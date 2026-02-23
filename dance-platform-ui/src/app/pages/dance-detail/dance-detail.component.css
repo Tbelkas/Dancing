@@ -1,0 +1,60 @@
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.styles-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.description {
+  color: var(--color-text-muted);
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.videos-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 24px;
+}
+
+.videos-grid {
+  display: grid;
+  gap: 32px;
+}
+
+.video-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.video-desc {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.empty {
+  color: var(--color-text-muted);
+}
+
+.loading {
+  padding: 60px;
+  text-align: center;
+  color: var(--color-text-muted);
+}

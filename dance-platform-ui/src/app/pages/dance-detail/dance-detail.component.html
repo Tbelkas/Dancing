@@ -1,0 +1,48 @@
+@if (dance()) {
+  <div class="container">
+    <div class="detail-header">
+      <div>
+        <h1 class="page-title">{{ dance()!.name }}</h1>
+        <div class="styles-row">
+          @for (style of dance()!.styles; track style) {
+            <span class="badge">{{ style }}</span>
+          }
+        </div>
+        @if (dance()!.description) {
+          <p class="description">{{ dance()!.description }}</p>
+        }
+      </div>
+      @if (auth.isAuthenticated()) {
+        <div class="detail-actions">
+          <button class="btn" [class.btn--accent]="dance()!.isFavorite" [class.btn--ghost]="!dance()!.isFavorite" (click)="toggleFavorite()">
+            {{ dance()!.isFavorite ? 'Favorited' : 'Add to Favorites' }}
+          </button>
+          <button class="btn" [class.btn--primary]="dance()!.isLearned" [class.btn--ghost]="!dance()!.isLearned" (click)="toggleLearned()">
+            {{ dance()!.isLearned ? 'Learned' : 'Mark as Learned' }}
+          </button>
+        </div>
+      }
+    </div>
+
+    <section class="videos-section">
+      <h2>Videos</h2>
+      @if (videos().length === 0) {
+        <p class="empty">No videos available for this dance yet.</p>
+      } @else {
+        <div class="videos-grid">
+          @for (video of videos(); track video.id) {
+            <div class="video-item">
+              <h3 class="video-title">{{ video.title }}</h3>
+              @if (video.description) {
+                <p class="video-desc">{{ video.description }}</p>
+              }
+              <app-video-player [youTubeId]="video.youTubeId" />
+            </div>
+          }
+        </div>
+      }
+    </section>
+  </div>
+} @else {
+  <div class="container loading">Loading...</div>
+}

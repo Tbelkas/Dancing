@@ -1,0 +1,24 @@
+<div class="player-wrapper">
+  <div #playerContainer class="yt-player"></div>
+
+  <div class="controls">
+    <div class="control-row">
+      <label>Speed</label>
+      <div class="speed-buttons">
+        @for (rate of playbackRates; track rate) {
+          <button class="speed-btn" [class.active]="currentRate() === rate" (click)="setRate(rate)">{{ rate }}x</button>
+        }
+      </div>
+    </div>
+
+    <div class="control-row">
+      <label>Repeat Region (seconds)</label>
+      <div class="repeat-inputs">
+        <input type="number" [(ngModel)]="repeatStart" min="0" placeholder="Start" class="time-input" />
+        <span>to</span>
+        <input type="number" [(ngModel)]="repeatEnd" min="0" placeholder="End" class="time-input" />
+        <button class="btn btn--accent btn--sm" (click)="toggleRepeat()">{{ repeating() ? 'Stop Repeat' : 'Repeat Region' }}</button>
+      </div>
+    </div>
+  </div>
+</div>

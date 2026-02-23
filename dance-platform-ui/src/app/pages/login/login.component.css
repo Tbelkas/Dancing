@@ -1,0 +1,40 @@
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  margin-bottom: 28px;
+}
+
+.btn--full {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px;
+  font-size: 1rem;
+}
+
+.toggle-text {
+  text-align: center;
+  margin-top: 20px;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.toggle-text a {
+  cursor: pointer;
+  color: var(--color-accent);
+  margin-left: 4px;
+}
+
+.error-message {
+  margin-bottom: 16px;
+}

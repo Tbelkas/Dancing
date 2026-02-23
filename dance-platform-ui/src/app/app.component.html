@@ -1,0 +1,17 @@
+<header class="header">
+  <div class="container header__inner">
+    <a routerLink="/dances" class="header__logo">Dance Platform</a>
+    <nav class="header__nav">
+      <a routerLink="/dances">Browse</a>
+      @if (auth.isAuthenticated()) {
+        <a routerLink="/profile">Profile</a>
+        <button class="btn btn--ghost" (click)="auth.logout()">Sign out</button>
+      } @else {
+        <a routerLink="/login" class="btn btn--primary">Sign in</a>
+      }
+    </nav>
+  </div>
+</header>
+<main class="main">
+  <router-outlet />
+</main>
