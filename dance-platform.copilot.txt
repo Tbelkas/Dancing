@@ -1,0 +1,47 @@
+# Copilot Instruction File: Dance Platform Project
+
+# Project Overview:
+# Full-stack dance platform using .NET REST API (Entity Framework + PostgreSQL) and Angular v22 frontend.
+# Deployment target: Raspberry Pi OS, PostgreSQL service, .NET API as systemd service, Angular served via Apache2 reverse proxy.
+# Design style: warm and energetic. No emojis.
+
+# General Rules:
+- Follow SOLID and DRY principles.
+- Only add comments when necessary for clarity or complex logic.
+- Use Entity Framework migrations for database setup.
+- Use proper REST conventions for backend endpoints.
+- Ensure database relationships: many-to-many for Dance↔Style and User↔Dance (favorites/learned), one-to-many for Dance↔Video.
+- All database entries include dateAdded field.
+- Implement search functionality for dances by name or style.
+- Frontend: handle video playback for YouTube, with adjustable speed and repeat region.
+
+# Backend (.NET REST API):
+- Implement login with username/password (hashed), prepare for OAuth later.
+- Provide endpoints for:
+    - CRUD for Dances, Videos, Styles
+    - User authentication and profile
+    - Favorites and learned dances
+    - Search/filter dances
+- Use Entity Framework for PostgreSQL.
+- Ensure proper validation and error handling.
+- Profile fields: name, nickname, avatar, dances learned/interested, visibility (public/private).
+
+# Frontend (Angular v22):
+- Implement login and profile pages.
+- Display dances by style and allow browsing/favoriting/marking as learned.
+- Video player must support speed adjustment and repeat region.
+- Warm and energetic design. No emojis.
+- Keep code modular: components, services, models properly organized.
+
+# Deployment Instructions (Raspberry Pi):
+- Install PostgreSQL and initialize database.
+- Deploy .NET API as systemd service.
+- Deploy Angular via Apache2 with reverse proxy to .NET API.
+- Include setup commands for packages, services, and enabling reverse proxy.
+
+# Output Requirements:
+- Full project folder structure for backend and frontend.
+- Entity Framework migration scripts.
+- Angular components, services, models, and modules.
+- README with development and deployment instructions.
+- SQL and API examples matching the REST endpoints.

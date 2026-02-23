@@ -1,0 +1,17 @@
+[Unit]
+Description=Dance Platform .NET API
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+WorkingDirectory=/opt/dance-platform/api
+ExecStart=/usr/bin/dotnet /opt/dance-platform/api/DancePlatform.API.dll
+Restart=always
+RestartSec=10
+SyslogIdentifier=dance-platform-api
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://localhost:5000
+
+[Install]
+WantedBy=multi-user.target
