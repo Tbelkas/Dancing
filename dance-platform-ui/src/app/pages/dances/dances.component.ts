@@ -4,9 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DanceService } from '../../core/services/dance.service';
 import { StyleService } from '../../core/services/style.service';
+import { MusicalStyleService } from '../../core/services/musical-style.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Dance } from '../../models/dance.model';
 import { Style } from '../../models/style.model';
+import { MusicalStyle } from '../../models/musical-style.model';
 
 @Component({
   selector: 'app-dances',
@@ -18,6 +20,7 @@ import { Style } from '../../models/style.model';
 export class DancesComponent implements OnInit {
   dances = signal<Dance[]>([]);
   styles = signal<Style[]>([]);
+  musicalStyles = signal<MusicalStyle[]>([]);
   loading = signal(true);
   selectedStyleId = signal<number | null>(null);
   searchQuery = '';
@@ -25,11 +28,13 @@ export class DancesComponent implements OnInit {
   constructor(
     private danceService: DanceService,
     private styleService: StyleService,
+    private musicalStyleService: MusicalStyleService,
     public auth: AuthService
   ) {}
 
   ngOnInit(): void {
     this.styleService.getAll().subscribe(s => this.styles.set(s));
+    this.musicalStyleService.getAll().subscribe(ms => this.musicalStyles.set(ms));
     this.loadDances();
   }
 

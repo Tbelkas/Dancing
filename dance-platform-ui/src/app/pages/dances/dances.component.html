@@ -45,6 +45,9 @@
               @for (style of dance.styles; track style) {
                 <span class="badge">{{ style }}</span>
               }
+              @for (ms of dance.musicalStyles; track ms) {
+                <span class="badge badge--music">♪ {{ ms }}</span>
+              }
             </div>
             <span class="video-count">{{ dance.videoCount }} video{{ dance.videoCount !== 1 ? 's' : '' }}</span>
           </div>

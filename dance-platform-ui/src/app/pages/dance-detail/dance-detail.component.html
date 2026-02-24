@@ -7,6 +7,9 @@
           @for (style of dance()!.styles; track style) {
             <span class="badge">{{ style }}</span>
           }
+          @for (ms of dance()!.musicalStyles; track ms) {
+            <span class="badge badge--music">♪ {{ ms }}</span>
+          }
         </div>
         @if (dance()!.description) {
           <p class="description">{{ dance()!.description }}</p>

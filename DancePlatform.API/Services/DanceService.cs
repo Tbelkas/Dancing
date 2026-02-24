@@ -26,13 +26,16 @@ public class DanceService : IDanceService
         foreach (var styleId in request.StyleIds)
             _db.DanceStyles.Add(new DanceStyle { DanceId = dance.Id, StyleId = styleId });
 
+        foreach (var musicalStyleId in request.MusicalStyleIds)
+            _db.DanceMusicalStyles.Add(new DanceMusicalStyle { DanceId = dance.Id, MusicalStyleId = musicalStyleId });
+
         await _db.SaveChangesAsync();
         return (await GetByIdAsync(dance.Id, null))!;
     }
 
     public async Task<DanceDto?> UpdateAsync(int id, UpdateDanceRequest request)
     {
-        var dance = await _db.Dances.Include(d => d.DanceStyles).FirstOrDefaultAsync(d => d.Id == id);
+        var dance = await _db.Dances.Include(d => d.DanceStyles).Include(d => d.DanceMusicalStyles).FirstOrDefaultAsync(d => d.Id == id);
         if (dance is null) return null;
 
         if (request.Name is not null) dance.Name = request.Name;
@@ -43,6 +46,13 @@ public class DanceService : IDanceService
             _db.DanceStyles.RemoveRange(dance.DanceStyles);
             foreach (var styleId in request.StyleIds)
                 _db.DanceStyles.Add(new DanceStyle { DanceId = dance.Id, StyleId = styleId });
+        }
+
+        if (request.MusicalStyleIds is not null)
+        {
+            _db.DanceMusicalStyles.RemoveRange(dance.DanceMusicalStyles);
+            foreach (var musicalStyleId in request.MusicalStyleIds)
+                _db.DanceMusicalStyles.Add(new DanceMusicalStyle { DanceId = dance.Id, MusicalStyleId = musicalStyleId });
         }
 
         await _db.SaveChangesAsync();
@@ -99,6 +109,7 @@ public class DanceService : IDanceService
     private IQueryable<DanceDto> BuildQuery(int? userId) =>
         _db.Dances
             .Include(d => d.DanceStyles).ThenInclude(ds => ds.Style)
+            .Include(d => d.DanceMusicalStyles).ThenInclude(dms => dms.MusicalStyle)
             .Include(d => d.Videos)
             .Include(d => d.FavoritedBy)
             .Include(d => d.LearnedBy)
@@ -109,6 +120,7 @@ public class DanceService : IDanceService
                 Description = d.Description,
                 DateAdded = d.DateAdded,
                 Styles = d.DanceStyles.Select(ds => ds.Style.Name).ToList(),
+                MusicalStyles = d.DanceMusicalStyles.Select(dms => dms.MusicalStyle.Name).ToList(),
                 VideoCount = d.Videos.Count,
                 IsFavorite = userId.HasValue && d.FavoritedBy.Any(f => f.UserId == userId.Value),
                 IsLearned = userId.HasValue && d.LearnedBy.Any(l => l.UserId == userId.Value)

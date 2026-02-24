@@ -4,6 +4,7 @@ export interface Dance {
   description?: string;
   dateAdded: string;
   styles: string[];
+  musicalStyles: string[];
   videoCount: number;
   isFavorite: boolean;
   isLearned: boolean;

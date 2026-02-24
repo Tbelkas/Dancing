@@ -10,8 +10,10 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Dance> Dances => Set<Dance>();
     public DbSet<Style> Styles => Set<Style>();
+    public DbSet<MusicalStyle> MusicalStyles => Set<MusicalStyle>();
     public DbSet<Video> Videos => Set<Video>();
     public DbSet<DanceStyle> DanceStyles => Set<DanceStyle>();
+    public DbSet<DanceMusicalStyle> DanceMusicalStyles => Set<DanceMusicalStyle>();
     public DbSet<UserFavoriteDance> UserFavoriteDances => Set<UserFavoriteDance>();
     public DbSet<UserLearnedDance> UserLearnedDances => Set<UserLearnedDance>();
 
@@ -29,6 +31,19 @@ public class AppDbContext : DbContext
             .HasOne(ds => ds.Style)
             .WithMany(s => s.DanceStyles)
             .HasForeignKey(ds => ds.StyleId);
+
+        modelBuilder.Entity<DanceMusicalStyle>()
+            .HasKey(dms => new { dms.DanceId, dms.MusicalStyleId });
+
+        modelBuilder.Entity<DanceMusicalStyle>()
+            .HasOne(dms => dms.Dance)
+            .WithMany(d => d.DanceMusicalStyles)
+            .HasForeignKey(dms => dms.DanceId);
+
+        modelBuilder.Entity<DanceMusicalStyle>()
+            .HasOne(dms => dms.MusicalStyle)
+            .WithMany(ms => ms.DanceMusicalStyles)
+            .HasForeignKey(dms => dms.MusicalStyleId);
 
         modelBuilder.Entity<UserFavoriteDance>()
             .HasKey(ufd => new { ufd.UserId, ufd.DanceId });

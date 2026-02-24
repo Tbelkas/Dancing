@@ -17,6 +17,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDanceService, DanceService>();
 builder.Services.AddScoped<IStyleService, StyleService>();
+builder.Services.AddScoped<IMusicalStyleService, MusicalStyleService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 builder.Services.AddScoped<IUserService, UserService>();
 

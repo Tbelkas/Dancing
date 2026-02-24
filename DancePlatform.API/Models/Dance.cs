@@ -8,6 +8,7 @@ public class Dance
     public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
     public ICollection<DanceStyle> DanceStyles { get; set; } = new List<DanceStyle>();
+    public ICollection<DanceMusicalStyle> DanceMusicalStyles { get; set; } = new List<DanceMusicalStyle>();
     public ICollection<Video> Videos { get; set; } = new List<Video>();
     public ICollection<UserFavoriteDance> FavoritedBy { get; set; } = new List<UserFavoriteDance>();
     public ICollection<UserLearnedDance> LearnedBy { get; set; } = new List<UserLearnedDance>();

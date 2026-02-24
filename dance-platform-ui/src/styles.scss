@@ -1,6 +1,7 @@
 :root {
   --color-primary: #E84B10;
   --color-accent: #F5A623;
+  --color-music: #7B61FF;
   --color-bg: #1A1A2E;
   --color-surface: #16213E;
   --color-surface-2: #0F3460;
@@ -110,6 +111,10 @@ a:hover { color: var(--color-primary); }
   font-weight: 600;
   background: var(--color-surface-2);
   color: var(--color-accent);
+
+  &--music {
+    color: var(--color-music);
+  }
 }
 
 .error-message {
@@ -125,10 +130,7 @@ a:hover { color: var(--color-primary); }
   font-size: 2rem;
   font-weight: 800;
   margin-bottom: 8px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-primary);
 }
 
 .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
