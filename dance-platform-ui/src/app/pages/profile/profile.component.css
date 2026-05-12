@@ -1,58 +1,71 @@
 .profile-layout {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 340px 1fr;
   gap: 24px;
   align-items: start;
 }
 
 @media (max-width: 768px) {
-  .profile-layout {
-    grid-template-columns: 1fr;
-  }
+  .profile-layout { grid-template-columns: 1fr; }
+}
+
+.profile-card {
+  border-top: 2px solid var(--color-primary);
 }
 
 .avatar-section {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .avatar {
   width: 72px;
   height: 72px;
-  border-radius: 50%;
+  border-radius: 3px;
   object-fit: cover;
-  border: 3px solid var(--color-primary);
+  border: 2px solid var(--color-primary);
 }
 
 .avatar-placeholder {
   width: 72px;
   height: 72px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  border-radius: 3px;
+  background: linear-gradient(135deg, rgba(245, 200, 66, 0.15), rgba(232, 80, 58, 0.15));
+  border: 1px solid var(--color-border-light);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-display);
+  font-style: italic;
   font-size: 1.8rem;
-  font-weight: 800;
-  color: #fff;
+  font-weight: 900;
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
 h2 {
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
 }
 
 .nickname {
-  color: var(--color-accent);
-  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  margin-top: 2px;
 }
 
 .username {
+  font-family: var(--font-mono);
   color: var(--color-text-muted);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
+  margin-top: 2px;
 }
 
 .profile-info {
@@ -65,7 +78,7 @@ h2 {
 
 .form-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .stats-column {
@@ -75,53 +88,61 @@ h2 {
 }
 
 .stats-column .card h3 {
-  font-size: 1rem;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
   font-weight: 700;
-  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text-muted);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .count-badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 1px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
   color: var(--color-text-muted);
+  margin-left: auto;
 }
 
 .dance-ref-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 1px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
 .dance-ref-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--radius);
-  border: 1px solid var(--color-border);
-  background: rgba(255,255,255,0.03);
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
   color: var(--color-text);
   text-decoration: none;
-  transition: all var(--transition);
-}
+  transition: background var(--transition), box-shadow var(--transition);
 
-.dance-ref-item:hover {
-  border-color: var(--color-primary);
-  background: var(--color-primary-glow);
-  color: var(--color-text);
+  &:last-child { border-bottom: none; }
+
+  &:hover {
+    background: var(--color-surface-2);
+    box-shadow: inset 3px 0 0 var(--color-primary);
+    color: var(--color-text);
+  }
 }
 
 .dance-ref-icon {
-  font-size: 0.9rem;
-  color: var(--color-accent);
+  font-size: 0.82rem;
+  color: var(--color-primary);
   flex-shrink: 0;
+  font-family: var(--font-mono);
 }
 
 .dance-ref-icon.learned {
@@ -130,29 +151,38 @@ h2 {
 
 .dance-ref-name {
   flex: 1;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .dance-ref-arrow {
+  font-family: var(--font-mono);
   color: var(--color-text-muted);
-  font-size: 0.8rem;
-  transition: transform var(--transition);
+  font-size: 0.72rem;
+  transition: transform var(--transition), color var(--transition);
 }
 
 .dance-ref-item:hover .dance-ref-arrow {
-  transform: translateX(3px);
+  transform: translateX(4px);
   color: var(--color-primary);
 }
 
 .empty {
   color: var(--color-text-muted);
-  font-size: 0.88rem;
-  line-height: 1.6;
+  font-size: 0.85rem;
+  line-height: 1.65;
 }
 
 .loading {
   padding: 60px;
   text-align: center;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--color-text-muted);
 }

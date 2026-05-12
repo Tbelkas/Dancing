@@ -1,8 +1,8 @@
 .header {
-  background: rgba(13, 13, 20, 0.75);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(7, 7, 13, 0.88);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -12,47 +12,46 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 56px;
 }
 
 .header__logo {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--color-primary);
   letter-spacing: -0.01em;
+  transition: opacity var(--transition);
+  &:hover { opacity: 0.85; color: var(--color-primary); }
 }
 
 .header__nav {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
 }
 
 .header__nav a {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   color: var(--color-text-muted);
-  font-weight: 500;
-  font-size: 0.9rem;
-  padding: 6px 14px;
+  padding: 6px 12px;
   border-radius: var(--radius);
   transition: all var(--transition);
-}
-
-.header__nav a:hover {
-  color: var(--color-text);
-  background: rgba(255,255,255,0.06);
+  &:hover { color: var(--color-text); background: rgba(255, 255, 255, 0.04); }
 }
 
 .main {
   padding: 48px 0;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 56px);
 }
 
 @media (max-width: 640px) {
   .header__logo { font-size: 1.1rem; }
-  .header__nav a { padding: 6px 10px; font-size: 0.85rem; }
+  .header__nav a { padding: 5px 8px; font-size: 0.68rem; }
   .main { padding: 24px 0; }
 }
