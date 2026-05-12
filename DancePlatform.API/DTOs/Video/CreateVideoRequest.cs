@@ -8,4 +8,6 @@ public class CreateVideoRequest
     [Required] public string YouTubeId { get; set; } = string.Empty;
     public string? Description { get; set; }
     [Required] public int DanceId { get; set; }
+    public int? StartTime { get; set; }
+    public int? EndTime { get; set; }
 }

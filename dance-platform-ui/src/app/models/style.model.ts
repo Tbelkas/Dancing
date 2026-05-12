@@ -4,4 +4,5 @@ export interface Style {
   description?: string;
   dateAdded: string;
   danceCount: number;
+  isMyStyle?: boolean;
 }

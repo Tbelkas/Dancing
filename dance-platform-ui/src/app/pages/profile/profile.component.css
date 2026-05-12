@@ -77,30 +77,78 @@ h2 {
 .stats-column .card h3 {
   font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.dance-list {
-  list-style: none;
+.count-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1px 8px;
+  color: var(--color-text-muted);
+}
+
+.dance-ref-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
-.dance-list li {
-  color: var(--color-text-muted);
+.dance-ref-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background: rgba(255,255,255,0.03);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: all var(--transition);
+}
+
+.dance-ref-item:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-glow);
+  color: var(--color-text);
+}
+
+.dance-ref-icon {
   font-size: 0.9rem;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--color-surface-2);
+  color: var(--color-accent);
+  flex-shrink: 0;
 }
 
-.dance-list li:last-child {
-  border-bottom: none;
+.dance-ref-icon.learned {
+  color: var(--color-success);
+}
+
+.dance-ref-name {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.dance-ref-arrow {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  transition: transform var(--transition);
+}
+
+.dance-ref-item:hover .dance-ref-arrow {
+  transform: translateX(3px);
+  color: var(--color-primary);
 }
 
 .empty {
   color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
 }
 
 .loading {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { UserProfile } from '../../models/user.model';
+import { MyStyleWithDances, UserProfile } from '../../models/user.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -16,5 +16,9 @@ export class ProfileService {
 
   updateProfile(data: Partial<Pick<UserProfile, 'name' | 'nickname' | 'avatarUrl' | 'visibility'>>): Observable<UserProfile> {
     return this.http.put<UserProfile>(this.base, data);
+  }
+
+  getMyDances(): Observable<MyStyleWithDances[]> {
+    return this.http.get<MyStyleWithDances[]>(`${this.base}/my-dances`);
   }
 }

@@ -52,4 +52,18 @@ public class StyleService : IStyleService
         await _db.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> ToggleMyStyleAsync(int userId, int styleId)
+    {
+        var existing = await _db.UserMyStyles.FindAsync(userId, styleId);
+        if (existing is not null)
+        {
+            _db.UserMyStyles.Remove(existing);
+            await _db.SaveChangesAsync();
+            return false;
+        }
+        _db.UserMyStyles.Add(new UserMyStyle { UserId = userId, StyleId = styleId });
+        await _db.SaveChangesAsync();
+        return true;
+    }
 }

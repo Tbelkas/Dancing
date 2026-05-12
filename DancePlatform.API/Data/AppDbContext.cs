@@ -16,6 +16,8 @@ public class AppDbContext : DbContext
     public DbSet<DanceMusicalStyle> DanceMusicalStyles => Set<DanceMusicalStyle>();
     public DbSet<UserFavoriteDance> UserFavoriteDances => Set<UserFavoriteDance>();
     public DbSet<UserLearnedDance> UserLearnedDances => Set<UserLearnedDance>();
+    public DbSet<UserInProgressDance> UserInProgressDances => Set<UserInProgressDance>();
+    public DbSet<UserMyStyle> UserMyStyles => Set<UserMyStyle>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -70,6 +72,32 @@ public class AppDbContext : DbContext
             .HasOne(uld => uld.Dance)
             .WithMany(d => d.LearnedBy)
             .HasForeignKey(uld => uld.DanceId);
+
+        modelBuilder.Entity<UserInProgressDance>()
+            .HasKey(uid => new { uid.UserId, uid.DanceId });
+
+        modelBuilder.Entity<UserInProgressDance>()
+            .HasOne(uid => uid.User)
+            .WithMany(u => u.InProgressDances)
+            .HasForeignKey(uid => uid.UserId);
+
+        modelBuilder.Entity<UserInProgressDance>()
+            .HasOne(uid => uid.Dance)
+            .WithMany(d => d.InProgressBy)
+            .HasForeignKey(uid => uid.DanceId);
+
+        modelBuilder.Entity<UserMyStyle>()
+            .HasKey(ums => new { ums.UserId, ums.StyleId });
+
+        modelBuilder.Entity<UserMyStyle>()
+            .HasOne(ums => ums.User)
+            .WithMany(u => u.MyStyles)
+            .HasForeignKey(ums => ums.UserId);
+
+        modelBuilder.Entity<UserMyStyle>()
+            .HasOne(ums => ums.Style)
+            .WithMany(s => s.MyStyleUsers)
+            .HasForeignKey(ums => ums.StyleId);
 
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Username)

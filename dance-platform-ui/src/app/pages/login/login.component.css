@@ -2,39 +2,43 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 60px 24px;
+  padding: 72px 24px;
+  min-height: calc(100vh - 64px);
 }
 
 .login-card {
   width: 100%;
   max-width: 420px;
+  padding: 36px;
 }
 
 .subtitle {
   color: var(--color-text-muted);
-  margin-bottom: 28px;
+  margin-bottom: 32px;
+  font-size: 0.95rem;
 }
 
 .btn--full {
   width: 100%;
   margin-top: 8px;
   padding: 14px;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .toggle-text {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 24px;
   color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .toggle-text a {
   cursor: pointer;
-  color: var(--color-accent);
+  color: var(--color-primary);
   margin-left: 4px;
+  font-weight: 600;
 }
 
-.error-message {
-  margin-bottom: 16px;
+.toggle-text a:hover {
+  text-decoration: underline;
 }

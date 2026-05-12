@@ -9,4 +9,5 @@ public interface IVideoService
     Task<VideoDto?> CreateAsync(CreateVideoRequest request);
     Task<VideoDto?> UpdateAsync(int id, UpdateVideoRequest request);
     Task<bool> DeleteAsync(int id);
+    Task<bool> IncrementViewCountAsync(int id);
 }

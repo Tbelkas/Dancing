@@ -31,4 +31,10 @@ public class ProfileController : ControllerBase
         var profile = await _userService.UpdateProfileAsync(CurrentUserId, request);
         return profile is null ? NotFound() : Ok(profile);
     }
+
+    [HttpGet("my-dances")]
+    public async Task<IActionResult> GetMyDances()
+    {
+        return Ok(await _userService.GetMyDancesAsync(CurrentUserId));
+    }
 }

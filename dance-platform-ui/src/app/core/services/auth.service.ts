@@ -5,6 +5,7 @@ import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { AuthResponse } from '../../models/user.model';
 import { environment } from '../../../environments/environment';
+import { RoleService } from './role.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -17,16 +18,19 @@ export class AuthService {
     localStorage.getItem(this.USER_KEY) ? JSON.parse(localStorage.getItem(this.USER_KEY)!).userId : null
   );
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private roleService: RoleService) {
+    // If already authenticated on app start, load role
+    if (this._token()) this.roleService.loadRole();
+  }
 
   login(username: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, { username, password })
-      .pipe(tap(res => this.storeAuth(res)));
+      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadRole(); }));
   }
 
   register(data: { username: string; password: string; name: string; nickname: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, data)
-      .pipe(tap(res => this.storeAuth(res)));
+      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadRole(); }));
   }
 
   logout(): void {
@@ -34,6 +38,7 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     this._token.set(null);
     this.currentUserId.set(null);
+    this.roleService.clearRole();
     this.router.navigate(['/login']);
   }
 

@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using DancePlatform.API.DTOs.Style;
+using DancePlatform.API.Filters;
 using DancePlatform.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +15,9 @@ public class StylesController : ControllerBase
 
     public StylesController(IStyleService styleService) => _styleService = styleService;
 
+    private int? CurrentUserId =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier) is string id ? int.Parse(id) : null;
+
     [HttpGet]
     public async Task<IActionResult> GetAll() => Ok(await _styleService.GetAllAsync());
 
@@ -23,7 +28,6 @@ public class StylesController : ControllerBase
         return style is null ? NotFound() : Ok(style);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateStyleRequest request)
     {
@@ -31,11 +35,19 @@ public class StylesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = style.Id }, style);
     }
 
-    [Authorize]
+    [RequireAdmin]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _styleService.DeleteAsync(id);
         return deleted ? NoContent() : NotFound();
+    }
+
+    [Authorize]
+    [HttpPost("{id}/mystyle")]
+    public async Task<IActionResult> ToggleMyStyle(int id)
+    {
+        var isMyStyle = await _styleService.ToggleMyStyleAsync(CurrentUserId!.Value, id);
+        return Ok(new { isMyStyle });
     }
 }

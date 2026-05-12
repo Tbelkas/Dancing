@@ -1,0 +1,186 @@
+<div class="container">
+  <div class="page-header">
+    <div class="page-header__top">
+      <h1 class="page-title">My Dances</h1>
+      <button class="btn btn--ghost" (click)="showStylePicker.set(!showStylePicker())">
+        {{ showStylePicker() ? '✕ Done' : '+ Manage Styles' }}
+      </button>
+    </div>
+    <p class="page-subtitle">Your dance styles and tracked moves</p>
+  </div>
+
+  @if (showStylePicker()) {
+    <div class="card style-picker">
+      <div class="style-picker__header">
+        <h3 class="style-picker__title">Select your dance styles</h3>
+        <button class="btn btn--ghost btn--sm" (click)="toggleAddStyle()">
+          {{ showAddStyle() ? '✕ Cancel' : '+ New Style' }}
+        </button>
+      </div>
+
+      @if (showAddStyle()) {
+        <div class="add-style-form">
+          @if (addStyleError()) { <div class="error-message">{{ addStyleError() }}</div> }
+          <div class="add-style-fields">
+            <input type="text" [(ngModel)]="newStyleName" placeholder="Style name (e.g. Salsa)" class="style-input" />
+            <input type="text" [(ngModel)]="newStyleDesc" placeholder="Description (optional)" class="style-input" />
+            <button class="btn btn--primary btn--sm" (click)="submitAddStyle()" [disabled]="addingStyle()">
+              {{ addingStyle() ? 'Adding...' : 'Add' }}
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (allStyles().length === 0) {
+        <p class="empty">No styles yet. Create the first one above.</p>
+      } @else {
+        <div class="style-picker__grid">
+          @for (style of allStyles(); track style.id) {
+            <button class="style-chip" [class.style-chip--active]="myStyleIds().has(style.id)" (click)="toggleMyStyle(style)">
+              {{ style.name }}
+              @if (myStyleIds().has(style.id)) { <span class="chip-check">✓</span> }
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading">Loading your dances...</div>
+  } @else if (myStyles().length === 0) {
+    <div class="empty-state card">
+      <div class="empty-state__icon">💃</div>
+      <h2>No dance styles yet</h2>
+      <p>Click "Manage Styles" above to add the styles you practice.</p>
+    </div>
+  } @else {
+    <div class="style-tabs">
+      @for (ms of myStyles(); track ms.styleId) {
+        <button
+          class="style-tab"
+          [class.style-tab--active]="selectedStyleId() === ms.styleId"
+          (click)="selectStyle(ms.styleId)">
+          {{ ms.styleName }}
+          @if (ms.dances.length > 0) { <span class="tab-count">{{ ms.dances.length }}</span> }
+        </button>
+      }
+    </div>
+
+    @if (selectedStyle()) {
+      <div class="dances-view">
+
+        <!-- Add Dance Button + Form -->
+        <div class="add-dance-bar">
+          <button class="btn btn--ghost btn--sm" (click)="toggleAddDance()">
+            {{ showAddDance() ? '✕ Cancel' : '+ Add Dance' }}
+          </button>
+        </div>
+
+        @if (showAddDance()) {
+          <div class="card add-dance-form">
+            <h3 class="form-title">New Dance in {{ selectedStyle()!.styleName }}</h3>
+            @if (addDanceError()) { <div class="error-message">{{ addDanceError() }}</div> }
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Dance name</label>
+                <input type="text" [(ngModel)]="newDanceName" placeholder="e.g. Cross Body Lead" />
+              </div>
+              <div class="form-group">
+                <label>Description <span class="optional">(optional)</span></label>
+                <input type="text" [(ngModel)]="newDanceDesc" placeholder="Short description" />
+              </div>
+            </div>
+
+            <div class="video-section">
+              <h4 class="video-section__title">Link a video <span class="optional">(optional)</span></h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Video title</label>
+                  <input type="text" [(ngModel)]="newVideoTitle" placeholder="e.g. Basic Tutorial" />
+                </div>
+                <div class="form-group">
+                  <label>YouTube URL or ID</label>
+                  <input type="text" [(ngModel)]="newVideoUrl" placeholder="https://youtu.be/... or dQw4w9WgXcQ" />
+                </div>
+              </div>
+
+              @if (newVideoUrl.trim()) {
+                <label class="checkbox-item" [class.checked]="setVideoTime" (click)="setVideoTime = !setVideoTime" style="display:inline-flex; margin-top: 12px;">
+                  <input type="checkbox" [checked]="setVideoTime" />
+                  Set start / end time
+                </label>
+
+                @if (setVideoTime) {
+                  <div class="form-row" style="margin-top: 12px;">
+                    <div class="form-group">
+                      <label>Start time <span class="optional">(e.g. 1:30 or 90)</span></label>
+                      <input type="text" [(ngModel)]="newVideoStartTime" placeholder="0:00" />
+                    </div>
+                    <div class="form-group">
+                      <label>End time <span class="optional">(e.g. 3:45 or 225)</span></label>
+                      <input type="text" [(ngModel)]="newVideoEndTime" placeholder="0:00" />
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+
+            <button class="btn btn--primary" (click)="submitAddDance()" [disabled]="addingDance()">
+              {{ addingDance() ? 'Creating...' : 'Create Dance' }}
+            </button>
+          </div>
+        }
+
+        <!-- Learned Dances -->
+        @if (learnedDances().length > 0) {
+          <div class="dance-section">
+            <h3 class="section-title">
+              <span class="section-icon learned-icon">✓</span>
+              Learned
+              <span class="section-count">{{ learnedDances().length }}</span>
+            </h3>
+            <div class="dance-list">
+              @for (dance of learnedDances(); track dance.id) {
+                <a [routerLink]="['/dances', dance.id]" class="dance-item">
+                  <span class="dance-status dance-status--learned">✓</span>
+                  <span class="dance-name">{{ dance.name }}</span>
+                  <span class="dance-arrow">→</span>
+                </a>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- In Progress Dances -->
+        @if (inProgressDances().length > 0) {
+          <div class="dance-section">
+            <h3 class="section-title">
+              <span class="section-icon progress-icon">◐</span>
+              In Progress
+              <span class="section-count">{{ inProgressDances().length }}</span>
+            </h3>
+            <div class="dance-list">
+              @for (dance of inProgressDances(); track dance.id) {
+                <a [routerLink]="['/dances', dance.id]" class="dance-item">
+                  <span class="dance-status dance-status--progress">◐</span>
+                  <span class="dance-name">{{ dance.name }}</span>
+                  <span class="dance-arrow">→</span>
+                </a>
+              }
+            </div>
+          </div>
+        }
+
+        @if (learnedDances().length === 0 && inProgressDances().length === 0 && !showAddDance()) {
+          <div class="card empty-style">
+            <p class="empty">No tracked moves in {{ selectedStyle()!.styleName }} yet.</p>
+            <p class="empty hint">Click <strong>+ Add Dance</strong> to create one, or go to a dance and mark it as Learned or In Progress.</p>
+          </div>
+        }
+
+      </div>
+    }
+  }
+</div>

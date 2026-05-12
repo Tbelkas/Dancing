@@ -1,6 +1,6 @@
 using DancePlatform.API.DTOs.Video;
+using DancePlatform.API.Filters;
 using DancePlatform.API.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DancePlatform.API.Controllers;
@@ -24,7 +24,13 @@ public class VideosController : ControllerBase
         return video is null ? NotFound() : Ok(video);
     }
 
-    [Authorize]
+    [HttpPost("{id}/view")]
+    public async Task<IActionResult> IncrementView(int id)
+    {
+        var ok = await _videoService.IncrementViewCountAsync(id);
+        return ok ? NoContent() : NotFound();
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateVideoRequest request)
     {
@@ -33,7 +39,7 @@ public class VideosController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = video.Id }, video);
     }
 
-    [Authorize]
+    [RequireAdmin]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateVideoRequest request)
     {
@@ -41,7 +47,7 @@ public class VideosController : ControllerBase
         return video is null ? NotFound() : Ok(video);
     }
 
-    [Authorize]
+    [RequireAdmin]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

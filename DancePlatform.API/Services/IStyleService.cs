@@ -8,4 +8,5 @@ public interface IStyleService
     Task<StyleDto?> GetByIdAsync(int id);
     Task<StyleDto> CreateAsync(CreateStyleRequest request);
     Task<bool> DeleteAsync(int id);
+    Task<bool> ToggleMyStyleAsync(int userId, int styleId);
 }

@@ -14,7 +14,10 @@
       </div>
       <div class="form-group">
         <label>Password</label>
-        <input type="password" [(ngModel)]="password" name="password" required placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
+        <input type="password" [(ngModel)]="password" name="password" required [attr.minlength]="isRegister() ? 8 : null" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
+        @if (isRegister()) {
+          <span class="field-hint">At least 8 characters</span>
+        }
       </div>
       @if (isRegister()) {
         <div class="form-group">

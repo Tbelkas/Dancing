@@ -7,5 +7,6 @@ export const routes: Routes = [
   { path: 'dances', loadComponent: () => import('./pages/dances/dances.component').then(m => m.DancesComponent) },
   { path: 'dances/:id', loadComponent: () => import('./pages/dance-detail/dance-detail.component').then(m => m.DanceDetailComponent) },
   { path: 'profile', loadComponent: () => import('./pages/profile/profile.component').then(m => m.ProfileComponent), canActivate: [authGuard] },
-  { path: '**', redirectTo: 'dances' }
+  { path: 'my-dances', loadComponent: () => import('./pages/my-dances/my-dances.component').then(m => m.MyDancesComponent), canActivate: [authGuard] },
+  { path: '**', loadComponent: () => import('./pages/not-found/not-found.component').then(m => m.NotFoundComponent) }
 ];

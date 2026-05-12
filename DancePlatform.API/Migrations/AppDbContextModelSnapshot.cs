@@ -135,6 +135,9 @@ namespace DancePlatform.API.Migrations
                     b.Property<DateTime>("DateAdded")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -180,6 +183,24 @@ namespace DancePlatform.API.Migrations
                     b.ToTable("UserFavoriteDances");
                 });
 
+            modelBuilder.Entity("DancePlatform.API.Models.UserInProgressDance", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DanceId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "DanceId");
+
+                    b.HasIndex("DanceId");
+
+                    b.ToTable("UserInProgressDances");
+                });
+
             modelBuilder.Entity("DancePlatform.API.Models.UserLearnedDance", b =>
                 {
                     b.Property<int>("UserId")
@@ -196,6 +217,24 @@ namespace DancePlatform.API.Migrations
                     b.HasIndex("DanceId");
 
                     b.ToTable("UserLearnedDances");
+                });
+
+            modelBuilder.Entity("DancePlatform.API.Models.UserMyStyle", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StyleId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "StyleId");
+
+                    b.HasIndex("StyleId");
+
+                    b.ToTable("UserMyStyles");
                 });
 
             modelBuilder.Entity("DancePlatform.API.Models.Video", b =>
@@ -218,6 +257,9 @@ namespace DancePlatform.API.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<long>("ViewCount")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("YouTubeId")
                         .IsRequired()
@@ -287,6 +329,25 @@ namespace DancePlatform.API.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DancePlatform.API.Models.UserInProgressDance", b =>
+                {
+                    b.HasOne("DancePlatform.API.Models.Dance", "Dance")
+                        .WithMany("InProgressBy")
+                        .HasForeignKey("DanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DancePlatform.API.Models.User", "User")
+                        .WithMany("InProgressDances")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dance");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DancePlatform.API.Models.UserLearnedDance", b =>
                 {
                     b.HasOne("DancePlatform.API.Models.Dance", "Dance")
@@ -302,6 +363,25 @@ namespace DancePlatform.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Dance");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DancePlatform.API.Models.UserMyStyle", b =>
+                {
+                    b.HasOne("DancePlatform.API.Models.Style", "Style")
+                        .WithMany("MyStyleUsers")
+                        .HasForeignKey("StyleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DancePlatform.API.Models.User", "User")
+                        .WithMany("MyStyles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Style");
 
                     b.Navigation("User");
                 });
@@ -325,6 +405,8 @@ namespace DancePlatform.API.Migrations
 
                     b.Navigation("FavoritedBy");
 
+                    b.Navigation("InProgressBy");
+
                     b.Navigation("LearnedBy");
 
                     b.Navigation("Videos");
@@ -338,13 +420,19 @@ namespace DancePlatform.API.Migrations
             modelBuilder.Entity("DancePlatform.API.Models.Style", b =>
                 {
                     b.Navigation("DanceStyles");
+
+                    b.Navigation("MyStyleUsers");
                 });
 
             modelBuilder.Entity("DancePlatform.API.Models.User", b =>
                 {
                     b.Navigation("FavoriteDances");
 
+                    b.Navigation("InProgressDances");
+
                     b.Navigation("LearnedDances");
+
+                    b.Navigation("MyStyles");
                 });
 #pragma warning restore 612, 618
         }

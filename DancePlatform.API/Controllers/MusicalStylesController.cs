@@ -1,6 +1,6 @@
 using DancePlatform.API.DTOs.MusicalStyle;
+using DancePlatform.API.Filters;
 using DancePlatform.API.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DancePlatform.API.Controllers;
@@ -24,7 +24,7 @@ public class MusicalStylesController : ControllerBase
         return style is null ? NotFound() : Ok(style);
     }
 
-    [Authorize]
+    [RequireAdmin]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateMusicalStyleRequest request)
     {
@@ -32,7 +32,7 @@ public class MusicalStylesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = style.Id }, style);
     }
 
-    [Authorize]
+    [RequireAdmin]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

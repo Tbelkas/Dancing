@@ -1,5 +1,7 @@
 namespace DancePlatform.API.DTOs.User;
 
+public record DanceRef(int Id, string Name);
+
 public class UserProfileDto
 {
     public int Id { get; set; }
@@ -9,6 +11,6 @@ public class UserProfileDto
     public string? AvatarUrl { get; set; }
     public string Visibility { get; set; } = string.Empty;
     public DateTime DateAdded { get; set; }
-    public List<string> FavoriteDances { get; set; } = new();
-    public List<string> LearnedDances { get; set; } = new();
+    public List<DanceRef> FavoriteDances { get; set; } = new();
+    public List<DanceRef> LearnedDances { get; set; } = new();
 }

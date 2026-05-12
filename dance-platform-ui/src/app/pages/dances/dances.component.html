@@ -1,15 +1,96 @@
 <div class="container">
   <div class="page-header">
-    <h1 class="page-title">Explore Dances</h1>
-    <p class="page-subtitle">Discover, favorite, and track your dance journey</p>
+    <div class="page-header__top">
+      <div>
+        <h1 class="page-title">Explore Dances</h1>
+        <p class="page-subtitle">Discover, favorite, and track your dance journey</p>
+      </div>
+      @if (role.isAdmin()) {
+        <div class="admin-actions">
+          <button class="btn btn--ghost btn--sm" (click)="toggleAddStyle()">
+            {{ showAddStyle() ? '✕ Cancel' : '+ Add Style' }}
+          </button>
+          <button class="btn btn--primary btn--sm" (click)="toggleAddDance()">
+            {{ showAddDance() ? '✕ Cancel' : '+ Add Dance' }}
+          </button>
+        </div>
+      }
+    </div>
   </div>
 
+  <!-- Admin: Add Style Form -->
+  @if (showAddStyle()) {
+    <div class="admin-form card">
+      <h3 class="admin-form__title">New Dance Style</h3>
+      @if (addStyleError()) { <div class="error-message">{{ addStyleError() }}</div> }
+      <div class="admin-form__fields">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" [(ngModel)]="newStyleName" placeholder="e.g. Salsa" />
+        </div>
+        <div class="form-group">
+          <label>Description <span class="optional">(optional)</span></label>
+          <input type="text" [(ngModel)]="newStyleDesc" placeholder="Brief description" />
+        </div>
+      </div>
+      <button class="btn btn--primary btn--sm" (click)="submitAddStyle()" [disabled]="addingStyle()">
+        {{ addingStyle() ? 'Creating...' : 'Create Style' }}
+      </button>
+    </div>
+  }
+
+  <!-- Admin: Add Dance Form -->
+  @if (showAddDance()) {
+    <div class="admin-form card">
+      <h3 class="admin-form__title">New Dance</h3>
+      @if (addDanceError()) { <div class="error-message">{{ addDanceError() }}</div> }
+      <div class="admin-form__fields">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" [(ngModel)]="newDanceName" placeholder="e.g. Bachata" />
+        </div>
+        <div class="form-group">
+          <label>Description <span class="optional">(optional)</span></label>
+          <textarea [(ngModel)]="newDanceDesc" rows="2" placeholder="Short description"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Dance Styles</label>
+          <div class="checkbox-grid">
+            @for (style of styles(); track style.id) {
+              <label class="checkbox-item" [class.checked]="newDanceStyleIds().has(style.id)">
+                <input type="checkbox" [checked]="newDanceStyleIds().has(style.id)" (change)="toggleDanceStyle(style.id)" />
+                {{ style.name }}
+              </label>
+            }
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Musical Styles</label>
+          <div class="checkbox-grid">
+            @for (ms of musicalStyles(); track ms.id) {
+              <label class="checkbox-item" [class.checked]="newDanceMusicalStyleIds().has(ms.id)">
+                <input type="checkbox" [checked]="newDanceMusicalStyleIds().has(ms.id)" (change)="toggleDanceMusicalStyle(ms.id)" />
+                {{ ms.name }}
+              </label>
+            }
+          </div>
+        </div>
+      </div>
+      <button class="btn btn--primary btn--sm" (click)="submitAddDance()" [disabled]="addingDance()">
+        {{ addingDance() ? 'Creating...' : 'Create Dance' }}
+      </button>
+    </div>
+  }
+
   <div class="filters">
-    <input type="text" [(ngModel)]="searchQuery" (input)="onSearch()" class="search-input" placeholder="Search dances..." />
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" [value]="searchQuery()" (input)="onSearchInput($any($event.target).value)" class="search-input" placeholder="Search dances..." />
+    </div>
     <div class="style-filters">
-      <button class="btn" [class.btn--primary]="selectedStyleId() === null" [class.btn--ghost]="selectedStyleId() !== null" (click)="filterByStyle(null)">All</button>
+      <button class="filter-pill" [class.active]="selectedStyleId() === null" (click)="filterByStyle(null)">All</button>
       @for (style of styles(); track style.id) {
-        <button class="btn" [class.btn--primary]="selectedStyleId() === style.id" [class.btn--ghost]="selectedStyleId() !== style.id" (click)="filterByStyle(style.id)">
+        <button class="filter-pill" [class.active]="selectedStyleId() === style.id" (click)="filterByStyle(style.id)">
           {{ style.name }}
         </button>
       }
@@ -18,21 +99,21 @@
 
   @if (loading()) {
     <div class="loading">Loading dances...</div>
-  } @else if (dances().length === 0) {
+  } @else if (filteredDances().length === 0) {
     <div class="empty">No dances found.</div>
   } @else {
     <div class="grid grid--2">
-      @for (dance of dances(); track dance.id) {
+      @for (dance of filteredDances(); track dance.id) {
         <div class="card dance-card">
           <div class="dance-card__header">
             <h3 class="dance-card__name">{{ dance.name }}</h3>
             @if (auth.isAuthenticated()) {
               <div class="dance-card__actions">
                 <button class="icon-btn" [class.active]="dance.isFavorite" (click)="toggleFavorite(dance, $event)" title="Favorite">
-                  {{ dance.isFavorite ? '&#9733;' : '&#9734;' }}
+                  {{ dance.isFavorite ? '★' : '☆' }}
                 </button>
                 <button class="icon-btn" [class.active]="dance.isLearned" (click)="toggleLearned(dance, $event)" title="Mark as learned">
-                  {{ dance.isLearned ? '&#10003;' : '&#9675;' }}
+                  {{ dance.isLearned ? '✓' : '○' }}
                 </button>
               </div>
             }
@@ -49,9 +130,13 @@
                 <span class="badge badge--music">♪ {{ ms }}</span>
               }
             </div>
-            <span class="video-count">{{ dance.videoCount }} video{{ dance.videoCount !== 1 ? 's' : '' }}</span>
+            <div class="dance-card__counts">
+              <span class="count-chip" title="Favorited by">★ {{ dance.favoriteCount }}</span>
+              <span class="count-chip" title="Learned by">✓ {{ dance.learnedCount }}</span>
+              <span class="video-count">{{ dance.videoCount }} video{{ dance.videoCount !== 1 ? 's' : '' }}</span>
+            </div>
           </div>
-          <a [routerLink]="['/dances', dance.id]" class="btn btn--ghost btn--sm">View details</a>
+          <a [routerLink]="['/dances', dance.id]" class="btn btn--ghost btn--sm">View details →</a>
         </div>
       }
     </div>

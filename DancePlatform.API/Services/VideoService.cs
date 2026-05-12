@@ -27,7 +27,9 @@ public class VideoService : IVideoService
             Title = request.Title,
             YouTubeId = request.YouTubeId,
             Description = request.Description,
-            DanceId = request.DanceId
+            DanceId = request.DanceId,
+            StartTime = request.StartTime,
+            EndTime = request.EndTime
         };
 
         _db.Videos.Add(video);
@@ -57,6 +59,15 @@ public class VideoService : IVideoService
         return true;
     }
 
+    public async Task<bool> IncrementViewCountAsync(int id)
+    {
+        var video = await _db.Videos.FindAsync(id);
+        if (video is null) return false;
+        video.ViewCount++;
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
     private IQueryable<VideoDto> BuildQuery() =>
         _db.Videos.Include(v => v.Dance).Select(v => new VideoDto
         {
@@ -65,6 +76,9 @@ public class VideoService : IVideoService
             YouTubeId = v.YouTubeId,
             Description = v.Description,
             DateAdded = v.DateAdded,
+            ViewCount = v.ViewCount,
+            StartTime = v.StartTime,
+            EndTime = v.EndTime,
             DanceId = v.DanceId,
             DanceName = v.Dance.Name
         });

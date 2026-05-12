@@ -12,11 +12,14 @@ import { FormsModule } from '@angular/forms';
 })
 export class VideoPlayerComponent implements OnInit, OnDestroy {
   @Input({ required: true }) youTubeId!: string;
+  @Input() startTime?: number;
+  @Input() endTime?: number;
   @ViewChild('playerContainer', { static: true }) playerContainer!: ElementRef;
 
   readonly playbackRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
   currentRate = signal(1);
   repeating = signal(false);
+  videoDuration = signal(0);
 
   repeatStart = 0;
   repeatEnd = 0;
@@ -47,6 +50,20 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.player?.setPlaybackRate(rate);
   }
 
+  onStartSliderChange(value: number): void {
+    this.repeatStart = Math.min(value, this.repeatEnd > 0 ? this.repeatEnd - 1 : value);
+  }
+
+  onEndSliderChange(value: number): void {
+    this.repeatEnd = Math.max(value, this.repeatStart + 1);
+  }
+
+  formatTime(seconds: number): string {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
   toggleRepeat(): void {
     if (this.repeating()) {
       this.clearRepeat();
@@ -65,10 +82,22 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   }
 
   private createPlayer(): void {
+    const playerVars: YT.PlayerVars = { rel: 0, modestbranding: 1 };
+    if (this.startTime != null) playerVars['start'] = this.startTime;
+    if (this.endTime != null) playerVars['end'] = this.endTime;
+
     this.player = new window.YT.Player(this.playerContainer.nativeElement, {
       videoId: this.youTubeId,
-      playerVars: { rel: 0, modestbranding: 1 },
-      events: { onReady: () => this.player?.setPlaybackRate(this.currentRate()) }
+      playerVars,
+      events: {
+        onReady: () => {
+          this.player?.setPlaybackRate(this.currentRate());
+          const dur = this.player?.getDuration() ?? 0;
+          this.videoDuration.set(Math.floor(dur));
+          this.repeatStart = this.startTime ?? 0;
+          this.repeatEnd = this.endTime ?? Math.floor(dur);
+        }
+      }
     });
   }
 

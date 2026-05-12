@@ -28,6 +28,20 @@ export class LoginComponent {
   }
 
   submit(): void {
+    if (this.isRegister()) {
+      if (!this.username || this.username.length < 3) {
+        this.error.set('Username must be at least 3 characters.');
+        return;
+      }
+      if (!this.password || this.password.length < 8) {
+        this.error.set('Password must be at least 8 characters.');
+        return;
+      }
+      if (!this.name) {
+        this.error.set('Full name is required.');
+        return;
+      }
+    }
     this.loading.set(true);
     this.error.set('');
 

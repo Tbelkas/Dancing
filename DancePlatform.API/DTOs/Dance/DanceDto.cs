@@ -9,6 +9,9 @@ public class DanceDto
     public List<string> Styles { get; set; } = new();
     public List<string> MusicalStyles { get; set; } = new();
     public int VideoCount { get; set; }
+    public int FavoriteCount { get; set; }
+    public int LearnedCount { get; set; }
     public bool IsFavorite { get; set; }
     public bool IsLearned { get; set; }
+    public bool IsInProgress { get; set; }
 }

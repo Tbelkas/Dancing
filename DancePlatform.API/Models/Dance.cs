@@ -12,4 +12,5 @@ public class Dance
     public ICollection<Video> Videos { get; set; } = new List<Video>();
     public ICollection<UserFavoriteDance> FavoritedBy { get; set; } = new List<UserFavoriteDance>();
     public ICollection<UserLearnedDance> LearnedBy { get; set; } = new List<UserLearnedDance>();
+    public ICollection<UserInProgressDance> InProgressBy { get; set; } = new List<UserInProgressDance>();
 }

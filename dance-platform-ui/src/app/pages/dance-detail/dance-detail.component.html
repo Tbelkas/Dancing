@@ -11,36 +11,167 @@
             <span class="badge badge--music">♪ {{ ms }}</span>
           }
         </div>
+        <div class="social-counts">
+          <span class="social-count" title="People who favorited this dance">★ {{ dance()!.favoriteCount }} favorited</span>
+          <span class="social-count learned" title="People who learned this dance">✓ {{ dance()!.learnedCount }} learned</span>
+        </div>
         @if (dance()!.description) {
           <p class="description">{{ dance()!.description }}</p>
         }
       </div>
-      @if (auth.isAuthenticated()) {
-        <div class="detail-actions">
-          <button class="btn" [class.btn--accent]="dance()!.isFavorite" [class.btn--ghost]="!dance()!.isFavorite" (click)="toggleFavorite()">
-            {{ dance()!.isFavorite ? 'Favorited' : 'Add to Favorites' }}
+      <div class="detail-right">
+        @if (auth.isAuthenticated()) {
+          <div class="detail-actions">
+            <button class="btn" [class.btn--accent]="dance()!.isFavorite" [class.btn--ghost]="!dance()!.isFavorite" (click)="toggleFavorite()">
+              {{ dance()!.isFavorite ? '★ Favorited' : '☆ Favorite' }}
+            </button>
+            <button class="btn" [class.btn--primary]="dance()!.isLearned" [class.btn--ghost]="!dance()!.isLearned" (click)="toggleLearned()">
+              {{ dance()!.isLearned ? '✓ Learned' : 'Mark as Learned' }}
+            </button>
+            <button class="btn" [class.btn--progress]="dance()!.isInProgress" [class.btn--ghost]="!dance()!.isInProgress" (click)="toggleInProgress()">
+              {{ dance()!.isInProgress ? '◐ In Progress' : 'Mark In Progress' }}
+            </button>
+          </div>
+          @if (actionError()) {
+            <p class="action-error">{{ actionError() }}</p>
+          }
+        }
+        @if (role.isAdmin()) {
+          <div class="admin-actions">
+            <button class="btn btn--ghost btn--sm" (click)="toggleEditDance()">
+              {{ showEditDance() ? '✕ Cancel' : '✏ Edit' }}
+            </button>
+            <button class="btn btn--danger btn--sm" (click)="deleteDance()" [disabled]="deletingDance()">
+              {{ deletingDance() ? 'Deleting...' : '🗑 Delete' }}
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Admin: Edit Dance Form -->
+    @if (showEditDance()) {
+      <div class="admin-form card">
+        <h3 class="admin-form__title">Edit Dance</h3>
+        @if (editDanceError()) { <div class="error-message">{{ editDanceError() }}</div> }
+        <div class="admin-form__fields">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" [(ngModel)]="editName" placeholder="Dance name" />
+          </div>
+          <div class="form-group">
+            <label>Description <span class="optional">(optional)</span></label>
+            <input type="text" [(ngModel)]="editDescription" placeholder="Short description" />
+          </div>
+        </div>
+        @if (allStyles().length > 0) {
+          <div class="form-group">
+            <label>Styles</label>
+            <div class="checkbox-grid">
+              @for (style of allStyles(); track style.id) {
+                <label class="checkbox-item" [class.checked]="editStyleIds.includes(style.id)" (click)="toggleEditStyleId(style.id)">
+                  <input type="checkbox" [checked]="editStyleIds.includes(style.id)" />
+                  {{ style.name }}
+                </label>
+              }
+            </div>
+          </div>
+        }
+        @if (allMusicalStyles().length > 0) {
+          <div class="form-group">
+            <label>Musical Styles</label>
+            <div class="checkbox-grid">
+              @for (ms of allMusicalStyles(); track ms.id) {
+                <label class="checkbox-item" [class.checked]="editMusicalStyleIds.includes(ms.id)" (click)="toggleEditMusicalStyleId(ms.id)">
+                  <input type="checkbox" [checked]="editMusicalStyleIds.includes(ms.id)" />
+                  ♪ {{ ms.name }}
+                </label>
+              }
+            </div>
+          </div>
+        }
+        <button class="btn btn--primary btn--sm" (click)="submitEditDance()" [disabled]="savingDance()">
+          {{ savingDance() ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    }
+
+    <section class="videos-section">
+      <div class="videos-section__header">
+        <h2>Videos</h2>
+        @if (role.isAdmin()) {
+          <button class="btn btn--primary btn--sm" (click)="toggleAddVideo()">
+            {{ showAddVideo() ? '✕ Cancel' : '+ Add Video' }}
           </button>
-          <button class="btn" [class.btn--primary]="dance()!.isLearned" [class.btn--ghost]="!dance()!.isLearned" (click)="toggleLearned()">
-            {{ dance()!.isLearned ? 'Learned' : 'Mark as Learned' }}
+        }
+      </div>
+
+      <!-- Admin: Add Video Form -->
+      @if (showAddVideo()) {
+        <div class="admin-form card">
+          <h3 class="admin-form__title">Add Video</h3>
+          @if (addVideoError()) { <div class="error-message">{{ addVideoError() }}</div> }
+          <div class="admin-form__fields">
+            <div class="form-group">
+              <label>Title</label>
+              <input type="text" [(ngModel)]="newVideoTitle" placeholder="e.g. Basic Steps Tutorial" />
+            </div>
+            <div class="form-group">
+              <label>YouTube URL or Video ID</label>
+              <input type="text" [(ngModel)]="newVideoYouTubeId" placeholder="https://youtu.be/... or dQw4w9WgXcQ" />
+            </div>
+            <div class="form-group">
+              <label>Description <span class="optional">(optional)</span></label>
+              <input type="text" [(ngModel)]="newVideoDesc" placeholder="Brief description" />
+            </div>
+          </div>
+          <button class="btn btn--primary btn--sm" (click)="submitAddVideo()" [disabled]="addingVideo()">
+            {{ addingVideo() ? 'Adding...' : 'Add Video' }}
           </button>
         </div>
       }
-    </div>
 
-    <section class="videos-section">
-      <h2>Videos</h2>
       @if (videos().length === 0) {
         <p class="empty">No videos available for this dance yet.</p>
+      } @else if (videos().length === 1) {
+        <div class="video-item">
+          <div class="video-item__header">
+            <h3 class="video-title">{{ videos()[0].title }}</h3>
+            @if (role.isAdmin()) {
+              <button class="btn btn--danger btn--sm" (click)="deleteVideo(videos()[0])">🗑 Delete</button>
+            }
+          </div>
+          @if (videos()[0].description) {
+            <p class="video-desc">{{ videos()[0].description }}</p>
+          }
+          <app-video-player [youTubeId]="videos()[0].youTubeId" [startTime]="videos()[0].startTime" [endTime]="videos()[0].endTime" />
+        </div>
       } @else {
-        <div class="videos-grid">
+        <div class="video-list">
           @for (video of videos(); track video.id) {
-            <div class="video-item">
-              <h3 class="video-title">{{ video.title }}</h3>
-              @if (video.description) {
-                <p class="video-desc">{{ video.description }}</p>
-              }
-              <app-video-player [youTubeId]="video.youTubeId" />
+            <div class="video-list-item" [class.video-list-item--active]="selectedVideo()?.id === video.id" (click)="selectVideo(video)">
+              <div class="video-list-item__info">
+                <span class="video-list-item__title">{{ video.title }}</span>
+                <span class="video-list-item__meta">
+                  <span>{{ video.dateAdded | date:'mediumDate' }}</span>
+                  <span class="views-badge">👁 {{ viewCountBucket(video.viewCount) }}</span>
+                </span>
+              </div>
+              <div class="video-list-item__end">
+                @if (role.isAdmin()) {
+                  <button class="btn btn--danger btn--xs" (click)="$event.stopPropagation(); deleteVideo(video)">🗑</button>
+                }
+                <span class="video-list-item__toggle">{{ selectedVideo()?.id === video.id ? '▲' : '▼' }}</span>
+              </div>
             </div>
+            @if (selectedVideo()?.id === video.id) {
+              <div class="video-player-expanded">
+                @if (video.description) {
+                  <p class="video-desc">{{ video.description }}</p>
+                }
+                <app-video-player [youTubeId]="video.youTubeId" [startTime]="video.startTime" [endTime]="video.endTime" />
+              </div>
+            }
           }
         </div>
       }
@@ -49,3 +180,4 @@
 } @else {
   <div class="container loading">Loading...</div>
 }
+

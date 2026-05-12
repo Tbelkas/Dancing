@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using DancePlatform.API.DTOs.Dance;
+using DancePlatform.API.Filters;
 using DancePlatform.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,6 @@ public class DancesController : ControllerBase
         return dance is null ? NotFound() : Ok(dance);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateDanceRequest request)
     {
@@ -36,7 +36,7 @@ public class DancesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = dance.Id }, dance);
     }
 
-    [Authorize]
+    [RequireAdmin]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateDanceRequest request)
     {
@@ -44,7 +44,7 @@ public class DancesController : ControllerBase
         return dance is null ? NotFound() : Ok(dance);
     }
 
-    [Authorize]
+    [RequireAdmin]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -66,5 +66,13 @@ public class DancesController : ControllerBase
     {
         var isLearned = await _danceService.ToggleLearnedAsync(CurrentUserId!.Value, id);
         return Ok(new { isLearned });
+    }
+
+    [Authorize]
+    [HttpPost("{id}/inprogress")]
+    public async Task<IActionResult> ToggleInProgress(int id)
+    {
+        var isInProgress = await _danceService.ToggleInProgressAsync(CurrentUserId!.Value, id);
+        return Ok(new { isInProgress });
     }
 }

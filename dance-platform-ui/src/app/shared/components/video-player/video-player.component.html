@@ -11,14 +11,34 @@
       </div>
     </div>
 
-    <div class="control-row">
-      <label>Repeat Region (seconds)</label>
-      <div class="repeat-inputs">
-        <input type="number" [(ngModel)]="repeatStart" min="0" placeholder="Start" class="time-input" />
-        <span>to</span>
-        <input type="number" [(ngModel)]="repeatEnd" min="0" placeholder="End" class="time-input" />
-        <button class="btn btn--accent btn--sm" (click)="toggleRepeat()">{{ repeating() ? 'Stop Repeat' : 'Repeat Region' }}</button>
+    <div class="control-row control-row--column">
+      <div class="repeat-header">
+        <label>Repeat Region</label>
+        @if (videoDuration() > 0) {
+          <span class="repeat-times">{{ formatTime(repeatStart) }} → {{ formatTime(repeatEnd) }}</span>
+        }
+        <button class="btn btn--accent btn--sm" (click)="toggleRepeat()" [disabled]="videoDuration() === 0">
+          {{ repeating() ? 'Stop Repeat' : 'Repeat Region' }}
+        </button>
       </div>
+      @if (videoDuration() > 0) {
+        <div class="slider-group">
+          <div class="slider-row">
+            <span class="slider-label">Start</span>
+            <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatStart"
+              (input)="onStartSliderChange(+$any($event.target).value)" />
+            <span class="slider-time">{{ formatTime(repeatStart) }}</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">End</span>
+            <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatEnd"
+              (input)="onEndSliderChange(+$any($event.target).value)" />
+            <span class="slider-time">{{ formatTime(repeatEnd) }}</span>
+          </div>
+        </div>
+      } @else {
+        <p class="repeat-hint">Load the video to enable sliders</p>
+      }
     </div>
   </div>
 </div>

@@ -8,4 +8,5 @@ public class Style
     public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
     public ICollection<DanceStyle> DanceStyles { get; set; } = new List<DanceStyle>();
+    public ICollection<UserMyStyle> MyStyleUsers { get; set; } = new List<UserMyStyle>();
 }
