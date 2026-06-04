@@ -21,6 +21,9 @@ builder.Services.AddScoped<IMusicalStyleService, MusicalStyleService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPracticeService, PracticeService>();
+builder.Services.AddScoped<IInstructorService, InstructorService>();
+builder.Services.AddScoped<IImportService, ImportService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -60,6 +63,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
     await SeedData.SeedAsync(db);
 }
 

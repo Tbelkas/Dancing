@@ -18,6 +18,10 @@ public class AppDbContext : DbContext
     public DbSet<UserLearnedDance> UserLearnedDances => Set<UserLearnedDance>();
     public DbSet<UserInProgressDance> UserInProgressDances => Set<UserInProgressDance>();
     public DbSet<UserMyStyle> UserMyStyles => Set<UserMyStyle>();
+    public DbSet<DanceRating> DanceRatings => Set<DanceRating>();
+    public DbSet<PracticeSession> PracticeSessions => Set<PracticeSession>();
+    public DbSet<Instructor> Instructors => Set<Instructor>();
+    public DbSet<DanceInstructor> DanceInstructors => Set<DanceInstructor>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -102,5 +106,47 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Username)
             .IsUnique();
+
+        modelBuilder.Entity<DanceRating>()
+            .HasKey(dr => new { dr.UserId, dr.DanceId });
+
+        modelBuilder.Entity<DanceRating>()
+            .HasOne(dr => dr.User)
+            .WithMany(u => u.Ratings)
+            .HasForeignKey(dr => dr.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DanceRating>()
+            .HasOne(dr => dr.Dance)
+            .WithMany(d => d.Ratings)
+            .HasForeignKey(dr => dr.DanceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PracticeSession>()
+            .HasOne(ps => ps.User)
+            .WithMany(u => u.PracticeSessions)
+            .HasForeignKey(ps => ps.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PracticeSession>()
+            .HasOne(ps => ps.Dance)
+            .WithMany(d => d.PracticeSessions)
+            .HasForeignKey(ps => ps.DanceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DanceInstructor>()
+            .HasKey(di => new { di.DanceId, di.InstructorId });
+
+        modelBuilder.Entity<DanceInstructor>()
+            .HasOne(di => di.Dance)
+            .WithMany(d => d.DanceInstructors)
+            .HasForeignKey(di => di.DanceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DanceInstructor>()
+            .HasOne(di => di.Instructor)
+            .WithMany(i => i.DanceInstructors)
+            .HasForeignKey(di => di.InstructorId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

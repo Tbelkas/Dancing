@@ -10,11 +10,30 @@
   aspect-ratio: 16/9;
 }
 
+/* TikTok / Instagram embeds */
+.embed-container {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+.embed-frame--portrait {
+  width: 325px;
+  height: 578px;
+  border: none;
+}
+
+.embed-frame--instagram {
+  width: 400px;
+  height: 505px;
+  border: none;
+}
+
 .controls {
-  padding: 18px 20px;
+  padding: 20px 22px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   border-top: 1px solid var(--color-border);
 }
 
@@ -32,12 +51,12 @@
 }
 
 .control-row label {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  min-width: 60px;
+  letter-spacing: 0.07em;
+  min-width: 64px;
   flex-shrink: 0;
 }
 
@@ -52,9 +71,9 @@
   border: 1px solid var(--color-border);
   border-radius: 6px;
   color: var(--color-text-muted);
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: 6px 12px;
   cursor: pointer;
   transition: all var(--transition);
 }
@@ -75,15 +94,15 @@
 }
 
 .repeat-header label {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
 }
 
 .repeat-times {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--color-accent);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -91,7 +110,7 @@
 }
 
 .repeat-hint {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: var(--color-text-muted);
 }
 
@@ -109,14 +128,14 @@
 }
 
 .slider-label {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   color: var(--color-text-muted);
-  width: 38px;
+  width: 42px;
   flex-shrink: 0;
 }
 
 .slider-time {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-accent);
   width: 44px;

@@ -25,7 +25,8 @@ public class VideoService : IVideoService
         var video = new Video
         {
             Title = request.Title,
-            YouTubeId = request.YouTubeId,
+            VideoId = request.VideoId,
+            Platform = request.Platform,
             Description = request.Description,
             DanceId = request.DanceId,
             StartTime = request.StartTime,
@@ -43,7 +44,7 @@ public class VideoService : IVideoService
         if (video is null) return null;
 
         if (request.Title is not null) video.Title = request.Title;
-        if (request.YouTubeId is not null) video.YouTubeId = request.YouTubeId;
+        if (request.VideoId is not null) video.VideoId = request.VideoId;
         if (request.Description is not null) video.Description = request.Description;
 
         await _db.SaveChangesAsync();
@@ -73,7 +74,8 @@ public class VideoService : IVideoService
         {
             Id = v.Id,
             Title = v.Title,
-            YouTubeId = v.YouTubeId,
+            VideoId = v.VideoId,
+            Platform = v.Platform,
             Description = v.Description,
             DateAdded = v.DateAdded,
             ViewCount = v.ViewCount,

@@ -18,7 +18,7 @@ export class ProfileComponent implements OnInit {
   editName = '';
   editNickname = '';
   editAvatarUrl = '';
-  editVisibility: 'Public' | 'Private' = 'Public';
+  editVisibility: 'Public' | 'Private' = 'Private';
 
   constructor(private profileService: ProfileService) {}
 

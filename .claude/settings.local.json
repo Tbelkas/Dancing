@@ -9,7 +9,13 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\valot\\\\Documents\\\\Git\\\\Projects\\\\Dance\\\\dance-platform-ui\\\\src\" -Filter \"*.css\")",
       "Bash(Select-Object FullName)",
       "Bash(npx ng *)",
-      "Bash(xargs cat)"
+      "Bash(xargs cat)",
+      "PowerShell(Get-ChildItem *)",
+      "WebSearch",
+      "WebFetch(domain:developers.tiktok.com)",
+      "Bash(npx tsc *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\valot\\\\Documents\\\\Git\\\\Projects\\\\Dance\\\\dance-platform-ui\\\\src\" -Recurse -File | Where-Object { $_.Extension -match '\\\\.\\(scss|css|ts|html\\)$' } | Select-Object -First 50 | ForEach-Object { $_.FullName })",
+      "Bash(Get-ChildItem *)"
     ]
   }
 }

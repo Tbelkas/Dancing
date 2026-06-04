@@ -6,7 +6,8 @@ import { environment } from '../../../environments/environment';
 
 export interface CreateVideoPayload {
   title: string;
-  youTubeId: string;
+  videoId: string;
+  platform: string;
   description?: string;
   danceId: number;
   startTime?: number;

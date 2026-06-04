@@ -4,6 +4,7 @@ using DancePlatform.API.Filters;
 using DancePlatform.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace DancePlatform.API.Controllers;
 
@@ -74,5 +75,13 @@ public class DancesController : ControllerBase
     {
         var isInProgress = await _danceService.ToggleInProgressAsync(CurrentUserId!.Value, id);
         return Ok(new { isInProgress });
+    }
+
+    [Authorize]
+    [HttpPost("{id}/rate")]
+    public async Task<IActionResult> Rate(int id, [FromBody] RateDanceRequest request)
+    {
+        var dance = await _danceService.RateDanceAsync(CurrentUserId!.Value, id, request.Rating);
+        return dance is null ? NotFound() : Ok(dance);
     }
 }

@@ -2,7 +2,7 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { switchMap } from 'rxjs';
+import { switchMap, EMPTY } from 'rxjs';
 import { ProfileService } from '../../core/services/profile.service';
 import { StyleService } from '../../core/services/style.service';
 import { DanceService, CreateDancePayload } from '../../core/services/dance.service';
@@ -156,9 +156,16 @@ export class MyDancesComponent implements OnInit {
     });
   }
 
-  private extractYouTubeId(input: string): string {
-    const match = input.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
-    return match ? match[1] : input.trim();
+  private parseVideoUrl(input: string): { platform: string; videoId: string } | null {
+    const url = input.trim();
+    const tiktok = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
+    if (tiktok) return { platform: 'tiktok', videoId: tiktok[1] };
+    const ig = url.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+    if (ig) return { platform: 'instagram', videoId: ig[1] };
+    const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
+    if (yt) return { platform: 'youtube', videoId: yt[1] };
+    if (/^[A-Za-z0-9_-]{11}$/.test(url)) return { platform: 'youtube', videoId: url };
+    return null;
   }
 
   private parseTimeSecs(input: string): number | undefined {
@@ -176,7 +183,7 @@ export class MyDancesComponent implements OnInit {
     if (!this.newDanceName.trim()) { this.addDanceError.set('Dance name is required.'); return; }
     const videoTitle = this.newVideoTitle.trim();
     const videoUrl = this.newVideoUrl.trim();
-    if (videoTitle && !videoUrl) { this.addDanceError.set('YouTube URL is required when adding a video.'); return; }
+    if (videoTitle && !videoUrl) { this.addDanceError.set('Video URL is required when adding a video.'); return; }
 
     this.addingDance.set(true);
     this.addDanceError.set('');
@@ -191,11 +198,18 @@ export class MyDancesComponent implements OnInit {
     this.danceService.create(dancePayload).pipe(
       switchMap(dance => {
         if (videoTitle && videoUrl) {
+          const parsed = this.parseVideoUrl(videoUrl);
+          if (!parsed) {
+            this.addDanceError.set('Unrecognized URL. Paste a YouTube, TikTok, or Instagram link.');
+            this.addingDance.set(false);
+            return EMPTY;
+          }
           const videoPayload: CreateVideoPayload = {
             title: videoTitle,
-            youTubeId: this.extractYouTubeId(videoUrl),
+            videoId: parsed.videoId,
+            platform: parsed.platform,
             danceId: dance.id,
-            ...(this.setVideoTime ? {
+            ...(this.setVideoTime && parsed.platform === 'youtube' ? {
               startTime: this.parseTimeSecs(this.newVideoStartTime),
               endTime: this.parseTimeSecs(this.newVideoEndTime)
             } : {})

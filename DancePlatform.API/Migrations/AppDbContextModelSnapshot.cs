@@ -36,6 +36,9 @@ namespace DancePlatform.API.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<int>("Difficulty")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -43,6 +46,21 @@ namespace DancePlatform.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Dances");
+                });
+
+            modelBuilder.Entity("DancePlatform.API.Models.DanceInstructor", b =>
+                {
+                    b.Property<int>("DanceId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("InstructorId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("DanceId", "InstructorId");
+
+                    b.HasIndex("InstructorId");
+
+                    b.ToTable("DanceInstructors");
                 });
 
             modelBuilder.Entity("DancePlatform.API.Models.DanceMusicalStyle", b =>
@@ -60,6 +78,27 @@ namespace DancePlatform.API.Migrations
                     b.ToTable("DanceMusicalStyles");
                 });
 
+            modelBuilder.Entity("DancePlatform.API.Models.DanceRating", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DanceId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "DanceId");
+
+                    b.HasIndex("DanceId");
+
+                    b.ToTable("DanceRatings");
+                });
+
             modelBuilder.Entity("DancePlatform.API.Models.DanceStyle", b =>
                 {
                     b.Property<int>("DanceId")
@@ -73,6 +112,32 @@ namespace DancePlatform.API.Migrations
                     b.HasIndex("StyleId");
 
                     b.ToTable("DanceStyles");
+                });
+
+            modelBuilder.Entity("DancePlatform.API.Models.Instructor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Bio")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Website")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Instructors");
                 });
 
             modelBuilder.Entity("DancePlatform.API.Models.MusicalStyle", b =>
@@ -96,6 +161,41 @@ namespace DancePlatform.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("MusicalStyles");
+                });
+
+            modelBuilder.Entity("DancePlatform.API.Models.PracticeSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DanceId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DurationMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DanceId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PracticeSessions");
                 });
 
             modelBuilder.Entity("DancePlatform.API.Models.Style", b =>
@@ -254,22 +354,51 @@ namespace DancePlatform.API.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<int?>("EndTime")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("StartTime")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("VideoId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("ViewCount")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("YouTubeId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DanceId");
 
                     b.ToTable("Videos");
+                });
+
+            modelBuilder.Entity("DancePlatform.API.Models.DanceInstructor", b =>
+                {
+                    b.HasOne("DancePlatform.API.Models.Dance", "Dance")
+                        .WithMany("DanceInstructors")
+                        .HasForeignKey("DanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DancePlatform.API.Models.Instructor", "Instructor")
+                        .WithMany("DanceInstructors")
+                        .HasForeignKey("InstructorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Dance");
+
+                    b.Navigation("Instructor");
                 });
 
             modelBuilder.Entity("DancePlatform.API.Models.DanceMusicalStyle", b =>
@@ -291,6 +420,25 @@ namespace DancePlatform.API.Migrations
                     b.Navigation("MusicalStyle");
                 });
 
+            modelBuilder.Entity("DancePlatform.API.Models.DanceRating", b =>
+                {
+                    b.HasOne("DancePlatform.API.Models.Dance", "Dance")
+                        .WithMany("Ratings")
+                        .HasForeignKey("DanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DancePlatform.API.Models.User", "User")
+                        .WithMany("Ratings")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dance");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DancePlatform.API.Models.DanceStyle", b =>
                 {
                     b.HasOne("DancePlatform.API.Models.Dance", "Dance")
@@ -308,6 +456,25 @@ namespace DancePlatform.API.Migrations
                     b.Navigation("Dance");
 
                     b.Navigation("Style");
+                });
+
+            modelBuilder.Entity("DancePlatform.API.Models.PracticeSession", b =>
+                {
+                    b.HasOne("DancePlatform.API.Models.Dance", "Dance")
+                        .WithMany("PracticeSessions")
+                        .HasForeignKey("DanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DancePlatform.API.Models.User", "User")
+                        .WithMany("PracticeSessions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dance");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DancePlatform.API.Models.UserFavoriteDance", b =>
@@ -399,6 +566,8 @@ namespace DancePlatform.API.Migrations
 
             modelBuilder.Entity("DancePlatform.API.Models.Dance", b =>
                 {
+                    b.Navigation("DanceInstructors");
+
                     b.Navigation("DanceMusicalStyles");
 
                     b.Navigation("DanceStyles");
@@ -409,7 +578,16 @@ namespace DancePlatform.API.Migrations
 
                     b.Navigation("LearnedBy");
 
+                    b.Navigation("PracticeSessions");
+
+                    b.Navigation("Ratings");
+
                     b.Navigation("Videos");
+                });
+
+            modelBuilder.Entity("DancePlatform.API.Models.Instructor", b =>
+                {
+                    b.Navigation("DanceInstructors");
                 });
 
             modelBuilder.Entity("DancePlatform.API.Models.MusicalStyle", b =>
@@ -433,6 +611,10 @@ namespace DancePlatform.API.Migrations
                     b.Navigation("LearnedDances");
 
                     b.Navigation("MyStyles");
+
+                    b.Navigation("PracticeSessions");
+
+                    b.Navigation("Ratings");
                 });
 #pragma warning restore 612, 618
         }

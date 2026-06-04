@@ -5,6 +5,7 @@
       <a routerLink="/dances">Browse</a>
       @if (auth.isAuthenticated()) {
         <a routerLink="/my-dances">My Dances</a>
+        <a routerLink="/practice">Practice</a>
         <a routerLink="/profile">Profile</a>
         <button class="btn btn--ghost" (click)="auth.logout()">Sign out</button>
       } @else {

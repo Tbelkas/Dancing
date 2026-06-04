@@ -7,15 +7,25 @@ import { environment } from '../../../environments/environment';
 export interface CreateDancePayload {
   name: string;
   description?: string;
+  difficulty?: string;
   styleIds: number[];
   musicalStyleIds: number[];
+  instructorIds?: number[];
 }
 
 export interface UpdateDancePayload {
   name?: string;
   description?: string;
+  difficulty?: string;
   styleIds?: number[];
   musicalStyleIds?: number[];
+  instructorIds?: number[];
+}
+
+export interface ImportResult {
+  videoId: string | null;
+  created: Dance[];
+  errors: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -32,11 +42,18 @@ export class DanceService {
     return this.http.get<Dance>(`${this.base}/${id}`);
   }
 
-  search(query: string, styleId?: number): Observable<Dance[]> {
+  search(query: string, styleId?: number, musicalStyleId?: number, difficulty?: string, status?: string): Observable<Dance[]> {
     let params = new HttpParams();
     if (query) params = params.set('q', query);
     if (styleId) params = params.set('styleId', styleId.toString());
+    if (musicalStyleId) params = params.set('musicalStyleId', musicalStyleId.toString());
+    if (difficulty) params = params.set('difficulty', difficulty);
+    if (status) params = params.set('status', status);
     return this.http.get<Dance[]>(`${environment.apiUrl}/search/dances`, { params });
+  }
+
+  rate(id: number, rating: number): Observable<Dance> {
+    return this.http.post<Dance>(`${this.base}/${id}/rate`, { rating });
   }
 
   create(payload: CreateDancePayload): Observable<Dance> {
@@ -61,5 +78,9 @@ export class DanceService {
 
   toggleInProgress(id: number): Observable<{ isInProgress: boolean }> {
     return this.http.post<{ isInProgress: boolean }>(`${this.base}/${id}/inprogress`, {});
+  }
+
+  importDances(text: string): Observable<ImportResult> {
+    return this.http.post<ImportResult>(`${environment.apiUrl}/import/dances`, { text });
   }
 }

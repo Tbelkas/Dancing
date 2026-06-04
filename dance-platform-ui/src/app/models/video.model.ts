@@ -1,7 +1,8 @@
 export interface Video {
   id: number;
   title: string;
-  youTubeId: string;
+  videoId: string;
+  platform: string;
   description?: string;
   dateAdded: string;
   viewCount: number;

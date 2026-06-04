@@ -2,14 +2,25 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { DanceService, CreateDancePayload } from '../../core/services/dance.service';
+import { DanceService, CreateDancePayload, ImportResult } from '../../core/services/dance.service';
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
+import { InstructorService } from '../../core/services/instructor.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
 import { Dance } from '../../models/dance.model';
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
+import { Instructor } from '../../models/instructor.model';
+
+const DIFFICULTIES = ['Beginner', 'Intermediate', 'Advanced'];
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All' },
+  { value: 'notstarted', label: 'Not Started' },
+  { value: 'inprogress', label: 'In Progress' },
+  { value: 'learned', label: 'Learned' },
+  { value: 'favorite', label: 'Favorited' }
+];
 
 @Component({
   selector: 'app-dances',
@@ -19,24 +30,43 @@ import { MusicalStyle } from '../../models/musical-style.model';
   styleUrls: ['./dances.component.css']
 })
 export class DancesComponent implements OnInit {
+  readonly difficulties = DIFFICULTIES;
+  readonly statusOptions = STATUS_OPTIONS;
+
   // Data
   allDances = signal<Dance[]>([]);
   styles = signal<Style[]>([]);
   musicalStyles = signal<MusicalStyle[]>([]);
+  instructors = signal<Instructor[]>([]);
   loading = signal(true);
 
   // Filters (client-side)
   searchQuery = signal('');
   selectedStyleId = signal<number | null>(null);
+  selectedMusicalStyleId = signal<number | null>(null);
+  selectedDifficulty = signal<string | null>(null);
+  selectedStatus = signal<string>('all');
 
   readonly filteredDances = computed(() => {
     const q = this.searchQuery().trim().toLowerCase();
     const sid = this.selectedStyleId();
+    const msid = this.selectedMusicalStyleId();
+    const diff = this.selectedDifficulty();
+    const status = this.selectedStatus();
     const styleName = sid ? this.styles().find(s => s.id === sid)?.name ?? null : null;
-    return this.allDances().filter(d =>
-      (!q || d.name.toLowerCase().includes(q)) &&
-      (!styleName || d.styles.includes(styleName))
-    );
+    const msName = msid ? this.musicalStyles().find(ms => ms.id === msid)?.name ?? null : null;
+
+    return this.allDances().filter(d => {
+      if (q && !d.name.toLowerCase().includes(q)) return false;
+      if (styleName && !d.styles.includes(styleName)) return false;
+      if (msName && !d.musicalStyles.includes(msName)) return false;
+      if (diff && d.difficulty !== diff) return false;
+      if (status === 'notstarted' && (d.isLearned || d.isInProgress)) return false;
+      if (status === 'inprogress' && !d.isInProgress) return false;
+      if (status === 'learned' && !d.isLearned) return false;
+      if (status === 'favorite' && !d.isFavorite) return false;
+      return true;
+    });
   });
 
   // Admin: add style form
@@ -46,12 +76,21 @@ export class DancesComponent implements OnInit {
   addingStyle = signal(false);
   addStyleError = signal('');
 
+  // Admin: bulk import form
+  showImport = signal(false);
+  importText = '';
+  importing = signal(false);
+  importResult = signal<ImportResult | null>(null);
+  importError = signal('');
+
   // Admin: add dance form
   showAddDance = signal(false);
   newDanceName = '';
   newDanceDesc = '';
+  newDanceDifficulty = 'None';
   newDanceStyleIds = signal<Set<number>>(new Set());
   newDanceMusicalStyleIds = signal<Set<number>>(new Set());
+  newDanceInstructorIds = signal<Set<number>>(new Set());
   addingDance = signal(false);
   addDanceError = signal('');
 
@@ -59,6 +98,7 @@ export class DancesComponent implements OnInit {
     private danceService: DanceService,
     private styleService: StyleService,
     private musicalStyleService: MusicalStyleService,
+    private instructorService: InstructorService,
     public auth: AuthService,
     public role: RoleService
   ) {}
@@ -66,6 +106,7 @@ export class DancesComponent implements OnInit {
   ngOnInit(): void {
     this.styleService.getAll().subscribe(s => this.styles.set(s));
     this.musicalStyleService.getAll().subscribe(ms => this.musicalStyles.set(ms));
+    this.instructorService.getAll().subscribe(i => this.instructors.set(i));
     this.loadDances();
   }
 
@@ -85,6 +126,22 @@ export class DancesComponent implements OnInit {
     this.selectedStyleId.set(styleId);
   }
 
+  filterByMusicalStyle(msId: number | null): void {
+    this.selectedMusicalStyleId.set(msId);
+  }
+
+  filterByDifficulty(difficulty: string | null): void {
+    this.selectedDifficulty.set(difficulty);
+  }
+
+  filterByStatus(status: string): void {
+    this.selectedStatus.set(status);
+  }
+
+  starLabel(rating: number): string {
+    return rating > 0 ? rating.toFixed(1) : '—';
+  }
+
   toggleFavorite(dance: Dance, event: Event): void {
     event.stopPropagation();
     event.preventDefault();
@@ -102,6 +159,32 @@ export class DancesComponent implements OnInit {
       this.allDances.update(list =>
         list.map(d => d.id === dance.id ? { ...d, isLearned: res.isLearned } : d)
       );
+    });
+  }
+
+  // --- Admin: Bulk Import ---
+  toggleImport(): void {
+    this.showImport.update(v => !v);
+    this.importText = '';
+    this.importResult.set(null);
+    this.importError.set('');
+  }
+
+  submitImport(): void {
+    if (!this.importText.trim()) { this.importError.set('Paste some text to import.'); return; }
+    this.importing.set(true);
+    this.importError.set('');
+    this.importResult.set(null);
+    this.danceService.importDances(this.importText).subscribe({
+      next: result => {
+        this.importResult.set(result);
+        this.importing.set(false);
+        if (result.created.length > 0) {
+          this.allDances.update(list => [...result.created, ...list]);
+          this.importText = '';
+        }
+      },
+      error: () => { this.importError.set('Import failed. Make sure you are logged in as admin.'); this.importing.set(false); }
     });
   }
 
@@ -135,8 +218,10 @@ export class DancesComponent implements OnInit {
     this.addDanceError.set('');
     this.newDanceName = '';
     this.newDanceDesc = '';
+    this.newDanceDifficulty = 'None';
     this.newDanceStyleIds.set(new Set());
     this.newDanceMusicalStyleIds.set(new Set());
+    this.newDanceInstructorIds.set(new Set());
   }
 
   toggleDanceStyle(id: number): void {
@@ -155,13 +240,23 @@ export class DancesComponent implements OnInit {
     });
   }
 
+  toggleDanceInstructor(id: number): void {
+    this.newDanceInstructorIds.update(s => {
+      const next = new Set(s);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
   submitAddDance(): void {
     if (!this.newDanceName.trim()) { this.addDanceError.set('Name is required.'); return; }
     const payload: CreateDancePayload = {
       name: this.newDanceName.trim(),
       description: this.newDanceDesc.trim() || undefined,
+      difficulty: this.newDanceDifficulty,
       styleIds: [...this.newDanceStyleIds()],
-      musicalStyleIds: [...this.newDanceMusicalStyleIds()]
+      musicalStyleIds: [...this.newDanceMusicalStyleIds()],
+      instructorIds: [...this.newDanceInstructorIds()]
     };
     this.addingDance.set(true);
     this.addDanceError.set('');
@@ -172,8 +267,10 @@ export class DancesComponent implements OnInit {
         this.addingDance.set(false);
         this.newDanceName = '';
         this.newDanceDesc = '';
+        this.newDanceDifficulty = 'None';
         this.newDanceStyleIds.set(new Set());
         this.newDanceMusicalStyleIds.set(new Set());
+        this.newDanceInstructorIds.set(new Set());
       },
       error: () => { this.addDanceError.set('Failed to create dance.'); this.addingDance.set(false); }
     });

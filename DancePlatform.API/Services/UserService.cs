@@ -45,6 +45,20 @@ public class UserService : IUserService
         return await GetProfileAsync(userId);
     }
 
+    public async Task<PublicProfileDto?> GetPublicProfileAsync(string username) =>
+        await _db.Users
+            .Include(u => u.LearnedDances).ThenInclude(l => l.Dance)
+            .Where(u => u.Username == username && u.Visibility == ProfileVisibility.Public)
+            .Select(u => new PublicProfileDto
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Nickname = u.Nickname,
+                AvatarUrl = u.AvatarUrl,
+                LearnedDances = u.LearnedDances.Select(l => new DanceRef(l.Dance.Id, l.Dance.Name)).ToList()
+            })
+            .FirstOrDefaultAsync();
+
     public async Task<List<MyStyleWithDancesDto>> GetMyDancesAsync(int userId)
     {
         var user = await _db.Users

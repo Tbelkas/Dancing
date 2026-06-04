@@ -47,7 +47,12 @@
           </form>
         } @else {
           <div class="profile-info">
-            <span class="badge">{{ profile()!.visibility }}</span>
+            <span class="badge" [class.badge--private]="profile()!.visibility === 'Private'" [class.badge--public]="profile()!.visibility === 'Public'">
+              {{ profile()!.visibility === 'Public' ? 'Public' : 'Private' }}
+            </span>
+            @if (profile()!.visibility === 'Public') {
+              <a [routerLink]="['/users', profile()!.username]" class="profile-public-link">View public profile →</a>
+            }
           </div>
           <button class="btn btn--ghost" (click)="startEdit()">Edit Profile</button>
         }
@@ -57,12 +62,12 @@
         <div class="card">
           <h3>Favorite Dances <span class="count-badge">{{ profile()!.favoriteDances.length }}</span></h3>
           @if (profile()!.favoriteDances.length === 0) {
-            <p class="empty">No favorites yet. Browse dances and hit ★ to save them here.</p>
+            <p class="empty">No favorites yet. Browse dances and hit the star to save them here.</p>
           } @else {
             <div class="dance-ref-list">
               @for (d of profile()!.favoriteDances; track d.id) {
                 <a [routerLink]="['/dances', d.id]" class="dance-ref-item">
-                  <span class="dance-ref-icon">★</span>
+                  <span class="dance-ref-icon"><i class="fa-solid fa-star"></i></span>
                   <span class="dance-ref-name">{{ d.name }}</span>
                   <span class="dance-ref-arrow">→</span>
                 </a>
@@ -79,7 +84,7 @@
             <div class="dance-ref-list">
               @for (d of profile()!.learnedDances; track d.id) {
                 <a [routerLink]="['/dances', d.id]" class="dance-ref-item">
-                  <span class="dance-ref-icon learned">✓</span>
+                  <span class="dance-ref-icon learned"><i class="fa-solid fa-check"></i></span>
                   <span class="dance-ref-name">{{ d.name }}</span>
                   <span class="dance-ref-arrow">→</span>
                 </a>

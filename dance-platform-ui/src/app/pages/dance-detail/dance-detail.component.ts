@@ -6,13 +6,17 @@ import { DanceService, UpdateDancePayload } from '../../core/services/dance.serv
 import { VideoService, CreateVideoPayload } from '../../core/services/video.service';
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
+import { InstructorService } from '../../core/services/instructor.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
 import { Dance } from '../../models/dance.model';
 import { Video, viewCountBucket } from '../../models/video.model';
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
+import { Instructor } from '../../models/instructor.model';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
+
+const DIFFICULTIES = ['None', 'Beginner', 'Intermediate', 'Advanced'];
 
 @Component({
   selector: 'app-dance-detail',
@@ -22,6 +26,9 @@ import { VideoPlayerComponent } from '../../shared/components/video-player/video
   styleUrls: ['./dance-detail.component.css']
 })
 export class DanceDetailComponent implements OnInit {
+  readonly difficulties = DIFFICULTIES;
+  readonly stars = [1, 2, 3, 4, 5];
+
   dance = signal<Dance | null>(null);
   videos = signal<Video[]>([]);
   selectedVideo = signal<Video | null>(null);
@@ -33,7 +40,7 @@ export class DanceDetailComponent implements OnInit {
   // Admin: add video form
   showAddVideo = signal(false);
   newVideoTitle = '';
-  newVideoYouTubeId = '';
+  newVideoUrl = '';
   newVideoDesc = '';
   addingVideo = signal(false);
   addVideoError = signal('');
@@ -42,15 +49,21 @@ export class DanceDetailComponent implements OnInit {
   showEditDance = signal(false);
   editName = '';
   editDescription = '';
+  editDifficulty = 'None';
   editStyleIds: number[] = [];
   editMusicalStyleIds: number[] = [];
+  editInstructorIds: number[] = [];
   allStyles = signal<Style[]>([]);
   allMusicalStyles = signal<MusicalStyle[]>([]);
+  allInstructors = signal<Instructor[]>([]);
   savingDance = signal(false);
   editDanceError = signal('');
 
   // Admin: delete dance
   deletingDance = signal(false);
+
+  // Rating hover state
+  hoverRating = signal(0);
 
   constructor(
     private route: ActivatedRoute,
@@ -59,6 +72,7 @@ export class DanceDetailComponent implements OnInit {
     private videoService: VideoService,
     private styleService: StyleService,
     private musicalStyleService: MusicalStyleService,
+    private instructorService: InstructorService,
     public auth: AuthService,
     public role: RoleService
   ) {}
@@ -81,6 +95,7 @@ export class DanceDetailComponent implements OnInit {
     if (this.role.isAdmin()) {
       this.styleService.getAll().subscribe(s => this.allStyles.set(s));
       this.musicalStyleService.getAll().subscribe(s => this.allMusicalStyles.set(s));
+      this.instructorService.getAll().subscribe(i => this.allInstructors.set(i));
     }
   }
 
@@ -130,30 +145,60 @@ export class DanceDetailComponent implements OnInit {
     });
   }
 
+  // Rating
+  rateDance(rating: number): void {
+    const d = this.dance();
+    if (!d) return;
+    this.danceService.rate(d.id, rating).subscribe({
+      next: updated => this.dance.update(cur => cur ? {
+        ...cur,
+        userRating: updated.userRating,
+        averageRating: updated.averageRating,
+        ratingCount: updated.ratingCount
+      } : cur),
+      error: () => this.actionError.set('Rating failed. Please log in again.')
+    });
+  }
+
   // Admin: add video
   toggleAddVideo(): void {
     this.showAddVideo.update(v => !v);
     this.addVideoError.set('');
     this.newVideoTitle = '';
-    this.newVideoYouTubeId = '';
+    this.newVideoUrl = '';
     this.newVideoDesc = '';
   }
 
-  /** Extracts YouTube video ID from a full URL or returns the value as-is if already an ID */
-  private extractYouTubeId(input: string): string {
-    const match = input.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
-    return match ? match[1] : input.trim();
+  private parseVideoUrl(input: string): { platform: string; videoId: string } | null {
+    const url = input.trim();
+
+    const tiktok = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
+    if (tiktok) return { platform: 'tiktok', videoId: tiktok[1] };
+
+    const ig = url.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+    if (ig) return { platform: 'instagram', videoId: ig[1] };
+
+    const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
+    if (yt) return { platform: 'youtube', videoId: yt[1] };
+
+    if (/^[A-Za-z0-9_-]{11}$/.test(url)) return { platform: 'youtube', videoId: url };
+
+    return null;
   }
 
   submitAddVideo(): void {
     const danceId = this.dance()?.id;
     if (!danceId) return;
     if (!this.newVideoTitle.trim()) { this.addVideoError.set('Title is required.'); return; }
-    if (!this.newVideoYouTubeId.trim()) { this.addVideoError.set('YouTube URL or ID is required.'); return; }
+    if (!this.newVideoUrl.trim()) { this.addVideoError.set('Video URL or ID is required.'); return; }
+
+    const parsed = this.parseVideoUrl(this.newVideoUrl);
+    if (!parsed) { this.addVideoError.set('Unrecognized URL. Paste a YouTube, TikTok, or Instagram link.'); return; }
 
     const payload: CreateVideoPayload = {
       title: this.newVideoTitle.trim(),
-      youTubeId: this.extractYouTubeId(this.newVideoYouTubeId),
+      videoId: parsed.videoId,
+      platform: parsed.platform,
       description: this.newVideoDesc.trim() || undefined,
       danceId
     };
@@ -167,7 +212,7 @@ export class DanceDetailComponent implements OnInit {
         this.showAddVideo.set(false);
         this.addingVideo.set(false);
         this.newVideoTitle = '';
-        this.newVideoYouTubeId = '';
+        this.newVideoUrl = '';
         this.newVideoDesc = '';
       },
       error: () => { this.addVideoError.set('Failed to add video.'); this.addingVideo.set(false); }
@@ -196,13 +241,16 @@ export class DanceDetailComponent implements OnInit {
     }
     this.editName = d.name;
     this.editDescription = d.description ?? '';
-    // Resolve style IDs by matching names to allStyles
+    this.editDifficulty = d.difficulty;
     this.editStyleIds = this.allStyles()
       .filter(s => d.styles.includes(s.name))
       .map(s => s.id);
     this.editMusicalStyleIds = this.allMusicalStyles()
       .filter(s => d.musicalStyles.includes(s.name))
       .map(s => s.id);
+    this.editInstructorIds = this.allInstructors()
+      .filter(i => d.instructors.includes(i.name))
+      .map(i => i.id);
     this.editDanceError.set('');
     this.showEditDance.set(true);
   }
@@ -219,6 +267,12 @@ export class DanceDetailComponent implements OnInit {
       : [...this.editMusicalStyleIds, id];
   }
 
+  toggleEditInstructorId(id: number): void {
+    this.editInstructorIds = this.editInstructorIds.includes(id)
+      ? this.editInstructorIds.filter(x => x !== id)
+      : [...this.editInstructorIds, id];
+  }
+
   submitEditDance(): void {
     if (!this.editName.trim()) { this.editDanceError.set('Name is required.'); return; }
     const d = this.dance();
@@ -226,14 +280,24 @@ export class DanceDetailComponent implements OnInit {
     const payload: UpdateDancePayload = {
       name: this.editName.trim(),
       description: this.editDescription.trim() || undefined,
+      difficulty: this.editDifficulty,
       styleIds: this.editStyleIds,
-      musicalStyleIds: this.editMusicalStyleIds
+      musicalStyleIds: this.editMusicalStyleIds,
+      instructorIds: this.editInstructorIds
     };
     this.savingDance.set(true);
     this.editDanceError.set('');
     this.danceService.update(d.id, payload).subscribe({
       next: updated => {
-        this.dance.set({ ...updated, isFavorite: d.isFavorite, isLearned: d.isLearned, isInProgress: d.isInProgress, favoriteCount: d.favoriteCount, learnedCount: d.learnedCount });
+        this.dance.set({
+          ...updated,
+          isFavorite: d.isFavorite,
+          isLearned: d.isLearned,
+          isInProgress: d.isInProgress,
+          favoriteCount: d.favoriteCount,
+          learnedCount: d.learnedCount,
+          userRating: d.userRating
+        });
         this.showEditDance.set(false);
         this.savingDance.set(false);
       },
@@ -251,4 +315,3 @@ export class DanceDetailComponent implements OnInit {
     });
   }
 }
-

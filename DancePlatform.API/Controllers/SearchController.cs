@@ -16,9 +16,14 @@ public class SearchController : ControllerBase
         User.FindFirstValue(ClaimTypes.NameIdentifier) is string id ? int.Parse(id) : null;
 
     [HttpGet("dances")]
-    public async Task<IActionResult> SearchDances([FromQuery] string? q, [FromQuery] int? styleId)
+    public async Task<IActionResult> SearchDances(
+        [FromQuery] string? q,
+        [FromQuery] int? styleId,
+        [FromQuery] int? musicalStyleId,
+        [FromQuery] string? difficulty,
+        [FromQuery] string? status)
     {
-        var results = await _danceService.SearchAsync(q ?? string.Empty, styleId, CurrentUserId);
+        var results = await _danceService.SearchAsync(q ?? string.Empty, styleId, musicalStyleId, difficulty, status, CurrentUserId);
         return Ok(results);
     }
 }

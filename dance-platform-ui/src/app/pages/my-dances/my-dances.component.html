@@ -3,7 +3,7 @@
     <div class="page-header__top">
       <h1 class="page-title">My Dances</h1>
       <button class="btn btn--ghost" (click)="showStylePicker.set(!showStylePicker())">
-        {{ showStylePicker() ? '✕ Done' : '+ Manage Styles' }}
+        @if (showStylePicker()) { <i class="fa-solid fa-xmark"></i> Done } @else { <i class="fa-solid fa-plus"></i> Manage Styles }
       </button>
     </div>
     <p class="page-subtitle">Your dance styles and tracked moves</p>
@@ -14,7 +14,7 @@
       <div class="style-picker__header">
         <h3 class="style-picker__title">Select your dance styles</h3>
         <button class="btn btn--ghost btn--sm" (click)="toggleAddStyle()">
-          {{ showAddStyle() ? '✕ Cancel' : '+ New Style' }}
+          @if (showAddStyle()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> New Style }
         </button>
       </div>
 
@@ -38,7 +38,7 @@
           @for (style of allStyles(); track style.id) {
             <button class="style-chip" [class.style-chip--active]="myStyleIds().has(style.id)" (click)="toggleMyStyle(style)">
               {{ style.name }}
-              @if (myStyleIds().has(style.id)) { <span class="chip-check">✓</span> }
+              @if (myStyleIds().has(style.id)) { <span class="chip-check"><i class="fa-solid fa-check"></i></span> }
             </button>
           }
         </div>
@@ -50,7 +50,7 @@
     <div class="loading">Loading your dances...</div>
   } @else if (myStyles().length === 0) {
     <div class="empty-state card">
-      <div class="empty-state__icon">💃</div>
+      <div class="empty-state__icon"><i class="fa-solid fa-person-dancing"></i></div>
       <h2>No dance styles yet</h2>
       <p>Click "Manage Styles" above to add the styles you practice.</p>
     </div>
@@ -73,7 +73,7 @@
         <!-- Add Dance Button + Form -->
         <div class="add-dance-bar">
           <button class="btn btn--ghost btn--sm" (click)="toggleAddDance()">
-            {{ showAddDance() ? '✕ Cancel' : '+ Add Dance' }}
+            @if (showAddDance()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Dance }
           </button>
         </div>
 
@@ -101,14 +101,14 @@
                   <input type="text" [(ngModel)]="newVideoTitle" placeholder="e.g. Basic Tutorial" />
                 </div>
                 <div class="form-group">
-                  <label>YouTube URL or ID</label>
-                  <input type="text" [(ngModel)]="newVideoUrl" placeholder="https://youtu.be/... or dQw4w9WgXcQ" />
+                  <label>Video URL</label>
+                  <input type="text" [(ngModel)]="newVideoUrl" placeholder="YouTube, TikTok, or Instagram URL" />
                 </div>
               </div>
 
               @if (newVideoUrl.trim()) {
-                <label class="checkbox-item" [class.checked]="setVideoTime" (click)="setVideoTime = !setVideoTime" style="display:inline-flex; margin-top: 12px;">
-                  <input type="checkbox" [checked]="setVideoTime" />
+                <label class="checkbox-item" [class.checked]="setVideoTime" style="display:inline-flex; margin-top: 12px;">
+                  <input type="checkbox" [(ngModel)]="setVideoTime" />
                   Set start / end time
                 </label>
 
@@ -137,14 +137,14 @@
         @if (learnedDances().length > 0) {
           <div class="dance-section">
             <h3 class="section-title">
-              <span class="section-icon learned-icon">✓</span>
+              <span class="section-icon learned-icon"><i class="fa-solid fa-check"></i></span>
               Learned
               <span class="section-count">{{ learnedDances().length }}</span>
             </h3>
             <div class="dance-list">
               @for (dance of learnedDances(); track dance.id) {
                 <a [routerLink]="['/dances', dance.id]" class="dance-item">
-                  <span class="dance-status dance-status--learned">✓</span>
+                  <span class="dance-status dance-status--learned"><i class="fa-solid fa-check"></i></span>
                   <span class="dance-name">{{ dance.name }}</span>
                   <span class="dance-arrow">→</span>
                 </a>
@@ -157,14 +157,14 @@
         @if (inProgressDances().length > 0) {
           <div class="dance-section">
             <h3 class="section-title">
-              <span class="section-icon progress-icon">◐</span>
+              <span class="section-icon progress-icon"><i class="fa-solid fa-circle-half-stroke"></i></span>
               In Progress
               <span class="section-count">{{ inProgressDances().length }}</span>
             </h3>
             <div class="dance-list">
               @for (dance of inProgressDances(); track dance.id) {
                 <a [routerLink]="['/dances', dance.id]" class="dance-item">
-                  <span class="dance-status dance-status--progress">◐</span>
+                  <span class="dance-status dance-status--progress"><i class="fa-solid fa-circle-half-stroke"></i></span>
                   <span class="dance-name">{{ dance.name }}</span>
                   <span class="dance-arrow">→</span>
                 </a>

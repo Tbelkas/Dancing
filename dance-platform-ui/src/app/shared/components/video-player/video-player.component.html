@@ -1,27 +1,72 @@
 <div class="player-wrapper">
-  <div #playerContainer class="yt-player"></div>
 
-  <div class="controls">
-    <div class="control-row">
-      <label>Speed</label>
-      <div class="speed-buttons">
-        @for (rate of playbackRates; track rate) {
-          <button class="speed-btn" [class.active]="currentRate() === rate" (click)="setRate(rate)">{{ rate }}x</button>
+  @if (isYouTube) {
+    <div #playerContainer class="yt-player"></div>
+
+    <div class="controls">
+      <div class="control-row">
+        <label>Speed</label>
+        <div class="speed-buttons">
+          @for (rate of playbackRates; track rate) {
+            <button class="speed-btn" [class.active]="currentRate() === rate" (click)="setRate(rate)">{{ rate }}x</button>
+          }
+        </div>
+      </div>
+
+      <div class="control-row control-row--column">
+        <div class="repeat-header">
+          <label>Repeat Region</label>
+          @if (videoDuration() > 0) {
+            <span class="repeat-times">{{ formatTime(repeatStart) }} → {{ formatTime(repeatEnd) }}</span>
+          }
+          <button class="btn btn--accent btn--sm" (click)="toggleRepeat()" [disabled]="videoDuration() === 0">
+            {{ repeating() ? 'Stop Repeat' : 'Repeat Region' }}
+          </button>
+        </div>
+        @if (videoDuration() > 0) {
+          <div class="slider-group">
+            <div class="slider-row">
+              <span class="slider-label">Start</span>
+              <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatStart"
+                (input)="onStartSliderChange(+$any($event.target).value)" />
+              <span class="slider-time">{{ formatTime(repeatStart) }}</span>
+            </div>
+            <div class="slider-row">
+              <span class="slider-label">End</span>
+              <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatEnd"
+                (input)="onEndSliderChange(+$any($event.target).value)" />
+              <span class="slider-time">{{ formatTime(repeatEnd) }}</span>
+            </div>
+          </div>
+        } @else {
+          <p class="repeat-hint">Load the video to enable sliders</p>
         }
       </div>
     </div>
+  }
 
-    <div class="control-row control-row--column">
-      <div class="repeat-header">
-        <label>Repeat Region</label>
-        @if (videoDuration() > 0) {
+  @if (isTikTok) {
+    <div class="embed-container embed-container--portrait">
+      <iframe
+        #tiktokFrame
+        [src]="embedUrl | trustUrl"
+        class="embed-frame embed-frame--portrait"
+        allow="autoplay; fullscreen"
+        allowfullscreen
+        frameborder="0"
+        scrolling="no">
+      </iframe>
+    </div>
+
+    <div class="controls">
+      <div class="control-row control-row--column">
+        <div class="repeat-header">
+          <label>Repeat Region</label>
           <span class="repeat-times">{{ formatTime(repeatStart) }} → {{ formatTime(repeatEnd) }}</span>
-        }
-        <button class="btn btn--accent btn--sm" (click)="toggleRepeat()" [disabled]="videoDuration() === 0">
-          {{ repeating() ? 'Stop Repeat' : 'Repeat Region' }}
-        </button>
-      </div>
-      @if (videoDuration() > 0) {
+          <button class="btn btn--accent btn--sm" (click)="toggleRepeat()">
+            {{ repeating() ? 'Stop Repeat' : 'Repeat Region' }}
+          </button>
+        </div>
         <div class="slider-group">
           <div class="slider-row">
             <span class="slider-label">Start</span>
@@ -36,9 +81,22 @@
             <span class="slider-time">{{ formatTime(repeatEnd) }}</span>
           </div>
         </div>
-      } @else {
-        <p class="repeat-hint">Load the video to enable sliders</p>
-      }
+        <p class="repeat-hint">Duration auto-updates as the video plays. Speed control not available for TikTok.</p>
+      </div>
     </div>
-  </div>
+  }
+
+  @if (isInstagram) {
+    <div class="embed-container embed-container--instagram">
+      <iframe
+        [src]="embedUrl | trustUrl"
+        class="embed-frame embed-frame--instagram"
+        allow="autoplay; fullscreen"
+        allowfullscreen
+        frameborder="0"
+        scrolling="no">
+      </iframe>
+    </div>
+  }
+
 </div>

@@ -1,0 +1,95 @@
+<div class="container">
+  <div class="page-header">
+    <div class="page-header__top">
+      <div>
+        <h1 class="page-title">Practice Log</h1>
+        <p class="page-subtitle">Track your practice sessions and build consistency</p>
+      </div>
+      <button class="btn btn--primary btn--sm" (click)="toggleAddForm()">
+        @if (showAddForm()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Log Session }
+      </button>
+    </div>
+  </div>
+
+  @if (sessions().length > 0) {
+    <div class="stats-row">
+      <div class="stat-chip">
+        <span class="stat-chip__label">Streak</span>
+        <span class="stat-chip__value">{{ streak() }} day{{ streak() !== 1 ? 's' : '' }} <i class="fa-solid fa-fire"></i></span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-chip__label">Sessions</span>
+        <span class="stat-chip__value">{{ sessions().length }}</span>
+      </div>
+      @if (totalMinutes() > 0) {
+        <div class="stat-chip">
+          <span class="stat-chip__label">Total time</span>
+          <span class="stat-chip__value">{{ totalMinutes() }} min</span>
+        </div>
+      }
+    </div>
+  }
+
+  @if (showAddForm()) {
+    <div class="admin-form card">
+      <h3 class="admin-form__title">Log Practice Session</h3>
+      @if (addError()) { <div class="error-message">{{ addError() }}</div> }
+      <div class="admin-form__fields">
+        <div class="form-group">
+          <label>Dance</label>
+          <select [(ngModel)]="newDanceId">
+            <option [ngValue]="null" disabled>Select a dance...</option>
+            @for (d of dances(); track d.id) {
+              <option [ngValue]="d.id">{{ d.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" [(ngModel)]="newDate" />
+        </div>
+        <div class="form-group">
+          <label>Duration (minutes) <span class="optional">(optional)</span></label>
+          <input type="number" [(ngModel)]="newDuration" min="1" placeholder="e.g. 30" />
+        </div>
+        <div class="form-group">
+          <label>Notes <span class="optional">(optional)</span></label>
+          <textarea [(ngModel)]="newNotes" rows="2" placeholder="What did you work on?"></textarea>
+        </div>
+      </div>
+      <button class="btn btn--primary btn--sm" (click)="submitAdd()" [disabled]="adding()">
+        {{ adding() ? 'Saving...' : 'Log Session' }}
+      </button>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading">Loading sessions...</div>
+  } @else if (sessions().length === 0) {
+    <div class="empty-state">
+      <p>No practice sessions yet. Hit "Log Session" to start tracking!</p>
+    </div>
+  } @else {
+    <div class="sessions-list">
+      @for (group of groupedSessions(); track group[0]) {
+        <div class="session-group">
+          <h3 class="session-date-header">{{ formatDate(group[0]) }}</h3>
+          @for (session of group[1]; track session.id) {
+            <div class="card session-card">
+              <div class="session-card__main">
+                <a [routerLink]="['/dances', session.danceId]" class="session-dance-name">{{ session.danceName }}</a>
+                @if (session.durationMinutes) {
+                  <span class="session-duration">{{ session.durationMinutes }} min</span>
+                }
+              </div>
+              @if (session.notes) {
+                <p class="session-notes">{{ session.notes }}</p>
+              }
+              <button class="btn btn--danger btn--xs session-delete" (click)="deleteSession(session.id)">Delete</button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

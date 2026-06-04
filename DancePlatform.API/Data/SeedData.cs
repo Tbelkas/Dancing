@@ -93,20 +93,20 @@ public static class SeedData
 
         // --- Videos ---
         db.Videos.AddRange(
-            new Video { Title = "Salsa Basic Steps for Beginners",       YouTubeId = "nCGXCR4yCzk", DanceId = salsa.Id,             Description = "Learn the fundamental salsa steps and timing in this beginner-friendly tutorial." },
-            new Video { Title = "Salsa On2 Timing Explained",            YouTubeId = "K8F8v6GCFhg", DanceId = salsa.Id,             Description = "Master the New York-style salsa on2 timing with a detailed footwork breakdown." },
-            new Video { Title = "Waltz for Beginners – Basic Steps",     YouTubeId = "J5hBxiT-NsY", DanceId = waltz.Id,             Description = "Step-by-step guide to the natural turn, reverse turn and basic box in waltz." },
-            new Video { Title = "Argentine Tango – Walking Technique",   YouTubeId = "dN4TT5kFvOg", DanceId = tango.Id,             Description = "Foundation of Argentine tango: the walk, posture and connection with your partner." },
-            new Video { Title = "Breakdance Footwork for Beginners",     YouTubeId = "WC5oGldzGiQ", DanceId = breakdance.Id,        Description = "Learn the 6-step, the fundamental footwork pattern for all bboys and bgirls." },
-            new Video { Title = "Ballet Barre Exercises – Beginner",     YouTubeId = "pLsAZhGMeaU", DanceId = ballet.Id,            Description = "A complete beginner barre workout covering pliés, tendus and dégagés." },
-            new Video { Title = "Flamenco Footwork Basics – Zapateado",  YouTubeId = "HhVbFZGu3eE", DanceId = flamenco.Id,          Description = "Introduction to flamenco zapateado, the essential footwork technique." },
-            new Video { Title = "Jive – Basic Steps Tutorial",           YouTubeId = "T9LchSmfK3s", DanceId = jive.Id,              Description = "Learn the jive basic steps, underarm turns and American spin." },
-            new Video { Title = "Cha-Cha Basic Steps for Beginners",     YouTubeId = "vMGpWlxsXEY", DanceId = chaCha.Id,            Description = "Master the cha-cha basic with proper hip action and timing." },
-            new Video { Title = "Bachata for Complete Beginners",        YouTubeId = "bLXAVMgWBME", DanceId = bachata.Id,           Description = "Learn the bachata basic step, side step and hip motion from scratch." },
-            new Video { Title = "Bachata Sensual – Body Movement",       YouTubeId = "RP4abiHdQpc", DanceId = bachata.Id,           Description = "Explore the body waves and sensual movement of modern bachata sensual style." },
-            new Video { Title = "Popping Tutorial – The Basics",         YouTubeId = "9bZkp7q19f0", DanceId = popping.Id,           Description = "Learn how to pop correctly: chest pop, arm pop and neck pop." },
-            new Video { Title = "Contemporary Dance Technique",          YouTubeId = "XbpmVxnFQdk", DanceId = contemporaryDance.Id, Description = "Explore floor work, weight shifting and improvisation in contemporary dance." },
-            new Video { Title = "Foxtrot Basic Steps – Ballroom",        YouTubeId = "Ct6BUPvE2sQ", DanceId = foxtrot.Id,           Description = "Learn the foxtrot feather step, reverse turn and three-step sequence." }
+            new Video { Title = "Salsa Basic Steps for Beginners",       VideoId ="nCGXCR4yCzk", DanceId = salsa.Id,             Description = "Learn the fundamental salsa steps and timing in this beginner-friendly tutorial." },
+            new Video { Title = "Salsa On2 Timing Explained",            VideoId ="K8F8v6GCFhg", DanceId = salsa.Id,             Description = "Master the New York-style salsa on2 timing with a detailed footwork breakdown." },
+            new Video { Title = "Waltz for Beginners – Basic Steps",     VideoId ="J5hBxiT-NsY", DanceId = waltz.Id,             Description = "Step-by-step guide to the natural turn, reverse turn and basic box in waltz." },
+            new Video { Title = "Argentine Tango – Walking Technique",   VideoId ="dN4TT5kFvOg", DanceId = tango.Id,             Description = "Foundation of Argentine tango: the walk, posture and connection with your partner." },
+            new Video { Title = "Breakdance Footwork for Beginners",     VideoId ="WC5oGldzGiQ", DanceId = breakdance.Id,        Description = "Learn the 6-step, the fundamental footwork pattern for all bboys and bgirls." },
+            new Video { Title = "Ballet Barre Exercises – Beginner",     VideoId ="pLsAZhGMeaU", DanceId = ballet.Id,            Description = "A complete beginner barre workout covering pliés, tendus and dégagés." },
+            new Video { Title = "Flamenco Footwork Basics – Zapateado",  VideoId ="HhVbFZGu3eE", DanceId = flamenco.Id,          Description = "Introduction to flamenco zapateado, the essential footwork technique." },
+            new Video { Title = "Jive – Basic Steps Tutorial",           VideoId ="T9LchSmfK3s", DanceId = jive.Id,              Description = "Learn the jive basic steps, underarm turns and American spin." },
+            new Video { Title = "Cha-Cha Basic Steps for Beginners",     VideoId ="vMGpWlxsXEY", DanceId = chaCha.Id,            Description = "Master the cha-cha basic with proper hip action and timing." },
+            new Video { Title = "Bachata for Complete Beginners",        VideoId ="bLXAVMgWBME", DanceId = bachata.Id,           Description = "Learn the bachata basic step, side step and hip motion from scratch." },
+            new Video { Title = "Bachata Sensual – Body Movement",       VideoId ="RP4abiHdQpc", DanceId = bachata.Id,           Description = "Explore the body waves and sensual movement of modern bachata sensual style." },
+            new Video { Title = "Popping Tutorial – The Basics",         VideoId ="9bZkp7q19f0", DanceId = popping.Id,           Description = "Learn how to pop correctly: chest pop, arm pop and neck pop." },
+            new Video { Title = "Contemporary Dance Technique",          VideoId ="XbpmVxnFQdk", DanceId = contemporaryDance.Id, Description = "Explore floor work, weight shifting and improvisation in contemporary dance." },
+            new Video { Title = "Foxtrot Basic Steps – Ballroom",        VideoId ="Ct6BUPvE2sQ", DanceId = foxtrot.Id,           Description = "Learn the foxtrot feather step, reverse turn and three-step sequence." }
         );
 
         // --- Users ---

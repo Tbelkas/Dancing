@@ -8,15 +8,60 @@
       @if (role.isAdmin()) {
         <div class="admin-actions">
           <button class="btn btn--ghost btn--sm" (click)="toggleAddStyle()">
-            {{ showAddStyle() ? '✕ Cancel' : '+ Add Style' }}
+            @if (showAddStyle()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Style }
+          </button>
+          <button class="btn btn--ghost btn--sm" (click)="toggleImport()">
+            @if (showImport()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-file-import"></i> Import }
           </button>
           <button class="btn btn--primary btn--sm" (click)="toggleAddDance()">
-            {{ showAddDance() ? '✕ Cancel' : '+ Add Dance' }}
+            @if (showAddDance()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Dance }
           </button>
         </div>
       }
     </div>
   </div>
+
+  <!-- Admin: Bulk Import Form -->
+  @if (showImport()) {
+    <div class="admin-form card">
+      <h3 class="admin-form__title">Import Dances from YouTube</h3>
+      <p class="admin-form__hint">Paste text containing a YouTube URL and dance entries in the format <code>Dance Name [MM:SS]</code>. One Dance + Video will be created per entry.</p>
+      @if (importError()) { <div class="error-message">{{ importError() }}</div> }
+      <div class="admin-form__fields">
+        <div class="form-group">
+          <label>Paste text</label>
+          <textarea [(ngModel)]="importText" rows="8" placeholder="Paste the YouTube description or timestamps here...&#10;&#10;Example:&#10;The Wu-Tang [00:29]&#10;The Roger Rabbit [01:26]"></textarea>
+        </div>
+      </div>
+      <button class="btn btn--primary btn--sm" (click)="submitImport()" [disabled]="importing()">
+        {{ importing() ? 'Importing...' : 'Import' }}
+      </button>
+
+      @if (importResult()) {
+        <div class="import-result">
+          @if (importResult()!.videoId) {
+            <p class="import-result__video">Linked to YouTube video: <code>{{ importResult()!.videoId }}</code></p>
+          }
+          @if (importResult()!.created.length > 0) {
+            <p class="import-result__success">Created {{ importResult()!.created.length }} dance{{ importResult()!.created.length !== 1 ? 's' : '' }}:</p>
+            <ul class="import-result__list">
+              @for (d of importResult()!.created; track d.id) {
+                <li>{{ d.name }}</li>
+              }
+            </ul>
+          }
+          @if (importResult()!.errors.length > 0) {
+            <p class="import-result__errors-label">Errors:</p>
+            <ul class="import-result__list import-result__list--error">
+              @for (e of importResult()!.errors; track e) {
+                <li>{{ e }}</li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    </div>
+  }
 
   <!-- Admin: Add Style Form -->
   @if (showAddStyle()) {
@@ -54,6 +99,15 @@
           <textarea [(ngModel)]="newDanceDesc" rows="2" placeholder="Short description"></textarea>
         </div>
         <div class="form-group">
+          <label>Difficulty</label>
+          <select [(ngModel)]="newDanceDifficulty">
+            <option value="None">Not specified</option>
+            @for (d of difficulties; track d) {
+              <option [value]="d">{{ d }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
           <label>Dance Styles</label>
           <div class="checkbox-grid">
             @for (style of styles(); track style.id) {
@@ -75,6 +129,19 @@
             }
           </div>
         </div>
+        @if (instructors().length > 0) {
+          <div class="form-group">
+            <label>Instructors <span class="optional">(optional)</span></label>
+            <div class="checkbox-grid">
+              @for (inst of instructors(); track inst.id) {
+                <label class="checkbox-item" [class.checked]="newDanceInstructorIds().has(inst.id)">
+                  <input type="checkbox" [checked]="newDanceInstructorIds().has(inst.id)" (change)="toggleDanceInstructor(inst.id)" />
+                  {{ inst.name }}
+                </label>
+              }
+            </div>
+          </div>
+        }
       </div>
       <button class="btn btn--primary btn--sm" (click)="submitAddDance()" [disabled]="addingDance()">
         {{ addingDance() ? 'Creating...' : 'Create Dance' }}
@@ -84,17 +151,58 @@
 
   <div class="filters">
     <div class="search-wrapper">
-      <span class="search-icon">🔍</span>
+      <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
       <input type="text" [value]="searchQuery()" (input)="onSearchInput($any($event.target).value)" class="search-input" placeholder="Search dances..." />
     </div>
-    <div class="style-filters">
-      <button class="filter-pill" [class.active]="selectedStyleId() === null" (click)="filterByStyle(null)">All</button>
-      @for (style of styles(); track style.id) {
-        <button class="filter-pill" [class.active]="selectedStyleId() === style.id" (click)="filterByStyle(style.id)">
-          {{ style.name }}
-        </button>
-      }
+
+    <div class="filter-row">
+      <span class="filter-label">Style:</span>
+      <div class="style-filters">
+        <button class="filter-pill" [class.active]="selectedStyleId() === null" (click)="filterByStyle(null)">All</button>
+        @for (style of styles(); track style.id) {
+          <button class="filter-pill" [class.active]="selectedStyleId() === style.id" (click)="filterByStyle(style.id)">
+            {{ style.name }}
+          </button>
+        }
+      </div>
     </div>
+
+    <div class="filter-row">
+      <span class="filter-label">Music:</span>
+      <div class="style-filters">
+        <button class="filter-pill" [class.active]="selectedMusicalStyleId() === null" (click)="filterByMusicalStyle(null)">All</button>
+        @for (ms of musicalStyles(); track ms.id) {
+          <button class="filter-pill" [class.active]="selectedMusicalStyleId() === ms.id" (click)="filterByMusicalStyle(ms.id)">
+            {{ ms.name }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="filter-row">
+      <span class="filter-label">Level:</span>
+      <div class="style-filters">
+        <button class="filter-pill" [class.active]="selectedDifficulty() === null" (click)="filterByDifficulty(null)">All</button>
+        @for (d of difficulties; track d) {
+          <button class="filter-pill" [class.active]="selectedDifficulty() === d" (click)="filterByDifficulty(d)">
+            {{ d }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (auth.isAuthenticated()) {
+      <div class="filter-row">
+        <span class="filter-label">Status:</span>
+        <div class="style-filters">
+          @for (opt of statusOptions; track opt.value) {
+            <button class="filter-pill" [class.active]="selectedStatus() === opt.value" (click)="filterByStatus(opt.value)">
+              {{ opt.label }}
+            </button>
+          }
+        </div>
+      </div>
+    }
   </div>
 
   @if (loading()) {
@@ -110,10 +218,10 @@
             @if (auth.isAuthenticated()) {
               <div class="dance-card__actions">
                 <button class="icon-btn" [class.active]="dance.isFavorite" (click)="toggleFavorite(dance, $event)" title="Favorite">
-                  {{ dance.isFavorite ? '★' : '☆' }}
+                  @if (dance.isFavorite) { <i class="fa-solid fa-star"></i> } @else { <i class="fa-regular fa-star"></i> }
                 </button>
                 <button class="icon-btn" [class.active]="dance.isLearned" (click)="toggleLearned(dance, $event)" title="Mark as learned">
-                  {{ dance.isLearned ? '✓' : '○' }}
+                  @if (dance.isLearned) { <i class="fa-solid fa-check"></i> } @else { <i class="fa-regular fa-circle"></i> }
                 </button>
               </div>
             }
@@ -123,16 +231,22 @@
           }
           <div class="dance-card__meta">
             <div class="dance-card__styles">
+              @if (dance.difficulty !== 'None') {
+                <span class="badge badge--difficulty badge--difficulty-{{ dance.difficulty | lowercase }}">{{ dance.difficulty }}</span>
+              }
               @for (style of dance.styles; track style) {
                 <span class="badge">{{ style }}</span>
               }
               @for (ms of dance.musicalStyles; track ms) {
-                <span class="badge badge--music">♪ {{ ms }}</span>
+                <span class="badge badge--music"><i class="fa-solid fa-music"></i> {{ ms }}</span>
               }
             </div>
             <div class="dance-card__counts">
-              <span class="count-chip" title="Favorited by">★ {{ dance.favoriteCount }}</span>
-              <span class="count-chip" title="Learned by">✓ {{ dance.learnedCount }}</span>
+              @if (dance.ratingCount > 0) {
+                <span class="count-chip" title="Community rating"><i class="fa-solid fa-star"></i> {{ dance.averageRating | number:'1.1-1' }}</span>
+              }
+              <span class="count-chip" title="Favorited by"><i class="fa-solid fa-heart"></i> {{ dance.favoriteCount }}</span>
+              <span class="count-chip" title="Learned by"><i class="fa-solid fa-check"></i> {{ dance.learnedCount }}</span>
               <span class="video-count">{{ dance.videoCount }} video{{ dance.videoCount !== 1 ? 's' : '' }}</span>
             </div>
           </div>

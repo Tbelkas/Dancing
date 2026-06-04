@@ -13,10 +13,10 @@
   --color-surface: #0D0D1A;
   --color-surface-solid: #0D0D1A;
   --color-surface-2: #141422;
-  --color-border: #1C1C2E;
-  --color-border-light: #272740;
+  --color-border: #262642;
+  --color-border-light: #353558;
   --color-text: #EDE8FF;
-  --color-text-muted: #504E68;
+  --color-text-muted: #9490B8;
   --color-error: #E8503A;
   --color-success: #5ECFA8;
   --radius: 3px;
@@ -52,7 +52,7 @@ body {
   color: var(--color-text);
   line-height: 1.6;
   min-height: 100vh;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 400;
 }
 
@@ -78,11 +78,11 @@ a:hover { color: var(--color-text); }
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 9px 20px;
+  padding: 11px 24px;
   border: 1px solid transparent;
   border-radius: var(--radius);
   font-family: var(--font-ui);
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -128,8 +128,8 @@ a:hover { color: var(--color-text); }
     &:hover { filter: brightness(1.08); }
   }
 
-  &--sm { padding: 6px 14px; font-size: 0.72rem; }
-  &--xs { padding: 3px 9px; font-size: 0.68rem; }
+  &--sm { padding: 8px 16px; font-size: 0.8rem; }
+  &--xs { padding: 5px 12px; font-size: 0.75rem; }
 
   &:disabled { opacity: 0.38; cursor: not-allowed; filter: none !important; }
 }
@@ -151,11 +151,11 @@ a:hover { color: var(--color-text); }
 
   label {
     font-family: var(--font-ui);
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
   }
 
   input, textarea, select {
@@ -183,7 +183,7 @@ a:hover { color: var(--color-text); }
 
 .field-hint {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--color-text-muted);
   margin-top: 2px;
 }
@@ -191,10 +191,10 @@ a:hover { color: var(--color-text); }
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 2px;
   font-family: var(--font-ui);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -211,7 +211,7 @@ a:hover { color: var(--color-text); }
 
 .error-message {
   font-family: var(--font-ui);
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--color-error);
@@ -225,7 +225,7 @@ a:hover { color: var(--color-text); }
 .page-title {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 2.6rem;
+  font-size: 3rem;
   font-weight: 900;
   color: var(--color-text);
   letter-spacing: -0.02em;
@@ -246,10 +246,10 @@ a:hover { color: var(--color-text); }
 
 @media (max-width: 640px) {
   .container { padding: 0 16px; }
-  .page-title { font-size: 1.9rem; }
+  .page-title { font-size: 2.2rem; }
   .grid--2 { grid-template-columns: 1fr; }
   .grid--3 { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-  .btn { padding: 8px 14px; font-size: 0.72rem; }
+  .btn { padding: 10px 18px; font-size: 0.8rem; }
 }
 
 @keyframes slideDown {
@@ -291,13 +291,13 @@ a:hover { color: var(--color-text); }
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 2px;
   border: 1px solid var(--color-border);
   background: var(--color-surface-2);
   cursor: pointer;
   font-family: var(--font-ui);
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -317,4 +317,125 @@ a:hover { color: var(--color-text); }
     border-color: var(--color-border-light);
     color: var(--color-text);
   }
+}
+
+// Difficulty badges
+.badge--difficulty {
+  &-beginner {
+    background: rgba(94, 207, 168, 0.12);
+    color: #5ECFA8;
+    border-color: rgba(94, 207, 168, 0.28);
+  }
+  &-intermediate {
+    background: rgba(245, 200, 66, 0.12);
+    color: var(--color-primary);
+    border-color: rgba(245, 200, 66, 0.28);
+  }
+  &-advanced {
+    background: rgba(232, 80, 58, 0.12);
+    color: var(--color-accent);
+    border-color: rgba(232, 80, 58, 0.28);
+  }
+}
+
+// Profile visibility badges
+.badge--private {
+  background: rgba(148, 144, 184, 0.1);
+  color: var(--color-text-muted);
+  border-color: rgba(148, 144, 184, 0.22);
+}
+.badge--public {
+  background: rgba(94, 207, 168, 0.1);
+  color: #5ECFA8;
+  border-color: rgba(94, 207, 168, 0.22);
+}
+
+.profile-public-link {
+  font-size: 0.85rem;
+  margin-left: 0.75rem;
+}
+
+// Star rating
+.rating-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.rating-label {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.star-rating {
+  display: flex;
+  gap: 2px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.4rem;
+  color: var(--color-border-light);
+  padding: 0 2px;
+  transition: color var(--transition), transform var(--transition);
+  line-height: 1;
+
+  &.filled { color: var(--color-primary); }
+  &:hover { transform: scale(1.15); }
+}
+
+.rating-value {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+// Filter rows
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  min-width: 3.5rem;
+}
+
+// Instructors
+.instructors-section {
+  margin-bottom: 1.5rem;
+
+  h2 { margin-bottom: 0.75rem; }
+}
+
+.instructor-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.instructor-chip {
+  padding: 5px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border-light);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
 }
