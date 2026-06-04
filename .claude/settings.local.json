@@ -15,7 +15,9 @@
       "WebFetch(domain:developers.tiktok.com)",
       "Bash(npx tsc *)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\valot\\\\Documents\\\\Git\\\\Projects\\\\Dance\\\\dance-platform-ui\\\\src\" -Recurse -File | Where-Object { $_.Extension -match '\\\\.\\(scss|css|ts|html\\)$' } | Select-Object -First 50 | ForEach-Object { $_.FullName })",
-      "Bash(Get-ChildItem *)"
+      "Bash(Get-ChildItem *)",
+      "Bash(Sort-Object LastWriteTime -Descending)",
+      "Bash(Select-Object -First 5)"
     ]
   }
 }

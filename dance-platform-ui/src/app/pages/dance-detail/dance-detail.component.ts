@@ -59,6 +59,13 @@ export class DanceDetailComponent implements OnInit {
   savingDance = signal(false);
   editDanceError = signal('');
 
+  // Admin: edit video time
+  editingVideoId = signal<number | null>(null);
+  editVideoStartTime = '';
+  editVideoEndTime = '';
+  savingVideoTime = signal(false);
+  editVideoTimeError = signal('');
+
   // Admin: delete dance
   deletingDance = signal(false);
 
@@ -216,6 +223,51 @@ export class DanceDetailComponent implements OnInit {
         this.newVideoDesc = '';
       },
       error: () => { this.addVideoError.set('Failed to add video.'); this.addingVideo.set(false); }
+    });
+  }
+
+  // Admin: edit video time
+  toggleEditVideoTime(video: Video): void {
+    if (this.editingVideoId() === video.id) {
+      this.editingVideoId.set(null);
+      return;
+    }
+    this.editVideoStartTime = video.startTime != null ? this.formatTimeSecs(video.startTime) : '';
+    this.editVideoEndTime = video.endTime != null ? this.formatTimeSecs(video.endTime) : '';
+    this.editVideoTimeError.set('');
+    this.editingVideoId.set(video.id);
+  }
+
+  private formatTimeSecs(seconds: number): string {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  private parseTimeSecs(input: string): number | undefined {
+    const s = input.trim();
+    if (!s) return undefined;
+    if (s.includes(':')) {
+      const [m, sec] = s.split(':').map(Number);
+      return isNaN(m) || isNaN(sec) ? undefined : m * 60 + sec;
+    }
+    const n = Number(s);
+    return isNaN(n) ? undefined : n;
+  }
+
+  submitEditVideoTime(video: Video): void {
+    const startTime = this.parseTimeSecs(this.editVideoStartTime);
+    const endTime = this.parseTimeSecs(this.editVideoEndTime);
+    this.savingVideoTime.set(true);
+    this.editVideoTimeError.set('');
+    this.videoService.updateTimes(video.id, startTime, endTime).subscribe({
+      next: updated => {
+        this.videos.update(list => list.map(v => v.id === updated.id ? updated : v));
+        if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
+        this.editingVideoId.set(null);
+        this.savingVideoTime.set(false);
+      },
+      error: () => { this.editVideoTimeError.set('Failed to save. Please try again.'); this.savingVideoTime.set(false); }
     });
   }
 

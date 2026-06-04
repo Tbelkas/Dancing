@@ -46,6 +46,11 @@ public class VideoService : IVideoService
         if (request.Title is not null) video.Title = request.Title;
         if (request.VideoId is not null) video.VideoId = request.VideoId;
         if (request.Description is not null) video.Description = request.Description;
+        if (request.UpdateTimes)
+        {
+            video.StartTime = request.StartTime;
+            video.EndTime = request.EndTime;
+        }
 
         await _db.SaveChangesAsync();
         return await GetByIdAsync(id);

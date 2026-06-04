@@ -190,9 +190,21 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
         onReady: () => {
           this.player?.setPlaybackRate(this.currentRate());
           const dur = this.player?.getDuration() ?? 0;
-          this.videoDuration.set(Math.floor(dur));
-          this.repeatStart = this.startTime ?? 0;
-          this.repeatEnd = this.endTime ?? Math.floor(dur);
+          if (dur > 0) {
+            this.videoDuration.set(Math.floor(dur));
+            this.repeatStart = this.startTime ?? 0;
+            this.repeatEnd = this.endTime ?? Math.floor(dur);
+          }
+        },
+        onStateChange: () => {
+          if (this.videoDuration() === 0) {
+            const dur = this.player?.getDuration() ?? 0;
+            if (dur > 0) {
+              this.videoDuration.set(Math.floor(dur));
+              this.repeatStart = this.startTime ?? 0;
+              this.repeatEnd = this.endTime ?? Math.floor(dur);
+            }
+          }
         }
       }
     });

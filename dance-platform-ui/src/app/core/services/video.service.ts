@@ -32,6 +32,10 @@ export class VideoService {
     return this.http.post<Video>(this.base, payload);
   }
 
+  updateTimes(id: number, startTime: number | undefined, endTime: number | undefined): Observable<Video> {
+    return this.http.put<Video>(`${this.base}/${id}`, { updateTimes: true, startTime, endTime });
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }

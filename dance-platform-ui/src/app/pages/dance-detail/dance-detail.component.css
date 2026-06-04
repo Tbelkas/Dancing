@@ -126,6 +126,23 @@
   gap: 0 24px;
 }
 
+.admin-form--inline {
+  margin-bottom: 0;
+  padding: 14px 16px;
+}
+
+.admin-form__fields--row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 24px;
+}
+
+.admin-form__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 .video-item {
   display: flex;
   flex-direction: column;
