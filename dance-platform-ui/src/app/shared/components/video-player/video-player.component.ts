@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, ElementRef, ViewChild, signal } from '@angular/core';
+import { Component, Input, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TrustUrlPipe } from '../../pipes/trust-url.pipe';
@@ -12,7 +12,7 @@ import { VideoSegment } from '../../../models/video.model';
   templateUrl: './video-player.component.html',
   styleUrls: ['./video-player.component.css']
 })
-export class VideoPlayerComponent implements OnInit, OnDestroy {
+export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input({ required: true }) videoId!: string;
   @Input() platform: string = 'youtube';
   @Input() startTime?: number;
@@ -44,6 +44,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   private player: YT.Player | null = null;
   private repeatInterval: ReturnType<typeof setInterval> | null = null;
+  private durationPollInterval: ReturnType<typeof setInterval> | null = null;
   private tiktokCurrentTime = 0;
 
   private readonly tiktokMessageHandler = (event: MessageEvent) => {
@@ -93,22 +94,27 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
       this.repeatStart = this.startTime ?? 0;
       this.repeatEnd = this.endTime ?? defaultDur;
       window.addEventListener('message', this.tiktokMessageHandler);
-      return;
     }
+  }
 
+  ngAfterViewInit(): void {
     if (!this.isYouTube || typeof window === 'undefined') return;
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.body.appendChild(tag);
-      (window as any).onYouTubeIframeAPIReady = () => this.createPlayer();
-    } else {
+
+    if (window.YT?.Player) {
       this.createPlayer();
+    } else {
+      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.body.appendChild(tag);
+      }
+      (window as any).onYouTubeIframeAPIReady = () => this.createPlayer();
     }
   }
 
   ngOnDestroy(): void {
     this.clearRepeat();
+    this.clearDurationPoll();
     this.player?.destroy();
     window.removeEventListener('message', this.tiktokMessageHandler);
   }
@@ -204,25 +210,38 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
       events: {
         onReady: () => {
           this.player?.setPlaybackRate(this.currentRate());
-          const dur = this.player?.getDuration() ?? 0;
-          if (dur > 0) {
-            this.videoDuration.set(Math.floor(dur));
-            this.repeatStart = this.startTime ?? 0;
-            this.repeatEnd = this.endTime ?? Math.floor(dur);
-          }
+          this.pollForDuration();
         },
         onStateChange: () => {
-          if (this.videoDuration() === 0) {
-            const dur = this.player?.getDuration() ?? 0;
-            if (dur > 0) {
-              this.videoDuration.set(Math.floor(dur));
-              this.repeatStart = this.startTime ?? 0;
-              this.repeatEnd = this.endTime ?? Math.floor(dur);
-            }
-          }
+          if (this.videoDuration() === 0) this.tryCaptureDuration();
         }
       }
     });
+  }
+
+  private tryCaptureDuration(): boolean {
+    const dur = this.player?.getDuration() ?? 0;
+    if (dur <= 0) return false;
+    this.videoDuration.set(Math.floor(dur));
+    this.repeatStart = this.startTime ?? 0;
+    this.repeatEnd = this.endTime ?? Math.floor(dur);
+    return true;
+  }
+
+  // getDuration() returns 0 until the video's metadata loads, which can
+  // happen well after onReady — poll until it reports a real value.
+  private pollForDuration(): void {
+    if (this.tryCaptureDuration()) return;
+    this.durationPollInterval = setInterval(() => {
+      if (this.tryCaptureDuration()) this.clearDurationPoll();
+    }, 250);
+  }
+
+  private clearDurationPoll(): void {
+    if (this.durationPollInterval) {
+      clearInterval(this.durationPollInterval);
+      this.durationPollInterval = null;
+    }
   }
 
   private clearRepeat(): void {

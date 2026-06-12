@@ -26,7 +26,8 @@
       "PowerShell(npx ng build --configuration development 2>&1 | Select-Object -Last 8)",
       "PowerShell(\\(Invoke-RestMethod http://localhost:5000/api/dances\\) | Select-Object id, name, slug | Sort-Object slug | Format-Table -AutoSize)",
       "PowerShell($bySlug = Invoke-RestMethod http://localhost:5000/api/dances/loose-legs; $byId = Invoke-RestMethod http://localhost:5000/api/dances/22; \"by slug: id=$\\($bySlug.id\\) name=$\\($bySlug.name\\)\"; \"by id:   slug=$\\($byId.slug\\)\"; $r2 = Invoke-RestMethod http://localhost:5000/api/dances/reebok-3; \"reebok-3: id=$\\($r2.id\\)\")",
-      "PowerShell(Stop-Process *)"
+      "PowerShell(Stop-Process *)",
+      "PowerShell(git *)"
     ]
   }
 }
