@@ -2,6 +2,7 @@ import { Component, Input, OnInit, OnDestroy, ElementRef, ViewChild, signal } fr
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TrustUrlPipe } from '../../pipes/trust-url.pipe';
+import { VideoSegment } from '../../../models/video.model';
 
 
 @Component({
@@ -16,6 +17,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   @Input() platform: string = 'youtube';
   @Input() startTime?: number;
   @Input() endTime?: number;
+  @Input() segments: VideoSegment[] = [];
   @ViewChild('playerContainer', { static: false }) playerContainer?: ElementRef;
   @ViewChild('tiktokFrame', { static: false }) tiktokFrame?: ElementRef<HTMLIFrameElement>;
 
@@ -23,6 +25,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
   currentRate = signal(1);
   repeating = signal(false);
   videoDuration = signal(0);
+  activeSegmentId = signal<number | null>(null);
 
   repeatStart = 0;
   repeatEnd = 0;
@@ -108,6 +111,18 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.clearRepeat();
     this.player?.destroy();
     window.removeEventListener('message', this.tiktokMessageHandler);
+  }
+
+  jumpToSegment(segment: VideoSegment): void {
+    this.activeSegmentId.set(segment.id);
+    if (this.isYouTube) {
+      this.player?.seekTo(segment.startTime, true);
+      this.player?.playVideo();
+    } else if (this.isTikTok) {
+      this.tiktokCurrentTime = segment.startTime;
+      this.tiktokPost({ type: 'seekTo', value: segment.startTime });
+      this.tiktokPost({ type: 'play' });
+    }
   }
 
   setRate(rate: number): void {

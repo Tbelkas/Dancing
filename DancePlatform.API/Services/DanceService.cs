@@ -20,12 +20,34 @@ public class DanceService : IDanceService
         return dance is null ? null : ToDto(dance, userId);
     }
 
+    public async Task<DanceDto?> GetBySlugAsync(string slug, int? userId)
+    {
+        var dance = await BuildEntityQuery().FirstOrDefaultAsync(d => d.Slug == slug);
+        return dance is null ? null : ToDto(dance, userId);
+    }
+
+    /// <summary>Slugifies the name; appends -2, -3, ... when another dance already uses the slug.</summary>
+    public async Task<string> GenerateUniqueSlugAsync(string name, int? excludeDanceId = null)
+    {
+        var baseSlug = SlugGenerator.Slugify(name);
+        var slug = baseSlug;
+        for (var i = 2; await _db.Dances.AnyAsync(d => d.Slug == slug && d.Id != excludeDanceId); i++)
+            slug = $"{baseSlug}-{i}";
+        return slug;
+    }
+
     public async Task<DanceDto> CreateAsync(CreateDanceRequest request)
     {
         if (!Enum.TryParse<DifficultyLevel>(request.Difficulty, true, out var difficulty))
             difficulty = DifficultyLevel.None;
 
-        var dance = new Dance { Name = request.Name, Description = request.Description, Difficulty = difficulty };
+        var dance = new Dance
+        {
+            Name = request.Name,
+            Slug = await GenerateUniqueSlugAsync(request.Name),
+            Description = request.Description,
+            Difficulty = difficulty
+        };
         _db.Dances.Add(dance);
         await _db.SaveChangesAsync();
 
@@ -51,7 +73,11 @@ public class DanceService : IDanceService
             .FirstOrDefaultAsync(d => d.Id == id);
         if (dance is null) return null;
 
-        if (request.Name is not null) dance.Name = request.Name;
+        if (request.Name is not null && request.Name != dance.Name)
+        {
+            dance.Name = request.Name;
+            dance.Slug = await GenerateUniqueSlugAsync(request.Name, dance.Id);
+        }
         if (request.Description is not null) dance.Description = request.Description;
         if (request.Difficulty is not null && Enum.TryParse<DifficultyLevel>(request.Difficulty, true, out var diff))
             dance.Difficulty = diff;
@@ -192,6 +218,7 @@ public class DanceService : IDanceService
     {
         Id = d.Id,
         Name = d.Name,
+        Slug = d.Slug,
         Description = d.Description,
         DateAdded = d.DateAdded,
         Difficulty = d.Difficulty.ToString(),

@@ -9,11 +9,13 @@ import { DanceService, CreateDancePayload } from '../../core/services/dance.serv
 import { VideoService, CreateVideoPayload } from '../../core/services/video.service';
 import { MyStyleWithDances } from '../../models/user.model';
 import { Style } from '../../models/style.model';
+import { Video } from '../../models/video.model';
+import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
 
 @Component({
   selector: 'app-my-dances',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, VideoPlayerComponent],
   templateUrl: './my-dances.component.html',
   styleUrls: ['./my-dances.component.css']
 })
@@ -43,6 +45,12 @@ export class MyDancesComponent implements OnInit {
   newVideoEndTime = '';
   addingDance = signal(false);
   addDanceError = signal('');
+
+  // Inline video expansion
+  expandedDanceId = signal<number | null>(null);
+  expandedVideos = signal<Video[]>([]);
+  loadingVideos = signal(false);
+  private videoCache = new Map<number, Video[]>();
 
   readonly myStyleIds = computed(() => new Set(this.myStyles().map(ms => ms.styleId)));
 
@@ -88,6 +96,40 @@ export class MyDancesComponent implements OnInit {
   selectStyle(id: number): void {
     this.selectedStyleId.set(id);
     this.showAddDance.set(false);
+    this.expandedDanceId.set(null);
+  }
+
+  toggleExpand(danceId: number, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (this.expandedDanceId() === danceId) {
+      this.expandedDanceId.set(null);
+      return;
+    }
+
+    this.expandedDanceId.set(danceId);
+    const cached = this.videoCache.get(danceId);
+    if (cached) {
+      this.expandedVideos.set(cached);
+      return;
+    }
+
+    this.expandedVideos.set([]);
+    this.loadingVideos.set(true);
+    this.videoService.getByDance(danceId).subscribe({
+      next: videos => {
+        this.videoCache.set(danceId, videos);
+        // Ignore stale responses if the user switched cards meanwhile
+        if (this.expandedDanceId() === danceId) {
+          this.expandedVideos.set(videos);
+          this.loadingVideos.set(false);
+        }
+      },
+      error: () => {
+        if (this.expandedDanceId() === danceId) this.loadingVideos.set(false);
+      }
+    });
   }
 
   toggleMyStyle(style: Style): void {

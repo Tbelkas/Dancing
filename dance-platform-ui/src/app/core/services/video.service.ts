@@ -1,17 +1,37 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Video } from '../../models/video.model';
+import { Video, VideoType } from '../../models/video.model';
 import { environment } from '../../../environments/environment';
+
+export interface SegmentPayload {
+  label: string;
+  startTime: number;
+  endTime?: number;
+}
 
 export interface CreateVideoPayload {
   title: string;
   videoId: string;
   platform: string;
+  videoType?: VideoType;
   description?: string;
   danceId: number;
   startTime?: number;
   endTime?: number;
+  segments?: SegmentPayload[];
+}
+
+export interface UpdateVideoPayload {
+  title?: string;
+  videoId?: string;
+  description?: string;
+  videoType?: VideoType;
+  updateTimes?: boolean;
+  startTime?: number;
+  endTime?: number;
+  updateSegments?: boolean;
+  segments?: SegmentPayload[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -32,8 +52,8 @@ export class VideoService {
     return this.http.post<Video>(this.base, payload);
   }
 
-  updateTimes(id: number, startTime: number | undefined, endTime: number | undefined): Observable<Video> {
-    return this.http.put<Video>(`${this.base}/${id}`, { updateTimes: true, startTime, endTime });
+  update(id: number, payload: UpdateVideoPayload): Observable<Video> {
+    return this.http.put<Video>(`${this.base}/${id}`, payload);
   }
 
   delete(id: number): Observable<void> {

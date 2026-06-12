@@ -183,7 +183,30 @@
               <label>Description <span class="optional">(optional)</span></label>
               <input type="text" [(ngModel)]="newVideoDesc" placeholder="Brief description" />
             </div>
+            <div class="form-group">
+              <label>Type</label>
+              <select [(ngModel)]="newVideoType" (ngModelChange)="onNewVideoTypeChange()">
+                <option value="steps">Steps</option>
+                <option value="tutorial">Tutorial</option>
+              </select>
+            </div>
           </div>
+          @if (newVideoType === 'tutorial') {
+            <div class="form-group">
+              <label>Sections <span class="optional">(e.g. Theory, Steps, Practice — start time as m:ss or seconds)</span></label>
+              <div class="segment-rows">
+                @for (row of newVideoSegments; track $index) {
+                  <div class="segment-row">
+                    <input type="text" [(ngModel)]="row.label" placeholder="Label" />
+                    <input type="text" class="segment-row__time" [(ngModel)]="row.start" placeholder="Start" />
+                    <input type="text" class="segment-row__time" [(ngModel)]="row.end" placeholder="End (opt.)" />
+                    <button class="btn btn--danger btn--xs" (click)="removeSegmentRow(newVideoSegments, $index)" title="Remove section"><i class="fa-solid fa-xmark"></i></button>
+                  </div>
+                }
+                <button class="btn btn--ghost btn--sm" (click)="addSegmentRow(newVideoSegments)"><i class="fa-solid fa-plus"></i> Add Section</button>
+              </div>
+            </div>
+          }
           <button class="btn btn--primary btn--sm" (click)="submitAddVideo()" [disabled]="addingVideo()">
             {{ addingVideo() ? 'Adding...' : 'Add Video' }}
           </button>
@@ -196,6 +219,9 @@
         <div class="video-item">
           <div class="video-item__header">
             <h3 class="video-title">{{ videos()[0].title }}</h3>
+            @if (videos()[0].videoType === 'tutorial') {
+              <span class="badge badge--tutorial"><i class="fa-solid fa-graduation-cap"></i> Tutorial</span>
+            }
             @if (role.isAdmin()) {
               <button class="btn btn--ghost btn--sm" (click)="toggleEditVideoTime(videos()[0])"><i class="fa-solid fa-clock"></i> Edit Time</button>
               <button class="btn btn--danger btn--sm" (click)="deleteVideo(videos()[0])"><i class="fa-solid fa-trash"></i> Delete</button>
@@ -213,7 +239,30 @@
                   <label>End Time <span class="optional">(m:ss or seconds, blank to clear)</span></label>
                   <input type="text" [(ngModel)]="editVideoEndTime" placeholder="e.g. 3:06" />
                 </div>
+                <div class="form-group">
+                  <label>Type</label>
+                  <select [(ngModel)]="editVideoType" (ngModelChange)="onEditVideoTypeChange()">
+                    <option value="steps">Steps</option>
+                    <option value="tutorial">Tutorial</option>
+                  </select>
+                </div>
               </div>
+              @if (editVideoType === 'tutorial') {
+                <div class="form-group">
+                  <label>Sections <span class="optional">(start time as m:ss or seconds)</span></label>
+                  <div class="segment-rows">
+                    @for (row of editVideoSegments; track $index) {
+                      <div class="segment-row">
+                        <input type="text" [(ngModel)]="row.label" placeholder="Label" />
+                        <input type="text" class="segment-row__time" [(ngModel)]="row.start" placeholder="Start" />
+                        <input type="text" class="segment-row__time" [(ngModel)]="row.end" placeholder="End (opt.)" />
+                        <button class="btn btn--danger btn--xs" (click)="removeSegmentRow(editVideoSegments, $index)" title="Remove section"><i class="fa-solid fa-xmark"></i></button>
+                      </div>
+                    }
+                    <button class="btn btn--ghost btn--sm" (click)="addSegmentRow(editVideoSegments)"><i class="fa-solid fa-plus"></i> Add Section</button>
+                  </div>
+                </div>
+              }
               <div class="admin-form__actions">
                 <button class="btn btn--primary btn--sm" (click)="submitEditVideoTime(videos()[0])" [disabled]="savingVideoTime()">
                   {{ savingVideoTime() ? 'Saving...' : 'Save' }}
@@ -225,14 +274,19 @@
           @if (videos()[0].description) {
             <p class="video-desc">{{ videos()[0].description }}</p>
           }
-          <app-video-player [videoId]="videos()[0].videoId" [platform]="videos()[0].platform" [startTime]="videos()[0].startTime" [endTime]="videos()[0].endTime" />
+          <app-video-player [videoId]="videos()[0].videoId" [platform]="videos()[0].platform" [startTime]="videos()[0].startTime" [endTime]="videos()[0].endTime" [segments]="videos()[0].segments" />
         </div>
       } @else {
         <div class="video-list">
           @for (video of videos(); track video.id) {
             <div class="video-list-item" [class.video-list-item--active]="selectedVideo()?.id === video.id" (click)="selectVideo(video)">
               <div class="video-list-item__info">
-                <span class="video-list-item__title">{{ video.title }}</span>
+                <span class="video-list-item__title">
+                  {{ video.title }}
+                  @if (video.videoType === 'tutorial') {
+                    <span class="badge badge--tutorial"><i class="fa-solid fa-graduation-cap"></i> Tutorial</span>
+                  }
+                </span>
                 <span class="video-list-item__meta">
                   <span>{{ video.dateAdded | date:'mediumDate' }}</span>
                   <span class="views-badge"><i class="fa-solid fa-eye"></i> {{ viewCountBucket(video.viewCount) }}</span>
@@ -260,7 +314,30 @@
                         <label>End Time <span class="optional">(m:ss or seconds, blank to clear)</span></label>
                         <input type="text" [(ngModel)]="editVideoEndTime" placeholder="e.g. 3:06" />
                       </div>
+                      <div class="form-group">
+                        <label>Type</label>
+                        <select [(ngModel)]="editVideoType" (ngModelChange)="onEditVideoTypeChange()">
+                          <option value="steps">Steps</option>
+                          <option value="tutorial">Tutorial</option>
+                        </select>
+                      </div>
                     </div>
+                    @if (editVideoType === 'tutorial') {
+                      <div class="form-group">
+                        <label>Sections <span class="optional">(start time as m:ss or seconds)</span></label>
+                        <div class="segment-rows">
+                          @for (row of editVideoSegments; track $index) {
+                            <div class="segment-row">
+                              <input type="text" [(ngModel)]="row.label" placeholder="Label" />
+                              <input type="text" class="segment-row__time" [(ngModel)]="row.start" placeholder="Start" />
+                              <input type="text" class="segment-row__time" [(ngModel)]="row.end" placeholder="End (opt.)" />
+                              <button class="btn btn--danger btn--xs" (click)="removeSegmentRow(editVideoSegments, $index)" title="Remove section"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                          }
+                          <button class="btn btn--ghost btn--sm" (click)="addSegmentRow(editVideoSegments)"><i class="fa-solid fa-plus"></i> Add Section</button>
+                        </div>
+                      </div>
+                    }
                     <div class="admin-form__actions">
                       <button class="btn btn--primary btn--sm" (click)="submitEditVideoTime(video)" [disabled]="savingVideoTime()">
                         {{ savingVideoTime() ? 'Saving...' : 'Save' }}
@@ -272,7 +349,7 @@
                 @if (video.description) {
                   <p class="video-desc">{{ video.description }}</p>
                 }
-                <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="video.startTime" [endTime]="video.endTime" />
+                <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="video.startTime" [endTime]="video.endTime" [segments]="video.segments" />
               </div>
             }
           }

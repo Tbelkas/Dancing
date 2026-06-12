@@ -143,6 +143,31 @@
   margin-top: 12px;
 }
 
+/* Tutorial section editor */
+.segment-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.segment-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  max-width: 520px;
+}
+
+.segment-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.segment-row .segment-row__time {
+  flex: 0 0 110px;
+}
+
 .video-item {
   display: flex;
   flex-direction: column;

@@ -4,6 +4,7 @@ public class DanceDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
     public string? Description { get; set; }
     public DateTime DateAdded { get; set; }
     public string Difficulty { get; set; } = "None";

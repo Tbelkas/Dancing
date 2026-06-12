@@ -6,6 +6,7 @@ public interface IDanceService
 {
     Task<List<DanceDto>> GetAllAsync(int? userId);
     Task<DanceDto?> GetByIdAsync(int id, int? userId);
+    Task<DanceDto?> GetBySlugAsync(string slug, int? userId);
     Task<DanceDto> CreateAsync(CreateDanceRequest request);
     Task<DanceDto?> UpdateAsync(int id, UpdateDanceRequest request);
     Task<bool> DeleteAsync(int id);

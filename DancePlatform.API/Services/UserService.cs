@@ -25,8 +25,8 @@ public class UserService : IUserService
                 AvatarUrl = u.AvatarUrl,
                 Visibility = u.Visibility.ToString(),
                 DateAdded = u.DateAdded,
-                FavoriteDances = u.FavoriteDances.Select(f => new DanceRef(f.Dance.Id, f.Dance.Name)).ToList(),
-                LearnedDances = u.LearnedDances.Select(l => new DanceRef(l.Dance.Id, l.Dance.Name)).ToList()
+                FavoriteDances = u.FavoriteDances.Select(f => new DanceRef(f.Dance.Id, f.Dance.Name, f.Dance.Slug)).ToList(),
+                LearnedDances = u.LearnedDances.Select(l => new DanceRef(l.Dance.Id, l.Dance.Name, l.Dance.Slug)).ToList()
             }).FirstOrDefaultAsync();
 
     public async Task<UserProfileDto?> UpdateProfileAsync(int userId, UpdateProfileRequest request)
@@ -55,7 +55,7 @@ public class UserService : IUserService
                 Username = u.Username,
                 Nickname = u.Nickname,
                 AvatarUrl = u.AvatarUrl,
-                LearnedDances = u.LearnedDances.Select(l => new DanceRef(l.Dance.Id, l.Dance.Name)).ToList()
+                LearnedDances = u.LearnedDances.Select(l => new DanceRef(l.Dance.Id, l.Dance.Name, l.Dance.Slug)).ToList()
             })
             .FirstOrDefaultAsync();
 
@@ -89,6 +89,7 @@ public class UserService : IUserService
                     {
                         Id = d.Id,
                         Name = d.Name,
+                        Slug = d.Slug,
                         Status = learnedIds.Contains(d.Id) ? "learned" : "inProgress"
                     })
                     .ToList()

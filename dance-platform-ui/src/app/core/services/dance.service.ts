@@ -38,8 +38,9 @@ export class DanceService {
     return this.http.get<Dance[]>(this.base);
   }
 
-  getById(id: number): Observable<Dance> {
-    return this.http.get<Dance>(`${this.base}/${id}`);
+  /** Accepts a slug or a numeric id — the API resolves both. */
+  getByIdOrSlug(idOrSlug: string | number): Observable<Dance> {
+    return this.http.get<Dance>(`${this.base}/${idOrSlug}`);
   }
 
   search(query: string, styleId?: number, musicalStyleId?: number, difficulty?: string, status?: string): Observable<Dance[]> {

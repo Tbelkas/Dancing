@@ -207,6 +207,12 @@ a:hover { color: var(--color-text); }
     color: var(--color-music);
     border-color: rgba(98, 196, 176, 0.22);
   }
+
+  &--tutorial {
+    background: rgba(151, 117, 250, 0.12);
+    color: #a98ffc;
+    border-color: rgba(151, 117, 250, 0.25);
+  }
 }
 
 .error-message {

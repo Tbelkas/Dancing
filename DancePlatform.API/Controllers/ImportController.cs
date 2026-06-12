@@ -20,4 +20,13 @@ public class ImportController : ControllerBase
         var result = await _importService.ImportDancesAsync(request);
         return Ok(result);
     }
+
+    [RequireAdmin]
+    [HttpPost("youtube-video")]
+    public async Task<IActionResult> ImportYoutubeVideo([FromBody] YoutubeVideoImportRequest request)
+    {
+        var video = await _importService.ImportYoutubeVideoAsync(request);
+        if (video is null) return BadRequest(new { message = "Invalid YouTube URL or dance not found." });
+        return Ok(video);
+    }
 }

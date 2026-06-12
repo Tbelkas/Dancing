@@ -1,5 +1,19 @@
 <div class="player-wrapper">
 
+  @if (segments.length > 0 && !isInstagram) {
+    <div class="segments-bar">
+      <span class="segments-label">Sections</span>
+      <div class="segment-chips">
+        @for (seg of segments; track seg.id) {
+          <button class="segment-chip" [class.active]="activeSegmentId() === seg.id" (click)="jumpToSegment(seg)">
+            {{ seg.label }}
+            <span class="segment-chip__time">{{ formatTime(seg.startTime) }}@if (seg.endTime != null) { – {{ formatTime(seg.endTime) }}}</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+
   @if (isYouTube) {
     <div #playerContainer class="yt-player"></div>
 

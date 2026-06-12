@@ -1,8 +1,18 @@
+export type VideoType = 'steps' | 'tutorial';
+
+export interface VideoSegment {
+  id: number;
+  label: string;
+  startTime: number;
+  endTime?: number;
+}
+
 export interface Video {
   id: number;
   title: string;
   videoId: string;
   platform: string;
+  videoType: VideoType;
   description?: string;
   dateAdded: string;
   viewCount: number;
@@ -10,6 +20,7 @@ export interface Video {
   endTime?: number;
   danceId: number;
   danceName: string;
+  segments: VideoSegment[];
 }
 
 export function viewCountBucket(count: number): string {

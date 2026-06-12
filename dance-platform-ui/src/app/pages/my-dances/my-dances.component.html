@@ -143,11 +143,35 @@
             </h3>
             <div class="dance-list">
               @for (dance of learnedDances(); track dance.id) {
-                <a [routerLink]="['/dances', dance.id]" class="dance-item">
-                  <span class="dance-status dance-status--learned"><i class="fa-solid fa-check"></i></span>
-                  <span class="dance-name">{{ dance.name }}</span>
-                  <span class="dance-arrow">→</span>
-                </a>
+                <div class="dance-row">
+                  <a [routerLink]="['/dances', dance.slug]" class="dance-item">
+                    <span class="dance-status dance-status--learned"><i class="fa-solid fa-check"></i></span>
+                    <span class="dance-name">{{ dance.name }}</span>
+                    <button type="button" class="dance-expand"
+                      [class.dance-expand--open]="expandedDanceId() === dance.id"
+                      (click)="toggleExpand(dance.id, $event)"
+                      [attr.aria-label]="expandedDanceId() === dance.id ? 'Hide video' : 'Show video'">
+                      <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <span class="dance-arrow">→</span>
+                  </a>
+                  @if (expandedDanceId() === dance.id) {
+                    <div class="dance-expanded">
+                      @if (loadingVideos()) {
+                        <p class="expanded-status">Loading video...</p>
+                      } @else if (expandedVideos().length === 0) {
+                        <p class="expanded-status">No videos linked to this dance yet.</p>
+                      } @else {
+                        @for (video of expandedVideos(); track video.id) {
+                          <div class="expanded-video">
+                            <span class="expanded-video__title">{{ video.title }}</span>
+                            <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="video.startTime" [endTime]="video.endTime" [segments]="video.segments" />
+                          </div>
+                        }
+                      }
+                    </div>
+                  }
+                </div>
               }
             </div>
           </div>
@@ -163,11 +187,35 @@
             </h3>
             <div class="dance-list">
               @for (dance of inProgressDances(); track dance.id) {
-                <a [routerLink]="['/dances', dance.id]" class="dance-item">
-                  <span class="dance-status dance-status--progress"><i class="fa-solid fa-circle-half-stroke"></i></span>
-                  <span class="dance-name">{{ dance.name }}</span>
-                  <span class="dance-arrow">→</span>
-                </a>
+                <div class="dance-row">
+                  <a [routerLink]="['/dances', dance.slug]" class="dance-item">
+                    <span class="dance-status dance-status--progress"><i class="fa-solid fa-circle-half-stroke"></i></span>
+                    <span class="dance-name">{{ dance.name }}</span>
+                    <button type="button" class="dance-expand"
+                      [class.dance-expand--open]="expandedDanceId() === dance.id"
+                      (click)="toggleExpand(dance.id, $event)"
+                      [attr.aria-label]="expandedDanceId() === dance.id ? 'Hide video' : 'Show video'">
+                      <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <span class="dance-arrow">→</span>
+                  </a>
+                  @if (expandedDanceId() === dance.id) {
+                    <div class="dance-expanded">
+                      @if (loadingVideos()) {
+                        <p class="expanded-status">Loading video...</p>
+                      } @else if (expandedVideos().length === 0) {
+                        <p class="expanded-status">No videos linked to this dance yet.</p>
+                      } @else {
+                        @for (video of expandedVideos(); track video.id) {
+                          <div class="expanded-video">
+                            <span class="expanded-video__title">{{ video.title }}</span>
+                            <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="video.startTime" [endTime]="video.endTime" [segments]="video.segments" />
+                          </div>
+                        }
+                      }
+                    </div>
+                  }
+                </div>
               }
             </div>
           </div>

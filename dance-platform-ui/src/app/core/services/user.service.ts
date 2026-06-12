@@ -8,7 +8,7 @@ export interface PublicProfile {
   username: string;
   nickname: string;
   avatarUrl?: string;
-  learnedDances: { id: number; name: string }[];
+  learnedDances: { id: number; name: string; slug: string }[];
 }
 
 @Injectable({ providedIn: 'root' })

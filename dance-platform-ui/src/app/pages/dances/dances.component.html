@@ -250,7 +250,7 @@
               <span class="video-count">{{ dance.videoCount }} video{{ dance.videoCount !== 1 ? 's' : '' }}</span>
             </div>
           </div>
-          <a [routerLink]="['/dances', dance.id]" class="btn btn--ghost btn--sm">View details →</a>
+          <a [routerLink]="['/dances', dance.slug]" class="btn btn--ghost btn--sm">View details →</a>
         </div>
       }
     </div>

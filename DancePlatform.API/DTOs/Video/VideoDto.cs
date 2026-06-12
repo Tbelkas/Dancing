@@ -6,6 +6,7 @@ public class VideoDto
     public string Title { get; set; } = string.Empty;
     public string VideoId { get; set; } = string.Empty;
     public string Platform { get; set; } = "youtube";
+    public string VideoType { get; set; } = "steps";
     public string? Description { get; set; }
     public DateTime DateAdded { get; set; }
     public long ViewCount { get; set; }
@@ -13,4 +14,5 @@ public class VideoDto
     public int? EndTime { get; set; }
     public int DanceId { get; set; }
     public string DanceName { get; set; } = string.Empty;
+    public List<VideoSegmentDto> Segments { get; set; } = new();
 }

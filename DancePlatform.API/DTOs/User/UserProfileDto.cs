@@ -1,6 +1,6 @@
 namespace DancePlatform.API.DTOs.User;
 
-public record DanceRef(int Id, string Name);
+public record DanceRef(int Id, string Name, string Slug);
 
 public class UserProfileDto
 {

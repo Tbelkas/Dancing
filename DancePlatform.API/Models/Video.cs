@@ -6,6 +6,7 @@ public class Video
     public string Title { get; set; } = string.Empty;
     public string VideoId { get; set; } = string.Empty;
     public string Platform { get; set; } = "youtube";
+    public string VideoType { get; set; } = "steps";
     public string? Description { get; set; }
     public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
@@ -15,4 +16,6 @@ public class Video
 
     public int DanceId { get; set; }
     public Dance Dance { get; set; } = null!;
+
+    public List<VideoSegment> Segments { get; set; } = new();
 }

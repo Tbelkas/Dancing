@@ -17,7 +17,16 @@
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\valot\\\\Documents\\\\Git\\\\Projects\\\\Dance\\\\dance-platform-ui\\\\src\" -Recurse -File | Where-Object { $_.Extension -match '\\\\.\\(scss|css|ts|html\\)$' } | Select-Object -First 50 | ForEach-Object { $_.FullName })",
       "Bash(Get-ChildItem *)",
       "Bash(Sort-Object LastWriteTime -Descending)",
-      "Bash(Select-Object -First 5)"
+      "Bash(Select-Object -First 5)",
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\valot\\\\Documents\\\\Git\\\\Projects\\\\Dance\\\\DancePlatform.API\\\\obj\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Remove-Item *)",
+      "PowerShell(dotnet build *)",
+      "PowerShell(dotnet ef migrations *)",
+      "PowerShell(npx ng build --configuration development 2>&1 | Select-Object -Last 12)",
+      "PowerShell(npx ng build --configuration development 2>&1 | Select-Object -Last 8)",
+      "PowerShell(\\(Invoke-RestMethod http://localhost:5000/api/dances\\) | Select-Object id, name, slug | Sort-Object slug | Format-Table -AutoSize)",
+      "PowerShell($bySlug = Invoke-RestMethod http://localhost:5000/api/dances/loose-legs; $byId = Invoke-RestMethod http://localhost:5000/api/dances/22; \"by slug: id=$\\($bySlug.id\\) name=$\\($bySlug.name\\)\"; \"by id:   slug=$\\($byId.slug\\)\"; $r2 = Invoke-RestMethod http://localhost:5000/api/dances/reebok-3; \"reebok-3: id=$\\($r2.id\\)\")",
+      "PowerShell(Stop-Process *)"
     ]
   }
 }

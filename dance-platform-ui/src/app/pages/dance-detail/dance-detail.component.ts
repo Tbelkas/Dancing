@@ -1,22 +1,29 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, WritableSignal } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DanceService, UpdateDancePayload } from '../../core/services/dance.service';
-import { VideoService, CreateVideoPayload } from '../../core/services/video.service';
+import { VideoService, CreateVideoPayload, SegmentPayload } from '../../core/services/video.service';
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
 import { InstructorService } from '../../core/services/instructor.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
 import { Dance } from '../../models/dance.model';
-import { Video, viewCountBucket } from '../../models/video.model';
+import { Video, VideoType, viewCountBucket } from '../../models/video.model';
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
 
 const DIFFICULTIES = ['None', 'Beginner', 'Intermediate', 'Advanced'];
+const DEFAULT_SEGMENT_LABELS = ['Theory', 'Steps', 'Practice'];
+
+interface SegmentRow {
+  label: string;
+  start: string;
+  end: string;
+}
 
 @Component({
   selector: 'app-dance-detail',
@@ -42,6 +49,8 @@ export class DanceDetailComponent implements OnInit {
   newVideoTitle = '';
   newVideoUrl = '';
   newVideoDesc = '';
+  newVideoType: VideoType = 'steps';
+  newVideoSegments: SegmentRow[] = [];
   addingVideo = signal(false);
   addVideoError = signal('');
 
@@ -59,10 +68,12 @@ export class DanceDetailComponent implements OnInit {
   savingDance = signal(false);
   editDanceError = signal('');
 
-  // Admin: edit video time
+  // Admin: edit video time/type/segments
   editingVideoId = signal<number | null>(null);
   editVideoStartTime = '';
   editVideoEndTime = '';
+  editVideoType: VideoType = 'steps';
+  editVideoSegments: SegmentRow[] = [];
   savingVideoTime = signal(false);
   editVideoTimeError = signal('');
 
@@ -75,6 +86,7 @@ export class DanceDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private location: Location,
     private danceService: DanceService,
     private videoService: VideoService,
     private styleService: StyleService,
@@ -85,11 +97,15 @@ export class DanceDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.danceService.getById(id).subscribe({
+    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
+    this.danceService.getByIdOrSlug(slug).subscribe({
       next: d => {
         this.dance.set(d);
-        this.videoService.getByDance(id).subscribe(v => {
+        // Rewrite legacy numeric URLs (/dances/22) to the slug form without reloading
+        if (slug !== d.slug) {
+          this.location.replaceState(`/dances/${d.slug}`);
+        }
+        this.videoService.getByDance(d.id).subscribe(v => {
           this.videos.set(v);
           if (v.length === 1) {
             this.selectedVideo.set(v[0]);
@@ -174,6 +190,44 @@ export class DanceDetailComponent implements OnInit {
     this.newVideoTitle = '';
     this.newVideoUrl = '';
     this.newVideoDesc = '';
+    this.newVideoType = 'steps';
+    this.newVideoSegments = [];
+  }
+
+  onNewVideoTypeChange(): void {
+    if (this.newVideoType === 'tutorial' && this.newVideoSegments.length === 0) {
+      this.newVideoSegments = DEFAULT_SEGMENT_LABELS.map(label => ({ label, start: '', end: '' }));
+    }
+  }
+
+  onEditVideoTypeChange(): void {
+    if (this.editVideoType === 'tutorial' && this.editVideoSegments.length === 0) {
+      this.editVideoSegments = DEFAULT_SEGMENT_LABELS.map(label => ({ label, start: '', end: '' }));
+    }
+  }
+
+  addSegmentRow(rows: SegmentRow[]): void {
+    rows.push({ label: '', start: '', end: '' });
+  }
+
+  removeSegmentRow(rows: SegmentRow[], index: number): void {
+    rows.splice(index, 1);
+  }
+
+  /** Converts editor rows to API payload; returns null (and sets the given error) on invalid input. */
+  private buildSegments(videoType: VideoType, rows: SegmentRow[], error: WritableSignal<string>): SegmentPayload[] | null {
+    if (videoType !== 'tutorial') return [];
+    const segments: SegmentPayload[] = [];
+    for (const row of rows) {
+      if (!row.label.trim() && !row.start.trim()) continue; // skip empty rows
+      const startTime = this.parseTimeSecs(row.start);
+      if (!row.label.trim() || startTime === undefined) {
+        error.set('Each section needs a label and a start time (m:ss or seconds).');
+        return null;
+      }
+      segments.push({ label: row.label.trim(), startTime, endTime: this.parseTimeSecs(row.end) });
+    }
+    return segments;
   }
 
   private parseVideoUrl(input: string): { platform: string; videoId: string } | null {
@@ -202,12 +256,17 @@ export class DanceDetailComponent implements OnInit {
     const parsed = this.parseVideoUrl(this.newVideoUrl);
     if (!parsed) { this.addVideoError.set('Unrecognized URL. Paste a YouTube, TikTok, or Instagram link.'); return; }
 
+    const segments = this.buildSegments(this.newVideoType, this.newVideoSegments, this.addVideoError);
+    if (segments === null) return;
+
     const payload: CreateVideoPayload = {
       title: this.newVideoTitle.trim(),
       videoId: parsed.videoId,
       platform: parsed.platform,
+      videoType: this.newVideoType,
       description: this.newVideoDesc.trim() || undefined,
-      danceId
+      danceId,
+      segments
     };
 
     this.addingVideo.set(true);
@@ -221,12 +280,14 @@ export class DanceDetailComponent implements OnInit {
         this.newVideoTitle = '';
         this.newVideoUrl = '';
         this.newVideoDesc = '';
+        this.newVideoType = 'steps';
+        this.newVideoSegments = [];
       },
       error: () => { this.addVideoError.set('Failed to add video.'); this.addingVideo.set(false); }
     });
   }
 
-  // Admin: edit video time
+  // Admin: edit video time/type/segments
   toggleEditVideoTime(video: Video): void {
     if (this.editingVideoId() === video.id) {
       this.editingVideoId.set(null);
@@ -234,6 +295,12 @@ export class DanceDetailComponent implements OnInit {
     }
     this.editVideoStartTime = video.startTime != null ? this.formatTimeSecs(video.startTime) : '';
     this.editVideoEndTime = video.endTime != null ? this.formatTimeSecs(video.endTime) : '';
+    this.editVideoType = video.videoType === 'tutorial' ? 'tutorial' : 'steps';
+    this.editVideoSegments = video.segments.map(s => ({
+      label: s.label,
+      start: this.formatTimeSecs(s.startTime),
+      end: s.endTime != null ? this.formatTimeSecs(s.endTime) : ''
+    }));
     this.editVideoTimeError.set('');
     this.editingVideoId.set(video.id);
   }
@@ -258,9 +325,18 @@ export class DanceDetailComponent implements OnInit {
   submitEditVideoTime(video: Video): void {
     const startTime = this.parseTimeSecs(this.editVideoStartTime);
     const endTime = this.parseTimeSecs(this.editVideoEndTime);
+    const segments = this.buildSegments(this.editVideoType, this.editVideoSegments, this.editVideoTimeError);
+    if (segments === null) return;
     this.savingVideoTime.set(true);
     this.editVideoTimeError.set('');
-    this.videoService.updateTimes(video.id, startTime, endTime).subscribe({
+    this.videoService.update(video.id, {
+      updateTimes: true,
+      startTime,
+      endTime,
+      videoType: this.editVideoType,
+      updateSegments: true,
+      segments
+    }).subscribe({
       next: updated => {
         this.videos.update(list => list.map(v => v.id === updated.id ? updated : v));
         if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
@@ -350,6 +426,9 @@ export class DanceDetailComponent implements OnInit {
           learnedCount: d.learnedCount,
           userRating: d.userRating
         });
+        if (updated.slug !== d.slug) {
+          this.location.replaceState(`/dances/${updated.slug}`);
+        }
         this.showEditDance.set(false);
         this.savingDance.set(false);
       },

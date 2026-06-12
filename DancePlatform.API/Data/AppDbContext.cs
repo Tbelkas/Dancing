@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<Style> Styles => Set<Style>();
     public DbSet<MusicalStyle> MusicalStyles => Set<MusicalStyle>();
     public DbSet<Video> Videos => Set<Video>();
+    public DbSet<VideoSegment> VideoSegments => Set<VideoSegment>();
     public DbSet<DanceStyle> DanceStyles => Set<DanceStyle>();
     public DbSet<DanceMusicalStyle> DanceMusicalStyles => Set<DanceMusicalStyle>();
     public DbSet<UserFavoriteDance> UserFavoriteDances => Set<UserFavoriteDance>();
@@ -25,6 +26,16 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Dance>()
+            .HasIndex(d => d.Slug)
+            .IsUnique();
+
+        modelBuilder.Entity<VideoSegment>()
+            .HasOne(vs => vs.Video)
+            .WithMany(v => v.Segments)
+            .HasForeignKey(vs => vs.VideoId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<DanceStyle>()
             .HasKey(ds => new { ds.DanceId, ds.StyleId });
 

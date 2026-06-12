@@ -1,11 +1,13 @@
 export interface DanceRef {
   id: number;
   name: string;
+  slug: string;
 }
 
 export interface MyDanceItem {
   id: number;
   name: string;
+  slug: string;
   status: 'learned' | 'inProgress';
 }
 

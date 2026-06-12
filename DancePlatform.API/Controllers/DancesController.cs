@@ -23,10 +23,12 @@ public class DancesController : ControllerBase
     public async Task<IActionResult> GetAll() =>
         Ok(await _danceService.GetAllAsync(CurrentUserId));
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    [HttpGet("{idOrSlug}")]
+    public async Task<IActionResult> GetByIdOrSlug(string idOrSlug)
     {
-        var dance = await _danceService.GetByIdAsync(id, CurrentUserId);
+        var dance = int.TryParse(idOrSlug, out var id)
+            ? await _danceService.GetByIdAsync(id, CurrentUserId)
+            : await _danceService.GetBySlugAsync(idOrSlug, CurrentUserId);
         return dance is null ? NotFound() : Ok(dance);
     }
 
@@ -34,7 +36,7 @@ public class DancesController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateDanceRequest request)
     {
         var dance = await _danceService.CreateAsync(request);
-        return CreatedAtAction(nameof(GetById), new { id = dance.Id }, dance);
+        return CreatedAtAction(nameof(GetByIdOrSlug), new { idOrSlug = dance.Id }, dance);
     }
 
     [RequireAdmin]

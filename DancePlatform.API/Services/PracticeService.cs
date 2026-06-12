@@ -22,6 +22,7 @@ public class PracticeService : IPracticeService
                 Id = ps.Id,
                 DanceId = ps.DanceId,
                 DanceName = ps.Dance.Name,
+                DanceSlug = ps.Dance.Slug,
                 Date = ps.Date,
                 DurationMinutes = ps.DurationMinutes,
                 Notes = ps.Notes
@@ -52,6 +53,7 @@ public class PracticeService : IPracticeService
                 Id = ps.Id,
                 DanceId = ps.DanceId,
                 DanceName = ps.Dance.Name,
+                DanceSlug = ps.Dance.Slug,
                 Date = ps.Date,
                 DurationMinutes = ps.DurationMinutes,
                 Notes = ps.Notes

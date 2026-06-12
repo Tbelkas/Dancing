@@ -50,6 +50,9 @@ public static class SeedData
 
         db.Dances.AddRange(salsa, waltz, tango, breakdance, ballet, flamenco, jive, chaCha, bachata, popping, contemporaryDance, foxtrot);
 
+        foreach (var dance in db.Dances.Local)
+            dance.Slug = Services.SlugGenerator.Slugify(dance.Name);
+
         await db.SaveChangesAsync();
 
         // --- Dance ↔ Style ---

@@ -2,13 +2,16 @@ using System.Text.RegularExpressions;
 using DancePlatform.API.Data;
 using DancePlatform.API.DTOs.Dance;
 using DancePlatform.API.DTOs.Import;
+using DancePlatform.API.DTOs.Video;
 using DancePlatform.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DancePlatform.API.Services;
 
 public class ImportService : IImportService
 {
     private readonly AppDbContext _db;
+    private readonly IVideoService _videoService;
 
     // Captures the 11-char video ID from any standard YouTube URL form
     private static readonly Regex YoutubeRegex = new(
@@ -20,7 +23,11 @@ public class ImportService : IImportService
         @"^\s*(?:\d+[\.\)]|\*|-)?\s*(.+?)\s*\[(\d{1,2}:\d{2}(?::\d{2})?)\]\s*$",
         RegexOptions.Compiled | RegexOptions.Multiline);
 
-    public ImportService(AppDbContext db) => _db = db;
+    public ImportService(AppDbContext db, IVideoService videoService)
+    {
+        _db = db;
+        _videoService = videoService;
+    }
 
     public async Task<BulkImportResult> ImportDancesAsync(BulkImportRequest request)
     {
@@ -46,7 +53,12 @@ public class ImportService : IImportService
 
             try
             {
-                var dance = new Dance { Name = name };
+                var baseSlug = SlugGenerator.Slugify(name);
+                var slug = baseSlug;
+                for (var n = 2; await _db.Dances.AnyAsync(d => d.Slug == slug); n++)
+                    slug = $"{baseSlug}-{n}";
+
+                var dance = new Dance { Name = name, Slug = slug };
                 _db.Dances.Add(dance);
                 await _db.SaveChangesAsync();
 
@@ -68,6 +80,7 @@ public class ImportService : IImportService
                 {
                     Id = dance.Id,
                     Name = dance.Name,
+                    Slug = dance.Slug,
                     DateAdded = dance.DateAdded,
                     Difficulty = dance.Difficulty.ToString(),
                     VideoCount = result.VideoId is not null ? 1 : 0
@@ -80,6 +93,24 @@ public class ImportService : IImportService
         }
 
         return result;
+    }
+
+    public async Task<VideoDto?> ImportYoutubeVideoAsync(YoutubeVideoImportRequest request)
+    {
+        var match = YoutubeRegex.Match(request.YoutubeUrl);
+        if (!match.Success) return null;
+
+        return await _videoService.CreateAsync(new CreateVideoRequest
+        {
+            Title = request.Title,
+            VideoId = match.Groups[1].Value,
+            Platform = "youtube",
+            VideoType = request.VideoType,
+            DanceId = request.DanceId,
+            StartTime = request.StartTime,
+            EndTime = request.EndTime,
+            Segments = request.Segments
+        });
     }
 
     private static int ParseTimestamp(string ts)
