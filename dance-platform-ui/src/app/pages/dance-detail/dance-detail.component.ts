@@ -37,6 +37,7 @@ export class DanceDetailComponent implements OnInit {
   readonly stars = [1, 2, 3, 4, 5];
 
   dance = signal<Dance | null>(null);
+  notFound = signal(false);
   videos = signal<Video[]>([]);
   selectedVideo = signal<Video | null>(null);
   readonly viewCountBucket = viewCountBucket;
@@ -113,7 +114,10 @@ export class DanceDetailComponent implements OnInit {
           }
         });
       },
-      error: () => this.router.navigate(['/dances'])
+      error: err => {
+        if (err?.status === 404) this.notFound.set(true);
+        else this.router.navigate(['/dances']);
+      }
     });
     if (this.role.isAdmin()) {
       this.styleService.getAll().subscribe(s => this.allStyles.set(s));

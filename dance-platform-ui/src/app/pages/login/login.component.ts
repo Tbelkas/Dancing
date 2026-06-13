@@ -41,6 +41,9 @@ export class LoginComponent {
         this.error.set('Full name is required.');
         return;
       }
+    } else if (!this.username.trim() || !this.password) {
+      this.error.set('Please enter your username and password.');
+      return;
     }
     this.loading.set(true);
     this.error.set('');

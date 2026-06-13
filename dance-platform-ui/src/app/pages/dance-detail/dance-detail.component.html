@@ -357,6 +357,11 @@
       }
     </section>
   </div>
+} @else if (notFound()) {
+  <div class="container loading">
+    <p>Dance not found. It may have been removed or the link is wrong.</p>
+    <a routerLink="/dances" class="btn btn--primary">Browse dances</a>
+  </div>
 } @else {
   <div class="container loading">Loading...</div>
 }

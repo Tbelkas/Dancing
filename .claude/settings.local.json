@@ -27,7 +27,18 @@
       "PowerShell(\\(Invoke-RestMethod http://localhost:5000/api/dances\\) | Select-Object id, name, slug | Sort-Object slug | Format-Table -AutoSize)",
       "PowerShell($bySlug = Invoke-RestMethod http://localhost:5000/api/dances/loose-legs; $byId = Invoke-RestMethod http://localhost:5000/api/dances/22; \"by slug: id=$\\($bySlug.id\\) name=$\\($bySlug.name\\)\"; \"by id:   slug=$\\($byId.slug\\)\"; $r2 = Invoke-RestMethod http://localhost:5000/api/dances/reebok-3; \"reebok-3: id=$\\($r2.id\\)\")",
       "PowerShell(Stop-Process *)",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "PowerShell(claude mcp *)",
+      "PowerShell(node --version; npx playwright --version 2>&1)",
+      "PowerShell(npx playwright install chromium --dry-run 2>&1 | Select-Object -First 10)",
+      "PowerShell(Test-Path \"$env:LOCALAPPDATA\\\\ms-playwright\" && Get-ChildItem \"$env:LOCALAPPDATA\\\\ms-playwright\" | Select-Object Name)",
+      "PowerShell(npm ls *)",
+      "PowerShell($d = Invoke-RestMethod 'https://dance-api.takelord.com/api/dances'; $d | Where-Object { $_.name -match 'Reebok|Butterfly|Waacking vid' } | Select-Object id, name, slug, videoCount, favoriteCount, learnedCount, ratingCount | Format-Table)",
+      "PowerShell(ssh -o BatchMode=yes -o ConnectTimeout=10 pi@pi \"echo SSH-OK; which psql; sudo -n -u postgres psql -c 'SELECT 1' 2>&1 | head -2\")",
+      "PowerShell(ssh pi@pi \"sudo -u postgres psql -d dance_platform -c '\\\\dt' 2>&1 | head -30\")",
+      "PowerShell(ssh pi@pi \"sudo -u postgres psql -l 2>&1 | head -15\")",
+      "PowerShell(ssh pi@pi \"sudo -u postgres psql -d dancing -c '\\\\dt'\")",
+      "Bash(python -c ' *)"
     ]
   }
 }

@@ -7,6 +7,11 @@ import { DanceService } from '../../core/services/dance.service';
 import { PracticeSession } from '../../models/practice-session.model';
 import { Dance } from '../../models/dance.model';
 
+/** Calendar date in the user's timezone (toISOString would give the UTC date). */
+function toLocalDateString(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 @Component({
   selector: 'app-practice',
   standalone: true,
@@ -32,8 +37,8 @@ export class PracticeComponent implements OnInit {
     if (sessions.length === 0) return 0;
 
     const dates = [...new Set(sessions.map(s => s.date))].sort().reverse();
-    const today = new Date().toISOString().split('T')[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    const today = toLocalDateString(new Date());
+    const yesterday = toLocalDateString(new Date(Date.now() - 86400000));
 
     if (dates[0] !== today && dates[0] !== yesterday) return 0;
 
@@ -64,7 +69,7 @@ export class PracticeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.newDate = new Date().toISOString().split('T')[0];
+    this.newDate = toLocalDateString(new Date());
     this.danceService.getAll().subscribe(d => this.dances.set(d));
     this.practiceService.getAll().subscribe({
       next: s => { this.sessions.set(s); this.loading.set(false); },
@@ -76,7 +81,7 @@ export class PracticeComponent implements OnInit {
     this.showAddForm.update(v => !v);
     this.addError.set('');
     this.newDanceId = null;
-    this.newDate = new Date().toISOString().split('T')[0];
+    this.newDate = toLocalDateString(new Date());
     this.newDuration = null;
     this.newNotes = '';
   }
@@ -116,7 +121,8 @@ export class PracticeComponent implements OnInit {
   }
 
   formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    // Parse as local midnight: new Date('YYYY-MM-DD') is UTC midnight and renders a day early west of UTC
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
   }
 
   totalMinutes(): number {
