@@ -10,6 +10,19 @@ A full-stack dance learning platform built with .NET 8 (REST API) and Angular, d
 - User profiles with visibility settings
 - JWT authentication, prepared for OAuth extension
 
+## AI / Contributor Context (`.ai-context/`)
+
+A layered **context bundle** lives in [`.ai-context/`](.ai-context/00-README.md) — a curated,
+code-grounded description of the system (architecture, DB schema, API contracts, business
+rules, known issues, and per-feature notes) so an AI assistant or new contributor can work
+inside the project without re-deriving everything each time.
+
+- **Layer 1 — core** ([`core-context.md`](.ai-context/core-context.md) + [`reference/`](.ai-context/reference)): stack, architecture, folder structure, conventions, and the "DO NOT" rules. Load this every session.
+- **Layer 2 — module** ([`module-context/`](.ai-context/module-context)): one file per feature; load the relevant one.
+- **Layer 3 — session** ([`session-context.template.md`](.ai-context/session-context.template.md)): the per-task brief.
+
+Start with [`.ai-context/00-README.md`](.ai-context/00-README.md) for the prepend prompt and usage. Keep the bundle updated when the code changes.
+
 ## Tech Stack
 
 | Layer      | Technology                          |

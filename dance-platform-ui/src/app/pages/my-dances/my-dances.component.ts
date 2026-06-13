@@ -20,6 +20,8 @@ import { VideoPlayerComponent } from '../../shared/components/video-player/video
   styleUrls: ['./my-dances.component.css']
 })
 export class MyDancesComponent implements OnInit {
+  private readonly SELECTED_STYLE_KEY = 'dp_mydances_style';
+
   myStyles = signal<MyStyleWithDances[]>([]);
   allStyles = signal<Style[]>([]);
   selectedStyleId = signal<number | null>(null);
@@ -84,8 +86,13 @@ export class MyDancesComponent implements OnInit {
     this.profileService.getMyDances().subscribe({
       next: data => {
         this.myStyles.set(data);
-        if (data.length > 0 && !this.selectedStyleId()) {
-          this.selectedStyleId.set(data[0].styleId);
+        const exists = (id: number | null) => id != null && data.some(ms => ms.styleId === id);
+        if (!exists(this.selectedStyleId())) {
+          const stored = localStorage.getItem(this.SELECTED_STYLE_KEY);
+          const storedId = stored ? Number(stored) : null;
+          this.setSelectedStyle(
+            exists(storedId) ? storedId : (data.length > 0 ? data[0].styleId : null)
+          );
         }
         this.loading.set(false);
       },
@@ -94,9 +101,19 @@ export class MyDancesComponent implements OnInit {
   }
 
   selectStyle(id: number): void {
-    this.selectedStyleId.set(id);
+    this.setSelectedStyle(id);
     this.showAddDance.set(false);
     this.expandedDanceId.set(null);
+  }
+
+  /** Sets the active style tab and remembers it across visits/reloads. */
+  private setSelectedStyle(id: number | null): void {
+    this.selectedStyleId.set(id);
+    if (id === null) {
+      localStorage.removeItem(this.SELECTED_STYLE_KEY);
+    } else {
+      localStorage.setItem(this.SELECTED_STYLE_KEY, String(id));
+    }
   }
 
   toggleExpand(danceId: number, event: Event): void {
@@ -136,13 +153,13 @@ export class MyDancesComponent implements OnInit {
     this.styleService.toggleMyStyle(style.id).subscribe(res => {
       if (res.isMyStyle) {
         this.myStyles.update(list => [...list, { styleId: style.id, styleName: style.name, dances: [] }]);
-        if (this.myStyles().length === 1) this.selectedStyleId.set(style.id);
+        if (this.myStyles().length === 1) this.setSelectedStyle(style.id);
       } else {
         const prevId = this.selectedStyleId();
         this.myStyles.update(list => list.filter(ms => ms.styleId !== style.id));
         if (prevId === style.id) {
           const remaining = this.myStyles();
-          this.selectedStyleId.set(remaining.length > 0 ? remaining[0].styleId : null);
+          this.setSelectedStyle(remaining.length > 0 ? remaining[0].styleId : null);
         }
       }
     });
