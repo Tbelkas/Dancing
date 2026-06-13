@@ -1,0 +1,107 @@
+# Reference — API Contracts
+
+Base URL: dev `http://localhost:5000/api`, prod `https://dance-api.takelord.com/api`.
+Auth column: **—** = anonymous · **Auth** = any logged-in user (`[Authorize]`) ·
+**Admin** = `[RequireAdmin]` (DB `IsAdmin` check). Bodies are the `DTOs/` request types;
+responses are `XxxDto` (never raw entities).
+
+> ⚠️ **Known auth gaps (see known-issues):** `POST /dances`, `POST /videos`, `POST /styles`
+> currently have **no** auth attribute → callable anonymously, even though their
+> Update/Delete are Admin-only and the analogous `POST /musicalstyles` & `POST /instructors`
+> *are* Admin-only. Treat this as a bug to fix, not a pattern to copy.
+
+## Auth — `/api/auth`
+| Method | Path | Auth | Body | Returns |
+|--------|------|------|------|---------|
+| POST | `/auth/login` | — | `LoginRequest { username, password }` | `AuthResponse { token, userId, username }` (400 on bad creds) |
+| POST | `/auth/register` | — | `RegisterRequest { username, password, name, nickname }` | `AuthResponse` |
+
+JWT claims: `NameIdentifier`=userId, `Name`=username. **No IsAdmin claim.**
+
+## Role — `/api/role`
+| Method | Path | Auth | Returns |
+|--------|------|------|---------|
+| GET | `/role/me` | Auth | the caller's role/admin flag (FE loads this on startup) |
+
+## Dances — `/api/dances`
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| GET | `/dances` | — | all dances (`DanceDto[]`) |
+| GET | `/dances/{idOrSlug}` | — | by numeric id **or** slug; 404 if missing |
+| POST | `/dances` | ⚠️ **none** | `CreateDanceRequest` → created `DanceDto` |
+| PUT | `/dances/{id}` | Admin | `UpdateDanceRequest` |
+| DELETE | `/dances/{id}` | Admin | |
+| POST | `/dances/{id}/favorite` | Auth | toggle favorite for current user |
+| POST | `/dances/{id}/learned` | Auth | toggle learned |
+| POST | `/dances/{id}/inprogress` | Auth | toggle in-progress |
+| POST | `/dances/{id}/rate` | Auth | `RateDanceRequest { rating 1–5 }` (upsert; one per user/dance) |
+
+`DanceDto` aggregates ratings (average + count) and per-user status flags when authenticated.
+
+## Search — `/api/search`
+| Method | Path | Auth | Query params |
+|--------|------|------|--------------|
+| GET | `/search/dances` | — | `q?`, `styleId?`, `musicalStyleId?`, `difficulty?` (string), `status?` (`notstarted`/`inprogress`/`learned`/`favorite`) |
+
+`status` filtering is per current user when authenticated. (Note: the dances page also does
+some client-side filtering; see module-context/dances-catalog.md.)
+
+## Videos — `/api/videos`
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| GET | `/videos/dance/{danceId}` | — | videos for a dance |
+| GET | `/videos/{id}` | — | single video (+ segments) |
+| POST | `/videos/{id}/view` | — | increment `ViewCount` |
+| POST | `/videos` | ⚠️ **none** | `CreateVideoRequest` |
+| PUT | `/videos/{id}` | Admin | `UpdateVideoRequest` |
+| DELETE | `/videos/{id}` | Admin | cascades to segments |
+
+## Styles — `/api/styles`  (dance categories)
+| Method | Path | Auth |
+|--------|------|------|
+| GET | `/styles` | — |
+| GET | `/styles/{id}` | — |
+| POST | `/styles` | ⚠️ **none** |
+| DELETE | `/styles/{id}` | Admin |
+| POST | `/styles/{id}/mystyle` | Auth | toggle style in user's "my styles" |
+
+## Musical Styles — `/api/musicalstyles`
+| Method | Path | Auth |
+|--------|------|------|
+| GET | `/musicalstyles` | — |
+| GET | `/musicalstyles/{id}` | — |
+| POST | `/musicalstyles` | Admin |
+| DELETE | `/musicalstyles/{id}` | Admin |
+
+## Instructors — `/api/instructors`
+| Method | Path | Auth |
+|--------|------|------|
+| GET | `/instructors` | — |
+| GET | `/instructors/{id}` | — |
+| POST | `/instructors` | Admin (`CreateInstructorRequest`) |
+| DELETE | `/instructors/{id}` | Admin |
+
+## Practice — `/api/practice`  (controller is `[Authorize]` at class level)
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| GET | `/practice` | Auth | current user's sessions (`PracticeSessionDto[]`) |
+| POST | `/practice` | Auth | `CreatePracticeSessionRequest { danceId, date (DateOnly), durationMinutes?, notes? }` |
+| DELETE | `/practice/{id}` | Auth | own sessions |
+
+## Profile — `/api/profile`  (class-level `[Authorize]`)
+| Method | Path | Auth | Returns |
+|--------|------|------|---------|
+| GET | `/profile` | Auth | `UserProfileDto` (own profile) |
+| PUT | `/profile` | Auth | `UpdateProfileRequest { name, nickname, avatarUrl, visibility }` |
+| GET | `/profile/my-dances` | Auth | `MyDancesDto` (favorites / learned / in-progress lists) |
+
+## Public users — `/api/users`
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| GET | `/users/{username}` | — | `PublicProfileDto` **only if `Visibility == Public`**, else not-available response |
+
+## Import (admin tooling) — `/api/import`
+| Method | Path | Auth | Body |
+|--------|------|------|------|
+| POST | `/import/dances` | Admin | `BulkImportRequest` → `BulkImportResult` |
+| POST | `/import/youtube-video` | Admin | `YoutubeVideoImportRequest` |
