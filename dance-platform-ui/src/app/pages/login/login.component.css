@@ -54,11 +54,13 @@
   letter-spacing: 0.06em;
   color: var(--color-text-muted);
 
-  a {
+  a, .link {
     cursor: pointer;
     color: var(--color-primary);
     margin-left: 5px;
     font-weight: 700;
+    letter-spacing: inherit;
+    text-transform: inherit;
     transition: opacity var(--transition);
 
     &:hover { opacity: 0.8; color: var(--color-primary); }

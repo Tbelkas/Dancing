@@ -1,19 +1,31 @@
+<a class="skip-link" href="#main-content">Skip to content</a>
 <header class="header">
   <div class="container header__inner">
-    <a routerLink="/my-dances" class="header__logo">Dance Platform</a>
-    <nav class="header__nav">
-      <a routerLink="/dances">Browse</a>
+    <a routerLink="/dances" class="header__logo" (click)="closeMenu()">Dance Platform</a>
+
+    <button
+      class="header__toggle"
+      type="button"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="primary-nav"
+      aria-label="Toggle navigation menu"
+      (click)="toggleMenu()">
+      @if (menuOpen()) { <i class="fa-solid fa-xmark"></i> } @else { <i class="fa-solid fa-bars"></i> }
+    </button>
+
+    <nav id="primary-nav" class="header__nav" [class.header__nav--open]="menuOpen()">
+      <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Browse</a>
       @if (auth.isAuthenticated()) {
-        <a routerLink="/my-dances">My Dances</a>
-        <a routerLink="/practice">Practice</a>
-        <a routerLink="/profile">Profile</a>
-        <button class="btn btn--ghost" (click)="auth.logout()">Sign out</button>
+        <a routerLink="/my-dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">My Dances</a>
+        <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Practice</a>
+        <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Profile</a>
+        <button class="btn btn--ghost" (click)="closeMenu(); auth.logout()">Sign out</button>
       } @else {
-        <a routerLink="/login" class="btn btn--primary">Sign in</a>
+        <a routerLink="/login" class="btn btn--primary" (click)="closeMenu()">Sign in</a>
       }
     </nav>
   </div>
 </header>
-<main class="main">
+<main id="main-content" class="main">
   <router-outlet />
 </main>

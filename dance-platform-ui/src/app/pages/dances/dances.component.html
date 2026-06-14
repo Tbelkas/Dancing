@@ -29,8 +29,8 @@
       @if (importError()) { <div class="error-message">{{ importError() }}</div> }
       <div class="admin-form__fields">
         <div class="form-group">
-          <label>Paste text</label>
-          <textarea [(ngModel)]="importText" rows="8" placeholder="Paste the YouTube description or timestamps here...&#10;&#10;Example:&#10;The Wu-Tang [00:29]&#10;The Roger Rabbit [01:26]"></textarea>
+          <label for="import-text">Paste text</label>
+          <textarea id="import-text" [(ngModel)]="importText" rows="8" placeholder="Paste the YouTube description or timestamps here...&#10;&#10;Example:&#10;The Wu-Tang [00:29]&#10;The Roger Rabbit [01:26]"></textarea>
         </div>
       </div>
       <button class="btn btn--primary btn--sm" (click)="submitImport()" [disabled]="importing()">
@@ -70,12 +70,12 @@
       @if (addStyleError()) { <div class="error-message">{{ addStyleError() }}</div> }
       <div class="admin-form__fields">
         <div class="form-group">
-          <label>Name</label>
-          <input type="text" [(ngModel)]="newStyleName" placeholder="e.g. Salsa" />
+          <label for="style-name">Name</label>
+          <input id="style-name" type="text" [(ngModel)]="newStyleName" placeholder="e.g. Salsa" />
         </div>
         <div class="form-group">
-          <label>Description <span class="optional">(optional)</span></label>
-          <input type="text" [(ngModel)]="newStyleDesc" placeholder="Brief description" />
+          <label for="style-desc">Description <span class="optional">(optional)</span></label>
+          <input id="style-desc" type="text" [(ngModel)]="newStyleDesc" placeholder="Brief description" />
         </div>
       </div>
       <button class="btn btn--primary btn--sm" (click)="submitAddStyle()" [disabled]="addingStyle()">
@@ -91,16 +91,16 @@
       @if (addDanceError()) { <div class="error-message">{{ addDanceError() }}</div> }
       <div class="admin-form__fields">
         <div class="form-group">
-          <label>Name</label>
-          <input type="text" [(ngModel)]="newDanceName" placeholder="e.g. Bachata" />
+          <label for="dance-name">Name</label>
+          <input id="dance-name" type="text" [(ngModel)]="newDanceName" placeholder="e.g. Bachata" />
         </div>
         <div class="form-group">
-          <label>Description <span class="optional">(optional)</span></label>
-          <textarea [(ngModel)]="newDanceDesc" rows="2" placeholder="Short description"></textarea>
+          <label for="dance-desc">Description <span class="optional">(optional)</span></label>
+          <textarea id="dance-desc" [(ngModel)]="newDanceDesc" rows="2" placeholder="Short description"></textarea>
         </div>
         <div class="form-group">
-          <label>Difficulty</label>
-          <select [(ngModel)]="newDanceDifficulty">
+          <label for="dance-difficulty">Difficulty</label>
+          <select id="dance-difficulty" [(ngModel)]="newDanceDifficulty">
             <option value="None">Not specified</option>
             @for (d of difficulties; track d) {
               <option [value]="d">{{ d }}</option>
@@ -152,7 +152,10 @@
   <div class="filters">
     <div class="search-wrapper">
       <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
-      <input type="text" [value]="searchQuery()" (input)="onSearchInput($any($event.target).value)" class="search-input" placeholder="Search dances..." />
+      <input type="text" [value]="searchQuery()" (input)="onSearchInput($any($event.target).value)" class="search-input" placeholder="Search dances..." aria-label="Search dances" />
+      @if (searchQuery()) {
+        <button class="search-clear" (click)="onSearchInput('')" aria-label="Clear search"><i class="fa-solid fa-xmark"></i></button>
+      }
     </div>
 
     <div class="filter-row">
@@ -205,52 +208,84 @@
     }
   </div>
 
+  @if (!loading()) {
+    <div class="results-bar">
+      <span class="results-count">{{ sortedDances().length }} dance{{ sortedDances().length !== 1 ? 's' : '' }}</span>
+      <div class="results-bar__controls">
+        @if (hasActiveFilters()) {
+          <button class="btn btn--ghost btn--xs" (click)="clearFilters()"><i class="fa-solid fa-xmark"></i> Clear filters</button>
+        }
+        <label class="sort-control">
+          <span class="sort-control__label">Sort</span>
+          <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)" aria-label="Sort dances">
+            <option value="name">Name (A–Z)</option>
+            <option value="rating">Top rated</option>
+            <option value="popular">Most favorited</option>
+            <option value="newest">Newest</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  }
+
   @if (loading()) {
     <div class="loading">Loading dances...</div>
-  } @else if (filteredDances().length === 0) {
+  } @else if (sortedDances().length === 0) {
     <div class="empty">No dances found.</div>
   } @else {
     <div class="grid grid--2">
-      @for (dance of filteredDances(); track dance.id) {
+      @for (dance of sortedDances(); track dance.id) {
         <div class="card dance-card">
-          <div class="dance-card__header">
-            <h3 class="dance-card__name">{{ dance.name }}</h3>
-            @if (auth.isAuthenticated()) {
-              <div class="dance-card__actions">
-                <button class="icon-btn" [class.active]="dance.isFavorite" (click)="toggleFavorite(dance, $event)" title="Favorite">
-                  @if (dance.isFavorite) { <i class="fa-solid fa-star"></i> } @else { <i class="fa-regular fa-star"></i> }
-                </button>
-                <button class="icon-btn" [class.active]="dance.isLearned" (click)="toggleLearned(dance, $event)" title="Mark as learned">
-                  @if (dance.isLearned) { <i class="fa-solid fa-check"></i> } @else { <i class="fa-regular fa-circle"></i> }
-                </button>
-              </div>
+          <a [routerLink]="['/dances', dance.slug]" class="dance-card__media" tabindex="-1" aria-hidden="true">
+            @if (thumbnailUrl(dance); as thumb) {
+              <img [src]="thumb" alt="" loading="lazy" class="dance-card__thumb" />
+            } @else {
+              <span class="dance-card__media-fallback"><i class="fa-solid fa-music"></i></span>
             }
-          </div>
-          @if (dance.description) {
-            <p class="dance-card__desc">{{ dance.description }}</p>
-          }
-          <div class="dance-card__meta">
-            <div class="dance-card__styles">
-              @if (dance.difficulty !== 'None') {
-                <span class="badge badge--difficulty badge--difficulty-{{ dance.difficulty | lowercase }}">{{ dance.difficulty }}</span>
-              }
-              @for (style of dance.styles; track style) {
-                <span class="badge">{{ style }}</span>
-              }
-              @for (ms of dance.musicalStyles; track ms) {
-                <span class="badge badge--music"><i class="fa-solid fa-music"></i> {{ ms }}</span>
+            @if (dance.videoCount > 0) {
+              <span class="dance-card__media-count"><i class="fa-solid fa-play"></i> {{ dance.videoCount }} video{{ dance.videoCount !== 1 ? 's' : '' }}</span>
+            }
+          </a>
+          <div class="dance-card__body">
+            <div class="dance-card__header">
+              <h3 class="dance-card__name">
+                <a [routerLink]="['/dances', dance.slug]" class="dance-card__title-link">{{ dance.name }}</a>
+              </h3>
+              @if (auth.isAuthenticated()) {
+                <div class="dance-card__actions">
+                  <button class="icon-btn" [class.active]="dance.isFavorite" (click)="toggleFavorite(dance, $event)" [attr.aria-pressed]="dance.isFavorite" [attr.aria-label]="dance.isFavorite ? 'Remove ' + dance.name + ' from favorites' : 'Add ' + dance.name + ' to favorites'">
+                    @if (dance.isFavorite) { <i class="fa-solid fa-star"></i> } @else { <i class="fa-regular fa-star"></i> }
+                  </button>
+                  <button class="icon-btn" [class.active]="dance.isLearned" (click)="toggleLearned(dance, $event)" [attr.aria-pressed]="dance.isLearned" [attr.aria-label]="dance.isLearned ? 'Unmark ' + dance.name + ' as learned' : 'Mark ' + dance.name + ' as learned'">
+                    @if (dance.isLearned) { <i class="fa-solid fa-check"></i> } @else { <i class="fa-regular fa-circle"></i> }
+                  </button>
+                </div>
               }
             </div>
-            <div class="dance-card__counts">
-              @if (dance.ratingCount > 0) {
-                <span class="count-chip" title="Community rating"><i class="fa-solid fa-star"></i> {{ dance.averageRating | number:'1.1-1' }}</span>
-              }
-              <span class="count-chip" title="Favorited by"><i class="fa-solid fa-heart"></i> {{ dance.favoriteCount }}</span>
-              <span class="count-chip" title="Learned by"><i class="fa-solid fa-check"></i> {{ dance.learnedCount }}</span>
-              <span class="video-count">{{ dance.videoCount }} video{{ dance.videoCount !== 1 ? 's' : '' }}</span>
+            @if (dance.description) {
+              <p class="dance-card__desc">{{ dance.description }}</p>
+            }
+            <div class="dance-card__meta">
+              <div class="dance-card__styles">
+                @if (dance.difficulty !== 'None') {
+                  <span class="badge badge--difficulty badge--difficulty-{{ dance.difficulty | lowercase }}">{{ dance.difficulty }}</span>
+                }
+                @for (style of dance.styles; track style) {
+                  <span class="badge">{{ style }}</span>
+                }
+                @for (ms of dance.musicalStyles; track ms) {
+                  <span class="badge badge--music"><i class="fa-solid fa-music"></i> {{ ms }}</span>
+                }
+              </div>
+              <div class="dance-card__counts">
+                @if (dance.ratingCount > 0) {
+                  <span class="count-chip" title="Community rating"><i class="fa-solid fa-star"></i> {{ dance.averageRating | number:'1.1-1' }}</span>
+                }
+                <span class="count-chip" title="Favorited by"><i class="fa-solid fa-heart"></i> {{ dance.favoriteCount }}</span>
+                <span class="count-chip" title="Learned by"><i class="fa-solid fa-check"></i> {{ dance.learnedCount }}</span>
+              </div>
             </div>
           </div>
-          <a [routerLink]="['/dances', dance.slug]" class="btn btn--ghost btn--sm">View details →</a>
         </div>
       }
     </div>

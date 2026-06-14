@@ -1,3 +1,24 @@
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -48px;
+  z-index: 200;
+  background: var(--color-primary);
+  color: #07070D;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  transition: top var(--transition);
+}
+.skip-link:focus {
+  top: 12px;
+  color: #07070D;
+}
+
 .header {
   background: rgba(7, 7, 13, 0.88);
   backdrop-filter: blur(18px) saturate(140%);
@@ -26,6 +47,22 @@
   &:hover { opacity: 0.85; color: var(--color-primary); }
 }
 
+.header__toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  width: 40px;
+  height: 40px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  &:hover { border-color: var(--color-primary); color: var(--color-primary); }
+}
+
 .header__nav {
   display: flex;
   align-items: center;
@@ -45,13 +82,58 @@
   &:hover { color: var(--color-text); background: rgba(255, 255, 255, 0.04); }
 }
 
+/* Active page indicator (not applied to .btn links) */
+.header__nav a.is-active:not(.btn) {
+  color: var(--color-primary);
+  background: var(--color-primary-glow);
+}
+
 .main {
   padding: 52px 0;
   min-height: calc(100vh - 64px);
 }
 
+/* Visible keyboard focus across interactive shell elements */
+.header__nav a:focus-visible,
+.header__toggle:focus-visible,
+.header__logo:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .header__toggle { display: inline-flex; }
+
+  .header__nav {
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 12px 16px 18px;
+    background: rgba(7, 7, 13, 0.97);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow);
+    transform-origin: top;
+    display: none;
+  }
+
+  .header__nav--open { display: flex; animation: slideDown 0.16s ease both; }
+
+  .header__nav a,
+  .header__nav .btn {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+    padding: 12px 14px;
+  }
+}
+
 @media (max-width: 640px) {
   .header__logo { font-size: 1.25rem; }
-  .header__nav a { padding: 6px 10px; font-size: 0.78rem; }
   .main { padding: 28px 0; }
 }

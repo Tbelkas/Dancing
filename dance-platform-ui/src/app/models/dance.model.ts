@@ -9,6 +9,8 @@ export interface Dance {
   musicalStyles: string[];
   instructors: string[];
   videoCount: number;
+  thumbnailVideoId?: string;
+  thumbnailPlatform?: string;
   favoriteCount: number;
   learnedCount: number;
   averageRating: number;

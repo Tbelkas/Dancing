@@ -46,6 +46,15 @@ export class DancesComponent implements OnInit {
   selectedMusicalStyleId = signal<number | null>(null);
   selectedDifficulty = signal<string | null>(null);
   selectedStatus = signal<string>('all');
+  sortBy = signal<string>('name');
+
+  readonly hasActiveFilters = computed(() =>
+    this.searchQuery().trim() !== '' ||
+    this.selectedStyleId() !== null ||
+    this.selectedMusicalStyleId() !== null ||
+    this.selectedDifficulty() !== null ||
+    this.selectedStatus() !== 'all'
+  );
 
   readonly filteredDances = computed(() => {
     const q = this.searchQuery().trim().toLowerCase();
@@ -68,6 +77,36 @@ export class DancesComponent implements OnInit {
       return true;
     });
   });
+
+  readonly sortedDances = computed(() => {
+    const list = [...this.filteredDances()];
+    switch (this.sortBy()) {
+      case 'rating':
+        return list.sort((a, b) => b.averageRating - a.averageRating || b.ratingCount - a.ratingCount);
+      case 'popular':
+        return list.sort((a, b) => b.favoriteCount - a.favoriteCount);
+      case 'newest':
+        return list.sort((a, b) => +new Date(b.dateAdded) - +new Date(a.dateAdded));
+      case 'name':
+      default:
+        return list.sort((a, b) => a.name.localeCompare(b.name));
+    }
+  });
+
+  thumbnailUrl(dance: Dance): string | null {
+    if (dance.thumbnailVideoId && dance.thumbnailPlatform === 'youtube') {
+      return `https://i.ytimg.com/vi/${dance.thumbnailVideoId}/hqdefault.jpg`;
+    }
+    return null;
+  }
+
+  clearFilters(): void {
+    this.searchQuery.set('');
+    this.selectedStyleId.set(null);
+    this.selectedMusicalStyleId.set(null);
+    this.selectedDifficulty.set(null);
+    this.selectedStatus.set('all');
+  }
 
   // Admin: add style form
   showAddStyle = signal(false);

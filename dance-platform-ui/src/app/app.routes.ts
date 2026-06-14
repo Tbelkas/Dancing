@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'my-dances', pathMatch: 'full' },
+  { path: '', redirectTo: 'dances', pathMatch: 'full' },
   { path: 'login', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
   { path: 'dances', loadComponent: () => import('./pages/dances/dances.component').then(m => m.DancesComponent) },
   { path: 'dances/:slug', loadComponent: () => import('./pages/dance-detail/dance-detail.component').then(m => m.DanceDetailComponent) },

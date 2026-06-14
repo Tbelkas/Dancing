@@ -22,20 +22,20 @@
         @if (editing()) {
           <form (ngSubmit)="saveProfile()" class="edit-form">
             <div class="form-group">
-              <label>Full Name</label>
-              <input type="text" [(ngModel)]="editName" name="name" />
+              <label for="profile-name">Full Name</label>
+              <input id="profile-name" type="text" [(ngModel)]="editName" name="name" autocomplete="name" />
             </div>
             <div class="form-group">
-              <label>Nickname</label>
-              <input type="text" [(ngModel)]="editNickname" name="nickname" />
+              <label for="profile-nickname">Nickname</label>
+              <input id="profile-nickname" type="text" [(ngModel)]="editNickname" name="nickname" autocomplete="nickname" />
             </div>
             <div class="form-group">
-              <label>Avatar URL</label>
-              <input type="url" [(ngModel)]="editAvatarUrl" name="avatarUrl" placeholder="https://..." />
+              <label for="profile-avatar">Avatar URL</label>
+              <input id="profile-avatar" type="url" [(ngModel)]="editAvatarUrl" name="avatarUrl" placeholder="https://..." />
             </div>
             <div class="form-group">
-              <label>Visibility</label>
-              <select [(ngModel)]="editVisibility" name="visibility">
+              <label for="profile-visibility">Visibility</label>
+              <select id="profile-visibility" [(ngModel)]="editVisibility" name="visibility">
                 <option value="Public">Public</option>
                 <option value="Private">Private</option>
               </select>

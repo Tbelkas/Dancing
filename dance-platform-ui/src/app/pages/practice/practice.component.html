@@ -36,8 +36,8 @@
       @if (addError()) { <div class="error-message">{{ addError() }}</div> }
       <div class="admin-form__fields">
         <div class="form-group">
-          <label>Dance</label>
-          <select [(ngModel)]="newDanceId">
+          <label for="practice-dance">Dance</label>
+          <select id="practice-dance" [(ngModel)]="newDanceId">
             <option [ngValue]="null" disabled>Select a dance...</option>
             @for (d of dances(); track d.id) {
               <option [ngValue]="d.id">{{ d.name }}</option>
@@ -45,16 +45,16 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Date</label>
-          <input type="date" [(ngModel)]="newDate" />
+          <label for="practice-date">Date</label>
+          <input id="practice-date" type="date" [(ngModel)]="newDate" />
         </div>
         <div class="form-group">
-          <label>Duration (minutes) <span class="optional">(optional)</span></label>
-          <input type="number" [(ngModel)]="newDuration" min="1" placeholder="e.g. 30" />
+          <label for="practice-duration">Duration (minutes) <span class="optional">(optional)</span></label>
+          <input id="practice-duration" type="number" [(ngModel)]="newDuration" min="1" placeholder="e.g. 30" />
         </div>
         <div class="form-group">
-          <label>Notes <span class="optional">(optional)</span></label>
-          <textarea [(ngModel)]="newNotes" rows="2" placeholder="What did you work on?"></textarea>
+          <label for="practice-notes">Notes <span class="optional">(optional)</span></label>
+          <textarea id="practice-notes" [(ngModel)]="newNotes" rows="2" placeholder="What did you work on?"></textarea>
         </div>
       </div>
       <button class="btn btn--primary btn--sm" (click)="submitAdd()" [disabled]="adding()">

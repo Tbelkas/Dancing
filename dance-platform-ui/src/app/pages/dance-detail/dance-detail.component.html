@@ -94,16 +94,16 @@
         @if (editDanceError()) { <div class="error-message">{{ editDanceError() }}</div> }
         <div class="admin-form__fields">
           <div class="form-group">
-            <label>Name</label>
-            <input type="text" [(ngModel)]="editName" placeholder="Dance name" />
+            <label for="edit-dance-name">Name</label>
+            <input id="edit-dance-name" type="text" [(ngModel)]="editName" placeholder="Dance name" />
           </div>
           <div class="form-group">
-            <label>Description <span class="optional">(optional)</span></label>
-            <input type="text" [(ngModel)]="editDescription" placeholder="Short description" />
+            <label for="edit-dance-desc">Description <span class="optional">(optional)</span></label>
+            <input id="edit-dance-desc" type="text" [(ngModel)]="editDescription" placeholder="Short description" />
           </div>
           <div class="form-group">
-            <label>Difficulty</label>
-            <select [(ngModel)]="editDifficulty">
+            <label for="edit-dance-difficulty">Difficulty</label>
+            <select id="edit-dance-difficulty" [(ngModel)]="editDifficulty">
               @for (d of difficulties; track d) {
                 <option [value]="d">{{ d === 'None' ? 'Not specified' : d }}</option>
               }
@@ -172,20 +172,20 @@
           @if (addVideoError()) { <div class="error-message">{{ addVideoError() }}</div> }
           <div class="admin-form__fields">
             <div class="form-group">
-              <label>Title</label>
-              <input type="text" [(ngModel)]="newVideoTitle" placeholder="e.g. Basic Steps Tutorial" />
+              <label for="new-video-title">Title</label>
+              <input id="new-video-title" type="text" [(ngModel)]="newVideoTitle" placeholder="e.g. Basic Steps Tutorial" />
             </div>
             <div class="form-group">
-              <label>Video URL</label>
-              <input type="text" [(ngModel)]="newVideoUrl" placeholder="YouTube, TikTok, or Instagram URL" />
+              <label for="new-video-url">Video URL</label>
+              <input id="new-video-url" type="text" [(ngModel)]="newVideoUrl" placeholder="YouTube, TikTok, or Instagram URL" />
             </div>
             <div class="form-group">
-              <label>Description <span class="optional">(optional)</span></label>
-              <input type="text" [(ngModel)]="newVideoDesc" placeholder="Brief description" />
+              <label for="new-video-desc">Description <span class="optional">(optional)</span></label>
+              <input id="new-video-desc" type="text" [(ngModel)]="newVideoDesc" placeholder="Brief description" />
             </div>
             <div class="form-group">
-              <label>Type</label>
-              <select [(ngModel)]="newVideoType" (ngModelChange)="onNewVideoTypeChange()">
+              <label for="new-video-type">Type</label>
+              <select id="new-video-type" [(ngModel)]="newVideoType" (ngModelChange)="onNewVideoTypeChange()">
                 <option value="steps">Steps</option>
                 <option value="tutorial">Tutorial</option>
               </select>

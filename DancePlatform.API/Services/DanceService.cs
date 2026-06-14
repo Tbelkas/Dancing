@@ -226,6 +226,8 @@ public class DanceService : IDanceService
         MusicalStyles = d.DanceMusicalStyles.Select(dms => dms.MusicalStyle.Name).ToList(),
         Instructors = d.DanceInstructors.Select(di => di.Instructor.Name).ToList(),
         VideoCount = d.Videos.Count,
+        ThumbnailVideoId = d.Videos.OrderBy(v => v.DateAdded).Select(v => v.VideoId).FirstOrDefault(),
+        ThumbnailPlatform = d.Videos.OrderBy(v => v.DateAdded).Select(v => v.Platform).FirstOrDefault(),
         FavoriteCount = d.FavoritedBy.Count,
         LearnedCount = d.LearnedBy.Count,
         AverageRating = d.Ratings.Count > 0 ? d.Ratings.Average(r => r.Rating) : 0,

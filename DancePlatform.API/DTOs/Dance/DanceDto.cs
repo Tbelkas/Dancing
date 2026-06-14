@@ -12,6 +12,8 @@ public class DanceDto
     public List<string> MusicalStyles { get; set; } = new();
     public List<string> Instructors { get; set; } = new();
     public int VideoCount { get; set; }
+    public string? ThumbnailVideoId { get; set; }
+    public string? ThumbnailPlatform { get; set; }
     public int FavoriteCount { get; set; }
     public int LearnedCount { get; set; }
     public double AverageRating { get; set; }
