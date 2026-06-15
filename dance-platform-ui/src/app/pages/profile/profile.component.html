@@ -95,6 +95,21 @@
       </div>
     </div>
   } @else {
-    <div class="loading">Loading profile...</div>
+    <div class="profile-layout" aria-busy="true" aria-label="Loading profile">
+      <div class="card">
+        <div class="skeleton" style="width: 72px; height: 72px; border-radius: 50%; margin-bottom: 16px;"></div>
+        <div class="skeleton skeleton-line skeleton-line--title" style="margin-bottom: 10px;"></div>
+        <div class="skeleton skeleton-line skeleton-line--short"></div>
+      </div>
+      <div class="stats-column">
+        @for (i of [0,1]; track i) {
+          <div class="card">
+            <div class="skeleton skeleton-line skeleton-line--title" style="margin-bottom: 16px;"></div>
+            <div class="skeleton skeleton-line" style="margin-bottom: 10px;"></div>
+            <div class="skeleton skeleton-line" style="width: 80%;"></div>
+          </div>
+        }
+      </div>
+    </div>
   }
 </div>

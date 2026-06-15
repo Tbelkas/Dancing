@@ -54,7 +54,7 @@
 .segment-chip.active {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: #fff;
+  color: #07070D;
 }
 
 .segment-chip__time {
@@ -104,6 +104,18 @@
   gap: 12px;
 }
 
+/* Loop is the core practice tool — give it its own coral-lit surface so it
+   reads as primary, not just another control row. */
+.loop-block {
+  background:
+    radial-gradient(ellipse 70% 120% at 0% 0%, rgba(232, 80, 58, 0.08), transparent 60%),
+    var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-left: 2px solid var(--color-accent);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
 .control-row label {
   font-size: 0.82rem;
   font-weight: 700;
@@ -136,7 +148,7 @@
 .speed-btn.active {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: #fff;
+  color: #07070D;
 }
 
 /* Repeat section */

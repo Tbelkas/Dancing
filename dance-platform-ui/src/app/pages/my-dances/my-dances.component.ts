@@ -69,6 +69,14 @@ export class MyDancesComponent implements OnInit {
     this.selectedStyle()?.dances.filter(d => d.status === 'inProgress') ?? []
   );
 
+  /** Tracked = moves you're learning or have learned in this style. */
+  readonly trackedCount = computed(() => this.learnedDances().length + this.inProgressDances().length);
+
+  readonly learnedPct = computed(() => {
+    const total = this.trackedCount();
+    return total === 0 ? 0 : Math.round((this.learnedDances().length / total) * 100);
+  });
+
   constructor(
     private profileService: ProfileService,
     private styleService: StyleService,

@@ -228,12 +228,11 @@
 }
 
 .section-title {
-  font-family: var(--font-ui);
-  font-size: 0.68rem;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-text-muted);
+  letter-spacing: -0.01em;
+  color: var(--color-text);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -257,6 +256,48 @@
   margin-left: auto;
 }
 
+/* Per-style progress — how much of what you're working on is learned. */
+.style-progress {
+  margin-bottom: 22px;
+}
+
+.style-progress__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.style-progress__count {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.style-progress__pct {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.style-progress__track {
+  height: 6px;
+  background: var(--color-surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.style-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-music), var(--color-primary));
+  border-radius: 999px;
+  transition: width 0.45s cubic-bezier(0.2, 0.72, 0.2, 1);
+}
+
 .dance-list {
   display: flex;
   flex-direction: column;
@@ -272,7 +313,17 @@
   &:last-child { border-bottom: none; }
 }
 
+.dance-row__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 14px;
+  background: var(--color-surface);
+}
+
 .dance-item {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 12px;

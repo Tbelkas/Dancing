@@ -252,6 +252,17 @@
 
 .dance-card:hover .dance-card__thumb { transform: scale(1.04); }
 
+.dance-card--skeleton {
+  cursor: default;
+  pointer-events: none;
+  animation: none;
+}
+.dance-card--skeleton:hover {
+  transform: none;
+  box-shadow: var(--shadow);
+  border-color: var(--color-border);
+}
+
 .dance-card__media-fallback {
   position: absolute;
   inset: 0;
@@ -406,6 +417,31 @@
   letter-spacing: 0.08em;
 }
 
+.empty-state {
+  text-align: center;
+  padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.empty-state__icon {
+  font-size: 2rem;
+  color: var(--color-border-light);
+  margin-bottom: 4px;
+}
+
+.empty-state h2 {
+  color: var(--color-text);
+}
+
+.empty-state p {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+}
+
 .loading::before {
   content: '';
   display: block;
@@ -488,5 +524,27 @@
   }
   .admin-form__fields {
     grid-template-columns: 1fr;
+  }
+
+  /* Each filter category becomes one swipeable line instead of wrapping —
+     keeps the four controls compact so dances appear above the fold. */
+  .filters { gap: 8px; }
+  .filter-row { flex-wrap: nowrap; }
+  .filter-label { flex-shrink: 0; }
+  .style-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+    /* fade the right edge to signal more pills are swipeable */
+    mask-image: linear-gradient(90deg, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, #000 92%, transparent);
+  }
+  .style-filters::-webkit-scrollbar { display: none; }
+  .filter-pill {
+    scroll-snap-align: start;
+    flex-shrink: 0;
   }
 }

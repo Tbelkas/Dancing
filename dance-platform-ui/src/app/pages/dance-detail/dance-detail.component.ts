@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { Title } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DanceService, UpdateDancePayload } from '../../core/services/dance.service';
@@ -88,6 +89,7 @@ export class DanceDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private location: Location,
+    private title: Title,
     private danceService: DanceService,
     private videoService: VideoService,
     private styleService: StyleService,
@@ -102,6 +104,7 @@ export class DanceDetailComponent implements OnInit {
     this.danceService.getByIdOrSlug(slug).subscribe({
       next: d => {
         this.dance.set(d);
+        this.title.setTitle(`${d.name} · Dance Platform`);
         // Rewrite legacy numeric URLs (/dances/22) to the slug form without reloading
         if (slug !== d.slug) {
           this.location.replaceState(`/dances/${d.slug}`);
@@ -115,8 +118,12 @@ export class DanceDetailComponent implements OnInit {
         });
       },
       error: err => {
-        if (err?.status === 404) this.notFound.set(true);
-        else this.router.navigate(['/dances']);
+        if (err?.status === 404) {
+          this.notFound.set(true);
+          this.title.setTitle('Dance not found · Dance Platform');
+        } else {
+          this.router.navigate(['/dances']);
+        }
       }
     });
     if (this.role.isAdmin()) {

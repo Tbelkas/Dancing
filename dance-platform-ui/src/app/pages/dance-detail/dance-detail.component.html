@@ -28,15 +28,20 @@
       <div class="detail-right">
         @if (auth.isAuthenticated()) {
           <div class="detail-actions">
-            <button class="btn" [class.btn--accent]="dance()!.isFavorite" [class.btn--ghost]="!dance()!.isFavorite" (click)="toggleFavorite()">
+            <button class="btn fav-btn" [class.btn--accent]="dance()!.isFavorite" [class.btn--ghost]="!dance()!.isFavorite" (click)="toggleFavorite()" [attr.aria-pressed]="dance()!.isFavorite">
               @if (dance()!.isFavorite) { <i class="fa-solid fa-star"></i> Favorited } @else { <i class="fa-regular fa-star"></i> Favorite }
             </button>
-            <button class="btn" [class.btn--primary]="dance()!.isLearned" [class.btn--ghost]="!dance()!.isLearned" (click)="toggleLearned()">
-              @if (dance()!.isLearned) { <i class="fa-solid fa-check"></i> Learned } @else { Mark as Learned }
-            </button>
-            <button class="btn" [class.btn--progress]="dance()!.isInProgress" [class.btn--ghost]="!dance()!.isInProgress" (click)="toggleInProgress()">
-              @if (dance()!.isInProgress) { <i class="fa-solid fa-circle-half-stroke"></i> In Progress } @else { Mark In Progress }
-            </button>
+            <div class="progress-control" role="group" aria-label="Track your progress">
+              <span class="progress-control__label">Progress</span>
+              <div class="progress-segments">
+                <button class="progress-seg progress-seg--inprogress" [class.is-active]="dance()!.isInProgress" (click)="toggleInProgress()" [attr.aria-pressed]="dance()!.isInProgress">
+                  <i class="fa-solid fa-circle-half-stroke"></i> In progress
+                </button>
+                <button class="progress-seg progress-seg--learned" [class.is-active]="dance()!.isLearned" (click)="toggleLearned()" [attr.aria-pressed]="dance()!.isLearned">
+                  <i class="fa-solid fa-check"></i> Learned
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="rating-section">
@@ -363,5 +368,16 @@
     <a routerLink="/dances" class="btn btn--primary">Browse dances</a>
   </div>
 } @else {
-  <div class="container loading">Loading...</div>
+  <div class="container" aria-busy="true" aria-label="Loading dance">
+    <div class="detail-skeleton">
+      <div class="skeleton skeleton-line skeleton-line--page-title"></div>
+      <div class="skeleton-badges">
+        <div class="skeleton skeleton-badge"></div>
+        <div class="skeleton skeleton-badge"></div>
+      </div>
+      <div class="skeleton skeleton-line" style="width: 90%;"></div>
+      <div class="skeleton skeleton-line" style="width: 70%;"></div>
+      <div class="skeleton detail-skeleton__video"></div>
+    </div>
+  </div>
 }

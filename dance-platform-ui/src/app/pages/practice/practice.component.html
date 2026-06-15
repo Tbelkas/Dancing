@@ -13,9 +13,12 @@
 
   @if (sessions().length > 0) {
     <div class="stats-row">
-      <div class="stat-chip">
-        <span class="stat-chip__label">Streak</span>
-        <span class="stat-chip__value">{{ streak() }} day{{ streak() !== 1 ? 's' : '' }} <i class="fa-solid fa-fire"></i></span>
+      <div class="stat-chip stat-chip--streak" [class.is-cold]="streak() === 0">
+        <span class="streak-flame"><i class="fa-solid fa-fire"></i></span>
+        <span class="streak-figure">
+          <span class="streak-num">{{ streak() }}</span>
+          <span class="stat-chip__label">day streak</span>
+        </span>
       </div>
       <div class="stat-chip">
         <span class="stat-chip__label">Sessions</span>
@@ -64,7 +67,11 @@
   }
 
   @if (loading()) {
-    <div class="loading">Loading sessions...</div>
+    <div aria-busy="true" aria-label="Loading sessions" style="display: flex; flex-direction: column; gap: 12px;">
+      @for (i of [0,1,2,3]; track i) {
+        <div class="skeleton skeleton-line" style="height: 86px; border-radius: var(--radius-lg);"></div>
+      }
+    </div>
   } @else if (sessions().length === 0) {
     <div class="empty-state">
       <p>No practice sessions yet. Hit "Log Session" to start tracking!</p>

@@ -32,22 +32,10 @@
 body {
   font-family: var(--font-body);
   background-color: var(--color-bg);
+  /* Lit stage: gold spotlight from above, coral floor-glow rising from below. */
   background-image:
-    radial-gradient(ellipse 70% 28% at 50% -1%, rgba(245, 200, 66, 0.08) 0%, transparent 70%),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 63px,
-      rgba(255, 255, 255, 0.016) 63px,
-      rgba(255, 255, 255, 0.016) 64px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 63px,
-      rgba(255, 255, 255, 0.016) 63px,
-      rgba(255, 255, 255, 0.016) 64px
-    );
+    radial-gradient(ellipse 58% 34% at 50% -3%, rgba(245, 200, 66, 0.11) 0%, transparent 72%),
+    radial-gradient(ellipse 120% 46% at 50% 112%, rgba(232, 80, 58, 0.07) 0%, transparent 68%);
   background-attachment: fixed;
   color: var(--color-text);
   line-height: 1.6;
@@ -62,13 +50,16 @@ h1 {
   line-height: 1.05;
 }
 
+/* Content headings: Barlow, sentence case. Loud condensed caps are reserved
+   for small utility labels (pills, badges, stat captions) — not headings. */
 h2, h3, h4 {
-  font-family: var(--font-ui);
+  font-family: var(--font-body);
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: -0.01em;
   line-height: 1.2;
 }
+h2 { font-size: 1.2rem; }
+h3 { font-size: 1.1rem; }
 
 a { color: var(--color-primary); text-decoration: none; transition: color var(--transition); }
 a:hover { color: var(--color-text); }
@@ -250,6 +241,9 @@ textarea:focus-visible,
   margin-bottom: 16px;
 }
 
+/* Signature: the title lands like a move hitting the beat — a coral afterimage
+   trails behind, then settles into register on load. Static offset (kept under
+   reduced-motion) still reads as a frozen motion trail. */
 .page-title {
   font-family: var(--font-display);
   font-style: italic;
@@ -259,6 +253,25 @@ textarea:focus-visible,
   letter-spacing: -0.02em;
   line-height: 1.05;
   margin-bottom: 6px;
+  text-shadow:
+    0.035em 0.028em 0 rgba(232, 80, 58, 0.55),
+    0.075em 0.06em 0 rgba(232, 80, 58, 0.20);
+  animation: afterimage-settle 0.34s cubic-bezier(0.2, 0.72, 0.2, 1) both;
+}
+
+@keyframes afterimage-settle {
+  from {
+    text-shadow:
+      0.16em 0.13em 0 rgba(232, 80, 58, 0.5),
+      0.34em 0.26em 0 rgba(232, 80, 58, 0.22);
+    opacity: 0.4;
+  }
+  to {
+    text-shadow:
+      0.035em 0.028em 0 rgba(232, 80, 58, 0.55),
+      0.075em 0.06em 0 rgba(232, 80, 58, 0.20);
+    opacity: 1;
+  }
 }
 
 .container {
@@ -297,6 +310,24 @@ textarea:focus-visible,
 @keyframes pageReveal {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tempo underline: a gold beat-line wipes in left→right under the active
+   nav item / tab / filter. Apply via a scaleX(0)→scaleX(1) ::after. */
+@keyframes tempo-wipe {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Tier-2 section heading — readable Barlow, full text colour. The missing tier
+   between the Fraunces page title and the tiny condensed-caps utility labels. */
+.section-heading {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  line-height: 1.2;
 }
 
 .optional {
@@ -383,6 +414,45 @@ textarea:focus-visible,
   margin-left: 0.75rem;
 }
 
+/* Avatar — shared by /profile and the public /users/:username page (the latter
+   has no scoped stylesheet, so these must live globally). */
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius);
+  object-fit: cover;
+  border: 2px solid var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* Distinctive placeholder: a lit gold→coral spotlight disc with the initial
+   set in the display face, dark for contrast — reads as a stage badge. */
+.avatar-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius);
+  background:
+    radial-gradient(ellipse 70% 70% at 30% 25%, rgba(255, 255, 255, 0.28), transparent 60%),
+    linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: #07070D;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), var(--shadow-glow);
+}
+
 // Star rating
 .rating-section {
   display: flex;
@@ -466,6 +536,35 @@ textarea:focus-visible,
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-text-muted);
+}
+
+/* Skeleton loading placeholders */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface-2);
+  border-radius: var(--radius);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+.skeleton-line {
+  height: 0.95rem;
+  border-radius: 3px;
+}
+.skeleton-line--title { height: 1.35rem; width: 60%; }
+.skeleton-line--short { width: 40%; }
+.skeleton-line--page-title { height: 2.6rem; width: 50%; }
+.skeleton-badge { height: 22px; width: 70px; border-radius: 2px; }
+.skeleton-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
 }
 
 @media (prefers-reduced-motion: reduce) {

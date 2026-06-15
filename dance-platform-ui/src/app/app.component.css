@@ -70,6 +70,7 @@
 }
 
 .header__nav a {
+  position: relative;
   font-family: var(--font-ui);
   font-size: 0.85rem;
   font-weight: 700;
@@ -78,14 +79,24 @@
   color: var(--color-text-muted);
   padding: 7px 14px;
   border-radius: var(--radius);
-  transition: all var(--transition);
-  &:hover { color: var(--color-text); background: rgba(255, 255, 255, 0.04); }
+  transition: color var(--transition);
+  &:hover { color: var(--color-text); }
 }
 
-/* Active page indicator (not applied to .btn links) */
+/* Active page indicator: a gold beat-line wipes in beneath the link. */
 .header__nav a.is-active:not(.btn) {
   color: var(--color-primary);
-  background: var(--color-primary-glow);
+}
+.header__nav a.is-active:not(.btn)::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 1px;
+  height: 2px;
+  background: var(--color-primary);
+  transform-origin: left center;
+  animation: tempo-wipe 0.22s ease both;
 }
 
 .main {

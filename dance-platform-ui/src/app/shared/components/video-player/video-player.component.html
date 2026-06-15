@@ -19,22 +19,22 @@
 
     <div class="controls">
       <div class="control-row">
-        <label>Speed</label>
-        <div class="speed-buttons">
+        <label id="speed-label">Speed</label>
+        <div class="speed-buttons" role="group" aria-labelledby="speed-label">
           @for (rate of playbackRates; track rate) {
-            <button class="speed-btn" [class.active]="currentRate() === rate" (click)="setRate(rate)">{{ rate }}x</button>
+            <button class="speed-btn" [class.active]="currentRate() === rate" (click)="setRate(rate)" [attr.aria-pressed]="currentRate() === rate" [attr.aria-label]="'Playback speed ' + rate + 'x'">{{ rate }}x</button>
           }
         </div>
       </div>
 
-      <div class="control-row control-row--column">
+      <div class="control-row control-row--column loop-block">
         <div class="repeat-header">
-          <label>Repeat Region</label>
+          <label>Loop</label>
           @if (videoDuration() > 0) {
             <span class="repeat-times">{{ formatTime(repeatStart) }} → {{ formatTime(repeatEnd) }}</span>
           }
           <button class="btn btn--accent btn--sm" (click)="toggleRepeat()" [disabled]="videoDuration() === 0">
-            {{ repeating() ? 'Stop Repeat' : 'Repeat Region' }}
+            {{ repeating() ? 'Stop loop' : 'Loop this section' }}
           </button>
         </div>
         @if (videoDuration() > 0) {
@@ -42,18 +42,20 @@
             <div class="slider-row">
               <span class="slider-label">Start</span>
               <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatStart"
+                aria-label="Loop start time" [attr.aria-valuetext]="formatTime(repeatStart)"
                 (input)="onStartSliderChange(+$any($event.target).value)" />
               <span class="slider-time">{{ formatTime(repeatStart) }}</span>
             </div>
             <div class="slider-row">
               <span class="slider-label">End</span>
               <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatEnd"
+                aria-label="Loop end time" [attr.aria-valuetext]="formatTime(repeatEnd)"
                 (input)="onEndSliderChange(+$any($event.target).value)" />
               <span class="slider-time">{{ formatTime(repeatEnd) }}</span>
             </div>
           </div>
         } @else {
-          <p class="repeat-hint">Load the video to enable sliders</p>
+          <p class="repeat-hint">Start the video, then drag to set your loop points.</p>
         }
       </div>
     </div>
@@ -73,29 +75,31 @@
     </div>
 
     <div class="controls">
-      <div class="control-row control-row--column">
+      <div class="control-row control-row--column loop-block">
         <div class="repeat-header">
-          <label>Repeat Region</label>
+          <label>Loop</label>
           <span class="repeat-times">{{ formatTime(repeatStart) }} → {{ formatTime(repeatEnd) }}</span>
           <button class="btn btn--accent btn--sm" (click)="toggleRepeat()">
-            {{ repeating() ? 'Stop Repeat' : 'Repeat Region' }}
+            {{ repeating() ? 'Stop loop' : 'Loop this section' }}
           </button>
         </div>
         <div class="slider-group">
           <div class="slider-row">
             <span class="slider-label">Start</span>
             <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatStart"
+              aria-label="Repeat region start time" [attr.aria-valuetext]="formatTime(repeatStart)"
               (input)="onStartSliderChange(+$any($event.target).value)" />
             <span class="slider-time">{{ formatTime(repeatStart) }}</span>
           </div>
           <div class="slider-row">
             <span class="slider-label">End</span>
             <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatEnd"
+              aria-label="Repeat region end time" [attr.aria-valuetext]="formatTime(repeatEnd)"
               (input)="onEndSliderChange(+$any($event.target).value)" />
             <span class="slider-time">{{ formatTime(repeatEnd) }}</span>
           </div>
         </div>
-        <p class="repeat-hint">Duration auto-updates as the video plays. Speed control not available for TikTok.</p>
+        <p class="repeat-hint">Loop points update as the video plays. Speed control isn't available for TikTok.</p>
       </div>
     </div>
   }

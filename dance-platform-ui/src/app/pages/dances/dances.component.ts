@@ -32,6 +32,7 @@ const STATUS_OPTIONS = [
 export class DancesComponent implements OnInit {
   readonly difficulties = DIFFICULTIES;
   readonly statusOptions = STATUS_OPTIONS;
+  readonly skeletonCards = [0, 1, 2, 3, 4, 5];
 
   // Data
   allDances = signal<Dance[]>([]);
@@ -93,11 +94,22 @@ export class DancesComponent implements OnInit {
     }
   });
 
+  thumbFailed = signal<Set<number>>(new Set());
+
   thumbnailUrl(dance: Dance): string | null {
+    if (this.thumbFailed().has(dance.id)) return null;
     if (dance.thumbnailVideoId && dance.thumbnailPlatform === 'youtube') {
       return `https://i.ytimg.com/vi/${dance.thumbnailVideoId}/hqdefault.jpg`;
     }
     return null;
+  }
+
+  onThumbError(danceId: number): void {
+    this.thumbFailed.update(set => {
+      const next = new Set(set);
+      next.add(danceId);
+      return next;
+    });
   }
 
   clearFilters(): void {

@@ -2,8 +2,8 @@
   <div class="page-header">
     <div class="page-header__top">
       <div>
-        <h1 class="page-title">Explore Dances</h1>
-        <p class="page-subtitle">Discover, favorite, and track your dance journey</p>
+        <h1 class="page-title">Find your next move</h1>
+        <p class="page-subtitle">Browse the catalog, save what moves you, track what you learn</p>
       </div>
       @if (role.isAdmin()) {
         <div class="admin-actions">
@@ -229,16 +229,40 @@
   }
 
   @if (loading()) {
-    <div class="loading">Loading dances...</div>
+    <div class="grid grid--2" aria-busy="true" aria-label="Loading dances">
+      @for (i of skeletonCards; track i) {
+        <div class="card dance-card dance-card--skeleton">
+          <div class="dance-card__media skeleton"></div>
+          <div class="dance-card__body">
+            <div class="skeleton skeleton-line skeleton-line--title"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line skeleton-line--short"></div>
+            <div class="skeleton-badges">
+              <div class="skeleton skeleton-badge"></div>
+              <div class="skeleton skeleton-badge"></div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
   } @else if (sortedDances().length === 0) {
-    <div class="empty">No dances found.</div>
+    <div class="empty-state card">
+      <div class="empty-state__icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <h2>No dances found</h2>
+      @if (hasActiveFilters()) {
+        <p>No dances match your current filters.</p>
+        <button class="btn btn--primary btn--sm" (click)="clearFilters()"><i class="fa-solid fa-xmark"></i> Clear filters</button>
+      } @else {
+        <p>There are no dances here yet.</p>
+      }
+    </div>
   } @else {
     <div class="grid grid--2">
       @for (dance of sortedDances(); track dance.id) {
         <div class="card dance-card">
           <a [routerLink]="['/dances', dance.slug]" class="dance-card__media" tabindex="-1" aria-hidden="true">
             @if (thumbnailUrl(dance); as thumb) {
-              <img [src]="thumb" alt="" loading="lazy" class="dance-card__thumb" />
+              <img [src]="thumb" alt="" loading="lazy" class="dance-card__thumb" (error)="onThumbError(dance.id)" />
             } @else {
               <span class="dance-card__media-fallback"><i class="fa-solid fa-music"></i></span>
             }

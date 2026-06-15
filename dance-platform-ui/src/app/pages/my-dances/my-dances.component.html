@@ -47,7 +47,18 @@
   }
 
   @if (loading()) {
-    <div class="loading">Loading your dances...</div>
+    <div aria-busy="true" aria-label="Loading your dances">
+      <div class="skeleton-badges" style="margin-bottom: 28px;">
+        @for (i of [0,1,2,3]; track i) {
+          <div class="skeleton skeleton-badge" style="width: 96px; height: 36px;"></div>
+        }
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        @for (i of [0,1,2,3,4]; track i) {
+          <div class="skeleton skeleton-line" style="height: 48px;"></div>
+        }
+      </div>
+    </div>
   } @else if (myStyles().length === 0) {
     <div class="empty-state card">
       <div class="empty-state__icon"><i class="fa-solid fa-person-dancing"></i></div>
@@ -69,6 +80,18 @@
 
     @if (selectedStyle()) {
       <div class="dances-view">
+
+        @if (trackedCount() > 0) {
+          <div class="style-progress">
+            <div class="style-progress__head">
+              <span class="style-progress__count">{{ learnedDances().length }} of {{ trackedCount() }} learned</span>
+              <span class="style-progress__pct">{{ learnedPct() }}%</span>
+            </div>
+            <div class="style-progress__track" role="progressbar" [attr.aria-valuenow]="learnedPct()" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'Learned ' + learnedPct() + ' percent of tracked moves in ' + selectedStyle()!.styleName">
+              <div class="style-progress__fill" [style.width.%]="learnedPct()"></div>
+            </div>
+          </div>
+        }
 
         <!-- Add Dance Button + Form -->
         <div class="add-dance-bar">
@@ -144,17 +167,20 @@
             <div class="dance-list">
               @for (dance of learnedDances(); track dance.id) {
                 <div class="dance-row">
-                  <a [routerLink]="['/dances', dance.slug]" class="dance-item">
-                    <span class="dance-status dance-status--learned"><i class="fa-solid fa-check"></i></span>
-                    <span class="dance-name">{{ dance.name }}</span>
+                  <div class="dance-row__bar">
+                    <a [routerLink]="['/dances', dance.slug]" class="dance-item">
+                      <span class="dance-status dance-status--learned"><i class="fa-solid fa-check"></i></span>
+                      <span class="dance-name">{{ dance.name }}</span>
+                      <span class="dance-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                    </a>
                     <button type="button" class="dance-expand"
                       [class.dance-expand--open]="expandedDanceId() === dance.id"
                       (click)="toggleExpand(dance.id, $event)"
-                      [attr.aria-label]="expandedDanceId() === dance.id ? 'Hide video' : 'Show video'">
+                      [attr.aria-expanded]="expandedDanceId() === dance.id"
+                      [attr.aria-label]="expandedDanceId() === dance.id ? 'Hide video for ' + dance.name : 'Show video for ' + dance.name">
                       <i class="fa-solid fa-chevron-down"></i>
                     </button>
-                    <span class="dance-arrow">→</span>
-                  </a>
+                  </div>
                   @if (expandedDanceId() === dance.id) {
                     <div class="dance-expanded">
                       @if (loadingVideos()) {
@@ -188,17 +214,20 @@
             <div class="dance-list">
               @for (dance of inProgressDances(); track dance.id) {
                 <div class="dance-row">
-                  <a [routerLink]="['/dances', dance.slug]" class="dance-item">
-                    <span class="dance-status dance-status--progress"><i class="fa-solid fa-circle-half-stroke"></i></span>
-                    <span class="dance-name">{{ dance.name }}</span>
+                  <div class="dance-row__bar">
+                    <a [routerLink]="['/dances', dance.slug]" class="dance-item">
+                      <span class="dance-status dance-status--progress"><i class="fa-solid fa-circle-half-stroke"></i></span>
+                      <span class="dance-name">{{ dance.name }}</span>
+                      <span class="dance-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                    </a>
                     <button type="button" class="dance-expand"
                       [class.dance-expand--open]="expandedDanceId() === dance.id"
                       (click)="toggleExpand(dance.id, $event)"
-                      [attr.aria-label]="expandedDanceId() === dance.id ? 'Hide video' : 'Show video'">
+                      [attr.aria-expanded]="expandedDanceId() === dance.id"
+                      [attr.aria-label]="expandedDanceId() === dance.id ? 'Hide video for ' + dance.name : 'Show video for ' + dance.name">
                       <i class="fa-solid fa-chevron-down"></i>
                     </button>
-                    <span class="dance-arrow">→</span>
-                  </a>
+                  </div>
                   @if (expandedDanceId() === dance.id) {
                     <div class="dance-expanded">
                       @if (loadingVideos()) {

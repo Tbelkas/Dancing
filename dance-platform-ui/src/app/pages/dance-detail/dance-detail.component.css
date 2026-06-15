@@ -46,10 +46,81 @@
 
 .detail-actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: flex-end;
+  justify-content: flex-end;
 }
+
+/* Progress: two connected segments under one label. Each is still an
+   independent toggle (not single-select), so both can read active. */
+.progress-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.progress-control__label {
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+
+.progress-segments {
+  display: inline-flex;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.progress-seg {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 9px 16px;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  transition: color var(--transition), background var(--transition);
+
+  & + & { border-left: 1px solid var(--color-border-light); }
+  &:hover { color: var(--color-text); background: rgba(255, 255, 255, 0.03); }
+}
+
+/* Active state: a tempo beat-line wipes in beneath the chosen segment,
+   tinted to each state's identity (teal = in progress, gold = learned). */
+.progress-seg.is-active { color: var(--color-text); }
+.progress-seg.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  transform-origin: left center;
+  animation: tempo-wipe 0.22s ease both;
+}
+.progress-seg--inprogress.is-active {
+  background: rgba(98, 196, 176, 0.12);
+  color: var(--color-music);
+}
+.progress-seg--inprogress.is-active::after { background: var(--color-music); }
+.progress-seg--learned.is-active {
+  background: var(--color-primary-glow);
+  color: var(--color-primary);
+}
+.progress-seg--learned.is-active::after { background: var(--color-primary); }
 
 .detail-right {
   display: flex;
@@ -93,12 +164,11 @@
 }
 
 .videos-section h2 {
-  font-family: var(--font-ui);
-  font-size: 0.72rem;
+  font-family: var(--font-body);
+  font-size: 1.2rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-text-muted);
+  letter-spacing: -0.01em;
+  color: var(--color-text);
   margin-bottom: 0;
 }
 
@@ -303,9 +373,31 @@
     margin-bottom: 32px;
     padding-bottom: 24px;
   }
-  .detail-right { align-items: flex-start; }
-  .detail-actions { width: 100%; }
-  .detail-actions .btn { flex: 1; justify-content: center; }
+  .detail-right { align-items: stretch; }
+  .detail-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .fav-btn { justify-content: center; }
+  .progress-control { align-items: stretch; }
+  .progress-control__label { text-align: left; }
+  .progress-segments { width: 100%; }
+  .progress-seg { flex: 1; justify-content: center; }
   .video-list-item { padding: 12px 14px; }
   .video-list-item__title { white-space: normal; }
+}
+
+/* Loading skeleton */
+.detail-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 760px;
+}
+.detail-skeleton__video {
+  margin-top: 18px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
 }
