@@ -158,6 +158,33 @@ public class DanceService : IDanceService
         return true;
     }
 
+    /// <summary>
+    /// Sets the mutually-exclusive learning status (notstarted/inprogress/learned) for a user+dance
+    /// in a single transaction. Reconciles both join tables together so the two states can never
+    /// both be set — enforcing the invariant server-side rather than trusting the client.
+    /// </summary>
+    public async Task<DanceStatusDto> SetStatusAsync(int userId, int danceId, string status)
+    {
+        var learned = await _db.UserLearnedDances.FindAsync(userId, danceId);
+        var inProgress = await _db.UserInProgressDances.FindAsync(userId, danceId);
+
+        var wantLearned = status == "learned";
+        var wantInProgress = status == "inprogress";
+
+        if (wantLearned && learned is null)
+            _db.UserLearnedDances.Add(new UserLearnedDance { UserId = userId, DanceId = danceId });
+        else if (!wantLearned && learned is not null)
+            _db.UserLearnedDances.Remove(learned);
+
+        if (wantInProgress && inProgress is null)
+            _db.UserInProgressDances.Add(new UserInProgressDance { UserId = userId, DanceId = danceId });
+        else if (!wantInProgress && inProgress is not null)
+            _db.UserInProgressDances.Remove(inProgress);
+
+        await _db.SaveChangesAsync();
+        return new DanceStatusDto(wantLearned, wantInProgress);
+    }
+
     public async Task<DanceDto?> RateDanceAsync(int userId, int danceId, int rating)
     {
         var existing = await _db.DanceRatings.FindAsync(userId, danceId);

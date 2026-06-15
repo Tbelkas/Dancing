@@ -2,7 +2,7 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { DanceService, CreateDancePayload, ImportResult } from '../../core/services/dance.service';
+import { DanceService, CreateDancePayload, ImportResult, DanceStatus } from '../../core/services/dance.service';
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
 import { InstructorService } from '../../core/services/instructor.service';
@@ -206,10 +206,22 @@ export class DancesComponent implements OnInit {
   toggleLearned(dance: Dance, event: Event): void {
     event.stopPropagation();
     event.preventDefault();
-    this.danceService.toggleLearned(dance.id).subscribe(res => {
-      this.allDances.update(list =>
-        list.map(d => d.id === dance.id ? { ...d, isLearned: res.isLearned } : d)
-      );
+    const snap = { isLearned: dance.isLearned, isInProgress: dance.isInProgress };
+    const status: DanceStatus = dance.isLearned ? 'notstarted' : 'learned';
+    const willLearn = status === 'learned';
+
+    // Optimistic single atomic call: flip now, revert on failure. Marking learned
+    // clears in-progress server-side (mutually exclusive), so mirror that here.
+    this.allDances.update(list =>
+      list.map(d => d.id === dance.id
+        ? { ...d, isLearned: willLearn, isInProgress: willLearn ? false : d.isInProgress }
+        : d)
+    );
+
+    this.danceService.setStatus(dance.id, status).subscribe({
+      error: () => this.allDances.update(list =>
+        list.map(d => d.id === dance.id ? { ...d, ...snap } : d)
+      )
     });
   }
 

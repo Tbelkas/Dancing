@@ -11,12 +11,15 @@
 .not-found__icon {
   font-size: 4rem;
   margin-bottom: 8px;
-  animation: bounce 1.2s ease infinite alternate;
+  color: var(--color-primary);
+  /* One-shot drop-and-settle — the dancer lands, then holds. No idle loop. */
+  animation: missed-step 0.5s cubic-bezier(0.2, 0.85, 0.3, 1) both;
 }
 
-@keyframes bounce {
-  from { transform: translateY(0); }
-  to { transform: translateY(-12px); }
+@keyframes missed-step {
+  0% { transform: translateY(-22px) rotate(-8deg); opacity: 0; }
+  60% { transform: translateY(4px) rotate(3deg); opacity: 1; }
+  100% { transform: translateY(0) rotate(0); opacity: 1; }
 }
 
 .not-found__title {

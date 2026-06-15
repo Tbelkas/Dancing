@@ -13,6 +13,7 @@ public interface IDanceService
     Task<bool> ToggleFavoriteAsync(int userId, int danceId);
     Task<bool> ToggleLearnedAsync(int userId, int danceId);
     Task<bool> ToggleInProgressAsync(int userId, int danceId);
+    Task<DanceStatusDto> SetStatusAsync(int userId, int danceId, string status);
     Task<List<DanceDto>> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, int? userId);
     Task<DanceDto?> RateDanceAsync(int userId, int danceId, int rating);
 }

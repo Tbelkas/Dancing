@@ -3,7 +3,7 @@ import { CommonModule, Location } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { DanceService, UpdateDancePayload } from '../../core/services/dance.service';
+import { DanceService, UpdateDancePayload, DanceStatus } from '../../core/services/dance.service';
 import { VideoService, CreateVideoPayload, SegmentPayload } from '../../core/services/video.service';
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
@@ -155,27 +155,41 @@ export class DanceDetailComponent implements OnInit {
     });
   }
 
+  // Learned / In progress are a mutually-exclusive single-select status, set in one
+  // atomic server call. The UI flips immediately (optimistic) and reverts on failure.
+
   toggleLearned(): void {
     const d = this.dance();
     if (!d) return;
-    this.actionError.set('');
-    this.danceService.toggleLearned(d.id).subscribe({
-      next: res => this.dance.update(cur => cur ? {
-        ...cur,
-        isLearned: res.isLearned,
-        learnedCount: cur.learnedCount + (res.isLearned ? 1 : -1)
-      } : cur),
-      error: () => this.actionError.set('Action failed. Please log in again.')
-    });
+    this.setStatus(d.isLearned ? 'notstarted' : 'learned');
   }
 
   toggleInProgress(): void {
     const d = this.dance();
     if (!d) return;
+    this.setStatus(d.isInProgress ? 'notstarted' : 'inprogress');
+  }
+
+  private setStatus(status: DanceStatus): void {
+    const d = this.dance();
+    if (!d) return;
     this.actionError.set('');
-    this.danceService.toggleInProgress(d.id).subscribe({
-      next: res => this.dance.update(cur => cur ? { ...cur, isInProgress: res.isInProgress } : cur),
-      error: () => this.actionError.set('Action failed. Please log in again.')
+    const snap = { isLearned: d.isLearned, isInProgress: d.isInProgress, learnedCount: d.learnedCount };
+    const willLearn = status === 'learned';
+    const learnedDelta = (willLearn ? 1 : 0) - (d.isLearned ? 1 : 0);
+
+    this.dance.update(cur => cur ? {
+      ...cur,
+      isLearned: willLearn,
+      isInProgress: status === 'inprogress',
+      learnedCount: cur.learnedCount + learnedDelta
+    } : cur);
+
+    this.danceService.setStatus(d.id, status).subscribe({
+      error: () => {
+        this.dance.update(cur => cur ? { ...cur, ...snap } : cur);
+        this.actionError.set('Couldn\'t save that. Check your connection and try again.');
+      }
     });
   }
 

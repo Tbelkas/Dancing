@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { Dance } from '../../models/dance.model';
 import { environment } from '../../../environments/environment';
 
+export type DanceStatus = 'notstarted' | 'inprogress' | 'learned';
+
 export interface CreateDancePayload {
   name: string;
   description?: string;
@@ -79,6 +81,11 @@ export class DanceService {
 
   toggleInProgress(id: number): Observable<{ isInProgress: boolean }> {
     return this.http.post<{ isInProgress: boolean }>(`${this.base}/${id}/inprogress`, {});
+  }
+
+  /** Sets the mutually-exclusive learning status atomically (one transaction, server-enforced). */
+  setStatus(id: number, status: DanceStatus): Observable<{ isLearned: boolean; isInProgress: boolean }> {
+    return this.http.put<{ isLearned: boolean; isInProgress: boolean }>(`${this.base}/${id}/status`, { status });
   }
 
   importDances(text: string): Observable<ImportResult> {

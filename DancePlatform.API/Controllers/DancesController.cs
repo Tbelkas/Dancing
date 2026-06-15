@@ -80,6 +80,14 @@ public class DancesController : ControllerBase
     }
 
     [Authorize]
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> SetStatus(int id, [FromBody] SetStatusRequest request)
+    {
+        var result = await _danceService.SetStatusAsync(CurrentUserId!.Value, id, request.Status);
+        return Ok(result);
+    }
+
+    [Authorize]
     [HttpPost("{id}/rate")]
     public async Task<IActionResult> Rate(int id, [FromBody] RateDanceRequest request)
     {

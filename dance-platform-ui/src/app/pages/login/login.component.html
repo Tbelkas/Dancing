@@ -1,7 +1,7 @@
 <div class="login-page">
   <div class="card login-card">
-    <h1 class="page-title">{{ isRegister() ? 'Create Account' : 'Welcome Back' }}</h1>
-    <p class="subtitle">{{ isRegister() ? 'Start your dance journey' : 'Sign in to continue' }}</p>
+    <h1 class="page-title">{{ isRegister() ? 'Create account' : 'Welcome back' }}</h1>
+    <p class="subtitle">{{ isRegister() ? 'Start your dance journey' : 'Sign in to pick up where you left off' }}</p>
 
     @if (error()) {
       <div class="error-message">{{ error() }}</div>
