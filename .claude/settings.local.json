@@ -40,7 +40,8 @@
       "PowerShell(ssh pi@pi \"sudo -u postgres psql -d dancing -c '\\\\dt'\")",
       "Bash(python -c ' *)",
       "PowerShell([System.Environment]::SetEnvironmentVariable\\(\"OLLAMA_HOST\", \"0.0.0.0\", \"Machine\"\\))",
-      "PowerShell(& \"C:\\\\Users\\\\valot\\\\Documents\\\\Git\\\\Projects\\\\Dance\\\\deploy-dance.bat\")"
+      "PowerShell(& \"C:\\\\Users\\\\valot\\\\Documents\\\\Git\\\\Projects\\\\Dance\\\\deploy-dance.bat\")",
+      "PowerShell(ssh pi@pi \"curl -s --connect-timeout 5 http://192.168.0.174:11434/api/tags\")"
     ]
   }
 }
