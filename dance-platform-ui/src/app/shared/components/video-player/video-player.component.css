@@ -5,9 +5,16 @@
   overflow: hidden;
 }
 
-.yt-player {
+/* The YouTube IFrame API replaces our <div.yt-player> with an <iframe.yt-player>
+   it creates itself — that iframe lacks Angular's encapsulation attribute, so
+   scoped styles don't reach it (it renders at the default 640×360, left-aligned).
+   ::ng-deep pierces encapsulation so the iframe fills the wrapper at 16:9. */
+:host ::ng-deep .yt-player {
+  display: block;
   width: 100%;
-  aspect-ratio: 16/9;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 0;
 }
 
 /* Tutorial segments */
