@@ -543,8 +543,21 @@
     -webkit-mask-image: linear-gradient(90deg, #000 92%, transparent);
   }
   .style-filters::-webkit-scrollbar { display: none; }
+
+  /* Touch-friendly hit areas on phones (WCAG 2.5.5): bigger pills and icon
+     buttons than the dense desktop sizing. */
   .filter-pill {
     scroll-snap-align: start;
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
   }
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1.05rem;
+  }
+  .search-input { padding-top: 12px; padding-bottom: 12px; }
+  .search-clear { width: 34px; height: 34px; }
 }

@@ -1,0 +1,97 @@
+- generic [ref=e2]:
+  - link "Skip to content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Dance Platform" [ref=e6] [cursor=pointer]:
+        - /url: /dances
+      - button "Toggle navigation menu" [expanded] [active] [ref=e7] [cursor=pointer]:
+        - generic [ref=e478]: 
+      - navigation [ref=e479]:
+        - link "Browse" [ref=e480] [cursor=pointer]:
+          - /url: /dances
+        - link "My Dances" [ref=e481] [cursor=pointer]:
+          - /url: /my-dances
+        - link "Practice" [ref=e482] [cursor=pointer]:
+          - /url: /practice
+        - link "Profile" [ref=e483] [cursor=pointer]:
+          - /url: /profile
+        - button "Sign out" [ref=e484] [cursor=pointer]
+  - main [ref=e9]:
+    - generic [ref=e11]:
+      - generic [ref=e14]:
+        - heading "Find your next move" [level=1] [ref=e15]
+        - paragraph [ref=e16]: Browse the catalog, save what moves you, track what you learn
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic:
+            - generic: 
+          - textbox "Search dances" [ref=e19]:
+            - /placeholder: Search dances...
+            - text: zzzzzznotadance
+          - button "Clear search" [ref=e467] [cursor=pointer]:
+            - generic [ref=e468]: 
+        - generic [ref=e20]:
+          - generic [ref=e21]: "Style:"
+          - generic [ref=e22]:
+            - button "All" [ref=e23] [cursor=pointer]
+            - button "Latin" [ref=e24] [cursor=pointer]
+            - button "Ballroom" [ref=e25] [cursor=pointer]
+            - button "Street / Urban" [ref=e26] [cursor=pointer]
+            - button "Classical / Ballet" [ref=e27] [cursor=pointer]
+            - button "Folk / Traditional" [ref=e28] [cursor=pointer]
+            - button "Swing" [ref=e29] [cursor=pointer]
+            - button "Contemporary" [ref=e30] [cursor=pointer]
+            - button "Waacking" [ref=e31] [cursor=pointer]
+            - button "Tektonik" [ref=e32] [cursor=pointer]
+            - button "Hip-hop" [ref=e33] [cursor=pointer]
+            - button "House" [ref=e34] [cursor=pointer]
+        - generic [ref=e35]:
+          - generic [ref=e36]: "Music:"
+          - generic [ref=e37]:
+            - button "All" [ref=e38] [cursor=pointer]
+            - button "Salsa" [ref=e39] [cursor=pointer]
+            - button "Classical / Orchestral" [ref=e40] [cursor=pointer]
+            - button "Hip-Hop" [ref=e41] [cursor=pointer]
+            - button "Jazz" [ref=e42] [cursor=pointer]
+            - button "Tango" [ref=e43] [cursor=pointer]
+            - button "Electronic / EDM" [ref=e44] [cursor=pointer]
+            - button "Blues" [ref=e45] [cursor=pointer]
+            - button "Reggaeton" [ref=e46] [cursor=pointer]
+            - button "Cumbia" [ref=e47] [cursor=pointer]
+            - button "Flamenco" [ref=e48] [cursor=pointer]
+        - generic [ref=e49]:
+          - generic [ref=e50]: "Level:"
+          - generic [ref=e51]:
+            - button "All" [ref=e52] [cursor=pointer]
+            - button "Beginner" [ref=e53] [cursor=pointer]
+            - button "Intermediate" [ref=e54] [cursor=pointer]
+            - button "Advanced" [ref=e55] [cursor=pointer]
+        - generic [ref=e56]:
+          - generic [ref=e57]: "Status:"
+          - generic [ref=e58]:
+            - button "All" [ref=e59] [cursor=pointer]
+            - button "Not Started" [ref=e60] [cursor=pointer]
+            - button "In Progress" [ref=e61] [cursor=pointer]
+            - button "Learned" [ref=e62] [cursor=pointer]
+            - button "Favorited" [ref=e63] [cursor=pointer]
+      - generic [ref=e64]:
+        - generic [ref=e65]: 0 dances
+        - generic [ref=e66]:
+          - button " Clear filters" [ref=e469] [cursor=pointer]:
+            - generic [ref=e470]: 
+            - text: Clear filters
+          - generic [ref=e67]:
+            - generic [ref=e68]: Sort
+            - combobox "Sort dances" [ref=e69] [cursor=pointer]:
+              - option "Name (A–Z)" [selected]
+              - option "Top rated"
+              - option "Most favorited"
+              - option "Newest"
+      - generic [ref=e471]:
+        - generic [ref=e473]: 
+        - heading "No dances found" [level=2] [ref=e474]
+        - paragraph [ref=e475]: No dances match your current filters.
+        - button " Clear filters" [ref=e476] [cursor=pointer]:
+          - generic [ref=e477]: 
+          - text: Clear filters

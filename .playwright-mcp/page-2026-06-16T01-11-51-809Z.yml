@@ -1,0 +1,138 @@
+- generic [ref=e2]:
+  - link "Skip to content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Dance Platform" [ref=e6] [cursor=pointer]:
+        - /url: /dances
+      - text: 
+      - navigation [ref=e7]:
+        - link "Browse" [ref=e8] [cursor=pointer]:
+          - /url: /dances
+        - link "Sign in" [ref=e9] [cursor=pointer]:
+          - /url: /login
+  - main [ref=e10]:
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - paragraph [ref=e15]: The dance studio in your pocket
+          - heading "Learn any dance, one loop at a time." [level=1] [ref=e17]:
+            - text: Learn any dance,
+            - text: one loop at a time.
+          - paragraph [ref=e18]: Browse a catalog of dances, slow the video down, and loop the section that trips you up until it clicks — then track every move from first watch to learned.
+          - generic [ref=e19]:
+            - link "Browse dances" [ref=e20] [cursor=pointer]:
+              - /url: /dances
+              - generic [ref=e21]: 
+              - text: Browse dances
+            - link "Sign in" [ref=e22] [cursor=pointer]:
+              - /url: /login
+          - paragraph [ref=e23]:
+            - generic [ref=e24]: 
+            - text: Free to browse — no account needed to start watching.
+        - generic [ref=e26]:
+          - generic [ref=e27]: Bachata
+          - generic [ref=e28]: ●
+          - generic [ref=e29]: Salsa
+          - generic [ref=e30]: ●
+          - generic [ref=e31]: Breakdance
+          - generic [ref=e32]: ●
+          - generic [ref=e33]: Ballet
+          - generic [ref=e34]: ●
+          - generic [ref=e35]: Hip-hop
+          - generic [ref=e36]: ●
+          - generic [ref=e37]: Tango
+          - generic [ref=e38]: ●
+          - generic [ref=e39]: Waacking
+          - generic [ref=e40]: ●
+          - generic [ref=e41]: Popping
+          - generic [ref=e42]: ●
+          - generic [ref=e43]: Contemporary
+          - generic [ref=e44]: ●
+          - generic [ref=e45]: Jive
+          - generic [ref=e46]: ●
+          - generic [ref=e47]: Flamenco
+          - generic [ref=e48]: ●
+          - generic [ref=e49]: House
+          - generic [ref=e50]: ●
+          - generic [ref=e51]: Bachata
+          - generic [ref=e52]: ●
+          - generic [ref=e53]: Salsa
+          - generic [ref=e54]: ●
+          - generic [ref=e55]: Breakdance
+          - generic [ref=e56]: ●
+          - generic [ref=e57]: Ballet
+          - generic [ref=e58]: ●
+          - generic [ref=e59]: Hip-hop
+          - generic [ref=e60]: ●
+          - generic [ref=e61]: Tango
+          - generic [ref=e62]: ●
+          - generic [ref=e63]: Waacking
+          - generic [ref=e64]: ●
+          - generic [ref=e65]: Popping
+          - generic [ref=e66]: ●
+          - generic [ref=e67]: Contemporary
+          - generic [ref=e68]: ●
+          - generic [ref=e69]: Jive
+          - generic [ref=e70]: ●
+          - generic [ref=e71]: Flamenco
+          - generic [ref=e72]: ●
+          - generic [ref=e73]: House
+          - generic [ref=e74]: ●
+      - region "Built to help you actually learn the steps" [ref=e75]:
+        - generic [ref=e76]:
+          - paragraph [ref=e77]: What's inside
+          - heading "Built to help you actually learn the steps" [level=2] [ref=e78]:
+            - text: Built to help you
+            - emphasis [ref=e79]: actually learn
+            - text: the steps
+        - generic [ref=e80]:
+          - article [ref=e81]:
+            - generic [ref=e82]:
+              - generic [ref=e84]: 
+              - heading "A practice player built for learning" [level=3] [ref=e85]
+              - paragraph [ref=e86]: Drop any tutorial to quarter speed, set an A→B loop on the one move you can't get, and jump straight to the chapter you need. The video bends to how you practice.
+            - generic [ref=e87]:
+              - generic [ref=e90]: 
+              - generic [ref=e91]:
+                - generic [ref=e92]: Speed
+                - generic [ref=e93]: 0.25×
+                - generic [ref=e94]: 0.5×
+                - generic [ref=e95]: 1×
+              - generic [ref=e96]:
+                - generic [ref=e97]: Loop
+                - generic [ref=e100]: 0:42 → 1:08
+          - article [ref=e101]:
+            - generic [ref=e103]: 
+            - heading "A catalog to explore" [level=3] [ref=e104]
+            - paragraph [ref=e105]: Browse dances across styles, music, and difficulty. Filter and sort to exactly what you want to learn next.
+          - article [ref=e106]:
+            - generic [ref=e108]: 
+            - heading "Track every move" [level=3] [ref=e109]
+            - paragraph [ref=e110]:
+              - text: Flag a dance as
+              - generic [ref=e111]: Favorite
+              - text: ","
+              - generic [ref=e112]: In progress
+              - text: ", or"
+              - generic [ref=e113]: Learned
+              - text: — and watch your progress build.
+          - article [ref=e114]:
+            - generic [ref=e116]: 
+            - heading "Keep a streak alive" [level=3] [ref=e117]
+            - paragraph [ref=e118]: Log practice sessions in seconds. A day-streak counter keeps you coming back to the floor.
+          - article [ref=e119]:
+            - generic [ref=e121]: 
+            - heading "Find the clearest tutorials" [level=3] [ref=e122]
+            - paragraph [ref=e123]: Community ratings float the videos that actually teach the move to the top.
+          - article [ref=e124]:
+            - generic [ref=e126]: 
+            - heading "Show your repertoire" [level=3] [ref=e127]
+            - paragraph [ref=e128]: A shareable public profile shows what you're working on and everything you've mastered.
+      - generic [ref=e130]:
+        - heading "Step onto the floor." [level=2] [ref=e131]
+        - paragraph [ref=e132]: Start watching now — sign in when you're ready to track what you learn.
+        - link "Browse dances" [ref=e133] [cursor=pointer]:
+          - /url: /dances
+          - text: Browse dances
+          - generic [ref=e134]: 

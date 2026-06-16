@@ -1,0 +1,10 @@
+- generic [ref=e2]:
+  - link "Skip to content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Dance Platform" [ref=e6] [cursor=pointer]:
+        - /url: /dances
+      - button "Toggle navigation menu" [ref=e7] [cursor=pointer]:
+        - generic [ref=e8]: 
+  - main [ref=e9]

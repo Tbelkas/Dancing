@@ -453,6 +453,137 @@ textarea:focus-visible,
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), var(--shadow-glow);
 }
 
+/* Profile layout + dance reference lists — shared by /profile and the public
+   /users/:username page. The latter has NO scoped stylesheet, so these live
+   globally; keep this as the single source so both pages stay in sync. */
+.profile-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .profile-layout { grid-template-columns: 1fr; }
+}
+
+.profile-card { border-top: 2px solid var(--color-primary); }
+
+.avatar-section h2 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.nickname {
+  font-family: var(--font-mono);
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  margin-top: 2px;
+}
+
+.username {
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+
+.stats-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stats-column .card h3 {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.count-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-left: auto;
+}
+
+.dance-ref-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.dance-ref-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: background var(--transition), box-shadow var(--transition);
+
+  &:last-child { border-bottom: none; }
+
+  &:hover {
+    background: var(--color-surface-2);
+    box-shadow: inset 3px 0 0 var(--color-primary);
+    color: var(--color-text);
+  }
+}
+
+.dance-ref-icon {
+  font-size: 0.82rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+
+  &.learned { color: var(--color-success); }
+}
+
+.dance-ref-name {
+  flex: 1;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.dance-ref-arrow {
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  transition: transform var(--transition), color var(--transition);
+}
+
+.dance-ref-item:hover .dance-ref-arrow {
+  transform: translateX(4px);
+  color: var(--color-primary);
+}
+
+/* Generic empty-list note (components may override with their own .empty). */
+.empty {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+
 // Star rating
 .rating-section {
   display: flex;

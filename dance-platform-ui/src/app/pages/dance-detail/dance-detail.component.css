@@ -91,6 +91,7 @@
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  white-space: nowrap;
   color: var(--color-text-muted);
   transition: color var(--transition), background var(--transition);
 

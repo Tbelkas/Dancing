@@ -1,0 +1,136 @@
+<div class="lp">
+
+  <!-- ============ HERO ============ -->
+  <header class="lp-hero">
+    <div class="lp-hero__glow" aria-hidden="true"></div>
+
+    <!-- Decorative equalizer — rhythm is the subject, so it gets to move (paused under reduced-motion). -->
+    <div class="lp-eq" aria-hidden="true">
+      @for (h of bars; track $index) {
+        <span class="lp-eq__bar" [style.--h.%]="h" [style.--i]="$index"></span>
+      }
+    </div>
+
+    <div class="container lp-hero__inner">
+      <p class="lp-eyebrow"><span class="lp-eyebrow__beat"></span> The dance studio in your pocket</p>
+      <h1 class="lp-title">Learn any dance,<br>one loop at a time.</h1>
+      <p class="lp-lede">
+        Browse a catalog of dances, slow the video down, and loop the section that trips
+        you up until it clicks — then track every move from first watch to learned.
+      </p>
+      <div class="lp-cta">
+        <a routerLink="/dances" class="btn btn--primary btn--lg">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Browse dances
+        </a>
+        <a routerLink="/login" class="btn btn--ghost btn--lg">Sign in</a>
+      </div>
+      <p class="lp-hero__note"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Free to browse — no account needed to start watching.</p>
+    </div>
+
+    <!-- Marquee: a playbill of styles already on the platform. -->
+    <div class="lp-marquee" aria-hidden="true">
+      <div class="lp-marquee__track">
+        @for (m of marquee; track $index) {
+          <span class="lp-marquee__item">{{ m }}</span>
+          <span class="lp-marquee__dot">●</span>
+        }
+        @for (m of marquee; track 'b' + $index) {
+          <span class="lp-marquee__item">{{ m }}</span>
+          <span class="lp-marquee__dot">●</span>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ FEATURES ============ -->
+  <section class="lp-features container" aria-labelledby="lp-features-h">
+    <header class="lp-section-head">
+      <p class="lp-eyebrow lp-eyebrow--center">What's inside</p>
+      <h2 id="lp-features-h" class="lp-section-title">Built to help you <em>actually learn</em> the steps</h2>
+    </header>
+
+    <div class="lp-grid">
+
+      <!-- Featured: the practice player (the platform's superpower) -->
+      <article class="lp-card lp-card--feature">
+        <div class="lp-card__body">
+          <span class="lp-card__icon"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i></span>
+          <h3 class="lp-card__title">A practice player built for learning</h3>
+          <p class="lp-card__text">
+            Drop any tutorial to quarter speed, set an A→B loop on the one move you can't
+            get, and jump straight to the chapter you need. The video bends to how you practice.
+          </p>
+        </div>
+
+        <!-- A small, honest mock of the real player controls. -->
+        <div class="lp-player" aria-hidden="true">
+          <div class="lp-player__screen">
+            <span class="lp-player__play"><i class="fa-solid fa-play"></i></span>
+          </div>
+          <div class="lp-player__row">
+            <span class="lp-player__label">Speed</span>
+            <span class="lp-chip">0.25×</span>
+            <span class="lp-chip lp-chip--on">0.5×</span>
+            <span class="lp-chip">1×</span>
+          </div>
+          <div class="lp-player__loop">
+            <span class="lp-player__label">Loop</span>
+            <span class="lp-player__loopbar"><span class="lp-player__loopfill"></span></span>
+            <span class="lp-player__time">0:42 → 1:08</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Catalog -->
+      <article class="lp-card">
+        <span class="lp-card__icon"><i class="fa-solid fa-compact-disc" aria-hidden="true"></i></span>
+        <h3 class="lp-card__title">A catalog to explore</h3>
+        <p class="lp-card__text">Browse dances across styles, music, and difficulty. Filter and sort to exactly what you want to learn next.</p>
+      </article>
+
+      <!-- Track progress -->
+      <article class="lp-card">
+        <span class="lp-card__icon"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i></span>
+        <h3 class="lp-card__title">Track every move</h3>
+        <p class="lp-card__text">Flag a dance as
+          <span class="lp-tag lp-tag--fav">Favorite</span>,
+          <span class="lp-tag lp-tag--prog">In progress</span>, or
+          <span class="lp-tag lp-tag--done">Learned</span> — and watch your progress build.</p>
+      </article>
+
+      <!-- Streak -->
+      <article class="lp-card">
+        <span class="lp-card__icon lp-card__icon--ember"><i class="fa-solid fa-fire" aria-hidden="true"></i></span>
+        <h3 class="lp-card__title">Keep a streak alive</h3>
+        <p class="lp-card__text">Log practice sessions in seconds. A day-streak counter keeps you coming back to the floor.</p>
+      </article>
+
+      <!-- Ratings -->
+      <article class="lp-card">
+        <span class="lp-card__icon"><i class="fa-solid fa-star" aria-hidden="true"></i></span>
+        <h3 class="lp-card__title">Find the clearest tutorials</h3>
+        <p class="lp-card__text">Community ratings float the videos that actually teach the move to the top.</p>
+      </article>
+
+      <!-- Profile -->
+      <article class="lp-card">
+        <span class="lp-card__icon"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i></span>
+        <h3 class="lp-card__title">Show your repertoire</h3>
+        <p class="lp-card__text">A shareable public profile shows what you're working on and everything you've mastered.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ CLOSING ============ -->
+  <section class="lp-closing">
+    <div class="container lp-closing__inner">
+      <h2 class="lp-closing__title">Step onto the floor.</h2>
+      <p class="lp-closing__text">Start watching now — sign in when you're ready to track what you learn.</p>
+      <a routerLink="/dances" class="btn btn--primary btn--lg">
+        Browse dances <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+      </a>
+    </div>
+  </section>
+
+</div>

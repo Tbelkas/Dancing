@@ -45,8 +45,8 @@
           </div>
 
           <div class="rating-section">
-            <span class="rating-label">Your rating:</span>
-            <div class="star-rating">
+            <span class="rating-label" id="rating-label">Your rating:</span>
+            <div class="star-rating" role="group" aria-labelledby="rating-label">
               @for (star of stars; track star) {
                 <button
                   class="star-btn"
@@ -54,8 +54,10 @@
                   (mouseenter)="hoverRating.set(star)"
                   (mouseleave)="hoverRating.set(0)"
                   (click)="rateDance(star)"
+                  [attr.aria-label]="'Rate ' + star + ' star' + (star > 1 ? 's' : '')"
+                  [attr.aria-pressed]="star === dance()!.userRating"
                   [title]="star + ' star' + (star > 1 ? 's' : '')"
-                ><i class="fa-solid fa-star"></i></button>
+                ><i class="fa-solid fa-star" aria-hidden="true"></i></button>
               }
             </div>
             @if (dance()!.userRating) {
