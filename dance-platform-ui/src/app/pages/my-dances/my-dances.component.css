@@ -256,21 +256,31 @@
   margin-left: auto;
 }
 
-/* Per-style progress — how much of what you're working on is learned.
-   No margin-bottom: the parent .dances-view flex gap (28px) owns the
-   spacing, otherwise it stacks into an awkward ~50px void. */
+/* Per-style progress — the split between what you're learning and what you've
+   learned. Sits above the style tabs as the headline stat for the active style. */
 .style-progress {
-  margin-bottom: 0;
+  margin-bottom: 18px;
 }
 
 .style-progress__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 8px;
 }
 
-.style-progress__count {
+.style-progress__legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.style-progress__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-ui);
   font-size: 0.72rem;
   font-weight: 700;
@@ -278,6 +288,16 @@
   letter-spacing: 0.08em;
   color: var(--color-text-muted);
 }
+
+.style-progress__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.style-progress__stat--learned .style-progress__dot { background: var(--color-success); }
+.style-progress__stat--progress .style-progress__dot { background: var(--color-music); }
 
 .style-progress__pct {
   font-family: var(--font-mono);
@@ -287,18 +307,21 @@
 }
 
 .style-progress__track {
+  display: flex;
+  gap: 2px;
   height: 6px;
   background: var(--color-surface-2);
   border-radius: 999px;
   overflow: hidden;
 }
 
-.style-progress__fill {
+.style-progress__seg {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-music), var(--color-primary));
-  border-radius: 999px;
-  transition: width 0.45s cubic-bezier(0.2, 0.72, 0.2, 1);
+  transition: flex-grow 0.45s cubic-bezier(0.2, 0.72, 0.2, 1);
 }
+
+.style-progress__seg--learned { background: var(--color-success); }
+.style-progress__seg--progress { background: var(--color-music); }
 
 .dance-list {
   display: flex;

@@ -66,6 +66,34 @@
       <p>Click "Manage Styles" above to add the styles you practice.</p>
     </div>
   } @else {
+    @if (selectedStyle() && trackedCount() > 0) {
+      <div class="style-progress">
+        <div class="style-progress__head">
+          <div class="style-progress__legend">
+            @if (learnedDances().length > 0) {
+              <span class="style-progress__stat style-progress__stat--learned">
+                <span class="style-progress__dot"></span>{{ learnedDances().length }} learned
+              </span>
+            }
+            @if (inProgressDances().length > 0) {
+              <span class="style-progress__stat style-progress__stat--progress">
+                <span class="style-progress__dot"></span>{{ inProgressDances().length }} in progress
+              </span>
+            }
+          </div>
+          <span class="style-progress__pct">{{ learnedPct() }}%</span>
+        </div>
+        <div class="style-progress__track" role="progressbar" [attr.aria-valuenow]="learnedPct()" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="learnedDances().length + ' learned and ' + inProgressDances().length + ' in progress in ' + selectedStyle()!.styleName">
+          @if (learnedDances().length > 0) {
+            <div class="style-progress__seg style-progress__seg--learned" [style.flex]="learnedDances().length"></div>
+          }
+          @if (inProgressDances().length > 0) {
+            <div class="style-progress__seg style-progress__seg--progress" [style.flex]="inProgressDances().length"></div>
+          }
+        </div>
+      </div>
+    }
+
     <div class="style-tabs">
       @for (ms of myStyles(); track ms.styleId) {
         <button
@@ -80,18 +108,6 @@
 
     @if (selectedStyle()) {
       <div class="dances-view">
-
-        @if (trackedCount() > 0) {
-          <div class="style-progress">
-            <div class="style-progress__head">
-              <span class="style-progress__count">{{ learnedDances().length }} of {{ trackedCount() }} learned</span>
-              <span class="style-progress__pct">{{ learnedPct() }}%</span>
-            </div>
-            <div class="style-progress__track" role="progressbar" [attr.aria-valuenow]="learnedPct()" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'Learned ' + learnedPct() + ' percent of tracked moves in ' + selectedStyle()!.styleName">
-              <div class="style-progress__fill" [style.width.%]="learnedPct()"></div>
-            </div>
-          </div>
-        }
 
         <!-- Add Dance Button + Form -->
         <div class="add-dance-bar">

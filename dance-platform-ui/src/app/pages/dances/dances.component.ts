@@ -22,6 +22,36 @@ const STATUS_OPTIONS = [
   { value: 'favorite', label: 'Favorited' }
 ];
 
+// Seeded so the Style / Music filter pills render instantly instead of
+// flickering in after the API responds. ngOnInit still refetches to pick up
+// any styles an admin adds; the IDs mirror the DB so the swap is seamless.
+// danceCount/dateAdded aren't used by the filter UI — placeholders are fine.
+const SEED_STYLES: Style[] = [
+  { id: 1, name: 'Latin', dateAdded: '', danceCount: 0 },
+  { id: 2, name: 'Ballroom', dateAdded: '', danceCount: 0 },
+  { id: 3, name: 'Street / Urban', dateAdded: '', danceCount: 0 },
+  { id: 4, name: 'Classical / Ballet', dateAdded: '', danceCount: 0 },
+  { id: 5, name: 'Folk / Traditional', dateAdded: '', danceCount: 0 },
+  { id: 6, name: 'Swing', dateAdded: '', danceCount: 0 },
+  { id: 7, name: 'Contemporary', dateAdded: '', danceCount: 0 },
+  { id: 8, name: 'Waacking', dateAdded: '', danceCount: 0 },
+  { id: 9, name: 'Tektonik', dateAdded: '', danceCount: 0 },
+  { id: 10, name: 'Hip-hop', dateAdded: '', danceCount: 0 },
+  { id: 11, name: 'House', dateAdded: '', danceCount: 0 }
+];
+const SEED_MUSICAL_STYLES: MusicalStyle[] = [
+  { id: 1, name: 'Salsa', dateAdded: '', danceCount: 0 },
+  { id: 2, name: 'Classical / Orchestral', dateAdded: '', danceCount: 0 },
+  { id: 3, name: 'Hip-Hop', dateAdded: '', danceCount: 0 },
+  { id: 4, name: 'Jazz', dateAdded: '', danceCount: 0 },
+  { id: 5, name: 'Tango', dateAdded: '', danceCount: 0 },
+  { id: 6, name: 'Electronic / EDM', dateAdded: '', danceCount: 0 },
+  { id: 7, name: 'Blues', dateAdded: '', danceCount: 0 },
+  { id: 8, name: 'Reggaeton', dateAdded: '', danceCount: 0 },
+  { id: 9, name: 'Cumbia', dateAdded: '', danceCount: 0 },
+  { id: 10, name: 'Flamenco', dateAdded: '', danceCount: 0 }
+];
+
 @Component({
   selector: 'app-dances',
   standalone: true,
@@ -36,8 +66,8 @@ export class DancesComponent implements OnInit {
 
   // Data
   allDances = signal<Dance[]>([]);
-  styles = signal<Style[]>([]);
-  musicalStyles = signal<MusicalStyle[]>([]);
+  styles = signal<Style[]>(SEED_STYLES);
+  musicalStyles = signal<MusicalStyle[]>(SEED_MUSICAL_STYLES);
   instructors = signal<Instructor[]>([]);
   loading = signal(true);
 
@@ -48,6 +78,25 @@ export class DancesComponent implements OnInit {
   selectedDifficulty = signal<string | null>(null);
   selectedStatus = signal<string>('all');
   sortBy = signal<string>('name');
+
+  // Type-to-narrow for the Style / Music pill lists (option search, not a
+  // results filter — see visibleStyles/visibleMusicalStyles).
+  styleQuery = signal('');
+  musicQuery = signal('');
+
+  readonly visibleStyles = computed(() => {
+    const q = this.styleQuery().trim().toLowerCase();
+    if (!q) return this.styles();
+    const sel = this.selectedStyleId();
+    return this.styles().filter(s => s.id === sel || s.name.toLowerCase().includes(q));
+  });
+
+  readonly visibleMusicalStyles = computed(() => {
+    const q = this.musicQuery().trim().toLowerCase();
+    if (!q) return this.musicalStyles();
+    const sel = this.selectedMusicalStyleId();
+    return this.musicalStyles().filter(ms => ms.id === sel || ms.name.toLowerCase().includes(q));
+  });
 
   readonly hasActiveFilters = computed(() =>
     this.searchQuery().trim() !== '' ||

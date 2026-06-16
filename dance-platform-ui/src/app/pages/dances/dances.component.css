@@ -175,6 +175,71 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Type-to-narrow input that sits between the row label and its pills. */
+.option-search {
+  position: relative;
+  flex-shrink: 0;
+  width: 9.5rem;
+}
+
+.option-search__icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.option-search__input {
+  width: 100%;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  padding: 5px 22px 5px 26px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-glow);
+  }
+
+  &::placeholder {
+    color: var(--color-text-muted);
+    font-style: italic;
+    letter-spacing: 0;
+  }
+}
+
+.option-search__clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  border-radius: 50%;
+  transition: color var(--transition), background var(--transition);
+
+  &:hover { color: var(--color-text); background: rgba(255, 255, 255, 0.06); }
 }
 
 .filter-pill {
@@ -531,6 +596,8 @@
   .filters { gap: 8px; }
   .filter-row { flex-wrap: nowrap; }
   .filter-label { flex-shrink: 0; }
+  /* Trim the option-search so the scrollable pills keep usable room. */
+  .option-search { width: 7rem; }
   .style-filters {
     flex-wrap: nowrap;
     overflow-x: auto;
