@@ -262,7 +262,7 @@
         <div class="card dance-card">
           <a [routerLink]="['/dances', dance.slug]" class="dance-card__media" tabindex="-1" aria-hidden="true">
             @if (thumbnailUrl(dance); as thumb) {
-              <img [src]="thumb" alt="" loading="lazy" class="dance-card__thumb" (error)="onThumbError(dance.id)" />
+              <img [src]="thumb" alt="" loading="lazy" class="dance-card__thumb" (error)="onThumbError(dance.id)" (load)="onThumbLoad(dance.id, $event)" />
             } @else {
               <span class="dance-card__media-fallback"><i class="fa-solid fa-music"></i></span>
             }

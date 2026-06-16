@@ -1,0 +1,66 @@
+- generic [ref=e2]:
+  - link "Skip to content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Dance Platform" [ref=e6] [cursor=pointer]:
+        - /url: /dances
+      - text: 
+      - navigation [ref=e7]:
+        - link "Browse" [ref=e8] [cursor=pointer]:
+          - /url: /dances
+        - link "My Dances" [ref=e9] [cursor=pointer]:
+          - /url: /my-dances
+        - link "Practice" [ref=e10] [cursor=pointer]:
+          - /url: /practice
+        - link "Profile" [ref=e11] [cursor=pointer]:
+          - /url: /profile
+        - button "Sign out" [ref=e12] [cursor=pointer]
+  - main [ref=e13]:
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - heading "Bachata" [level=1] [ref=e27]
+          - generic [ref=e28]:
+            - generic [ref=e29]: Latin
+            - generic [ref=e30]:
+              - generic [ref=e31]: 
+              - text: Reggaeton
+          - generic [ref=e32]:
+            - generic "People who favorited this dance" [ref=e33]:
+              - generic [ref=e34]: 
+              - text: 1 favorited
+            - generic "People who learned this dance" [ref=e35]:
+              - generic [ref=e36]: 
+              - text: 0 learned
+          - paragraph [ref=e37]: A sensual partner dance from the Dominican Republic characterized by a side-to-side hip motion.
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - button " Favorite" [ref=e40] [cursor=pointer]:
+              - generic [ref=e41]: 
+              - text: Favorite
+            - group "Track your progress" [ref=e42]:
+              - generic [ref=e43]: Progress
+              - generic [ref=e44]:
+                - button " In progress" [ref=e45] [cursor=pointer]:
+                  - generic [ref=e46]: 
+                  - text: In progress
+                - button " Learned" [ref=e47] [cursor=pointer]:
+                  - generic [ref=e48]: 
+                  - text: Learned
+          - generic [ref=e49]:
+            - generic [ref=e50]: "Your rating:"
+            - generic [ref=e51]:
+              - button "" [ref=e52] [cursor=pointer]:
+                - generic [ref=e53]: 
+              - button "" [ref=e54] [cursor=pointer]:
+                - generic [ref=e55]: 
+              - button "" [ref=e56] [cursor=pointer]:
+                - generic [ref=e57]: 
+              - button "" [ref=e58] [cursor=pointer]:
+                - generic [ref=e59]: 
+              - button "" [ref=e60] [cursor=pointer]:
+                - generic [ref=e61]: 
+      - generic [ref=e62]:
+        - heading "Videos" [level=2] [ref=e64]
+        - paragraph [ref=e65]: No videos available for this dance yet.

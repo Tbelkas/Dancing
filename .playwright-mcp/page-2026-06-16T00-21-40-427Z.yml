@@ -1,0 +1,52 @@
+- generic [ref=e2]:
+  - link "Skip to content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Dance Platform" [ref=e6] [cursor=pointer]:
+        - /url: /dances
+      - text: 
+      - navigation [ref=e7]:
+        - link "Browse" [ref=e8] [cursor=pointer]:
+          - /url: /dances
+        - link "My Dances" [ref=e9] [cursor=pointer]:
+          - /url: /my-dances
+        - link "Practice" [ref=e10] [cursor=pointer]:
+          - /url: /practice
+        - link "Profile" [ref=e11] [cursor=pointer]:
+          - /url: /profile
+        - button "Sign out" [ref=e12] [cursor=pointer]
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - heading "My Dances" [level=1] [ref=e18]
+          - button "+ Manage Styles" [ref=e19] [cursor=pointer]:
+            - generic [ref=e20]: +
+            - text: Manage Styles
+        - paragraph [ref=e21]: Your dance styles and tracked moves
+      - button "Latin 1" [ref=e35] [cursor=pointer]:
+        - text: Latin
+        - generic [ref=e36]: "1"
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - generic [ref=e40]: 1 of 1 learned
+            - generic [ref=e41]: 100%
+          - progressbar "Learned 100 percent of tracked moves in Latin" [ref=e42]
+        - button "+ Add Dance" [ref=e45] [cursor=pointer]:
+          - generic [ref=e46]: +
+          - text: Add Dance
+        - generic [ref=e47]:
+          - heading " Learned 1" [level=3] [ref=e48]:
+            - generic [ref=e50]: 
+            - text: Learned
+            - generic [ref=e51]: "1"
+          - generic [ref=e54]:
+            - link " Bachata " [ref=e55] [cursor=pointer]:
+              - /url: /dances/bachata
+              - generic [ref=e57]: 
+              - generic [ref=e58]: Bachata
+              - generic [ref=e60]: 
+            - button "Show video for Bachata" [ref=e61] [cursor=pointer]:
+              - generic [ref=e62]: 

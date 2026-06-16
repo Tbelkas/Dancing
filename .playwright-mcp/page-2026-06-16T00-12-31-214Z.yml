@@ -1,0 +1,82 @@
+- generic [ref=e2]:
+  - link "Skip to content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Dance Platform" [ref=e6] [cursor=pointer]:
+        - /url: /dances
+      - text: 
+      - navigation [ref=e7]:
+        - link "Browse" [ref=e8] [cursor=pointer]:
+          - /url: /dances
+        - link "Sign in" [ref=e9] [cursor=pointer]:
+          - /url: /login
+  - main [ref=e10]:
+    - generic [ref=e12]:
+      - generic [ref=e14]:
+        - heading "Bachata" [level=1] [ref=e15]
+        - generic [ref=e16]:
+          - generic [ref=e17]: Latin
+          - generic [ref=e18]:
+            - generic [ref=e19]: 
+            - text: Reggaeton
+        - generic [ref=e20]:
+          - generic "People who favorited this dance" [ref=e21]:
+            - generic [ref=e22]: 
+            - text: 1 favorited
+          - generic "People who learned this dance" [ref=e23]:
+            - generic [ref=e24]: 
+            - text: 0 learned
+        - paragraph [ref=e25]: A sensual partner dance from the Dominican Republic characterized by a side-to-side hip motion.
+      - generic [ref=e26]:
+        - heading "Videos" [level=2] [ref=e28]
+        - generic [ref=e29]:
+          - generic [ref=e30] [cursor=pointer]:
+            - generic [ref=e31]:
+              - generic [ref=e32]: Bachata for Complete Beginners
+              - generic [ref=e33]:
+                - generic [ref=e34]: Feb 27, 2026
+                - generic [ref=e35]:
+                  - generic [ref=e36]: 
+                  - text: < 100
+            - generic [ref=e51]: 
+          - generic [ref=e52]:
+            - paragraph [ref=e53]: Learn the bachata basic step, side step and hip motion from scratch.
+            - generic [ref=e55]:
+              - iframe [ref=e56]:
+                - generic "YouTube Video Player" [ref=f1e3]:
+                  - alert [ref=f1e4]:
+                    - generic [ref=f1e5]:
+                      - generic [ref=f1e6]:
+                        - img
+                      - generic [ref=f1e7]:
+                        - generic [ref=f1e8]: Video unavailable
+                        - generic [ref=f1e9]: This video is unavailable
+                    - link "Visit YouTube to search for more videos" [ref=f1e10] [cursor=pointer]:
+                      - /url: https://www.youtube.com
+                      - img
+              - generic [ref=e57]:
+                - generic [ref=e58]:
+                  - generic [ref=e59]: Speed
+                  - group "Speed" [ref=e60]:
+                    - button "Playback speed 0.25x" [ref=e61] [cursor=pointer]: 0.25x
+                    - button "Playback speed 0.5x" [ref=e62] [cursor=pointer]: 0.5x
+                    - button "Playback speed 0.75x" [ref=e63] [cursor=pointer]: 0.75x
+                    - button "Playback speed 1x" [pressed] [ref=e64] [cursor=pointer]: 1x
+                    - button "Playback speed 1.25x" [ref=e65] [cursor=pointer]: 1.25x
+                    - button "Playback speed 1.5x" [ref=e66] [cursor=pointer]: 1.5x
+                    - button "Playback speed 2x" [ref=e67] [cursor=pointer]: 2x
+                - generic [ref=e68]:
+                  - generic [ref=e69]:
+                    - generic [ref=e70]: Loop
+                    - button "Loop this section" [disabled] [ref=e71]
+                  - paragraph [ref=e72]: Start the video, then drag to set your loop points.
+          - generic [ref=e40] [cursor=pointer]:
+            - generic [ref=e41]:
+              - generic [ref=e42]: Bachata Sensual – Body Movement
+              - generic [ref=e43]:
+                - generic [ref=e44]: Feb 27, 2026
+                - generic [ref=e45]:
+                  - generic [ref=e46]: 
+                  - text: < 100
+            - generic [ref=e49]: 

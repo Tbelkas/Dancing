@@ -441,11 +441,10 @@
 }
 
 .empty-state h2 {
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
+  font-family: var(--font-body);
+  font-size: 1.2rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: -0.01em;
   margin-bottom: 10px;
   color: var(--color-text);
 }

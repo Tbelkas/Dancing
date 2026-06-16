@@ -112,6 +112,19 @@ export class DancesComponent implements OnInit {
     });
   }
 
+  /**
+   * YouTube returns a 120×90 grey placeholder (HTTP 200) when a video has no
+   * thumbnail, so the <img> "loads" and (error) never fires. A real hqdefault
+   * is 480×360 — anything 90px tall is the placeholder, so fall back to the
+   * branded media instead of showing a blurry grey box.
+   */
+  onThumbLoad(danceId: number, event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img.naturalHeight > 0 && img.naturalHeight <= 90) {
+      this.onThumbError(danceId);
+    }
+  }
+
   clearFilters(): void {
     this.searchQuery.set('');
     this.selectedStyleId.set(null);

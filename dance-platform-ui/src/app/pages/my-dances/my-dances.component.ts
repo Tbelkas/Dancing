@@ -108,6 +108,19 @@ export class MyDancesComponent implements OnInit {
     });
   }
 
+  /** Re-pull my-dances without the full-page loading flash; keeps the chosen tab selected. */
+  private refreshMyStyles(preferStyleId?: number): void {
+    this.profileService.getMyDances().subscribe(data => {
+      this.myStyles.set(data);
+      const exists = (id: number | null | undefined) => id != null && data.some(ms => ms.styleId === id);
+      if (exists(preferStyleId)) {
+        this.setSelectedStyle(preferStyleId!);
+      } else if (!exists(this.selectedStyleId())) {
+        this.setSelectedStyle(data.length > 0 ? data[0].styleId : null);
+      }
+    });
+  }
+
   selectStyle(id: number): void {
     this.setSelectedStyle(id);
     this.showAddDance.set(false);
@@ -160,8 +173,15 @@ export class MyDancesComponent implements OnInit {
   toggleMyStyle(style: Style): void {
     this.styleService.toggleMyStyle(style.id).subscribe(res => {
       if (res.isMyStyle) {
-        this.myStyles.update(list => [...list, { styleId: style.id, styleName: style.name, dances: [] }]);
-        if (this.myStyles().length === 1) this.setSelectedStyle(style.id);
+        // Show the tab instantly, then refresh from the server so any dances
+        // already learned / in progress in this style populate it (otherwise the
+        // tab reads "no tracked moves" until a full reload).
+        this.myStyles.update(list =>
+          list.some(ms => ms.styleId === style.id)
+            ? list
+            : [...list, { styleId: style.id, styleName: style.name, dances: [] }]);
+        this.setSelectedStyle(style.id);
+        this.refreshMyStyles(style.id);
       } else {
         const prevId = this.selectedStyleId();
         this.myStyles.update(list => list.filter(ms => ms.styleId !== style.id));
