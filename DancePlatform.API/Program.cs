@@ -25,6 +25,13 @@ builder.Services.AddScoped<IPracticeService, PracticeService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IImportService, ImportService>();
 
+builder.Services.AddHttpClient<IOllamaService, OllamaService>(client =>
+{
+    var baseUrl = builder.Configuration["Ollama:BaseUrl"] ?? "http://localhost:11434";
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(120);
+});
+
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

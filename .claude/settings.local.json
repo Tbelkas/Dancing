@@ -38,7 +38,9 @@
       "PowerShell(ssh pi@pi \"sudo -u postgres psql -d dance_platform -c '\\\\dt' 2>&1 | head -30\")",
       "PowerShell(ssh pi@pi \"sudo -u postgres psql -l 2>&1 | head -15\")",
       "PowerShell(ssh pi@pi \"sudo -u postgres psql -d dancing -c '\\\\dt'\")",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "PowerShell([System.Environment]::SetEnvironmentVariable\\(\"OLLAMA_HOST\", \"0.0.0.0\", \"Machine\"\\))",
+      "PowerShell(& \"C:\\\\Users\\\\valot\\\\Documents\\\\Git\\\\Projects\\\\Dance\\\\deploy-dance.bat\")"
     ]
   }
 }
