@@ -256,9 +256,11 @@
   margin-left: auto;
 }
 
-/* Per-style progress — how much of what you're working on is learned. */
+/* Per-style progress — how much of what you're working on is learned.
+   No margin-bottom: the parent .dances-view flex gap (28px) owns the
+   spacing, otherwise it stacks into an awkward ~50px void. */
 .style-progress {
-  margin-bottom: 22px;
+  margin-bottom: 0;
 }
 
 .style-progress__head {
