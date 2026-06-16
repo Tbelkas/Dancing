@@ -25,21 +25,21 @@ public class OllamaService : IOllamaService
         var styles = string.Join(", ", availableStyles);
         var musicStyles = string.Join(", ", availableMusicalStyles);
 
-        var prompt = $"""
+        var prompt = $$"""
             You are a dance classification expert. Classify this dance move for a learning platform.
 
-            Available dance styles: {(styles.Length > 0 ? styles : "(none defined yet)")}
-            Available musical styles: {(musicStyles.Length > 0 ? musicStyles : "(none defined yet)")}
+            Available dance styles: {{(styles.Length > 0 ? styles : "(none defined yet)")}}
+            Available musical styles: {{(musicStyles.Length > 0 ? musicStyles : "(none defined yet)")}}
 
-            Dance name: "{danceName}"
+            Dance name: "{{danceName}}"
 
             Return ONLY valid JSON, no explanation:
-            {{
+            {
               "dance_styles": [list of matching names from Available dance styles, or []],
               "musical_styles": [list of matching names from Available musical styles, or []],
               "difficulty": "Beginner" or "Intermediate" or "Advanced" or "None",
               "description": "one sentence describing what this move is"
-            }}
+            }
 
             Use ONLY names exactly as listed above. Use [] if nothing matches.
             """;
