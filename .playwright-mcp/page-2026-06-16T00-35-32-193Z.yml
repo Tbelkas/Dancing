@@ -1,0 +1,49 @@
+- generic [ref=e2]:
+  - link "Skip to content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Dance Platform" [ref=e6] [cursor=pointer]:
+        - /url: /dances
+      - text: 
+      - navigation [ref=e7]:
+        - link "Browse" [ref=e8] [cursor=pointer]:
+          - /url: /dances
+        - link "My Dances" [ref=e9] [cursor=pointer]:
+          - /url: /my-dances
+        - link "Practice" [ref=e10] [cursor=pointer]:
+          - /url: /practice
+        - link "Profile" [ref=e11] [cursor=pointer]:
+          - /url: /profile
+        - button "Sign out" [ref=e12] [cursor=pointer]
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - heading "My Dances" [level=1] [ref=e18]
+          - button " Done" [active] [ref=e100] [cursor=pointer]:
+            - generic [ref=e101]: 
+            - text: Done
+        - paragraph [ref=e21]: Your dance styles and tracked moves
+      - generic [ref=e102]:
+        - generic [ref=e103]:
+          - heading "Select your dance styles" [level=3] [ref=e104]
+          - button "+ New Style" [ref=e105] [cursor=pointer]:
+            - generic [ref=e106]: +
+            - text: New Style
+        - generic [ref=e107]:
+          - button "Latin" [ref=e108] [cursor=pointer]
+          - button "Ballroom" [ref=e109] [cursor=pointer]
+          - button "Street / Urban" [ref=e110] [cursor=pointer]
+          - button "Classical / Ballet" [ref=e111] [cursor=pointer]
+          - button "Folk / Traditional" [ref=e112] [cursor=pointer]
+          - button "Swing" [ref=e113] [cursor=pointer]
+          - button "Contemporary" [ref=e114] [cursor=pointer]
+          - button "Waacking" [ref=e115] [cursor=pointer]
+          - button "Tektonik" [ref=e116] [cursor=pointer]
+          - button "Hip-hop" [ref=e117] [cursor=pointer]
+          - button "House" [ref=e118] [cursor=pointer]
+      - generic [ref=e93]:
+        - generic [ref=e95]: 
+        - heading "No dance styles yet" [level=2] [ref=e96]
+        - paragraph [ref=e97]: Click "Manage Styles" above to add the styles you practice.
