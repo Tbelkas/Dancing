@@ -42,6 +42,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     return '';
   }
 
+  private readonly LOOP_PREF_KEY = 'dp_player_loop';
+
   private player: YT.Player | null = null;
   private repeatInterval: ReturnType<typeof setInterval> | null = null;
   private durationPollInterval: ReturnType<typeof setInterval> | null = null;
@@ -65,6 +67,23 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       this.repeatStart = this.startTime ?? 0;
       this.repeatEnd = this.endTime ?? defaultDur;
       if (this.startTime) this.tiktokPost({ type: 'seekTo', value: this.startTime });
+      if (this.repeating() && !this.repeatInterval && this.repeatEnd > this.repeatStart) {
+        this.tiktokCurrentTime = this.repeatStart;
+        this.tiktokPost({ type: 'seekTo', value: this.repeatStart });
+        this.tiktokPost({ type: 'play' });
+        let segmentStartedAt = Date.now();
+        this.repeatInterval = setInterval(() => {
+          const elapsed = (Date.now() - segmentStartedAt) / 1000;
+          const eventsArrive = this.tiktokCurrentTime > this.repeatStart + 0.15;
+          const pos = eventsArrive ? this.tiktokCurrentTime : this.repeatStart + elapsed;
+          if (pos >= this.repeatEnd) {
+            segmentStartedAt = Date.now();
+            this.tiktokCurrentTime = this.repeatStart;
+            this.tiktokPost({ type: 'seekTo', value: this.repeatStart });
+            this.tiktokPost({ type: 'play' });
+          }
+        }, 200);
+      }
     }
 
     if (type === 'onCurrentTime') {
@@ -88,6 +107,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   ngOnInit(): void {
+    this.repeating.set(localStorage.getItem(this.LOOP_PREF_KEY) === '1');
     if (this.isTikTok) {
       const defaultDur = this.endTime ? this.endTime + 10 : 60;
       this.videoDuration.set(defaultDur);
@@ -154,8 +174,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.repeating()) {
       this.clearRepeat();
       this.repeating.set(false);
+      localStorage.setItem(this.LOOP_PREF_KEY, '0');
     } else if (this.repeatEnd > this.repeatStart) {
       this.repeating.set(true);
+      localStorage.setItem(this.LOOP_PREF_KEY, '1');
       if (this.isYouTube) {
         this.player?.seekTo(this.repeatStart, true);
         this.player?.playVideo();
@@ -225,6 +247,16 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.videoDuration.set(Math.floor(dur));
     this.repeatStart = this.startTime ?? 0;
     this.repeatEnd = this.endTime ?? Math.floor(dur);
+    if (this.repeating() && !this.repeatInterval && this.repeatEnd > this.repeatStart) {
+      this.player?.seekTo(this.repeatStart, true);
+      this.player?.playVideo();
+      this.repeatInterval = setInterval(() => {
+        const current = this.player?.getCurrentTime() ?? 0;
+        if (current >= this.repeatEnd) {
+          this.player?.seekTo(this.repeatStart, true);
+        }
+      }, 250);
+    }
     return true;
   }
 

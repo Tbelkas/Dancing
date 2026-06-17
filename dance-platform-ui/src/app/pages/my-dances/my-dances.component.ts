@@ -21,6 +21,7 @@ import { VideoPlayerComponent } from '../../shared/components/video-player/video
 })
 export class MyDancesComponent implements OnInit {
   private readonly SELECTED_STYLE_KEY = 'dp_mydances_style';
+  private readonly EXPANDED_DANCE_KEY = 'dp_mydances_expanded';
 
   myStyles = signal<MyStyleWithDances[]>([]);
   allStyles = signal<Style[]>([]);
@@ -102,6 +103,12 @@ export class MyDancesComponent implements OnInit {
             exists(storedId) ? storedId : (data.length > 0 ? data[0].styleId : null)
           );
         }
+        // Restore last expanded dance if it's in the current style's dances
+        const storedExpanded = localStorage.getItem(this.EXPANDED_DANCE_KEY);
+        const expandedId = storedExpanded ? Number(storedExpanded) : null;
+        if (expandedId && data.flatMap(ms => ms.dances).some(d => d.id === expandedId)) {
+          this.expandDance(expandedId);
+        }
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
@@ -143,9 +150,15 @@ export class MyDancesComponent implements OnInit {
 
     if (this.expandedDanceId() === danceId) {
       this.expandedDanceId.set(null);
+      localStorage.removeItem(this.EXPANDED_DANCE_KEY);
       return;
     }
 
+    localStorage.setItem(this.EXPANDED_DANCE_KEY, String(danceId));
+    this.expandDance(danceId);
+  }
+
+  private expandDance(danceId: number): void {
     this.expandedDanceId.set(danceId);
     const cached = this.videoCache.get(danceId);
     if (cached) {
@@ -158,7 +171,6 @@ export class MyDancesComponent implements OnInit {
     this.videoService.getByDance(danceId).subscribe({
       next: videos => {
         this.videoCache.set(danceId, videos);
-        // Ignore stale responses if the user switched cards meanwhile
         if (this.expandedDanceId() === danceId) {
           this.expandedVideos.set(videos);
           this.loadingVideos.set(false);
