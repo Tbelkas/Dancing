@@ -26,9 +26,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   repeating = signal(false);
   videoDuration = signal(0);
   activeSegmentId = signal<number | null>(null);
+  loopSegmentId = signal<number | null>(null);
 
   repeatStart = 0;
   repeatEnd = 0;
+
+  get loopableSegments(): VideoSegment[] {
+    return this.segments.filter(s => s.endTime != null);
+  }
 
   get isYouTube(): boolean { return this.platform === 'youtube'; }
   get isTikTok(): boolean { return this.platform === 'tiktok'; }
@@ -67,22 +72,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       this.repeatStart = this.startTime ?? 0;
       this.repeatEnd = this.endTime ?? defaultDur;
       if (this.startTime) this.tiktokPost({ type: 'seekTo', value: this.startTime });
-      if (this.repeating() && !this.repeatInterval && this.repeatEnd > this.repeatStart) {
-        this.tiktokCurrentTime = this.repeatStart;
-        this.tiktokPost({ type: 'seekTo', value: this.repeatStart });
-        this.tiktokPost({ type: 'play' });
-        let segmentStartedAt = Date.now();
-        this.repeatInterval = setInterval(() => {
-          const elapsed = (Date.now() - segmentStartedAt) / 1000;
-          const eventsArrive = this.tiktokCurrentTime > this.repeatStart + 0.15;
-          const pos = eventsArrive ? this.tiktokCurrentTime : this.repeatStart + elapsed;
-          if (pos >= this.repeatEnd) {
-            segmentStartedAt = Date.now();
-            this.tiktokCurrentTime = this.repeatStart;
-            this.tiktokPost({ type: 'seekTo', value: this.repeatStart });
-            this.tiktokPost({ type: 'play' });
-          }
-        }, 200);
+      if (this.repeating()) {
+        // Clear any interval started before the player was ready, then start fresh.
+        this.clearRepeat();
+        this.startLoop();
       }
     }
 
@@ -158,10 +151,12 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onStartSliderChange(value: number): void {
     this.repeatStart = Math.min(value, this.repeatEnd > 0 ? this.repeatEnd - 1 : value);
+    this.loopSegmentId.set(null);
   }
 
   onEndSliderChange(value: number): void {
     this.repeatEnd = Math.max(value, this.repeatStart + 1);
+    this.loopSegmentId.set(null);
   }
 
   formatTime(seconds: number): string {
@@ -174,43 +169,23 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.repeating()) {
       this.clearRepeat();
       this.repeating.set(false);
+      this.loopSegmentId.set(null);
       localStorage.setItem(this.LOOP_PREF_KEY, '0');
     } else if (this.repeatEnd > this.repeatStart) {
       this.repeating.set(true);
       localStorage.setItem(this.LOOP_PREF_KEY, '1');
-      if (this.isYouTube) {
-        this.player?.seekTo(this.repeatStart, true);
-        this.player?.playVideo();
-        this.repeatInterval = setInterval(() => {
-          const current = this.player?.getCurrentTime() ?? 0;
-          if (current >= this.repeatEnd) {
-            this.player?.seekTo(this.repeatStart, true);
-          }
-        }, 250);
-      } else if (this.isTikTok) {
-        // Reset so elapsed-time fallback starts from 0
-        this.tiktokCurrentTime = this.repeatStart;
-        this.tiktokPost({ type: 'seekTo', value: this.repeatStart });
-        this.tiktokPost({ type: 'play' });
-
-        // Drive looping via interval — works whether or not onCurrentTime events fire.
-        // Uses actual position from events when available, elapsed wall-clock time otherwise.
-        let segmentStartedAt = Date.now();
-        this.repeatInterval = setInterval(() => {
-          // If onCurrentTime events are arriving, use them; otherwise estimate from elapsed time.
-          const elapsed = (Date.now() - segmentStartedAt) / 1000;
-          const eventsArrive = this.tiktokCurrentTime > this.repeatStart + 0.15;
-          const pos = eventsArrive ? this.tiktokCurrentTime : this.repeatStart + elapsed;
-
-          if (pos >= this.repeatEnd) {
-            segmentStartedAt = Date.now();
-            this.tiktokCurrentTime = this.repeatStart;
-            this.tiktokPost({ type: 'seekTo', value: this.repeatStart });
-            this.tiktokPost({ type: 'play' });
-          }
-        }, 200);
-      }
+      this.startLoop();
     }
+  }
+
+  selectLoopSegment(segment: VideoSegment): void {
+    this.loopSegmentId.set(segment.id);
+    this.repeatStart = segment.startTime;
+    this.repeatEnd = segment.endTime!;
+    this.clearRepeat();
+    this.repeating.set(true);
+    localStorage.setItem(this.LOOP_PREF_KEY, '1');
+    this.startLoop();
   }
 
   private tiktokPost(data: object): void {
@@ -248,14 +223,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.repeatStart = this.startTime ?? 0;
     this.repeatEnd = this.endTime ?? Math.floor(dur);
     if (this.repeating() && !this.repeatInterval && this.repeatEnd > this.repeatStart) {
-      this.player?.seekTo(this.repeatStart, true);
-      this.player?.playVideo();
-      this.repeatInterval = setInterval(() => {
-        const current = this.player?.getCurrentTime() ?? 0;
-        if (current >= this.repeatEnd) {
-          this.player?.seekTo(this.repeatStart, true);
-        }
-      }, 250);
+      this.startLoop();
     }
     return true;
   }
@@ -273,6 +241,36 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.durationPollInterval) {
       clearInterval(this.durationPollInterval);
       this.durationPollInterval = null;
+    }
+  }
+
+  private startLoop(): void {
+    if (this.isYouTube) {
+      this.player?.seekTo(this.repeatStart, true);
+      this.player?.playVideo();
+      this.repeatInterval = setInterval(() => {
+        const current = this.player?.getCurrentTime() ?? 0;
+        if (current >= this.repeatEnd) {
+          this.player?.seekTo(this.repeatStart, true);
+          this.player?.playVideo();
+        }
+      }, 250);
+    } else if (this.isTikTok) {
+      this.tiktokCurrentTime = this.repeatStart;
+      this.tiktokPost({ type: 'seekTo', value: this.repeatStart });
+      this.tiktokPost({ type: 'play' });
+      let segmentStartedAt = Date.now();
+      this.repeatInterval = setInterval(() => {
+        const elapsed = (Date.now() - segmentStartedAt) / 1000;
+        const eventsArrive = this.tiktokCurrentTime > this.repeatStart + 0.15;
+        const pos = eventsArrive ? this.tiktokCurrentTime : this.repeatStart + elapsed;
+        if (pos >= this.repeatEnd) {
+          segmentStartedAt = Date.now();
+          this.tiktokCurrentTime = this.repeatStart;
+          this.tiktokPost({ type: 'seekTo', value: this.repeatStart });
+          this.tiktokPost({ type: 'play' });
+        }
+      }, 200);
     }
   }
 
