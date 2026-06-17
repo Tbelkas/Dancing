@@ -21,9 +21,13 @@ public class SearchController : ControllerBase
         [FromQuery] int? styleId,
         [FromQuery] int? musicalStyleId,
         [FromQuery] string? difficulty,
-        [FromQuery] string? status)
+        [FromQuery] string? status,
+        [FromQuery] string? sortBy,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 24)
     {
-        var results = await _danceService.SearchAsync(q ?? string.Empty, styleId, musicalStyleId, difficulty, status, CurrentUserId);
-        return Ok(results);
+        var clamped = Math.Min(Math.Max(pageSize, 1), 100);
+        var result = await _danceService.SearchAsync(q ?? string.Empty, styleId, musicalStyleId, difficulty, status, sortBy, CurrentUserId, page, clamped);
+        return Ok(result);
     }
 }

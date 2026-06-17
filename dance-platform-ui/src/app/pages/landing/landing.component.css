@@ -104,6 +104,7 @@
   animation: lp-rise 0.6s ease 0.28s both;
 }
 .lp-hero__note i { color: var(--color-primary); margin-right: 4px; }
+.lp-hero__signin { color: var(--color-primary); text-decoration: underline; }
 
 /* ---------- EQUALIZER ---------- */
 .lp-eq {

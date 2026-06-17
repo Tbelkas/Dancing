@@ -4,6 +4,7 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   { path: '', title: 'Dance Platform · Learn any dance, one loop at a time', loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent) },
   { path: 'login', title: 'Sign in · Dance Platform', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
+  { path: 'register', title: 'Create account · Dance Platform', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
   { path: 'dances', title: 'Browse Dances · Dance Platform', loadComponent: () => import('./pages/dances/dances.component').then(m => m.DancesComponent) },
   { path: 'dances/:slug', loadComponent: () => import('./pages/dance-detail/dance-detail.component').then(m => m.DanceDetailComponent) },
   { path: 'profile', title: 'My Profile · Dance Platform', loadComponent: () => import('./pages/profile/profile.component').then(m => m.ProfileComponent), canActivate: [authGuard] },

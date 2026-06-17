@@ -228,14 +228,14 @@
 
   @if (!loading()) {
     <div class="results-bar">
-      <span class="results-count">{{ sortedDances().length }} dance{{ sortedDances().length !== 1 ? 's' : '' }}</span>
+      <span class="results-count">{{ searchTotal() }} dance{{ searchTotal() !== 1 ? 's' : '' }}</span>
       <div class="results-bar__controls">
         @if (hasActiveFilters()) {
           <button class="btn btn--ghost btn--xs" (click)="clearFilters()"><i class="fa-solid fa-xmark"></i> Clear filters</button>
         }
         <label class="sort-control">
           <span class="sort-control__label">Sort</span>
-          <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)" aria-label="Sort dances">
+          <select [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)" aria-label="Sort dances">
             <option value="name">Name (A–Z)</option>
             <option value="rating">Top rated</option>
             <option value="popular">Most favorited</option>
@@ -263,7 +263,7 @@
         </div>
       }
     </div>
-  } @else if (sortedDances().length === 0) {
+  } @else if (searchResults().length === 0) {
     <div class="empty-state card">
       <div class="empty-state__icon"><i class="fa-solid fa-magnifying-glass"></i></div>
       <h2>No dances found</h2>
@@ -276,7 +276,7 @@
     </div>
   } @else {
     <div class="grid grid--2">
-      @for (dance of sortedDances(); track dance.id) {
+      @for (dance of searchResults(); track dance.id) {
         <div class="card dance-card">
           <a [routerLink]="['/dances', dance.slug]" class="dance-card__media" tabindex="-1" aria-hidden="true">
             @if (thumbnailUrl(dance); as thumb) {
@@ -331,5 +331,25 @@
         </div>
       }
     </div>
+
+    @if (totalPages() > 1) {
+      <nav class="pagination" aria-label="Dance catalog pages">
+        <button class="pagination__btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" aria-label="Previous page">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        @for (p of pageNumbers(); track $index) {
+          @if (p === null) {
+            <span class="pagination__ellipsis">…</span>
+          } @else {
+            <button class="pagination__btn" [class.pagination__btn--active]="p === currentPage()" (click)="goToPage(p)" [attr.aria-current]="p === currentPage() ? 'page' : null">
+              {{ p }}
+            </button>
+          }
+        }
+        <button class="pagination__btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)" aria-label="Next page">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </nav>
+    }
   }
 </div>

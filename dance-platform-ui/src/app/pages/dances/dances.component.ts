@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -21,11 +21,8 @@ const STATUS_OPTIONS = [
   { value: 'learned', label: 'Learned' },
   { value: 'favorite', label: 'Favorited' }
 ];
+const PAGE_SIZE = 24;
 
-// Seeded so the Style / Music filter pills render instantly instead of
-// flickering in after the API responds. ngOnInit still refetches to pick up
-// any styles an admin adds; the IDs mirror the DB so the swap is seamless.
-// danceCount/dateAdded aren't used by the filter UI — placeholders are fine.
 const SEED_STYLES: Style[] = [
   { id: 1, name: 'Latin', dateAdded: '', danceCount: 0 },
   { id: 2, name: 'Ballroom', dateAdded: '', danceCount: 0 },
@@ -59,19 +56,22 @@ const SEED_MUSICAL_STYLES: MusicalStyle[] = [
   templateUrl: './dances.component.html',
   styleUrls: ['./dances.component.css']
 })
-export class DancesComponent implements OnInit {
+export class DancesComponent implements OnInit, OnDestroy {
   readonly difficulties = DIFFICULTIES;
   readonly statusOptions = STATUS_OPTIONS;
   readonly skeletonCards = [0, 1, 2, 3, 4, 5];
+  readonly PAGE_SIZE = PAGE_SIZE;
 
   // Data
-  allDances = signal<Dance[]>([]);
+  searchResults = signal<Dance[]>([]);
+  searchTotal = signal(0);
+  currentPage = signal(1);
   styles = signal<Style[]>(SEED_STYLES);
   musicalStyles = signal<MusicalStyle[]>(SEED_MUSICAL_STYLES);
   instructors = signal<Instructor[]>([]);
   loading = signal(true);
 
-  // Filters (client-side)
+  // Filters
   searchQuery = signal('');
   selectedStyleId = signal<number | null>(null);
   selectedMusicalStyleId = signal<number | null>(null);
@@ -79,8 +79,6 @@ export class DancesComponent implements OnInit {
   selectedStatus = signal<string>('all');
   sortBy = signal<string>('name');
 
-  // Type-to-narrow for the Style / Music pill lists (option search, not a
-  // results filter — see visibleStyles/visibleMusicalStyles).
   styleQuery = signal('');
   musicQuery = signal('');
 
@@ -106,81 +104,24 @@ export class DancesComponent implements OnInit {
     this.selectedStatus() !== 'all'
   );
 
-  readonly filteredDances = computed(() => {
-    const q = this.searchQuery().trim().toLowerCase();
-    const sid = this.selectedStyleId();
-    const msid = this.selectedMusicalStyleId();
-    const diff = this.selectedDifficulty();
-    const status = this.selectedStatus();
-    const styleName = sid ? this.styles().find(s => s.id === sid)?.name ?? null : null;
-    const msName = msid ? this.musicalStyles().find(ms => ms.id === msid)?.name ?? null : null;
+  readonly totalPages = computed(() => Math.ceil(this.searchTotal() / PAGE_SIZE));
 
-    return this.allDances().filter(d => {
-      if (q && !d.name.toLowerCase().includes(q)) return false;
-      if (styleName && !d.styles.includes(styleName)) return false;
-      if (msName && !d.musicalStyles.includes(msName)) return false;
-      if (diff && d.difficulty !== diff) return false;
-      if (status === 'notstarted' && (d.isLearned || d.isInProgress)) return false;
-      if (status === 'inprogress' && !d.isInProgress) return false;
-      if (status === 'learned' && !d.isLearned) return false;
-      if (status === 'favorite' && !d.isFavorite) return false;
-      return true;
-    });
-  });
-
-  readonly sortedDances = computed(() => {
-    const list = [...this.filteredDances()];
-    switch (this.sortBy()) {
-      case 'rating':
-        return list.sort((a, b) => b.averageRating - a.averageRating || b.ratingCount - a.ratingCount);
-      case 'popular':
-        return list.sort((a, b) => b.favoriteCount - a.favoriteCount);
-      case 'newest':
-        return list.sort((a, b) => +new Date(b.dateAdded) - +new Date(a.dateAdded));
-      case 'name':
-      default:
-        return list.sort((a, b) => a.name.localeCompare(b.name));
-    }
+  readonly pageNumbers = computed(() => {
+    const total = this.totalPages();
+    const cur = this.currentPage();
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages: (number | null)[] = [];
+    pages.push(1);
+    if (cur > 3) pages.push(null);
+    for (let p = Math.max(2, cur - 1); p <= Math.min(total - 1, cur + 1); p++) pages.push(p);
+    if (cur < total - 2) pages.push(null);
+    pages.push(total);
+    return pages;
   });
 
   thumbFailed = signal<Set<number>>(new Set());
 
-  thumbnailUrl(dance: Dance): string | null {
-    if (this.thumbFailed().has(dance.id)) return null;
-    if (dance.thumbnailVideoId && dance.thumbnailPlatform === 'youtube') {
-      return `https://i.ytimg.com/vi/${dance.thumbnailVideoId}/hqdefault.jpg`;
-    }
-    return null;
-  }
-
-  onThumbError(danceId: number): void {
-    this.thumbFailed.update(set => {
-      const next = new Set(set);
-      next.add(danceId);
-      return next;
-    });
-  }
-
-  /**
-   * YouTube returns a 120×90 grey placeholder (HTTP 200) when a video has no
-   * thumbnail, so the <img> "loads" and (error) never fires. A real hqdefault
-   * is 480×360 — anything 90px tall is the placeholder, so fall back to the
-   * branded media instead of showing a blurry grey box.
-   */
-  onThumbLoad(danceId: number, event: Event): void {
-    const img = event.target as HTMLImageElement;
-    if (img.naturalHeight > 0 && img.naturalHeight <= 90) {
-      this.onThumbError(danceId);
-    }
-  }
-
-  clearFilters(): void {
-    this.searchQuery.set('');
-    this.selectedStyleId.set(null);
-    this.selectedMusicalStyleId.set(null);
-    this.selectedDifficulty.set(null);
-    this.selectedStatus.set('all');
-  }
+  private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
   // Admin: add style form
   showAddStyle = signal(false);
@@ -220,35 +161,108 @@ export class DancesComponent implements OnInit {
     this.styleService.getAll().subscribe(s => this.styles.set(s));
     this.musicalStyleService.getAll().subscribe(ms => this.musicalStyles.set(ms));
     this.instructorService.getAll().subscribe(i => this.instructors.set(i));
-    this.loadDances();
+    this.runSearch();
   }
 
-  loadDances(): void {
+  ngOnDestroy(): void {
+    if (this.searchDebounce) clearTimeout(this.searchDebounce);
+  }
+
+  private runSearch(): void {
     this.loading.set(true);
-    this.danceService.getAll().subscribe({
-      next: d => { this.allDances.set(d); this.loading.set(false); },
+    this.danceService.searchDances({
+      q: this.searchQuery().trim() || undefined,
+      styleId: this.selectedStyleId(),
+      musicalStyleId: this.selectedMusicalStyleId(),
+      difficulty: this.selectedDifficulty() ?? undefined,
+      status: this.selectedStatus(),
+      sortBy: this.sortBy(),
+      page: this.currentPage(),
+      pageSize: PAGE_SIZE
+    }).subscribe({
+      next: result => {
+        this.searchResults.set(result.items);
+        this.searchTotal.set(result.total);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false)
     });
   }
 
   onSearchInput(value: string): void {
     this.searchQuery.set(value);
+    this.currentPage.set(1);
+    if (this.searchDebounce) clearTimeout(this.searchDebounce);
+    this.searchDebounce = setTimeout(() => this.runSearch(), 300);
   }
 
   filterByStyle(styleId: number | null): void {
     this.selectedStyleId.set(styleId);
+    this.currentPage.set(1);
+    this.runSearch();
   }
 
   filterByMusicalStyle(msId: number | null): void {
     this.selectedMusicalStyleId.set(msId);
+    this.currentPage.set(1);
+    this.runSearch();
   }
 
   filterByDifficulty(difficulty: string | null): void {
     this.selectedDifficulty.set(difficulty);
+    this.currentPage.set(1);
+    this.runSearch();
   }
 
   filterByStatus(status: string): void {
     this.selectedStatus.set(status);
+    this.currentPage.set(1);
+    this.runSearch();
+  }
+
+  onSortChange(value: string): void {
+    this.sortBy.set(value);
+    this.currentPage.set(1);
+    this.runSearch();
+  }
+
+  goToPage(page: number | null): void {
+    if (page === null || page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
+    this.runSearch();
+  }
+
+  clearFilters(): void {
+    this.searchQuery.set('');
+    this.selectedStyleId.set(null);
+    this.selectedMusicalStyleId.set(null);
+    this.selectedDifficulty.set(null);
+    this.selectedStatus.set('all');
+    this.currentPage.set(1);
+    this.runSearch();
+  }
+
+  thumbnailUrl(dance: Dance): string | null {
+    if (this.thumbFailed().has(dance.id)) return null;
+    if (dance.thumbnailVideoId && dance.thumbnailPlatform === 'youtube') {
+      return `https://i.ytimg.com/vi/${dance.thumbnailVideoId}/hqdefault.jpg`;
+    }
+    return null;
+  }
+
+  onThumbError(danceId: number): void {
+    this.thumbFailed.update(set => {
+      const next = new Set(set);
+      next.add(danceId);
+      return next;
+    });
+  }
+
+  onThumbLoad(danceId: number, event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img.naturalHeight > 0 && img.naturalHeight <= 90) {
+      this.onThumbError(danceId);
+    }
   }
 
   starLabel(rating: number): string {
@@ -259,7 +273,7 @@ export class DancesComponent implements OnInit {
     event.stopPropagation();
     event.preventDefault();
     this.danceService.toggleFavorite(dance.id).subscribe(res => {
-      this.allDances.update(list =>
+      this.searchResults.update(list =>
         list.map(d => d.id === dance.id ? { ...d, isFavorite: res.isFavorite } : d)
       );
     });
@@ -272,16 +286,14 @@ export class DancesComponent implements OnInit {
     const status: DanceStatus = dance.isLearned ? 'notstarted' : 'learned';
     const willLearn = status === 'learned';
 
-    // Optimistic single atomic call: flip now, revert on failure. Marking learned
-    // clears in-progress server-side (mutually exclusive), so mirror that here.
-    this.allDances.update(list =>
+    this.searchResults.update(list =>
       list.map(d => d.id === dance.id
         ? { ...d, isLearned: willLearn, isInProgress: willLearn ? false : d.isInProgress }
         : d)
     );
 
     this.danceService.setStatus(dance.id, status).subscribe({
-      error: () => this.allDances.update(list =>
+      error: () => this.searchResults.update(list =>
         list.map(d => d.id === dance.id ? { ...d, ...snap } : d)
       )
     });
@@ -305,7 +317,8 @@ export class DancesComponent implements OnInit {
         this.importResult.set(result);
         this.importing.set(false);
         if (result.created.length > 0) {
-          this.allDances.update(list => [...result.created, ...list]);
+          this.searchResults.update(list => [...result.created, ...list]);
+          this.searchTotal.update(t => t + result.created.length);
           this.importText = '';
         }
       },
@@ -387,7 +400,8 @@ export class DancesComponent implements OnInit {
     this.addDanceError.set('');
     this.danceService.create(payload).subscribe({
       next: dance => {
-        this.allDances.update(list => [dance, ...list]);
+        this.searchResults.update(list => [dance, ...list]);
+        this.searchTotal.update(t => t + 1);
         this.showAddDance.set(false);
         this.addingDance.set(false);
         this.newDanceName = '';

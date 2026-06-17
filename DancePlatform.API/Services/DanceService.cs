@@ -197,7 +197,7 @@ public class DanceService : IDanceService
         return await GetByIdAsync(danceId, userId);
     }
 
-    public async Task<List<DanceDto>> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, int? userId)
+    public async Task<SearchDancesResult> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, string? sortBy, int? userId, int page = 1, int pageSize = 24)
     {
         var entityQ = BuildEntityQuery().AsQueryable();
 
@@ -227,7 +227,21 @@ public class DanceService : IDanceService
             };
         }
 
-        return (await entityQ.ToListAsync()).Select(d => ToDto(d, userId)).ToList();
+        var all = (await entityQ.ToListAsync()).Select(d => ToDto(d, userId)).ToList();
+
+        all = sortBy switch
+        {
+            "rating"  => all.OrderByDescending(d => d.AverageRating).ThenByDescending(d => d.RatingCount).ToList(),
+            "popular" => all.OrderByDescending(d => d.FavoriteCount).ToList(),
+            "newest"  => all.OrderByDescending(d => d.DateAdded).ToList(),
+            _         => all.OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase).ToList()
+        };
+
+        var total = all.Count;
+        var clampedPage = Math.Max(1, page);
+        var items = all.Skip((clampedPage - 1) * pageSize).Take(pageSize).ToList();
+
+        return new SearchDancesResult { Items = items, Total = total, Page = clampedPage, PageSize = pageSize };
     }
 
     private IQueryable<Dance> BuildEntityQuery() =>

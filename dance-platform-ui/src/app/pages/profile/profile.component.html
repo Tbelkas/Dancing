@@ -59,6 +59,48 @@
       </div>
 
       <div class="stats-column">
+
+        <!-- Practice stats -->
+        @if (totalSessions() > 0) {
+          <div class="card profile-stats">
+            <h3>Practice</h3>
+            <div class="profile-stats__row">
+              <div class="profile-stat">
+                <span class="profile-stat__value">
+                  @if (streak() > 0) { <i class="fa-solid fa-fire" aria-hidden="true"></i> } {{ streak() }}
+                </span>
+                <span class="profile-stat__label">day streak</span>
+              </div>
+              <div class="profile-stat">
+                <span class="profile-stat__value">{{ totalSessions() }}</span>
+                <span class="profile-stat__label">sessions</span>
+              </div>
+              <div class="profile-stat">
+                <span class="profile-stat__value">{{ totalMinutes() }}</span>
+                <span class="profile-stat__label">minutes</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- In Progress -->
+        <div class="card">
+          <h3>In Progress <span class="count-badge">{{ profile()!.inProgressDances.length }}</span></h3>
+          @if (profile()!.inProgressDances.length === 0) {
+            <p class="empty">Nothing in progress yet. Open a dance page and mark it as "In Progress".</p>
+          } @else {
+            <div class="dance-ref-list">
+              @for (d of profile()!.inProgressDances; track d.id) {
+                <a [routerLink]="['/dances', d.slug]" class="dance-ref-item">
+                  <span class="dance-ref-icon"><i class="fa-solid fa-circle-half-stroke"></i></span>
+                  <span class="dance-ref-name">{{ d.name }}</span>
+                  <span class="dance-ref-arrow">→</span>
+                </a>
+              }
+            </div>
+          }
+        </div>
+
         <div class="card">
           <h3>Favorite Dances <span class="count-badge">{{ profile()!.favoriteDances.length }}</span></h3>
           @if (profile()!.favoriteDances.length === 0) {
@@ -102,7 +144,7 @@
         <div class="skeleton skeleton-line skeleton-line--short"></div>
       </div>
       <div class="stats-column">
-        @for (i of [0,1]; track i) {
+        @for (i of [0,1,2]; track i) {
           <div class="card">
             <div class="skeleton skeleton-line skeleton-line--title" style="margin-bottom: 16px;"></div>
             <div class="skeleton skeleton-line" style="margin-bottom: 10px;"></div>

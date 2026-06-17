@@ -13,4 +13,5 @@ public class UserProfileDto
     public DateTime DateAdded { get; set; }
     public List<DanceRef> FavoriteDances { get; set; } = new();
     public List<DanceRef> LearnedDances { get; set; } = new();
+    public List<DanceRef> InProgressDances { get; set; } = new();
 }

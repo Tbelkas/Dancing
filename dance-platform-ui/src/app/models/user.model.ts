@@ -27,6 +27,13 @@ export interface UserProfile {
   dateAdded: string;
   favoriteDances: DanceRef[];
   learnedDances: DanceRef[];
+  inProgressDances: DanceRef[];
+}
+
+export interface PracticeStats {
+  streak: number;
+  totalSessions: number;
+  totalMinutes: number;
 }
 
 export interface AuthResponse {

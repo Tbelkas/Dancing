@@ -30,6 +30,24 @@ export interface ImportResult {
   errors: string[];
 }
 
+export interface SearchDancesParams {
+  q?: string;
+  styleId?: number | null;
+  musicalStyleId?: number | null;
+  difficulty?: string | null;
+  status?: string;
+  sortBy?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface SearchDancesResult {
+  items: Dance[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DanceService {
   private readonly base = `${environment.apiUrl}/dances`;
@@ -45,14 +63,17 @@ export class DanceService {
     return this.http.get<Dance>(`${this.base}/${idOrSlug}`);
   }
 
-  search(query: string, styleId?: number, musicalStyleId?: number, difficulty?: string, status?: string): Observable<Dance[]> {
+  searchDances(p: SearchDancesParams): Observable<SearchDancesResult> {
     let params = new HttpParams();
-    if (query) params = params.set('q', query);
-    if (styleId) params = params.set('styleId', styleId.toString());
-    if (musicalStyleId) params = params.set('musicalStyleId', musicalStyleId.toString());
-    if (difficulty) params = params.set('difficulty', difficulty);
-    if (status) params = params.set('status', status);
-    return this.http.get<Dance[]>(`${environment.apiUrl}/search/dances`, { params });
+    if (p.q) params = params.set('q', p.q);
+    if (p.styleId) params = params.set('styleId', p.styleId.toString());
+    if (p.musicalStyleId) params = params.set('musicalStyleId', p.musicalStyleId.toString());
+    if (p.difficulty) params = params.set('difficulty', p.difficulty);
+    if (p.status && p.status !== 'all') params = params.set('status', p.status);
+    if (p.sortBy) params = params.set('sortBy', p.sortBy);
+    if (p.page) params = params.set('page', p.page.toString());
+    if (p.pageSize) params = params.set('pageSize', p.pageSize.toString());
+    return this.http.get<SearchDancesResult>(`${environment.apiUrl}/search/dances`, { params });
   }
 
   rate(id: number, rating: number): Observable<Dance> {

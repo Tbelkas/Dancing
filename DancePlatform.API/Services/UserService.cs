@@ -15,6 +15,7 @@ public class UserService : IUserService
         await _db.Users
             .Include(u => u.FavoriteDances).ThenInclude(f => f.Dance)
             .Include(u => u.LearnedDances).ThenInclude(l => l.Dance)
+            .Include(u => u.InProgressDances).ThenInclude(ip => ip.Dance)
             .Where(u => u.Id == userId)
             .Select(u => new UserProfileDto
             {
@@ -26,7 +27,8 @@ public class UserService : IUserService
                 Visibility = u.Visibility.ToString(),
                 DateAdded = u.DateAdded,
                 FavoriteDances = u.FavoriteDances.Select(f => new DanceRef(f.Dance.Id, f.Dance.Name, f.Dance.Slug)).ToList(),
-                LearnedDances = u.LearnedDances.Select(l => new DanceRef(l.Dance.Id, l.Dance.Name, l.Dance.Slug)).ToList()
+                LearnedDances = u.LearnedDances.Select(l => new DanceRef(l.Dance.Id, l.Dance.Name, l.Dance.Slug)).ToList(),
+                InProgressDances = u.InProgressDances.Select(ip => new DanceRef(ip.Dance.Id, ip.Dance.Name, ip.Dance.Slug)).ToList()
             }).FirstOrDefaultAsync();
 
     public async Task<UserProfileDto?> UpdateProfileAsync(int userId, UpdateProfileRequest request)
