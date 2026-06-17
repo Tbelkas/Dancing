@@ -134,6 +134,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   jumpToSegment(segment: VideoSegment): void {
     this.activeSegmentId.set(segment.id);
+    if (segment.endTime != null) {
+      this.loopSegmentId.set(segment.id);
+      this.repeatStart = segment.startTime;
+      this.repeatEnd = segment.endTime;
+    }
     if (this.isYouTube) {
       this.player?.seekTo(segment.startTime, true);
       this.player?.playVideo();

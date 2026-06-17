@@ -37,15 +37,6 @@
             {{ repeating() ? 'Stop loop' : 'Loop this section' }}
           </button>
         </div>
-        @if (loopableSegments.length > 0) {
-          <div class="segment-chips">
-            @for (seg of loopableSegments; track seg.id) {
-              <button class="segment-chip" [class.active]="loopSegmentId() === seg.id" (click)="selectLoopSegment(seg)">
-                {{ seg.label }}
-              </button>
-            }
-          </div>
-        }
         @if (videoDuration() > 0) {
           <div class="slider-group">
             <div class="slider-row">
@@ -92,15 +83,6 @@
             {{ repeating() ? 'Stop loop' : 'Loop this section' }}
           </button>
         </div>
-        @if (loopableSegments.length > 0) {
-          <div class="segment-chips">
-            @for (seg of loopableSegments; track seg.id) {
-              <button class="segment-chip" [class.active]="loopSegmentId() === seg.id" (click)="selectLoopSegment(seg)">
-                {{ seg.label }}
-              </button>
-            }
-          </div>
-        }
         <div class="slider-group">
           <div class="slider-row">
             <span class="slider-label">Start</span>
