@@ -1,0 +1,934 @@
+Logging in...
+Fetching dances...
+Total: 1654
+[1] OK  Salsa -> styles=[1] music=[1] Intermediate
+[2] OK  Waltz -> styles=[2] music=[2] Intermediate
+[3] OK  Tango -> styles=[2] music=[5] Intermediate
+[6] OK  Flamenco -> styles=[18] music=[10] Intermediate
+[7] OK  Jive -> styles=[6] music=[4] Intermediate
+[8] OK  Cha-Cha -> styles=[1] music=[1] Intermediate
+[9] OK  Bachata -> styles=[1] music=[8] Beginner
+[10] OK  Popping -> styles=[10] music=[3] Intermediate
+[11] OK  Contemporary -> styles=[7] music=[2] Intermediate
+[12] OK  Foxtrot -> styles=[2] music=[4] Intermediate
+[13] OK  Butterfly -> styles=[10] music=[3] Beginner
+[14] OK  Reebok -> styles=[10] music=[3] Beginner
+[15] OK  Loose legs -> styles=[10] music=[3] Beginner
+[16] OK  Waack choreo 1 -> styles=[8] music=[3] Intermediate
+[17] OK  MC Rock -> styles=[10] music=[3] Beginner
+[18] OK  Patty Duke -> styles=[10] music=[3] Beginner
+[19] OK  Smurf -> styles=[10] music=[3] Beginner
+[20] OK  The Prep -> styles=[10] music=[3] Beginner
+[21] OK  Stomp -> styles=[10] music=[3] Beginner
+[22] OK  Snake -> styles=[10] music=[3] Beginner
+[23] OK  Cabbage Patch -> styles=[10] music=[3] Beginner
+[24] OK  Reebok -> styles=[10] music=[3] Beginner
+[25] OK  Fila -> styles=[10] music=[3] Beginner
+[26] OK  Roger Rabbit -> styles=[10] music=[3] Beginner
+[27] OK  TLC -> styles=[10] music=[3] Beginner
+[28] OK  Rooftop -> styles=[10] music=[3] Beginner
+[29] OK  Steve Martin -> styles=[10] music=[3] Beginner
+[30] OK  Butterfly -> styles=[10] music=[3] Beginner
+[31] OK  Bankhead Bounce -> styles=[10] music=[3] Beginner
+[32] OK  ATL -> styles=[10] music=[3] Beginner
+[33] OK  ATL Stomp -> styles=[10] music=[3] Beginner
+[34] OK  Outlaw -> styles=[10] music=[3] Beginner
+[35] OK  Guess -> styles=[10] music=[3] Beginner
+[36] OK  Skate -> styles=[10] music=[3] Beginner
+[37] OK  Monastery/Chicken Head -> styles=[10] music=[3] Beginner
+[38] OK  Kid at Play -> styles=[10] music=[3] Beginner
+[39] OK  Party Machine -> styles=[10] music=[3] Beginner
+[40] OK  Spongebob -> styles=[10] music=[3] Beginner
+[41] OK  Bernie -> styles=[10] music=[3] Beginner
+[42] OK  BK Bounce -> styles=[10] music=[3] Beginner
+[43] OK  Aunt Viv -> styles=[10] music=[3] Beginner
+[44] OK  James Brown -> styles=[10] music=[3] Beginner
+[45] OK  Running Man -> styles=[10] music=[3] Beginner
+[46] OK  Shamrock -> styles=[10] music=[3] Beginner
+[48] OK  Wreckin Shop -> styles=[10] music=[3] Beginner
+[49] OK  Camel Walk -> styles=[10] music=[3] Beginner
+[50] OK  Janet Jackson -> styles=[10] music=[3] Beginner
+[51] OK  ALF -> styles=[10] music=[3] Beginner
+[52] OK  Happy Feet -> styles=[10] music=[3] Beginner
+[53] OK  Di Da -> styles=[10] music=[3] Beginner
+[54] OK  Cameo -> styles=[10] music=[3] Beginner
+[55] OK  Reject -> styles=[10] music=[3] Beginner
+[56] OK  C Walk -> styles=[3] music=[3] Beginner
+[57] OK  Aunt Jackie -> styles=[10] music=[3] Beginner
+[58] OK  Walk Out -> styles=[10] music=[3] Beginner
+[59] OK  Walk It Out -> styles=[10] music=[3] Beginner
+[60] OK  Gucci -> styles=[10] music=[3] Beginner
+[61] OK  Popcorn -> styles=[10] music=[3] Beginner
+[62] OK  Fly Girls -> styles=[10] music=[3] Beginner
+[63] OK  Upstairs Downstairs -> styles=[10] music=[3] Beginner
+[64] OK  Bobby Brown -> styles=[10] music=[3] Beginner
+[65] OK  Biz Markie -> styles=[10] music=[3] Beginner
+[66] OK  Kriss Kross -> styles=[10] music=[3] Beginner
+[68] OK  Robocop -> styles=[10] music=[3] Beginner
+[69] OK  Dougie -> styles=[10] music=[3] Beginner
+[70] OK  Wop -> styles=[10] music=[3] Beginner
+[71] OK  Bart Simpson -> styles=[10] music=[3] Beginner
+[73] OK  Wu-Tang -> styles=[10] music=[3] Beginner
+[74] OK  Funky Watergate -> styles=[10] music=[3] Beginner
+[75] OK  Pepper Seed -> styles=[14] music=[12] Beginner
+[76] OK  Cat Daddy -> styles=[10] music=[3] Beginner
+[77] OK  BIZ MARKIE -> styles=[10] music=[3] Beginner
+[80] OK  RUNNING MAN -> styles=[10] music=[3] Beginner
+[81] OK  BART SIMPSON -> styles=[10] music=[3] Beginner
+[87] OK  REEBOK HOP / CABBAGE PATCH -> styles=[10] music=[3] Beginner
+[88] OK  PARTY MACHINE -> styles=[10] music=[3] Beginner
+[89] OK  BK BOUNCE -> styles=[10] music=[3] Beginner
+[90] OK  ROBOCOP -> styles=[10] music=[3] Beginner
+[91] OK  BROOKLYNE -> styles=[10] music=[3] Beginner
+[95] OK  WOBBLE -> styles=[5] music=[3] Beginner
+[97] OK  CARLTON -> styles=[10] music=[3] Beginner
+[98] OK  HAPPY FEET -> styles=[10] music=[3] Beginner
+[99] OK  ROGER RABBIT -> styles=[10] music=[3] Beginner
+[100] OK  STEVE MARTIN -> styles=[10] music=[3] Beginner
+[102] OK  POPCORN -> styles=[10] music=[3] Beginner
+[103] OK  SMURF -> styles=[10] music=[3] Beginner
+[104] OK  SPONGE BOB -> styles=[10] music=[3] Beginner
+[105] OK  JERK -> styles=[3] music=[3] Beginner
+[106] OK  BERNIE -> styles=[10] music=[3] Beginner
+[107] OK  DROP DANCE -> styles=[10] music=[3] Beginner
+[108] OK  MILLIE ROCK -> styles=[10] music=[3] Beginner
+[110] OK  MONESTARY -> styles=[10] music=[3] Beginner
+[113] OK  SHAMROCK -> styles=[10] music=[3] Beginner
+[114] OK  RAISE THE ROOF -> styles=[10] music=[3] Beginner
+[120] OK  WALK IT OUT -> styles=[10] music=[3] Beginner
+[121] OK  HARLEM SHAKE -> styles=[10] music=[3] Beginner
+[122] OK  DOUGIE -> styles=[10] music=[3] Beginner
+[123] OK  ATL STOMP -> styles=[10] music=[3] Beginner
+[124] OK  WUTANG -> styles=[10] music=[3] Beginner
+[126] OK  Turtle -> styles=[12] music=[3] Intermediate
+[127] OK  Frog Pose -> styles=[12] music=[3] Beginner
+[128] OK  Baby Freeze -> styles=[12] music=[3] Intermediate
+[129] OK  Chair Freeze -> styles=[12] music=[3] Intermediate
+[130] OK  Headstand -> styles=[12] music=[3] Intermediate
+[131] OK  Handstand -> styles=[12] music=[3] Intermediate
+[132] OK  Turtle Switch -> styles=[12] music=[3] Intermediate
+[133] OK  Pin Drop -> styles=[12] music=[3] Intermediate
+[134] OK  Coffee Grinder -> styles=[12] music=[3] Intermediate
+[135] OK  Six Step -> styles=[12] music=[3] Beginner
+[137] OK  Frog Pose to Turtle -> styles=[12] music=[3] Intermediate
+[138] OK  Knee Slide Up -> styles=[12] music=[3] Intermediate
+[139] OK  Toe Slide -> styles=[12] music=[3] Beginner
+[140] OK  Donkey -> styles=[12] music=[3] Intermediate
+[141] OK  Kickup -> styles=[12] music=[3] Intermediate
+[142] OK  Elbow Cartwheel -> styles=[12] music=[3] Advanced
+[143] OK  V Kick -> styles=[12] music=[3] Intermediate
+[144] OK  Roll Back up -> styles=[12] music=[3] Beginner
+[145] OK  Knee Switches -> styles=[12] music=[3] Beginner
+[147] OK  Leg Thead -> styles=[12] music=[3] Intermediate
+[148] OK  Shoulder Roll -> styles=[12] music=[3] Intermediate
+[149] OK  Coin -> styles=[12] music=[3] Intermediate
+[150] OK  Swipe -> styles=[12] music=[3] Advanced
+[181] OK  Side Bump -> styles=[6] music=[4] Beginner
+[182] OK  Spin Bump -> styles=[6] music=[4] Intermediate
+[183] OK  Gentleman's turn -> styles=[6] music=[4] Intermediate
+[184] OK  Ladies' turn -> styles=[6] music=[4] Intermediate
+[185] OK  Wrap -> styles=[6] music=[4] Intermediate
+[186] OK  Dishrag out -> styles=[6] music=[4] Intermediate
+[187] OK  Handshake turn -> styles=[6] music=[4] Intermediate
+[188] OK  Windmill -> styles=[12] music=[3] Advanced
+[189] OK  Open style spin -> styles=[6] music=[4] Intermediate
+[214] OK  Double tour en l'air -> styles=[4] music=[2] Advanced
+[215] OK  Double cabriole -> styles=[4] music=[2] Advanced
+[216] OK  Jet� cloche (switch leap) -> styles=[4] music=[2] Intermediate
+[218] OK  Barrel turns -> styles=[4] music=[2] Advanced
+[219] OK  Double assembl� en tournant -> styles=[4] music=[2] Advanced
+[220] OK  Double saut de basque -> styles=[4] music=[2] Advanced
+[222] OK  Consecutive entrechat six -> styles=[4] music=[2] Advanced
+[223] OK  Coup� jet� en man�ge -> styles=[4] music=[2] Advanced
+[227] OK  Leader's Footwork for the Reverse Cross Body Lead. -> styles=[12] music=[3] Intermediate
+[236] OK  Cabbage Patch -> styles=[10] music=[3] Beginner
+[237] OK  The Wobble -> styles=[5] music=[3] Beginner
+[238] OK  Bust It Baby -> styles=[10] music=[3] Beginner
+[239] OK  Sassy Walk -> styles=[10] music=[3] Beginner
+[240] OK  Side to Side -> styles=[10] music=[3] Beginner
+[241] OK  Pony -> styles=[10] music=[3] Beginner
+[242] OK  Shake Your Hips -> styles=[10] music=[3] Beginner
+[243] OK  Hip Swivel -> styles=[10] music=[3] Beginner
+[244] OK  Cupid Shuffle -> styles=[5] music=[3] Beginner
+[245] OK  Boot Scootin' Boogie -> styles=[5] music=[3] Beginner
+[246] OK  Stanky Leg -> styles=[10] music=[3] Beginner
+[247] OK  Funky Chicken -> styles=[10] music=[3] Beginner
+[248] OK  Electric Slide -> styles=[5] music=[3] Beginner
+[249] OK  Drop it Low -> styles=[10] music=[3] Beginner
+[250] OK  Robot Flair Floss -> styles=[10] music=[3] Beginner
+[251] OK  Hustle -> styles=[1] music=[1] Intermediate
+[252] OK  Free Style Salsa -> styles=[1] music=[1] Intermediate
+[253] OK  Mashed Potato -> styles=[10] music=[3] Beginner
+[254] OK  Swim Buggy -> styles=[10] music=[3] Beginner
+[255] OK  Stomp the Floor -> styles=[10] music=[3] Beginner
+[256] OK  Honey Dipper -> styles=[10] music=[3] Beginner
+[257] OK  The Sprinkler -> styles=[10] music=[3] Beginner
+[258] OK  Tootsie Roll -> styles=[10] music=[3] Beginner
+[259] OK  Chest Pop -> styles=[10] music=[3] Beginner
+[262] OK  Cross-Body Lead -> styles=[1] music=[1] Intermediate
+[264] OK  Forward and Backward Ocho -> styles=[1] music=[1] Intermediate
+[266] OK  Promenade Position -> styles=[2] music=[5] Beginner
+[267] OK  Cuban Motion -> styles=[1] music=[1] Intermediate
+[268] OK  Tango Forward Step -> styles=[2] music=[5] Beginner
+[269] OK  Salida -> styles=[2] music=[5] Intermediate
+[270] OK  Camel Walk -> styles=[10] music=[3] Beginner
+[271] OK  Forward and Backward Giro -> styles=[1] music=[1] Intermediate
+[272] OK  R�pido -> styles=[1] music=[1] Intermediate
+[273] OK  Gafas -> styles=[1] music=[1] Beginner
+[274] OK  Lateral Pass -> styles=[1] music=[1] Intermediate
+[275] OK  Forward and Backward Cross-Body Lead -> styles=[1] music=[1] Intermediate
+[276] OK  Quickstep -> styles=[2] music=[4] Advanced
+[279] OK  Corta y Vuelta -> styles=[1] music=[1] Intermediate
+[280] OK  Palo de Cuerpo -> styles=[1] music=[1] Intermediate
+[281] OK  Sencillo -> styles=[1] music=[1] Beginner
+[282] OK  Rondilla -> styles=[1] music=[1] Intermediate
+[283] OK  Lazo -> styles=[1] music=[1] Intermediate
+[284] OK  Waltz Rise and Fall -> styles=[2] music=[2] Beginner
+[285] OK  Tango Forward Walk -> styles=[2] music=[5] Beginner
+[286] OK  Tango Backward Walk -> styles=[2] music=[5] Beginner
+[287] OK  Sway Step -> styles=[2] music=[4] Beginner
+[290] OK  Forward Lock -> styles=[2] music=[4] Beginner
+[291] OK  Reverse Lock -> styles=[2] music=[4] Beginner
+[292] OK  Natural Turn -> styles=[2] music=[4] Beginner
+[293] OK  Underarm Turn -> styles=[2] music=[4] Beginner
+[294] OK  Overarm Turn -> styles=[2] music=[4] Beginner
+[295] OK  Chass� en avant (Forward Chass�) -> styles=[2] music=[4] Beginner
+[296] OK  Chass� en arri�re (Backward Chass�) -> styles=[2] music=[4] Beginner
+[297] OK  Pivot Turn -> styles=[2] music=[4] Beginner
+[298] OK  Turn � gauche (Left Turn) -> styles=[2] music=[4] Beginner
+[299] OK  Turn � droite (Right Turn) -> styles=[2] music=[4] Beginner
+[300] OK  Cross-Step Forward -> styles=[2] music=[4] Beginner
+[301] OK  Cross-Step Backward -> styles=[2] music=[4] Beginner
+[302] OK  Quick-Quick-Slow Sequence -> styles=[2] music=[4] Beginner
+[303] OK  Slow-Slow-Quick Sequence -> styles=[2] music=[4] Beginner
+[304] OK  Ronde de jambe (Leg Circle) -> styles=[2] music=[4] Intermediate
+[306] OK  Tango Pas de basque -> styles=[2] music=[5] Intermediate
+[307] OK  Headspin -> styles=[12] music=[3] Advanced
+[308] OK  Pirouette -> styles=[4] music=[2] Intermediate
+[309] OK  Arm Wave -> styles=[10] music=[3] Intermediate
+[310] OK  Bounce -> styles=[10] music=[3] Beginner
+[311] OK  Shimmy -> styles=[10] music=[3] Beginner
+[312] OK  Sway -> styles=[10] music=[3] Beginner
+[313] OK  Vogue Dip -> styles=[16] music=[3] Intermediate
+[314] OK  Glide -> styles=[10] music=[3] Intermediate
+[315] OK  Milkshake -> styles=[10] music=[3] Beginner
+[316] OK  Juju Step -> styles=[13] music=[11] Beginner
+[319] OK  Flare -> styles=[12] music=[3] Advanced
+[321] OK  Waacking Arm -> styles=[8] music=[3] Beginner
+[322] OK  Pogo Stick -> styles=[10] music=[3] Beginner
+[323] OK  Stomp -> styles=[10] music=[3] Beginner
+[327] OK  Pli� -> styles=[4] music=[2] Beginner
+[328] OK  Tendu -> styles=[4] music=[2] Beginner
+[329] OK  D�gag� -> styles=[4] music=[2] Beginner
+[330] OK  Rond de jambe -> styles=[4] music=[2] Intermediate
+[331] OK  Fouett� -> styles=[4] music=[2] Advanced
+[332] OK  Jet� -> styles=[4] music=[2] Intermediate
+[333] OK  �chapp� -> styles=[4] music=[2] Intermediate
+[334] OK  En dedans -> styles=[4] music=[2] Intermediate
+[335] OK  En dehors -> styles=[4] music=[2] Intermediate
+[336] OK  Grande jet� -> styles=[4] music=[2] Advanced
+[337] OK  Petite allegro -> styles=[4] music=[2] Intermediate
+[338] OK  Soutenu -> styles=[4] music=[2] Intermediate
+[339] OK  Pirouette en pointe -> styles=[4] music=[2] Advanced
+[340] OK  Arabesque -> styles=[4] music=[2] Intermediate
+[341] OK  Tour en l'air -> styles=[4] music=[2] Advanced
+[342] OK  Couru -> styles=[4] music=[2] Intermediate
+[343] OK  Fouett� saut� -> styles=[4] music=[2] Advanced
+[345] OK  Ronds de jambe en l'air -> styles=[4] music=[2] Intermediate
+[346] OK  En avant et en arri�re -> styles=[4] music=[2] Beginner
+[347] OK  Rassembler -> styles=[4] music=[2] Intermediate
+[348] OK  Relever -> styles=[4] music=[2] Beginner
+[349] OK  D�sarm� -> styles=[4] music=[2] Intermediate
+[350] OK  Battement -> styles=[4] music=[2] Intermediate
+[351] OK  Alembra -> styles=[4] music=[2] Intermediate
+[352] OK  Bourr�e -> styles=[4] music=[2] Intermediate
+[358] OK  Jete -> styles=[4] music=[2] Intermediate
+[370] OK  Waltz Jump -> styles=[2] music=[2] Intermediate
+[373] OK  Triple Step -> styles=[6] music=[4] Beginner
+[375] OK  Outside Swivels -> styles=[6] music=[4] Beginner
+[376] OK  Inside Swivels -> styles=[6] music=[4] Beginner
+[377] OK  Flicks -> styles=[6] music=[4] Intermediate
+[378] OK  Rockstep -> styles=[6] music=[4] Beginner
+[379] OK  Lindy Hopper -> styles=[6] music=[4] Intermediate
+[381] OK  Tuck Turn -> styles=[6] music=[4] Intermediate
+[384] OK  Brush Step -> styles=[19] music=[4] Beginner
+[385] OK  Heel Toe Tap -> styles=[19] music=[4] Intermediate
+[392] OK  Arabesque -> styles=[4] music=[2] Intermediate
+[393] OK  En pointe -> styles=[4] music=[2] Advanced
+[394] OK  �cart� -> styles=[4] music=[2] Intermediate
+[395] OK  D�velopp� -> styles=[4] music=[2] Advanced
+[396] OK  Pas de chat -> styles=[4] music=[2] Intermediate
+[397] OK  Assembl� -> styles=[4] music=[2] Intermediate
+[398] OK  D�tendu -> styles=[4] music=[2] Beginner
+[399] OK  Tournant -> styles=[4] music=[2] Intermediate
+[400] OK  Glissade -> styles=[4] music=[2] Intermediate
+[401] OK  Lungeline -> styles=[4] music=[2] Intermediate
+[402] OK  Crawling movement -> styles=[7] music=[2] Beginner
+[403] OK  Vestige -> styles=[4] music=[2] Intermediate
+[404] OK  Spiral -> styles=[7] music=[2] Intermediate
+[405] OK  The Chicken -> styles=[10] music=[3] Beginner
+[406] OK  The Robot -> styles=[10] music=[3] Beginner
+[407] OK  The Hustle -> styles=[1] music=[1] Intermediate
+[408] OK  The Hustle -> styles=[1] music=[1] Intermediate
+[409] OK  The Mashed Potato -> styles=[10] music=[3] Beginner
+[410] OK  The Twist -> styles=[10] music=[3] Beginner
+[411] OK  The Shimmy -> styles=[20] music=[4] Beginner
+[413] OK  The Bump -> styles=[10] music=[3] Beginner
+[415] OK  The Swim -> styles=[10] music=[3] Beginner
+[416] OK  The Monkey -> styles=[10] music=[3] Beginner
+[417] OK  The Pony -> styles=[10] music=[3] Beginner
+[418] OK  The Funky Chicken -> styles=[10] music=[3] Beginner
+[419] OK  The Watusi -> styles=[5] music=[3] Beginner
+[420] OK  The Ska -> styles=[5] music=[4] Beginner
+[421] OK  The Rocksteady -> styles=[14] music=[12] Beginner
+[423] OK  The Hand Jive -> styles=[20] music=[4] Beginner
+[424] OK  The Stroll -> styles=[6] music=[4] Beginner
+[425] OK  The Chug -> styles=[6] music=[4] Beginner
+[426] OK  The Electric Slide -> styles=[5] music=[3] Beginner
+[427] OK  The Cupid Shuffle -> styles=[5] music=[3] Beginner
+[428] OK  The Cha Cha Slide -> styles=[1] music=[1] Beginner
+[429] OK  The Waltz -> styles=[2] music=[2] Intermediate
+[430] OK  The Tango -> styles=[2] music=[5] Intermediate
+[431] OK  The Head Banger -> styles=[10] music=[3] Beginner
+[433] OK  The Chest Pop -> styles=[10] music=[3] Beginner
+[434] OK  The Arm Wave -> styles=[10] music=[3] Intermediate
+[437] OK  The Heel-Toe Tap -> styles=[19] music=[4] Intermediate
+[448] OK  The Heel-Toe Tap Combo -> styles=[19] music=[4] Intermediate
+[454] OK  The Moonwalk -> styles=[3] music=[3] Intermediate
+[455] OK  The Running Man -> styles=[10] music=[3] Beginner
+[456] OK  The Cabbage Patch -> styles=[10] music=[3] Beginner
+[457] OK  The Stanky Leg -> styles=[10] music=[3] Beginner
+[458] OK  The Wop -> styles=[10] music=[3] Beginner
+[459] OK  The Floss -> styles=[10] music=[3] Beginner
+[460] OK  The Milly Rock -> styles=[10] music=[3] Beginner
+[461] OK  The Dab -> styles=[10] music=[3] Beginner
+[464] OK  The Jerk -> styles=[3] music=[3] Beginner
+[472] OK  Chaser Step -> styles=[10] music=[3] Beginner
+[473] OK  L-Step -> styles=[10] music=[3] Beginner
+[474] OK  Dip It Low -> styles=[10] music=[3] Beginner
+[475] OK  Pocket Drop -> styles=[10] music=[3] Beginner
+[476] OK  Rock Steady -> styles=[10] music=[3] Beginner
+[477] OK  Walking Breakdown -> styles=[10] music=[3] Beginner
+[478] OK  Swag Walk -> styles=[10] music=[3] Beginner
+[479] OK  Bicycle -> styles=[10] music=[3] Beginner
+[480] OK  Froggy -> styles=[10] music=[3] Beginner
+[481] OK  Swoop and Dip -> styles=[10] music=[3] Beginner
+[482] OK  Head Tilt -> styles=[10] music=[3] Beginner
+[483] OK  Pop and Lock -> styles=[10] music=[3] Intermediate
+[484] OK  Robo Hop -> styles=[10] music=[3] Beginner
+[485] OK  Robot Move -> styles=[10] music=[3] Beginner
+[486] OK  Heel-Toe Tap -> styles=[19] music=[4] Intermediate
+[487] OK  Dance Floor Bump -> styles=[10] music=[3] Beginner
+[488] OK  Hip Circle -> styles=[10] music=[3] Beginner
+[489] OK  Box Step -> styles=[2] music=[4] Beginner
+[490] OK  Running Man Reverse -> styles=[10] music=[3] Beginner
+[491] OK  Running Man Moonwalk -> styles=[10] music=[3] Intermediate
+[492] OK  Running Man & Heel Twist -> styles=[10] music=[3] Beginner
+[493] OK  Running Man & T-Step -> styles=[10] music=[3] Beginner
+[494] OK  Running Man & Kick -> styles=[10] music=[3] Beginner
+[495] OK  Running Man Heel -> styles=[10] music=[3] Beginner
+[496] OK  Running Man & Stepback -> styles=[10] music=[3] Beginner
+[497] OK  Diagonal Running Man Stepback -> styles=[10] music=[3] Beginner
+[498] OK  Diagonal Running Man & Flick -> styles=[10] music=[3] Beginner
+[499] OK  T-Step Reverse -> styles=[10] music=[3] Beginner
+[500] OK  T-Step Heel Toe -> styles=[10] music=[3] Beginner
+[501] OK  T-Step Angle -> styles=[10] music=[3] Beginner
+[502] OK  Spongebob Shuffle Reverse -> styles=[10] music=[3] Beginner
+[503] OK  Spongebob Shuffle Kick Out -> styles=[10] music=[3] Beginner
+[504] OK  Spongebob Shuffle Variation -> styles=[10] music=[3] Beginner
+[505] OK  Spongebob Shuffle Hop -> styles=[10] music=[3] Beginner
+[506] OK  Charleston Variation -> styles=[10] music=[3] Beginner
+[507] OK  Charleston & Cowtail -> styles=[10] music=[3] Beginner
+[508] OK  Charleston & Running Man -> styles=[10] music=[3] Beginner
+[509] OK  Criss Cross Variation -> styles=[10] music=[3] Beginner
+[510] OK  Criss Cross Hop & Tap -> styles=[10] music=[3] Beginner
+[511] OK  V-Step Back -> styles=[10] music=[3] Beginner
+[512] OK  Happy Feet Combo -> styles=[10] music=[3] Beginner
+[513] OK  Heel Toe Hop -> styles=[10] music=[3] Beginner
+[514] OK  Heel Toe & Toe Twist -> styles=[10] music=[3] Beginner
+[515] OK  Heel Toe Snake -> styles=[10] music=[3] Beginner
+[516] OK  Heel Toe Travel & Flick -> styles=[10] music=[3] Beginner
+[517] OK  Indian Step -> styles=[10] music=[3] Beginner
+[518] OK  Cross Step -> styles=[10] music=[3] Beginner
+[519] OK  1 Handstand/Elbow Freeze Mistake -> styles=[12] music=[3] Intermediate
+[520] OK  2 General Freeze Mistake -> styles=[12] music=[3] Intermediate
+[522] OK  4 Kip Up Mistake -> styles=[12] music=[3] Intermediate
+[530] OK  12 Freeze Transition Mistake -> styles=[12] music=[3] Intermediate
+[532] OK  14 Footwork Mistake -> styles=[12] music=[3] Intermediate
+[534] OK  16 Tabletop - Handstand Mistake -> styles=[12] music=[3] Intermediate
+[536] OK  18 Flare Mistake #1 -> styles=[12] music=[3] Intermediate
+[537] OK  19 Flare Mistake #2 -> styles=[12] music=[3] Intermediate
+[538] OK  20 Baby Freeze Switches Mistake -> styles=[12] music=[3] Intermediate
+[539] OK  Mambo -> styles=[1] music=[1] Intermediate
+[540] OK  Merengue -> styles=[1] music=[1] Beginner
+[541] OK  American Rumba -> styles=[1] music=[1] Intermediate
+[542] OK  American Cha Cha -> styles=[1] music=[1] Intermediate
+[543] OK  International Cha Cha -> styles=[1] music=[1] Intermediate
+[544] OK  Samba -> styles=[1] music=[1] Intermediate
+[545] OK  International Rumba -> styles=[1] music=[1] Intermediate
+[546] OK  Paso Doble -> styles=[1] music=[1] Advanced
+[547] OK  East Coast Swing -> styles=[6] music=[4] Beginner
+[548] OK  West Coast Swing -> styles=[6] music=[4] Intermediate
+[549] OK  Bolero -> styles=[1] music=[1] Intermediate
+[552] OK  TUTORIAL: Windmill into Roll (MOVE 2) -> styles=[12] music=[3] Intermediate
+[568] OK  TUTORIAL: Handstand to the Floor -> styles=[12] music=[3] Intermediate
+[569] OK  Attempting the Handstand to the Floor -> styles=[12] music=[3] Intermediate
+[572] OK  Salsa team -> styles=[1] music=[1] Intermediate
+[575] OK  Salsa Congresses -> styles=[1] music=[1] Intermediate
+[577] OK  Incorporate Salsa Into Travel -> styles=[1] music=[1] Intermediate
+[589] OK  Basic Running Man -> styles=[10] music=[3] Beginner
+[591] OK  Running Man Variation -> styles=[10] music=[3] Beginner
+[603] OK  Inversion Flip-Over -> styles=[12] music=[3] Advanced
+[604] OK  Z-Sit Pike Throw -> styles=[12] music=[3] Advanced
+[605] OK  Chug Knee Spin -> styles=[12] music=[3] Advanced
+[628] OK  Pas De Bourre'e -> styles=[4] music=[2] Intermediate
+[629] OK  Ball Change -> styles=[19] music=[4] Beginner
+[630] OK  Triple Step -> styles=[6] music=[4] Beginner
+[634] OK  LEARNING HOW TO BACKSPIN -> styles=[12] music=[3] Intermediate
+[635] OK  LEARNING HOW TO FLARE -> styles=[12] music=[3] Intermediate
+[639] OK  STEPS + FOOTWORK -> styles=[12] music=[3] Intermediate
+[643] OK  Toprocks -> styles=[12] music=[3] Beginner
+[644] OK  Footworks -> styles=[12] music=[3] Intermediate
+[645] OK  Freezes -> styles=[12] music=[3] Intermediate
+[646] OK  Powermoves -> styles=[12] music=[3] Advanced
+[648] OK  ARM ROLL -> styles=[8] music=[3] Beginner
+[649] OK  QUICK ARMS -> styles=[8] music=[3] Intermediate
+[651] OK  first song focusing on rock (one of the foundation elements in hiphop dance) -> styles=[10] music=[3] Beginner
+[652] OK  second song focusing on bounce (one of the foundation elements in hiphop dance) -> styles=[10] music=[3] Beginner
+[653] OK  third song focusing on footwork -> styles=[12] music=[3] Intermediate
+[654] OK  DRAPE -> styles=[8] music=[3] Intermediate
+[655] OK  NECK ROLL -> styles=[8] music=[3] Beginner
+[656] OK  CATWALK & WALK IN THE PARK -> styles=[8] music=[3] Intermediate
+[657] OK  Tango Walks -> styles=[2] music=[5] Beginner
+[659] OK  Closed Promenade -> styles=[2] music=[5] Beginner
+[664] OK  How do you do the Lindy? -> styles=[6] music=[4] Intermediate
+[665] OK  Attitude -> styles=[4] music=[2] Intermediate
+[666] OK  Cabriole -> styles=[4] music=[2] Advanced
+[667] OK  Coupe -> styles=[4] music=[2] Intermediate
+[669] OK  Ronds de jambe -> styles=[4] music=[2] Intermediate
+[670] OK  Saut� -> styles=[4] music=[2] Intermediate
+[671] OK  Saute-�-gauche -> styles=[4] music=[2] Intermediate
+[672] OK  Saute-�-droite -> styles=[4] music=[2] Intermediate
+[673] OK  Tour jet� -> styles=[4] music=[2] Advanced
+[674] OK  Tournant en avant -> styles=[4] music=[2] Intermediate
+[675] OK  Tournant en arri�re -> styles=[4] music=[2] Intermediate
+[676] OK  Contrapposto -> styles=[4] music=[2] Beginner
+[677] OK  Pli� � la seconde -> styles=[4] music=[2] Intermediate
+[678] OK  Soutenu en l'air -> styles=[4] music=[2] Advanced
+[679] OK  Jet� en l'air -> styles=[4] music=[2] Advanced
+[680] OK  Tournant jet� -> styles=[4] music=[2] Advanced
+[681] OK  Arabesque pench�e -> styles=[4] music=[2] Advanced
+[682] OK  D�gag� fouett� -> styles=[4] music=[2] Advanced
+[683] OK  Saute-�-gauche battu -> styles=[4] music=[2] Advanced
+[684] OK  Fouett� � terre -> styles=[4] music=[2] Advanced
+[693] OK  The Toe Tap -> styles=[19] music=[4] Intermediate
+[710] OK  Perico Pincho Pincho Shaka Shaka -> styles=[1] music=[8] Beginner
+[711] OK  Borracho Style -> styles=[1] music=[8] Beginner
+[712] OK  Perico Swag -> styles=[1] music=[8] Beginner
+[713] OK  Reggaeton Bounce -> styles=[1] music=[8] Beginner
+[714] OK  Salud -> styles=[1] music=[1] Beginner
+[715] OK  Pa' Lante -> styles=[1] music=[1] Beginner
+[716] OK  Guateque -> styles=[1] music=[1] Beginner
+[717] OK  Meneo -> styles=[1] music=[1] Beginner
+[718] OK  Dile -> styles=[1] music=[1] Beginner
+[719] OK  Pique -> styles=[1] music=[1] Beginner
+[720] OK  Pika -> styles=[1] music=[1] Beginner
+[721] OK  G Slide -> styles=[1] music=[1] Beginner
+[722] OK  El Perico -> styles=[1] music=[1] Beginner
+[723] OK  B Slide -> styles=[1] music=[1] Beginner
+[724] OK  4 Count Freeze -> styles=[1] music=[1] Intermediate
+[725] OK  La Gozadera -> styles=[1] music=[1] Beginner
+[726] OK  C Step -> styles=[1] music=[1] Beginner
+[727] OK  Guapo -> styles=[1] music=[1] Beginner
+[728] OK  D Step -> styles=[1] music=[1] Beginner
+[729] OK  Pasa la Olla -> styles=[1] music=[1] Beginner
+[730] OK  E Step -> styles=[1] music=[1] Beginner
+[731] OK  Rueda de Casino -> styles=[1] music=[1] Advanced
+[732] OK  5 Step -> styles=[1] music=[1] Beginner
+[733] OK  Chupa -> styles=[1] music=[1] Beginner
+[734] OK  6 Step -> styles=[12] music=[3] Beginner
+[735] OK  Guantera -> styles=[1] music=[1] Beginner
+[736] OK  7 Step -> styles=[1] music=[1] Beginner
+[737] OK  El Caderito -> styles=[1] music=[1] Beginner
+[738] OK  8 Step -> styles=[1] music=[1] Beginner
+[739] OK  Salsa Limpio -> styles=[1] music=[1] Intermediate
+[740] OK  9 Step -> styles=[1] music=[1] Beginner
+[741] OK  Perico Limpio -> styles=[1] music=[1] Intermediate
+[742] OK  Vaina Loca -> styles=[1] music=[1] Beginner
+[743] OK  10 Step -> styles=[1] music=[1] Beginner
+[744] OK  Salsero -> styles=[1] music=[1] Intermediate
+[745] OK  11 Step -> styles=[1] music=[1] Beginner
+[746] OK  Ojo Que Pasa -> styles=[1] music=[1] Beginner
+[747] OK  12 Step -> styles=[1] music=[1] Beginner
+[748] OK  Dile la Verdad -> styles=[1] music=[1] Beginner
+[749] OK  13 Step -> styles=[1] music=[1] Beginner
+[750] OK  14 Step -> styles=[1] music=[1] Beginner
+[751] OK  La India -> styles=[1] music=[1] Beginner
+[752] OK  15 Step -> styles=[1] music=[1] Beginner
+[753] OK  El Taita -> styles=[1] music=[1] Beginner
+[754] OK  16 Step -> styles=[1] music=[1] Beginner
+[755] OK  Tumbando Caja -> styles=[1] music=[1] Beginner
+[756] OK  G Slide 2 -> styles=[1] music=[1] Beginner
+[757] OK  Pa' Que Te Lo Cuenten -> styles=[1] music=[1] Beginner
+[758] OK  B Slide 2 -> styles=[1] music=[1] Beginner
+[760] OK  C Step 2 -> styles=[1] music=[1] Beginner
+[761] OK  Swivels -> styles=[6] music=[4] Beginner
+[762] OK  D Step 2 -> styles=[1] music=[1] Beginner
+[763] OK  Tap Steps -> styles=[19] music=[4] Beginner
+[764] OK  E Step 2 -> styles=[1] music=[1] Beginner
+[767] OK  5 Step 2 -> styles=[1] music=[1] Beginner
+[768] OK  6 Step 2 -> styles=[1] music=[1] Beginner
+[771] OK  7 Step 2 -> styles=[1] music=[1] Beginner
+[772] OK  8 Step 2 -> styles=[1] music=[1] Beginner
+[774] OK  9 Step 2 -> styles=[1] music=[1] Beginner
+[776] OK  10 Step 2 -> styles=[1] music=[1] Beginner
+[777] OK  Heel Clicks -> styles=[19] music=[4] Beginner
+[778] OK  11 Step 2 -> styles=[1] music=[1] Beginner
+[779] OK  Brush Kicks -> styles=[19] music=[4] Beginner
+[780] OK  12 Step 2 -> styles=[1] music=[1] Beginner
+[781] OK  Toe Heels -> styles=[19] music=[4] Beginner
+[782] OK  13 Step 2 -> styles=[1] music=[1] Beginner
+[784] OK  14 Step 2 -> styles=[1] music=[1] Beginner
+[786] OK  15 Step 2 -> styles=[1] music=[1] Beginner
+[791] OK  Tap Steps in Place -> styles=[19] music=[4] Beginner
+[807] OK  Bourr�e Turns -> styles=[4] music=[2] Intermediate
+[815] OK  Footwork -> styles=[12] music=[3] Intermediate
+[818] OK  Roc�o -> styles=[1] music=[8] Beginner
+[819] OK  La Guag�ita -> styles=[1] music=[8] Beginner
+[820] OK  La Cucaracha -> styles=[1] music=[1] Beginner
+[821] OK  El Puno -> styles=[1] music=[8] Beginner
+[822] OK  Bachata Step -> styles=[1] music=[8] Beginner
+[834] OK  Bachata Step to The Wave -> styles=[1] music=[1] Intermediate
+[835] OK  6-Step -> styles=[12] music=[3] Beginner
+[836] OK  Airchair -> styles=[12] music=[3] Advanced
+[837] OK  Airfreeze -> styles=[12] music=[3] Advanced
+[838] OK  Airporkchop -> styles=[12] music=[3] Advanced
+[839] OK  Banger -> styles=[12] music=[3] Advanced
+[840] OK  Backflip -> styles=[12] music=[3] Advanced
+[841] OK  Barrel Roll -> styles=[12] music=[3] Intermediate
+[842] OK  Birds Nest -> styles=[12] music=[3] Intermediate
+[844] OK  Blade -> styles=[12] music=[3] Advanced
+[847] OK  Bubble -> styles=[12] music=[3] Intermediate
+[850] OK  Chandelier -> styles=[12] music=[3] Advanced
+[853] OK  Collapsing Flip -> styles=[12] music=[3] Advanced
+[856] OK  Double Flare -> styles=[12] music=[3] Advanced
+[858] OK  chapter 4 additional tip ( multiply rockstep & improvise) -> styles=[6] music=[4] Intermediate
+[859] OK  Drop Top Rock -> styles=[12] music=[3] Intermediate
+[862] OK  Elephant Walk -> styles=[12] music=[3] Intermediate
+[865] OK  Finger Tutting -> styles=[10] music=[3] Intermediate
+[869] OK  Flip -> styles=[12] music=[3] Advanced
+[871] OK  Pli�s -> styles=[4] music=[2] Beginner
+[872] OK  Freeze Frame -> styles=[12] music=[3] Intermediate
+[873] OK  LEARN Tendu 1st -> styles=[4] music=[2] Intermediate
+[874] OK  Tendu 1st -> styles=[4] music=[2] Beginner
+[875] OK  Gazelle -> styles=[12] music=[3] Advanced
+[876] OK  LEARN Tendu 5th -> styles=[4] music=[2] Intermediate
+[877] OK  Ghost Step -> styles=[12] music=[3] Intermediate
+[878] OK  Tendu 5th -> styles=[4] music=[2] Beginner
+[880] OK  Helicopter -> styles=[12] music=[3] Advanced
+[881] OK  Pas de Cheval -> styles=[4] music=[2] Intermediate
+[882] OK  LEARN D�gag� 1st -> styles=[4] music=[2] Intermediate
+[883] OK  Hook Turn -> styles=[12] music=[3] Intermediate
+[884] OK  D�gag� 1st -> styles=[4] music=[2] Beginner
+[885] OK  LEARN D�gag� 5th -> styles=[4] music=[2] Intermediate
+[886] OK  Hurricane -> styles=[12] music=[3] Advanced
+[887] OK  D�gag� 5th -> styles=[4] music=[2] Beginner
+[888] OK  LEARN Rond de Jambe -> styles=[4] music=[2] Intermediate
+[890] OK  LEARN Fondu -> styles=[4] music=[2] Intermediate
+[891] OK  Fondu -> styles=[4] music=[2] Intermediate
+[892] OK  Locking -> styles=[10] music=[3] Intermediate
+[893] OK  LEARN Frapp� -> styles=[4] music=[2] Intermediate
+[894] OK  Frapp� -> styles=[4] music=[2] Intermediate
+[895] OK  Moonwalk -> styles=[3] music=[3] Intermediate
+[896] OK  LEARN Adagio -> styles=[4] music=[2] Intermediate
+[897] OK  Adagio -> styles=[4] music=[2] Advanced
+[898] OK  Mule Kick -> styles=[12] music=[3] Intermediate
+[899] OK  LEARN Grand Battement -> styles=[4] music=[2] Intermediate
+[900] OK  Grand Battement -> styles=[4] music=[2] Intermediate
+[901] OK  Power Move -> styles=[12] music=[3] Advanced
+[903] OK  Relev�s -> styles=[4] music=[2] Beginner
+[905] OK  Robot -> styles=[10] music=[3] Beginner
+[908] OK  Scrape -> styles=[12] music=[3] Intermediate
+[911] OK  Spin Top -> styles=[12] music=[3] Advanced
+[913] OK  Spring Forward -> styles=[12] music=[3] Intermediate
+[916] OK  Squat Thug -> styles=[12] music=[3] Beginner
+[920] OK  Zanku -> styles=[13] music=[11] Beginner
+[922] OK  Shaku Shaku -> styles=[13] music=[11] Beginner
+[925] OK  Wankele -> styles=[13] music=[11] Beginner
+[927] OK  Gbe Body -> styles=[13] music=[11] Beginner
+[930] OK  Kokomma -> styles=[13] music=[11] Beginner
+[934] OK  Fouette Turns -> styles=[4] music=[2] Advanced
+[936] OK  Sukuma Sukuma -> styles=[13] music=[11] Beginner
+[937] OK  Aja Move -> styles=[13] music=[11] Beginner
+[938] OK  Shoki -> styles=[13] music=[11] Beginner
+[939] OK  Dudupe -> styles=[13] music=[11] Beginner
+[940] OK  Shuffle -> styles=[19] music=[4] Beginner
+[941] OK  Baba Sowo -> styles=[13] music=[11] Beginner
+[942] OK  Ball Change -> styles=[19] music=[4] Beginner
+[943] OK  Igboro Igboro -> styles=[13] music=[11] Beginner
+[944] OK  Flap -> styles=[19] music=[4] Beginner
+[945] OK  Eje Eje -> styles=[13] music=[11] Beginner
+[946] OK  Flap Heel -> styles=[19] music=[4] Beginner
+[947] OK  Dance Like Me -> styles=[13] music=[11] Beginner
+[948] OK  Stomps & Stamps -> styles=[19] music=[4] Beginner
+[950] OK  Totori Dance -> styles=[13] music=[11] Beginner
+[953] OK  Mumu Rara -> styles=[13] music=[11] Beginner
+[958] OK  step on your left foot in a plie -> styles=[4] music=[2] Intermediate
+[963] OK  Wawo Dance -> styles=[13] music=[11] Beginner
+[965] OK  Odunsi Dance -> styles=[13] music=[11] Beginner
+[974] OK  Oyi -> styles=[13] music=[11] Beginner
+[975] OK  HOW TO PAS DE BOURREE VARIATION -> styles=[4] music=[2] Intermediate
+[976] OK  Gbe Gbe -> styles=[13] music=[11] Beginner
+[979] OK  Aiyelese O -> styles=[13] music=[11] Beginner
+[982] OK  Ololufe -> styles=[13] music=[11] Beginner
+[984] OK  Loko Loko -> styles=[13] music=[11] Beginner
+[987] OK  Sisi E -> styles=[13] music=[11] Beginner
+[990] OK  Mazito -> styles=[13] music=[11] Beginner
+[992] OK  Rotating Basic -> styles=[6] music=[4] Beginner
+[993] OK  Hip Bop -> styles=[13] music=[11] Beginner
+[994] OK  Throw Out -> styles=[6] music=[4] Beginner
+[995] OK  Outside Turn -> styles=[6] music=[4] Beginner
+[996] OK  Dance for Me -> styles=[13] music=[11] Beginner
+[997] OK  Inside Turn -> styles=[6] music=[4] Beginner
+[998] OK  Apple Jack -> styles=[13] music=[11] Beginner
+[999] OK  Ikawe -> styles=[13] music=[11] Beginner
+[1000] OK  Black Bottom -> styles=[13] music=[11] Beginner
+[1001] OK  Boogie Back aka 'Back it up' -> styles=[6] music=[4] Beginner
+[1002] OK  Femi Fadana -> styles=[13] music=[11] Beginner
+[1003] OK  Cultural Dance -> styles=[13] music=[11] Beginner
+[1004] OK  Boogie Forward -> styles=[6] music=[4] Beginner
+[1005] OK  Boogie Forward (clap behind) -> styles=[6] music=[4] Beginner
+[1006] OK  Tinukwai -> styles=[13] music=[11] Beginner
+[1007] OK  Boogie Step -> styles=[6] music=[4] Beginner
+[1008] OK  Box Step (original) -> styles=[6] music=[4] Beginner
+[1009] OK  Eje Aje -> styles=[13] music=[11] Beginner
+[1010] OK  Box Step (contemporary) -> styles=[6] music=[4] Beginner
+[1011] OK  Break (Shim Sham) aka 'TOBA break' -> styles=[6] music=[4] Intermediate
+[1012] OK  Baba Ti Owo -> styles=[13] music=[11] Beginner
+[1013] OK  Break (Half break) aka 'Tiger Rag break' -> styles=[6] music=[4] Intermediate
+[1014] OK  Break-a-leg -> styles=[6] music=[4] Intermediate
+[1015] OK  Walkover -> styles=[12] music=[3] Advanced
+[1016] OK  Cakewalk / Camelwalk (classic) -> styles=[6] music=[4] Beginner
+[1017] OK  Cakewalk / Camelwalk (modern) -> styles=[6] music=[4] Beginner
+[1018] OK  Dutty Rock -> styles=[14] music=[12] Beginner
+[1019] OK  Camelwalk (backward) -> styles=[6] music=[4] Beginner
+[1020] OK  Wuk Up -> styles=[14] music=[12] Beginner
+[1021] OK  Cartwheel -> styles=[12] music=[3] Intermediate
+[1022] OK  Charleston (1920s) -> styles=[6] music=[4] Beginner
+[1023] OK  Gully Side Step -> styles=[14] music=[12] Beginner
+[1024] OK  Charleston (Jump) -> styles=[6] music=[4] Intermediate
+[1025] OK  Charleston (Kansas City) -> styles=[6] music=[4] Intermediate
+[1027] OK  Charleston (Squat) -> styles=[6] music=[4] Intermediate
+[1028] OK  Cool Breeze (1953) aka 'Grapevine' -> styles=[6] music=[4] Beginner
+[1029] OK  Hill Top Jump -> styles=[14] music=[12] Beginner
+[1030] OK  Cool Breeze (1970s) -> styles=[6] music=[4] Beginner
+[1031] OK  Crazy Legs -> styles=[12] music=[3] Advanced
+[1032] OK  Buss A Bubble -> styles=[14] music=[12] Beginner
+[1033] OK  Crossovers -> styles=[6] music=[4] Beginner
+[1034] OK  Choppa Style -> styles=[14] music=[12] Beginner
+[1035] OK  Eagle Slide -> styles=[6] music=[4] Intermediate
+[1036] OK  Killer Bee -> styles=[14] music=[12] Beginner
+[1037] OK  Fall off the Log -> styles=[6] music=[4] Intermediate
+[1038] OK  Fall off the Log (turning) -> styles=[6] music=[4] Intermediate
+[1039] OK  Palm Tree Walk -> styles=[14] music=[12] Beginner
+[1040] OK  Fishtails -> styles=[6] music=[4] Intermediate
+[1041] OK  Festival Stance -> styles=[14] music=[12] Beginner
+[1042] OK  Gaze Afar -> styles=[14] music=[12] Beginner
+[1043] OK  Forward Bicep Bounce -> styles=[14] music=[12] Beginner
+[1044] OK  Grinds -> styles=[6] music=[4] Intermediate
+[1045] OK  Hallelujahs aka 'Shouts' -> styles=[6] music=[4] Beginner
+[1046] OK  Wiggle Wiggle -> styles=[14] music=[12] Beginner
+[1047] OK  Heels (Digs) -> styles=[6] music=[4] Beginner
+[1048] OK  Heels (Russian wing) -> styles=[6] music=[4] Advanced
+[1049] OK  Hitchhiker -> styles=[6] music=[4] Beginner
+[1050] OK  Itches -> styles=[6] music=[4] Beginner
+[1051] OK  Jig Walks -> styles=[6] music=[4] Beginner
+[1052] OK  Knee Slaps -> styles=[6] music=[4] Beginner
+[1053] OK  Lowdown -> styles=[6] music=[4] Intermediate
+[1054] OK  Mess Around -> styles=[6] music=[4] Beginner
+[1055] OK  Mooch aka 'Four Corners' -> styles=[6] music=[4] Beginner
+[1056] OK  Opposites aka 'Push n Pull' -> styles=[6] music=[4] Beginner
+[1057] OK  Paddle Turn -> styles=[6] music=[4] Intermediate
+[1058] OK  Pecks -> styles=[6] music=[4] Beginner
+[1059] OK  Pecks (Jackson 5) -> styles=[6] music=[4] Beginner
+[1060] OK  Ride the Pony -> styles=[6] music=[4] Beginner
+[1061] OK  Rocks -> styles=[6] music=[4] Beginner
+[1062] OK  Rusty Dusty -> styles=[6] music=[4] Beginner
+[1063] OK  Sailor Kicks -> styles=[6] music=[4] Beginner
+[1064] OK  Savoy Kicks -> styles=[6] music=[4] Intermediate
+[1065] OK  Scarecrow -> styles=[6] music=[4] Beginner
+[1066] OK  Scissor Kicks -> styles=[6] music=[4] Intermediate
+[1067] OK  Shim Sham -> styles=[6] music=[4] Intermediate
+[1068] OK  Shish-ka-boom-ba -> styles=[6] music=[4] Beginner
+[1069] OK  Shoe Shine -> styles=[6] music=[4] Beginner
+[1070] OK  Shorty George -> styles=[6] music=[4] Intermediate
+[1071] OK  Skate -> styles=[10] music=[3] Beginner
+[1072] OK  Skip up -> styles=[6] music=[4] Beginner
+[1073] OK  Slip Slops -> styles=[6] music=[4] Beginner
+[1074] OK  Spank the Baby -> styles=[6] music=[4] Beginner
+[1075] OK  Stomp off -> styles=[6] music=[4] Beginner
+[1076] OK  Struttin' -> styles=[6] music=[4] Beginner
+[1077] OK  Suzie Q -> styles=[6] music=[4] Beginner
+[1078] OK  Tabby the Cat -> styles=[6] music=[4] Beginner
+[1079] OK  Tacky Annie -> styles=[6] music=[4] Beginner
+[1080] OK  Tick Tocks -> styles=[6] music=[4] Beginner
+[1081] OK  Truckin' -> styles=[6] music=[4] Beginner
+[1082] OK  Turkey Trots -> styles=[6] music=[4] Beginner
+[1084] OK  Basic -> styles=[6] music=[4] Beginner
+[1085] OK  Turning Basic -> styles=[6] music=[4] Intermediate
+[1086] OK  Under Arm Turn -> styles=[6] music=[4] Beginner
+[1087] OK  Single Time vs. Jive vs ECS -> styles=[6] music=[4] None
+[1088] OK  Leader Break Through -> styles=[6] music=[4] Intermediate
+[1089] OK  Shoulder Check -> styles=[6] music=[4] Beginner
+[1099] OK  Promenade -> styles=[6] music=[4] Beginner
+[1105] OK  Shuffle and Flap -> styles=[19] music=[4] Beginner
+[1106] OK  Time Step -> styles=[19] music=[4] Intermediate
+[1107] OK  Double Time Step -> styles=[19] music=[4] Intermediate
+[1108] OK  Triple Time Step -> styles=[19] music=[4] Intermediate
+[1110] OK  See the remate -> styles=[18] music=[10] Intermediate
+[1115] OK  Practice with solo comp�s at 90bpm -> styles=[18] music=[10] Intermediate
+[1116] OK  Practice with solo comp�s at 110bpm -> styles=[18] music=[10] Intermediate
+[1124] OK  1st Position -> styles=[4] music=[2] Beginner
+[1125] OK  2nd Position -> styles=[4] music=[2] Beginner
+[1126] OK  3rd Position -> styles=[4] music=[2] Beginner
+[1127] OK  4th Position -> styles=[4] music=[2] Beginner
+[1128] OK  5th Position -> styles=[4] music=[2] Beginner
+[1129] OK  6th Position -> styles=[4] music=[2] Beginner
+[1132] OK  BATTEMENT FONDU -> styles=[4] music=[2] Intermediate
+[1133] OK  BATTEMENT FRAPP� -> styles=[4] music=[2] Intermediate
+[1134] OK  ADAGE -> styles=[4] music=[2] Advanced
+[1135] OK  BATTEMENT CLOCHE -> styles=[4] music=[2] Intermediate
+[1138] OK  PORT DE BRAS -> styles=[4] music=[2] Intermediate
+[1139] OK  ST ARABESQUE -> styles=[4] music=[2] Intermediate
+[1140] OK  ND ARABESQUE -> styles=[4] music=[2] Intermediate
+[1141] OK  RD ARABESQUE -> styles=[4] music=[2] Advanced
+[1142] OK  RD ARABESQUE -> styles=[4] music=[2] Advanced
+[1143] OK  ARABESQUE A TERRE -> styles=[4] music=[2] Intermediate
+[1144] OK  ARABESQUE A TERRE -> styles=[4] music=[2] Intermediate
+[1145] OK  ARABESQUE EN L'AIR -> styles=[4] music=[2] Advanced
+[1146] OK  ARABESQUE EN L'AIR -> styles=[4] music=[2] Advanced
+[1147] OK  ATTITUDE ARABESQUE -> styles=[4] music=[2] Advanced
+[1148] OK  ATTITUDE ARABESQUE -> styles=[4] music=[2] Advanced
+[1149] OK  PIROUETTE EN DEDANS -> styles=[4] music=[2] Intermediate
+[1150] OK  PIROUETTE EN DEDANS -> styles=[4] music=[2] Intermediate
+[1151] OK  CHANGEMENT -> styles=[4] music=[2] Intermediate
+[1152] OK  CHANGEMENT -> styles=[4] music=[2] Intermediate
+[1153] OK  Part 1 - explanation of the exercise and how to do the marcaje -> styles=[18] music=[10] Intermediate
+[1154] OK  Part 1 - explanation of the exercise and how to do the marcaje -> styles=[18] music=[10] Intermediate
+[1155] OK  Part 2 - how to do the remate, and a transition step -> styles=[18] music=[10] Intermediate
+[1156] OK  Part 2 - how to do the remate, and a transition step -> styles=[18] music=[10] Intermediate
+[1157] OK  Part 3 - the game plan for putting our moves to the letra -> styles=[18] music=[10] Intermediate
+[1158] OK  Part 3 - the game plan for putting our moves to the letra -> styles=[18] music=[10] Intermediate
+[1159] OK  Part 3 - then practice with solo comp�s -> styles=[18] music=[10] Intermediate
+[1160] OK  Part 3 - then practice with solo comp�s -> styles=[18] music=[10] Intermediate
+[1161] OK  Part 4 - dancing to the letra -> styles=[18] music=[10] Intermediate
+[1162] OK  Part 4 - dancing to the letra -> styles=[18] music=[10] Intermediate
+[1163] OK  LEARN Tendu 5th Faster -> styles=[4] music=[2] Intermediate
+[1164] OK  LEARN Tendu 5th Faster -> styles=[4] music=[2] Intermediate
+[1165] OK  Tendu 5th Faster -> styles=[4] music=[2] Intermediate
+[1166] OK  Tendu 5th Faster -> styles=[4] music=[2] Intermediate
+[1169] OK  Turnout Exercise -> styles=[4] music=[2] Beginner
+[1170] OK  Turnout Exercise -> styles=[4] music=[2] Beginner
+[1187] OK  Floor Work -> styles=[7] music=[2] Intermediate
+[1188] OK  Floor Work -> styles=[7] music=[2] Intermediate
+[1193] OK  Plies -> styles=[4] music=[2] Beginner
+[1195] OK  D�gage 1st -> styles=[4] music=[2] Beginner
+[1196] OK  Plies -> styles=[4] music=[2] Beginner
+[1198] OK  D�gage 1st -> styles=[4] music=[2] Beginner
+[1209] OK  What is Paso de Buler�as? -> styles=[18] music=[10] Intermediate
+[1212] OK  What is Paso de Buler�as? -> styles=[18] music=[10] Intermediate
+[1217] OK  Practice with solo comp�s 150 bpm -> styles=[18] music=[10] Intermediate
+[1218] OK  Practice with solo comp�s 170 bpm -> styles=[18] music=[10] Intermediate
+[1220] OK  Practice with solo comp�s 150 bpm -> styles=[18] music=[10] Intermediate
+[1221] OK  Practice with solo comp�s 190 bpm -> styles=[18] music=[10] Intermediate
+[1222] OK  Practice with solo comp�s 170 bpm -> styles=[18] music=[10] Intermediate
+[1223] OK  How to use the step with a letra -> styles=[18] music=[10] Intermediate
+[1224] OK  Practice with solo comp�s 190 bpm -> styles=[18] music=[10] Intermediate
+[1225] OK  Practice with a letra (slowed down) -> styles=[18] music=[10] Intermediate
+[1226] OK  Practice with the letra at full speed! -> styles=[18] music=[10] Intermediate
+[1227] OK  How to use the step with a letra -> styles=[18] music=[10] Intermediate
+[1229] OK  Practice with a letra (slowed down) -> styles=[18] music=[10] Intermediate
+[1230] OK  Boogie Forward / Back -> styles=[6] music=[4] Beginner
+[1231] OK  Practice with the letra at full speed! -> styles=[18] music=[10] Intermediate
+[1232] OK  Boogie Drop -> styles=[6] music=[4] Beginner
+[1234] OK  Bee's Knees -> styles=[6] music=[4] Beginner
+[1235] OK  Boogie Forward / Back -> styles=[6] music=[4] Beginner
+[1236] OK  Breeze Knees -> styles=[6] music=[4] Beginner
+[1237] OK  Boogie Drop -> styles=[6] music=[4] Beginner
+[1238] OK  Charleston -> styles=[6] music=[4] Beginner
+[1239] OK  Bee's Knees -> styles=[6] music=[4] Beginner
+[1240] OK  20s Charleston -> styles=[6] music=[4] Beginner
+[1241] OK  Breeze Knees -> styles=[6] music=[4] Beginner
+[1242] OK  Jump Charleston -> styles=[6] music=[4] Intermediate
+[1243] OK  Charleston -> styles=[6] music=[4] Beginner
+[1244] OK  Cow Tail -> styles=[6] music=[4] Beginner
+[1245] OK  20s Charleston -> styles=[6] music=[4] Beginner
+[1246] OK  Cross Over -> styles=[6] music=[4] Beginner
+[1247] OK  Jump Charleston -> styles=[6] music=[4] Intermediate
+[1248] OK  Cow Tail -> styles=[6] music=[4] Beginner
+[1249] OK  The Chase -> styles=[6] music=[4] Intermediate
+[1250] OK  Cross Over -> styles=[6] music=[4] Beginner
+[1251] OK  Fishtail -> styles=[6] music=[4] Intermediate
+[1252] OK  The Chase -> styles=[6] music=[4] Intermediate
+[1253] OK  Grapevine -> styles=[6] music=[4] Beginner
+[1254] OK  Fishtail -> styles=[6] music=[4] Intermediate
+[1255] OK  Groove Walk -> styles=[6] music=[4] Beginner
+[1256] OK  Grapevine -> styles=[6] music=[4] Beginner
+[1257] OK  Half Break -> styles=[6] music=[4] Intermediate
+[1258] OK  Groove Walk -> styles=[6] music=[4] Beginner
+[1259] OK  Jig Walk -> styles=[6] music=[4] Beginner
+[1260] OK  Half Break -> styles=[6] music=[4] Intermediate
+[1262] OK  Jig Walk -> styles=[6] music=[4] Beginner
+[1265] OK  Lock Turn -> styles=[6] music=[4] Intermediate
+[1267] OK  Opposites -> styles=[6] music=[4] Beginner
+[1268] OK  Lock Turn -> styles=[6] music=[4] Intermediate
+[1270] OK  Stomps -> styles=[6] music=[4] Beginner
+[1271] OK  Opposites -> styles=[6] music=[4] Beginner
+[1272] OK  Suzy Q -> styles=[6] music=[4] Beginner
+[1274] OK  Skating -> styles=[6] music=[4] Intermediate
+[1275] OK  Stomps -> styles=[6] music=[4] Beginner
+[1276] OK  TOBA-Break (Full Break) -> styles=[6] music=[4] Intermediate
+[1277] OK  Suzy Q -> styles=[6] music=[4] Beginner
+[1279] OK  Skating -> styles=[6] music=[4] Intermediate
+[1280] OK  Sidestep -> styles=[6] music=[4] Beginner
+[1281] OK  TOBA-Break (Full Break) -> styles=[6] music=[4] Intermediate
+[1282] OK  Sink & Grind -> styles=[6] music=[4] Intermediate
+[1284] OK  Rise & Grind -> styles=[6] music=[4] Intermediate
+[1285] OK  Sidestep -> styles=[6] music=[4] Beginner
+[1286] OK  Light Jig Step -> styles=[6] music=[4] Beginner
+[1287] OK  Sink & Grind -> styles=[6] music=[4] Intermediate
+[1289] OK  Rise & Grind -> styles=[6] music=[4] Intermediate
+[1291] OK  Light Jig Step -> styles=[6] music=[4] Beginner
+[1294] OK  LEARN Tendu & Shaping Feet -> styles=[4] music=[2] Intermediate
+[1296] OK  Tendu & Shaping Feet -> styles=[4] music=[2] Beginner
+[1298] OK  LEARN Plie & Straight Leg Relev� -> styles=[4] music=[2] Intermediate
+[1299] OK  LEARN Tendu & Shaping Feet -> styles=[4] music=[2] Intermediate
+[1300] OK  Pli� & Straight Leg Relev� -> styles=[4] music=[2] Beginner
+[1301] OK  Tendu & Shaping Feet -> styles=[4] music=[2] Beginner
+[1302] OK  LEARN Coup� & Tendu -> styles=[4] music=[2] Intermediate
+[1303] OK  LEARN Plie & Straight Leg Relev� -> styles=[4] music=[2] Intermediate
+[1304] OK  Coup� & Tendu -> styles=[4] music=[2] Beginner
+[1305] OK  LEARN Sous Sous -> styles=[4] music=[2] Intermediate
+[1306] OK  Pli� & Straight Leg Relev� -> styles=[4] music=[2] Beginner
+[1307] OK  Sous Sous -> styles=[4] music=[2] Intermediate
+[1308] OK  LEARN Coup� & Tendu -> styles=[4] music=[2] Intermediate
+[1309] OK  LEARN Relev� on 1 Leg -> styles=[4] music=[2] Intermediate
+[1310] OK  Coup� & Tendu -> styles=[4] music=[2] Beginner
+[1311] OK  Relev� on 1 Leg -> styles=[4] music=[2] Intermediate
+[1312] OK  LEARN Sous Sous -> styles=[4] music=[2] Intermediate
+[1314] OK  Sous Sous -> styles=[4] music=[2] Intermediate
+[1315] OK  Balance & Stretch -> styles=[4] music=[2] Beginner
+[1316] OK  LEARN Relev� on 1 Leg -> styles=[4] music=[2] Intermediate
+[1317] OK  Relev� on 1 Leg -> styles=[4] music=[2] Intermediate
+[1318] OK  Learn the llamada -> styles=[18] music=[10] Intermediate
+[1320] OK  Practice with solo comp�s at 100bpm -> styles=[18] music=[10] Intermediate
+[1321] OK  Balance & Stretch -> styles=[4] music=[2] Beginner
+[1322] OK  How a llamada works -> styles=[18] music=[10] Intermediate
+[1323] OK  Learn the llamada -> styles=[18] music=[10] Intermediate
+[1325] OK  Practice with solo comp�s at 100bpm -> styles=[18] music=[10] Intermediate
+[1327] OK  How a llamada works -> styles=[18] music=[10] Intermediate
+[1335] OK  left switch right fan over chef stick step tendu -> styles=[4] music=[2] Intermediate
+[1340] OK  Degag� 1st -> styles=[4] music=[2] Beginner
+[1341] OK  left switch right fan over chef stick step tendu -> styles=[4] music=[2] Intermediate
+[1342] OK  Degag� 5th -> styles=[4] music=[2] Beginner
+[1345] OK  Degag� 1st -> styles=[4] music=[2] Beginner
+[1346] OK  Developp� -> styles=[4] music=[2] Advanced
+[1347] OK  Degag� 5th -> styles=[4] music=[2] Beginner
+[1351] OK  Developp� -> styles=[4] music=[2] Advanced
+[1360] OK  LEARNING HOW TO CRIP PAS DE BOURREE -> styles=[4] music=[2] Intermediate
+[1365] OK  LEARNING HOW TO BONUS PAS DE BOURREE -> styles=[4] music=[2] Intermediate
+[1366] OK  LEARNING HOW TO CRIP PAS DE BOURREE -> styles=[4] music=[2] Intermediate
+[1369] OK  PAS DE BOURREE VARIATIONS WITH MUSIC -> styles=[4] music=[2] Intermediate
+[1372] OK  LEARNING HOW TO BONUS PAS DE BOURREE -> styles=[4] music=[2] Intermediate
+[1376] OK  PAS DE BOURREE VARIATIONS WITH MUSIC -> styles=[4] music=[2] Intermediate
+[1411] OK  d�velopp� exercise explanation -> styles=[4] music=[2] Intermediate
+[1413] OK  d�velopp� exercise -> styles=[4] music=[2] Advanced
+[1418] OK  d�velopp� exercise explanation -> styles=[4] music=[2] Intermediate
+[1420] OK  d�velopp� exercise -> styles=[4] music=[2] Advanced
+[1445] OK  The Leg Plie -> styles=[4] music=[2] Intermediate
+[1452] OK  The Leg Plie -> styles=[4] music=[2] Intermediate
+[1453] OK  Normal Shuffle -> styles=[19] music=[4] Beginner
+[1455] OK  Shuffle + Step -> styles=[19] music=[4] Beginner
+[1457] OK  Shuffle + Ball Change -> styles=[19] music=[4] Beginner
+[1459] OK  Hop + Shuffle + Step -> styles=[19] music=[4] Intermediate
+[1460] OK  Normal Shuffle -> styles=[19] music=[4] Beginner
+[1461] OK  Hop + Shuffle + Step + Shuffle + Ball Change -> styles=[19] music=[4] Intermediate
+[1462] OK  Shuffle + Step -> styles=[19] music=[4] Beginner
+[1463] OK  Normal Shuffle(Fast) -> styles=[19] music=[4] Intermediate
+[1464] OK  Shuffle + Ball Change -> styles=[19] music=[4] Beginner
+[1465] OK  Shuffle + Step(Fast) -> styles=[19] music=[4] Intermediate
+[1466] OK  Shuffle + Ball Change(Fast) -> styles=[19] music=[4] Intermediate
+[1467] OK  Hop + Shuffle + Step -> styles=[19] music=[4] Intermediate
+[1468] OK  Hop + Shuffle + Step(Fast) -> styles=[19] music=[4] Advanced
+[1469] OK  Hop + Shuffle + Step + Shuffle + Ball Change -> styles=[19] music=[4] Intermediate
+[1470] OK  Hop + Shuffle + Step + Shuffle + Ball Change(Fast) -> styles=[19] music=[4] Advanced
+[1471] OK  Normal Shuffle(Fast) -> styles=[19] music=[4] Intermediate
+[1472] OK  Playing with rhythm -> styles=[19] music=[4] Intermediate
+[1473] OK  Shuffle + Step(Fast) -> styles=[19] music=[4] Intermediate
+[1474] OK  Sweeps and Fades -> styles=[19] music=[4] Intermediate
+[1475] OK  Shuffle + Ball Change(Fast) -> styles=[19] music=[4] Intermediate
+[1476] OK  Playing with hesitation -> styles=[19] music=[4] Intermediate
+[1477] OK  Hop + Shuffle + Step(Fast) -> styles=[19] music=[4] Advanced
+[1479] OK  Hop + Shuffle + Step + Shuffle + Ball Change(Fast) -> styles=[19] music=[4] Advanced
+[1480] OK  Tuck Turn styling -> styles=[19] music=[4] Intermediate
+[1481] OK  Playing with rhythm -> styles=[19] music=[4] Intermediate
+[1483] OK  Sweeps and Fades -> styles=[19] music=[4] Intermediate
+[1484] OK  Follow styling Pump The Brakes -> styles=[19] music=[4] Intermediate
+[1485] OK  Playing with hesitation -> styles=[19] music=[4] Intermediate
+[1486] OK  Mirroring -> styles=[19] music=[4] Intermediate
+[1489] OK  Tuck Turn styling -> styles=[19] music=[4] Intermediate
+[1492] OK  Follow styling Pump The Brakes -> styles=[19] music=[4] Intermediate
+[1494] OK  Mirroring -> styles=[19] music=[4] Intermediate
+[1535] OK  TWIST | FREEZE -> styles=[12] music=[3] Intermediate
+[1538] OK  TWIST | FREEZE -> styles=[12] music=[3] Intermediate
+[1559] OK  Toes -> styles=[19] music=[4] Beginner
+[1561] OK  Toe Taps -> styles=[19] music=[4] Beginner
+[1562] OK  Toes -> styles=[19] music=[4] Beginner
+[1563] OK  Brush and Drags -> styles=[19] music=[4] Beginner
+[1564] OK  Toe Taps -> styles=[19] music=[4] Beginner
+[1566] OK  Brush and Drags -> styles=[19] music=[4] Beginner
+[1590] OK  First Tendu - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1591] OK  First Tendu - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1592] OK  Tendu from the Fifth - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1593] OK  Tendu from the Fifth - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1594] OK  Slow Jete - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1595] OK  Slow Jete - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1598] OK  Rond de Jambe - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1599] OK  Fondu - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1600] OK  Fondu - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1601] OK  Frappe - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1602] OK  Frappe - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1603] OK  Adage - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1604] OK  Adage - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1605] OK  Grand Battement - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1606] OK  Grand Battement - Intro.Exercise -> styles=[4] music=[2] Intermediate
+[1609] OK  The Breakaway -> styles=[6] music=[4] Intermediate
+[1610] OK  The Camel Walk -> styles=[6] music=[4] Beginner
+[1611] OK  Swingout -> styles=[6] music=[4] Intermediate
+[1612] OK  Connection -> styles=[6] music=[4] None
+[1613] OK  Fifth Position Frame -> styles=[6] music=[4] Beginner
+[1615] OK  Quick-Quick-Slow -> styles=[6] music=[4] Beginner
+[1619] OK  Forward Triple Step -> styles=[6] music=[4] Beginner
+[1620] OK  Backward Triple Step -> styles=[6] music=[4] Beginner
+[1625] OK  Forward Cross Over -> styles=[6] music=[4] Beginner
+[1626] OK  Backward Cross Over -> styles=[6] music=[4] Beginner
+[1628] OK  Forward Shuffle -> styles=[6] music=[4] Beginner
+[1629] OK  Backward Shuffle -> styles=[6] music=[4] Beginner
+[1630] OK  Forward Knee Slide -> styles=[6] music=[4] Intermediate
+[1631] OK  Backward Knee Slide -> styles=[6] music=[4] Intermediate
+[1632] OK  Forward Slide Step -> styles=[6] music=[4] Beginner
+[1633] OK  Backward Slide Step -> styles=[6] music=[4] Beginner
+[1634] OK  Forward Trotting Step -> styles=[6] music=[4] Beginner
+[1635] OK  Backward Trotting Step -> styles=[6] music=[4] Beginner
+[1636] OK  Forward Stomp -> styles=[6] music=[4] Beginner
+[1637] OK  Backward Stomp -> styles=[6] music=[4] Beginner
+[1646] OK  Forward Tuck Turn -> styles=[6] music=[4] Intermediate
+[1647] OK  Backward Tuck Turn -> styles=[6] music=[4] Intermediate
+[1648] OK  Forward Whip -> styles=[6] music=[4] Intermediate
+[1649] OK  Backward Whip -> styles=[6] music=[4] Intermediate
+[1650] OK  Forward Dip -> styles=[6] music=[4] Intermediate
+[1651] OK  Backward Dip -> styles=[6] music=[4] Intermediate
+[1652] OK  Clockwise Spin -> styles=[6] music=[4] Intermediate
+[1653] OK  Counterclockwise Spin -> styles=[6] music=[4] Intermediate
+
+Done � updated=929, no_match(kept existing)=725, errors=0

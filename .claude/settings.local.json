@@ -41,7 +41,24 @@
       "Bash(python -c ' *)",
       "PowerShell([System.Environment]::SetEnvironmentVariable\\(\"OLLAMA_HOST\", \"0.0.0.0\", \"Machine\"\\))",
       "PowerShell(& \"C:\\\\Users\\\\valot\\\\Documents\\\\Git\\\\Projects\\\\Dance\\\\deploy-dance.bat\")",
-      "PowerShell(ssh pi@pi \"curl -s --connect-timeout 5 http://192.168.0.174:11434/api/tags\")"
+      "PowerShell(ssh pi@pi \"curl -s --connect-timeout 5 http://192.168.0.174:11434/api/tags\")",
+      "PowerShell(ssh pi@pi \"PGPASSWORD=dancebabydance psql -h 192.168.0.197 -U dance_user -d dancing -c 'SELECT \\\\\"Id\\\\\", \\\\\"Username\\\\\", \\\\\"IsAdmin\\\\\" FROM \\\\\"Users\\\\\" WHERE \\\\\"Username\\\\\" = '\"'\"'justas'\"'\"';'\")",
+      "PowerShell(ssh pi@pi 'PGPASSWORD=dancebabydance psql -h 192.168.0.197 -U dance_user -d dancing -c \"SELECT \\\\\"Id\\\\\", \\\\\"Username\\\\\", \\\\\"IsAdmin\\\\\" FROM \\\\\"Users\\\\\" WHERE \\\\\"Username\\\\\" = '\"'\"'justas'\"'\"';\"')",
+      "PowerShell(ssh pi@pi 'PGPASSWORD=dancebabydance psql -h 192.168.0.197 -U dance_user -d dancing -c \"SELECT \\\\\"Id\\\\\", \\\\\"Username\\\\\", \\\\\"IsAdmin\\\\\" FROM \\\\\"Users\\\\\" ORDER BY \\\\\"Id\\\\\";\"')",
+      "PowerShell(ssh pi@pi 'PGPASSWORD=dancebabydance psql -h 192.168.0.197 -U dance_user -d dancing -c \"UPDATE \\\\\"Users\\\\\" SET \\\\\"IsAdmin\\\\\" = true WHERE \\\\\"Id\\\\\" = 10 RETURNING \\\\\"Id\\\\\", \\\\\"Username\\\\\", \\\\\"IsAdmin\\\\\";\"')",
+      "Bash(pip show *)",
+      "Bash(python *)",
+      "Bash(Get-Content \"C:\\\\Users\\\\valot\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-valot-Documents-Git-Projects-Dance\\\\5b4c9321-e72d-4e3e-b325-464b1710c180\\\\tasks\\\\bwg0316gx.output\" -Wait)",
+      "Bash(Select-String -Pattern \"OK|SKIP|FAIL|Phase|Style|moves|===\")",
+      "Bash(Get-Content \"C:\\\\Users\\\\valot\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-valot-Documents-Git-Projects-Dance\\\\5b4c9321-e72d-4e3e-b325-464b1710c180\\\\tasks\\\\bwg0316gx.output\" -Tail 30)",
+      "PowerShell($r = Invoke-RestMethod \"https://dance-api.takelord.com/api/dances\" -AllowInsecureRedirect; Write-Host \"Total dances: $\\($r.Count\\)\"; $r | Group-Object { $_.styles -join ',' } | Sort-Object Count -Descending | Select-Object -First 15 | ForEach-Object { Write-Host \"$\\($_.Count\\)x [$\\($_.Name\\)]\" })",
+      "PowerShell(Start-Process \"ollama\" -ArgumentList \"serve\" -WindowStyle Hidden; Start-Sleep -Seconds 3; try { Invoke-RestMethod \"http://localhost:11434/api/tags\" | ConvertTo-Json -Depth 2 } catch { Write-Host \"Not up yet: $_\" })",
+      "PowerShell(ssh pi@pi \"curl -s --connect-timeout 5 http://192.168.0.174:11434/api/tags | python3 -c 'import json,sys; d=json.load\\(sys.stdin\\); print\\([m[\\\\\"name\\\\\"] for m in d[\\\\\"models\\\\\"]]\\)'\")",
+      "Skill(update-config)",
+      "Write",
+      "Edit",
+      "PowerShell",
+      "Bash"
     ]
   }
 }
