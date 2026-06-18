@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using DancePlatform.API.Data;
 using DancePlatform.API.DTOs.MusicalStyle;
 using DancePlatform.API.Models;
@@ -11,37 +12,27 @@ public class MusicalStyleService : IMusicalStyleService
 
     public MusicalStyleService(AppDbContext db) => _db = db;
 
+    private static readonly Expression<Func<MusicalStyle, MusicalStyleDto>> ToDto = ms => new MusicalStyleDto
+    {
+        Id = ms.Id,
+        Name = ms.Name,
+        Description = ms.Description,
+        DateAdded = ms.DateAdded,
+        DanceCount = ms.DanceMusicalStyles.Count
+    };
+
     public async Task<List<MusicalStyleDto>> GetAllAsync() =>
-        await _db.MusicalStyles
-            .Include(ms => ms.DanceMusicalStyles)
-            .Select(ms => new MusicalStyleDto
-            {
-                Id = ms.Id,
-                Name = ms.Name,
-                Description = ms.Description,
-                DateAdded = ms.DateAdded,
-                DanceCount = ms.DanceMusicalStyles.Count
-            }).ToListAsync();
+        await _db.MusicalStyles.Include(ms => ms.DanceMusicalStyles).Select(ToDto).ToListAsync();
 
     public async Task<MusicalStyleDto?> GetByIdAsync(int id) =>
-        await _db.MusicalStyles
-            .Include(ms => ms.DanceMusicalStyles)
-            .Where(ms => ms.Id == id)
-            .Select(ms => new MusicalStyleDto
-            {
-                Id = ms.Id,
-                Name = ms.Name,
-                Description = ms.Description,
-                DateAdded = ms.DateAdded,
-                DanceCount = ms.DanceMusicalStyles.Count
-            }).FirstOrDefaultAsync();
+        await _db.MusicalStyles.Include(ms => ms.DanceMusicalStyles).Where(ms => ms.Id == id).Select(ToDto).FirstOrDefaultAsync();
 
     public async Task<MusicalStyleDto> CreateAsync(CreateMusicalStyleRequest request)
     {
-        var musicalStyle = new MusicalStyle { Name = request.Name, Description = request.Description };
-        _db.MusicalStyles.Add(musicalStyle);
+        var ms = new MusicalStyle { Name = request.Name, Description = request.Description };
+        _db.MusicalStyles.Add(ms);
         await _db.SaveChangesAsync();
-        return (await GetByIdAsync(musicalStyle.Id))!;
+        return new MusicalStyleDto { Id = ms.Id, Name = ms.Name, Description = ms.Description, DateAdded = ms.DateAdded, DanceCount = 0 };
     }
 
     public async Task<bool> DeleteAsync(int id)

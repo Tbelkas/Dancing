@@ -7,7 +7,7 @@ import { ProfileService } from '../../core/services/profile.service';
 import { PracticeService } from '../../core/services/practice.service';
 import { UserProfile } from '../../models/user.model';
 import { PracticeSession } from '../../models/practice-session.model';
-import { toLocalDateString } from '../../core/utils/video-url.utils';
+import { computeStreak } from '../../core/utils/practice.utils';
 
 @Component({
   selector: 'app-profile',
@@ -25,23 +25,7 @@ export class ProfileComponent implements OnInit {
   editAvatarUrl = '';
   editVisibility: 'Public' | 'Private' = 'Private';
 
-  readonly streak = computed(() => {
-    const s = this.sessions();
-    if (s.length === 0) return 0;
-    const dates = [...new Set(s.map(x => x.date))].sort().reverse();
-    const today = toLocalDateString(new Date());
-    const yesterday = toLocalDateString(new Date(Date.now() - 86400000));
-    if (dates[0] !== today && dates[0] !== yesterday) return 0;
-    let streak = 0;
-    let current = new Date(dates[0]);
-    for (const d of dates) {
-      const diff = Math.round((current.getTime() - new Date(d).getTime()) / 86400000);
-      if (diff > 1) break;
-      streak++;
-      current = new Date(d);
-    }
-    return streak;
-  });
+  readonly streak = computed(() => computeStreak(this.sessions()));
 
   readonly totalSessions = computed(() => this.sessions().length);
 

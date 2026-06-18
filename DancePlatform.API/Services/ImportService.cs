@@ -59,18 +59,17 @@ public class ImportService : IImportService
         var stylesByName = allStyles.ToDictionary(s => s.Name.ToLower(), s => s.Id);
         var musicByName = allMusicalStyles.ToDictionary(ms => ms.Name.ToLower(), ms => ms.Id);
 
+        var classifications = await Task.WhenAll(entries.Select(e =>
+            _ollama.ClassifyDanceAsync(e.Name, allStyles.Select(s => s.Name), allMusicalStyles.Select(ms => ms.Name))));
+
         for (int i = 0; i < entries.Count; i++)
         {
             var (name, startSeconds) = entries[i];
             int? endSeconds = i + 1 < entries.Count ? entries[i + 1].Start - 1 : null;
+            var classification = classifications[i];
 
             try
             {
-                var classification = await _ollama.ClassifyDanceAsync(
-                    name,
-                    allStyles.Select(s => s.Name),
-                    allMusicalStyles.Select(ms => ms.Name));
-
                 var styleIds = classification?.DanceStyles?
                     .Where(s => stylesByName.ContainsKey(s.ToLower()))
                     .Select(s => stylesByName[s.ToLower()])

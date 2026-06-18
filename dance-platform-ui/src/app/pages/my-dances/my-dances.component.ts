@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { switchMap, EMPTY } from 'rxjs';
 import { parseVideoUrl, parseTimeSecs } from '../../core/utils/video-url.utils';
+import { toggleSet } from '../../core/utils/set.utils';
 import { ProfileService } from '../../core/services/profile.service';
 import { StyleService } from '../../core/services/style.service';
 import { DanceService, CreateDancePayload } from '../../core/services/dance.service';
@@ -12,12 +13,6 @@ import { MyStyleWithDances } from '../../models/user.model';
 import { Style } from '../../models/style.model';
 import { Video } from '../../models/video.model';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
-
-function toggleSet<T>(s: Set<T>, item: T): Set<T> {
-  const next = new Set(s);
-  next.has(item) ? next.delete(item) : next.add(item);
-  return next;
-}
 
 @Component({
   selector: 'app-my-dances',

@@ -219,16 +219,18 @@ export class DanceDetailComponent implements OnInit {
     this.newVideoSegments = [];
   }
 
+  private defaultSegmentRows(): SegmentRow[] {
+    return DEFAULT_SEGMENT_LABELS.map(label => ({ label, start: '', end: '' }));
+  }
+
   onNewVideoTypeChange(): void {
-    if (this.newVideoType === 'tutorial' && this.newVideoSegments.length === 0) {
-      this.newVideoSegments = DEFAULT_SEGMENT_LABELS.map(label => ({ label, start: '', end: '' }));
-    }
+    if (this.newVideoType === 'tutorial' && this.newVideoSegments.length === 0)
+      this.newVideoSegments = this.defaultSegmentRows();
   }
 
   onEditVideoTypeChange(): void {
-    if (this.editVideoType === 'tutorial' && this.editVideoSegments.length === 0) {
-      this.editVideoSegments = DEFAULT_SEGMENT_LABELS.map(label => ({ label, start: '', end: '' }));
-    }
+    if (this.editVideoType === 'tutorial' && this.editVideoSegments.length === 0)
+      this.editVideoSegments = this.defaultSegmentRows();
   }
 
   addSegmentRow(rows: SegmentRow[]): void {
@@ -375,20 +377,13 @@ export class DanceDetailComponent implements OnInit {
     this.showEditDance.set(true);
   }
 
-  toggleEditStyleId(id: number): void {
-    this.editStyleIds = this.editStyleIds.includes(id)
-      ? this.editStyleIds.filter(x => x !== id) : [...this.editStyleIds, id];
+  private toggleId(arr: number[], id: number): number[] {
+    return arr.includes(id) ? arr.filter(x => x !== id) : [...arr, id];
   }
 
-  toggleEditMusicalStyleId(id: number): void {
-    this.editMusicalStyleIds = this.editMusicalStyleIds.includes(id)
-      ? this.editMusicalStyleIds.filter(x => x !== id) : [...this.editMusicalStyleIds, id];
-  }
-
-  toggleEditInstructorId(id: number): void {
-    this.editInstructorIds = this.editInstructorIds.includes(id)
-      ? this.editInstructorIds.filter(x => x !== id) : [...this.editInstructorIds, id];
-  }
+  toggleEditStyleId(id: number): void { this.editStyleIds = this.toggleId(this.editStyleIds, id); }
+  toggleEditMusicalStyleId(id: number): void { this.editMusicalStyleIds = this.toggleId(this.editMusicalStyleIds, id); }
+  toggleEditInstructorId(id: number): void { this.editInstructorIds = this.toggleId(this.editInstructorIds, id); }
 
   submitEditDance(): void {
     if (!this.editName.trim()) { this.editDanceError.set('Name is required.'); return; }

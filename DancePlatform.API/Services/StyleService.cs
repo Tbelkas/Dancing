@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using DancePlatform.API.Data;
 using DancePlatform.API.DTOs.Style;
 using DancePlatform.API.Models;
@@ -11,37 +12,27 @@ public class StyleService : IStyleService
 
     public StyleService(AppDbContext db) => _db = db;
 
+    private static readonly Expression<Func<Style, StyleDto>> ToDto = s => new StyleDto
+    {
+        Id = s.Id,
+        Name = s.Name,
+        Description = s.Description,
+        DateAdded = s.DateAdded,
+        DanceCount = s.DanceStyles.Count
+    };
+
     public async Task<List<StyleDto>> GetAllAsync() =>
-        await _db.Styles
-            .Include(s => s.DanceStyles)
-            .Select(s => new StyleDto
-            {
-                Id = s.Id,
-                Name = s.Name,
-                Description = s.Description,
-                DateAdded = s.DateAdded,
-                DanceCount = s.DanceStyles.Count
-            }).ToListAsync();
+        await _db.Styles.Include(s => s.DanceStyles).Select(ToDto).ToListAsync();
 
     public async Task<StyleDto?> GetByIdAsync(int id) =>
-        await _db.Styles
-            .Include(s => s.DanceStyles)
-            .Where(s => s.Id == id)
-            .Select(s => new StyleDto
-            {
-                Id = s.Id,
-                Name = s.Name,
-                Description = s.Description,
-                DateAdded = s.DateAdded,
-                DanceCount = s.DanceStyles.Count
-            }).FirstOrDefaultAsync();
+        await _db.Styles.Include(s => s.DanceStyles).Where(s => s.Id == id).Select(ToDto).FirstOrDefaultAsync();
 
     public async Task<StyleDto> CreateAsync(CreateStyleRequest request)
     {
         var style = new Style { Name = request.Name, Description = request.Description };
         _db.Styles.Add(style);
         await _db.SaveChangesAsync();
-        return (await GetByIdAsync(style.Id))!;
+        return new StyleDto { Id = style.Id, Name = style.Name, Description = style.Description, DateAdded = style.DateAdded, DanceCount = 0 };
     }
 
     public async Task<bool> DeleteAsync(int id)

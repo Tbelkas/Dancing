@@ -14,9 +14,10 @@ export class AuthService {
 
   private _token = signal<string | null>(localStorage.getItem(this.TOKEN_KEY));
   readonly isAuthenticated = computed(() => !!this._token());
-  readonly currentUserId = signal<number | null>(
-    localStorage.getItem(this.USER_KEY) ? JSON.parse(localStorage.getItem(this.USER_KEY)!).userId : null
-  );
+  readonly currentUserId = signal<number | null>((() => {
+    const stored = localStorage.getItem(this.USER_KEY);
+    return stored ? JSON.parse(stored).userId : null;
+  })());
 
   constructor(private http: HttpClient, private router: Router, private roleService: RoleService) {
     // If already authenticated on app start, load role

@@ -1,6 +1,7 @@
 using DancePlatform.API.DTOs.Video;
 using DancePlatform.API.Filters;
 using DancePlatform.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DancePlatform.API.Controllers;
@@ -31,6 +32,7 @@ public class VideosController : ControllerBase
         return ok ? NoContent() : NotFound();
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateVideoRequest request)
     {

@@ -11,9 +11,6 @@ public class DanceService : IDanceService
 
     public DanceService(AppDbContext db) => _db = db;
 
-    public async Task<List<DanceDto>> GetAllAsync(int? userId) =>
-        (await BuildEntityQuery().ToListAsync()).Select(d => ToDto(d, userId)).ToList();
-
     public async Task<List<DanceNameDto>> GetNamesAsync() =>
         await _db.Dances.OrderBy(d => d.Name).Select(d => new DanceNameDto { Id = d.Id, Name = d.Name }).ToListAsync();
 
@@ -256,7 +253,7 @@ public class DanceService : IDanceService
             _         => entityQ.OrderBy(d => d.Name)
         };
 
-        var total = await orderedQ.CountAsync();
+        var total = await entityQ.CountAsync();
         var items = (await orderedQ.Skip((clampedPage - 1) * pageSize).Take(pageSize).ToListAsync())
             .Select(d => ToDto(d, userId)).ToList();
 
@@ -274,29 +271,33 @@ public class DanceService : IDanceService
             .Include(d => d.InProgressBy)
             .Include(d => d.Ratings);
 
-    private static DanceDto ToDto(Dance d, int? userId) => new()
+    private static DanceDto ToDto(Dance d, int? userId)
     {
-        Id = d.Id,
-        Name = d.Name,
-        Slug = d.Slug,
-        Description = d.Description,
-        DateAdded = d.DateAdded,
-        Difficulty = d.Difficulty.ToString(),
-        Styles = d.DanceStyles.Select(ds => ds.Style.Name).ToList(),
-        MusicalStyles = d.DanceMusicalStyles.Select(dms => dms.MusicalStyle.Name).ToList(),
-        Instructors = d.DanceInstructors.Select(di => di.Instructor.Name).ToList(),
-        VideoCount = d.Videos.Count,
-        ThumbnailVideoId = d.Videos.OrderBy(v => v.DateAdded).Select(v => v.VideoId).FirstOrDefault(),
-        ThumbnailPlatform = d.Videos.OrderBy(v => v.DateAdded).Select(v => v.Platform).FirstOrDefault(),
-        FavoriteCount = d.FavoriteCount,
-        LearnedCount = d.LearnedCount,
-        AverageRating = d.AverageRating,
-        RatingCount = d.RatingCount,
-        UserRating = userId.HasValue
-            ? d.Ratings.FirstOrDefault(r => r.UserId == userId.Value)?.Rating
-            : null,
-        IsFavorite = userId.HasValue && d.FavoritedBy.Any(f => f.UserId == userId.Value),
-        IsLearned = userId.HasValue && d.LearnedBy.Any(l => l.UserId == userId.Value),
-        IsInProgress = userId.HasValue && d.InProgressBy.Any(ip => ip.UserId == userId.Value)
-    };
+        var thumb = d.Videos.OrderBy(v => v.DateAdded).FirstOrDefault();
+        return new DanceDto
+        {
+            Id = d.Id,
+            Name = d.Name,
+            Slug = d.Slug,
+            Description = d.Description,
+            DateAdded = d.DateAdded,
+            Difficulty = d.Difficulty.ToString(),
+            Styles = d.DanceStyles.Select(ds => ds.Style.Name).ToList(),
+            MusicalStyles = d.DanceMusicalStyles.Select(dms => dms.MusicalStyle.Name).ToList(),
+            Instructors = d.DanceInstructors.Select(di => di.Instructor.Name).ToList(),
+            VideoCount = d.Videos.Count,
+            ThumbnailVideoId = thumb?.VideoId,
+            ThumbnailPlatform = thumb?.Platform,
+            FavoriteCount = d.FavoriteCount,
+            LearnedCount = d.LearnedCount,
+            AverageRating = d.AverageRating,
+            RatingCount = d.RatingCount,
+            UserRating = userId.HasValue
+                ? d.Ratings.FirstOrDefault(r => r.UserId == userId.Value)?.Rating
+                : null,
+            IsFavorite = userId.HasValue && d.FavoritedBy.Any(f => f.UserId == userId.Value),
+            IsLearned = userId.HasValue && d.LearnedBy.Any(l => l.UserId == userId.Value),
+            IsInProgress = userId.HasValue && d.InProgressBy.Any(ip => ip.UserId == userId.Value)
+        };
+    }
 }

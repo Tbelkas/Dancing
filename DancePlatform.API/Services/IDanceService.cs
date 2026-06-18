@@ -4,7 +4,6 @@ namespace DancePlatform.API.Services;
 
 public interface IDanceService
 {
-    Task<List<DanceDto>> GetAllAsync(int? userId);
     Task<List<DanceNameDto>> GetNamesAsync();
     Task<DanceDto?> GetByIdAsync(int id, int? userId);
     Task<DanceDto?> GetBySlugAsync(string slug, int? userId);

@@ -13,12 +13,7 @@ import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
 import { DIFFICULTY_FILTER_OPTIONS, DIFFICULTY_LEVELS } from '../../core/constants/dance.constants';
-
-function toggleSet<T>(s: Set<T>, item: T): Set<T> {
-  const next = new Set(s);
-  next.has(item) ? next.delete(item) : next.add(item);
-  return next;
-}
+import { toggleSet } from '../../core/utils/set.utils';
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All' },

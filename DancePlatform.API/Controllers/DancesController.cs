@@ -3,7 +3,6 @@ using DancePlatform.API.Filters;
 using DancePlatform.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 
 namespace DancePlatform.API.Controllers;
 
@@ -14,10 +13,6 @@ public class DancesController : AppControllerBase
     private readonly IDanceService _danceService;
 
     public DancesController(IDanceService danceService) => _danceService = danceService;
-
-    [HttpGet]
-    public async Task<IActionResult> GetAll() =>
-        Ok(await _danceService.GetAllAsync(CurrentUserId));
 
     [HttpGet("names")]
     public async Task<IActionResult> GetNames() =>

@@ -6,6 +6,7 @@ import { PracticeService, CreatePracticePayload } from '../../core/services/prac
 import { DanceService } from '../../core/services/dance.service';
 import { PracticeSession } from '../../models/practice-session.model';
 import { toLocalDateString } from '../../core/utils/video-url.utils';
+import { computeStreak } from '../../core/utils/practice.utils';
 
 @Component({
   selector: 'app-practice',
@@ -27,26 +28,7 @@ export class PracticeComponent implements OnInit {
   addError = signal('');
   adding = signal(false);
 
-  readonly streak = computed(() => {
-    const sessions = this.sessions();
-    if (sessions.length === 0) return 0;
-
-    const dates = [...new Set(sessions.map(s => s.date))].sort().reverse();
-    const today = toLocalDateString(new Date());
-    const yesterday = toLocalDateString(new Date(Date.now() - 86400000));
-
-    if (dates[0] !== today && dates[0] !== yesterday) return 0;
-
-    let streak = 0;
-    let current = new Date(dates[0]);
-    for (const d of dates) {
-      const diff = Math.round((current.getTime() - new Date(d).getTime()) / 86400000);
-      if (diff > 1) break;
-      streak++;
-      current = new Date(d);
-    }
-    return streak;
-  });
+  readonly streak = computed(() => computeStreak(this.sessions()));
 
   readonly groupedSessions = computed(() => {
     const map = new Map<string, PracticeSession[]>();
