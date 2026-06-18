@@ -14,6 +14,9 @@ public class DanceService : IDanceService
     public async Task<List<DanceDto>> GetAllAsync(int? userId) =>
         (await BuildEntityQuery().ToListAsync()).Select(d => ToDto(d, userId)).ToList();
 
+    public async Task<List<DanceNameDto>> GetNamesAsync() =>
+        await _db.Dances.OrderBy(d => d.Name).Select(d => new DanceNameDto { Id = d.Id, Name = d.Name }).ToListAsync();
+
     public async Task<DanceDto?> GetByIdAsync(int id, int? userId)
     {
         var dance = await BuildEntityQuery().FirstOrDefaultAsync(d => d.Id == id);
@@ -119,43 +122,41 @@ public class DanceService : IDanceService
     public async Task<bool> ToggleFavoriteAsync(int userId, int danceId)
     {
         var existing = await _db.UserFavoriteDances.FindAsync(userId, danceId);
+        var isFavorite = existing is null;
         if (existing is not null)
-        {
             _db.UserFavoriteDances.Remove(existing);
-            await _db.SaveChangesAsync();
-            return false;
-        }
-        _db.UserFavoriteDances.Add(new UserFavoriteDance { UserId = userId, DanceId = danceId });
+        else
+            _db.UserFavoriteDances.Add(new UserFavoriteDance { UserId = userId, DanceId = danceId });
         await _db.SaveChangesAsync();
-        return true;
+        await _db.Dances.Where(d => d.Id == danceId)
+            .ExecuteUpdateAsync(s => s.SetProperty(d => d.FavoriteCount, d => d.FavoriteCount + (isFavorite ? 1 : -1)));
+        return isFavorite;
     }
 
     public async Task<bool> ToggleLearnedAsync(int userId, int danceId)
     {
         var existing = await _db.UserLearnedDances.FindAsync(userId, danceId);
+        var isLearned = existing is null;
         if (existing is not null)
-        {
             _db.UserLearnedDances.Remove(existing);
-            await _db.SaveChangesAsync();
-            return false;
-        }
-        _db.UserLearnedDances.Add(new UserLearnedDance { UserId = userId, DanceId = danceId });
+        else
+            _db.UserLearnedDances.Add(new UserLearnedDance { UserId = userId, DanceId = danceId });
         await _db.SaveChangesAsync();
-        return true;
+        await _db.Dances.Where(d => d.Id == danceId)
+            .ExecuteUpdateAsync(s => s.SetProperty(d => d.LearnedCount, d => d.LearnedCount + (isLearned ? 1 : -1)));
+        return isLearned;
     }
 
     public async Task<bool> ToggleInProgressAsync(int userId, int danceId)
     {
         var existing = await _db.UserInProgressDances.FindAsync(userId, danceId);
+        var isInProgress = existing is null;
         if (existing is not null)
-        {
             _db.UserInProgressDances.Remove(existing);
-            await _db.SaveChangesAsync();
-            return false;
-        }
-        _db.UserInProgressDances.Add(new UserInProgressDance { UserId = userId, DanceId = danceId });
+        else
+            _db.UserInProgressDances.Add(new UserInProgressDance { UserId = userId, DanceId = danceId });
         await _db.SaveChangesAsync();
-        return true;
+        return isInProgress;
     }
 
     /// <summary>
@@ -171,6 +172,8 @@ public class DanceService : IDanceService
         var wantLearned = status == "learned";
         var wantInProgress = status == "inprogress";
 
+        var learnedDelta = (wantLearned ? 1 : 0) - (learned is not null ? 1 : 0);
+
         if (wantLearned && learned is null)
             _db.UserLearnedDances.Add(new UserLearnedDance { UserId = userId, DanceId = danceId });
         else if (!wantLearned && learned is not null)
@@ -182,6 +185,11 @@ public class DanceService : IDanceService
             _db.UserInProgressDances.Remove(inProgress);
 
         await _db.SaveChangesAsync();
+
+        if (learnedDelta != 0)
+            await _db.Dances.Where(d => d.Id == danceId)
+                .ExecuteUpdateAsync(s => s.SetProperty(d => d.LearnedCount, d => d.LearnedCount + learnedDelta));
+
         return new DanceStatusDto(wantLearned, wantInProgress);
     }
 
@@ -194,6 +202,16 @@ public class DanceService : IDanceService
             _db.DanceRatings.Add(new DanceRating { UserId = userId, DanceId = danceId, Rating = rating });
 
         await _db.SaveChangesAsync();
+
+        var stats = await _db.DanceRatings
+            .Where(r => r.DanceId == danceId)
+            .GroupBy(r => r.DanceId)
+            .Select(g => new { Count = g.Count(), Avg = g.Average(r => (double)r.Rating) })
+            .FirstOrDefaultAsync();
+        await _db.Dances.Where(d => d.Id == danceId).ExecuteUpdateAsync(s => s
+            .SetProperty(d => d.RatingCount, stats != null ? stats.Count : 0)
+            .SetProperty(d => d.AverageRating, stats != null ? stats.Avg : 0.0));
+
         return await GetByIdAsync(danceId, userId);
     }
 
@@ -229,30 +247,20 @@ public class DanceService : IDanceService
 
         var clampedPage = Math.Max(1, page);
 
-        // Sorts that can be translated to SQL: push ORDER BY + SKIP/TAKE to the database.
-        if (sortBy is null or "name" or "newest")
+        // All sorts now use stored columns — push ORDER BY + COUNT + SKIP/TAKE to the database.
+        IQueryable<Dance> orderedQ = sortBy switch
         {
-            var total = await entityQ.CountAsync();
-            var sortedQ = sortBy == "newest"
-                ? entityQ.OrderByDescending(d => d.DateAdded)
-                : entityQ.OrderBy(d => d.Name);
-            var items = (await sortedQ.Skip((clampedPage - 1) * pageSize).Take(pageSize).ToListAsync())
-                .Select(d => ToDto(d, userId)).ToList();
-            return new SearchDancesResult { Items = items, Total = total, Page = clampedPage, PageSize = pageSize };
-        }
-
-        // Sorts on computed aggregates (rating average, favorite count) must happen in memory.
-        var all = (await entityQ.ToListAsync()).Select(d => ToDto(d, userId)).ToList();
-        var sorted = sortBy == "rating"
-            ? all.OrderByDescending(d => d.AverageRating).ThenByDescending(d => d.RatingCount).ToList()
-            : all.OrderByDescending(d => d.FavoriteCount).ToList(); // "popular"
-        return new SearchDancesResult
-        {
-            Items = sorted.Skip((clampedPage - 1) * pageSize).Take(pageSize).ToList(),
-            Total = sorted.Count,
-            Page = clampedPage,
-            PageSize = pageSize
+            "rating"  => entityQ.OrderByDescending(d => d.AverageRating).ThenByDescending(d => d.RatingCount),
+            "popular" => entityQ.OrderByDescending(d => d.FavoriteCount),
+            "newest"  => entityQ.OrderByDescending(d => d.DateAdded),
+            _         => entityQ.OrderBy(d => d.Name)
         };
+
+        var total = await orderedQ.CountAsync();
+        var items = (await orderedQ.Skip((clampedPage - 1) * pageSize).Take(pageSize).ToListAsync())
+            .Select(d => ToDto(d, userId)).ToList();
+
+        return new SearchDancesResult { Items = items, Total = total, Page = clampedPage, PageSize = pageSize };
     }
 
     private IQueryable<Dance> BuildEntityQuery() =>
@@ -280,10 +288,10 @@ public class DanceService : IDanceService
         VideoCount = d.Videos.Count,
         ThumbnailVideoId = d.Videos.OrderBy(v => v.DateAdded).Select(v => v.VideoId).FirstOrDefault(),
         ThumbnailPlatform = d.Videos.OrderBy(v => v.DateAdded).Select(v => v.Platform).FirstOrDefault(),
-        FavoriteCount = d.FavoritedBy.Count,
-        LearnedCount = d.LearnedBy.Count,
-        AverageRating = d.Ratings.Count > 0 ? d.Ratings.Average(r => r.Rating) : 0,
-        RatingCount = d.Ratings.Count,
+        FavoriteCount = d.FavoriteCount,
+        LearnedCount = d.LearnedCount,
+        AverageRating = d.AverageRating,
+        RatingCount = d.RatingCount,
         UserRating = userId.HasValue
             ? d.Ratings.FirstOrDefault(r => r.UserId == userId.Value)?.Rating
             : null,

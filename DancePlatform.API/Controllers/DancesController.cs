@@ -19,6 +19,10 @@ public class DancesController : AppControllerBase
     public async Task<IActionResult> GetAll() =>
         Ok(await _danceService.GetAllAsync(CurrentUserId));
 
+    [HttpGet("names")]
+    public async Task<IActionResult> GetNames() =>
+        Ok(await _danceService.GetNamesAsync());
+
     [HttpGet("{idOrSlug}")]
     public async Task<IActionResult> GetByIdOrSlug(string idOrSlug)
     {

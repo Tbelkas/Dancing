@@ -5,7 +5,6 @@ import { RouterLink } from '@angular/router';
 import { PracticeService, CreatePracticePayload } from '../../core/services/practice.service';
 import { DanceService } from '../../core/services/dance.service';
 import { PracticeSession } from '../../models/practice-session.model';
-import { Dance } from '../../models/dance.model';
 
 /** Calendar date in the user's timezone (toISOString would give the UTC date). */
 function toLocalDateString(d: Date): string {
@@ -21,7 +20,7 @@ function toLocalDateString(d: Date): string {
 })
 export class PracticeComponent implements OnInit {
   sessions = signal<PracticeSession[]>([]);
-  dances = signal<Dance[]>([]);
+  dances = signal<{ id: number; name: string }[]>([]);
   loading = signal(true);
 
   showAddForm = signal(false);
@@ -70,7 +69,7 @@ export class PracticeComponent implements OnInit {
 
   ngOnInit(): void {
     this.newDate = toLocalDateString(new Date());
-    this.danceService.getAll().subscribe(d => this.dances.set(d));
+    this.danceService.getNames().subscribe(d => this.dances.set(d));
     this.practiceService.getAll().subscribe({
       next: s => { this.sessions.set(s); this.loading.set(false); },
       error: () => this.loading.set(false)

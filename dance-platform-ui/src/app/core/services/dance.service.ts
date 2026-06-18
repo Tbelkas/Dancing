@@ -58,6 +58,10 @@ export class DanceService {
     return this.http.get<Dance[]>(this.base);
   }
 
+  getNames(): Observable<{ id: number; name: string }[]> {
+    return this.http.get<{ id: number; name: string }[]>(`${this.base}/names`);
+  }
+
   /** Accepts a slug or a numeric id — the API resolves both. */
   getByIdOrSlug(idOrSlug: string | number): Observable<Dance> {
     return this.http.get<Dance>(`${this.base}/${idOrSlug}`);

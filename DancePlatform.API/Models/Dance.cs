@@ -10,6 +10,11 @@ public class Dance
 
     public DifficultyLevel Difficulty { get; set; } = DifficultyLevel.None;
 
+    public int FavoriteCount { get; set; }
+    public int LearnedCount { get; set; }
+    public double AverageRating { get; set; }
+    public int RatingCount { get; set; }
+
     public ICollection<DanceStyle> DanceStyles { get; set; } = new List<DanceStyle>();
     public ICollection<DanceMusicalStyle> DanceMusicalStyles { get; set; } = new List<DanceMusicalStyle>();
     public ICollection<Video> Videos { get; set; } = new List<Video>();
