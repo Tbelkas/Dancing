@@ -58,7 +58,8 @@
       "Write",
       "Edit",
       "PowerShell",
-      "Bash"
+      "Bash",
+      "Skill(code-review)"
     ]
   }
 }

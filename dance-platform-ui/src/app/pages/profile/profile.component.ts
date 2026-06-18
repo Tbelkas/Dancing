@@ -7,10 +7,7 @@ import { ProfileService } from '../../core/services/profile.service';
 import { PracticeService } from '../../core/services/practice.service';
 import { UserProfile } from '../../models/user.model';
 import { PracticeSession } from '../../models/practice-session.model';
-
-function toLocalDateString(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+import { toLocalDateString } from '../../core/utils/video-url.utils';
 
 @Component({
   selector: 'app-profile',

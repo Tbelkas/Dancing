@@ -27,8 +27,6 @@ const STATUS_OPTIONS = [
   { value: 'learned', label: 'Learned' },
   { value: 'favorite', label: 'Favorited' }
 ];
-const PAGE_SIZE = 24;
-
 @Component({
   selector: 'app-dances',
   standalone: true,
@@ -41,7 +39,7 @@ export class DancesComponent implements OnInit, OnDestroy {
   readonly difficultyLevels = DIFFICULTY_LEVELS;
   readonly statusOptions = STATUS_OPTIONS;
   readonly skeletonCards = [0, 1, 2, 3, 4, 5];
-  readonly PAGE_SIZE = PAGE_SIZE;
+  readonly PAGE_SIZE = 24;
 
   // Data
   searchResults = signal<Dance[]>([]);
@@ -85,7 +83,7 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.selectedStatus() !== 'all'
   );
 
-  readonly totalPages = computed(() => Math.ceil(this.searchTotal() / PAGE_SIZE));
+  readonly totalPages = computed(() => Math.ceil(this.searchTotal() / this.PAGE_SIZE));
 
   readonly pageNumbers = computed(() => {
     const total = this.totalPages();
@@ -159,7 +157,7 @@ export class DancesComponent implements OnInit, OnDestroy {
       status: this.selectedStatus(),
       sortBy: this.sortBy(),
       page: this.currentPage(),
-      pageSize: PAGE_SIZE
+      pageSize: this.PAGE_SIZE
     }).subscribe({
       next: result => {
         this.searchResults.set(result.items);

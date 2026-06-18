@@ -32,6 +32,7 @@ public class DancesController : AppControllerBase
         return dance is null ? NotFound() : Ok(dance);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateDanceRequest request)
     {

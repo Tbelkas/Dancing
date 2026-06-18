@@ -12,21 +12,11 @@ public class PracticeService : IPracticeService
     public PracticeService(AppDbContext db) => _db = db;
 
     public async Task<List<PracticeSessionDto>> GetAsync(int userId) =>
-        await _db.PracticeSessions
+        await SessionQuery()
             .Where(ps => ps.UserId == userId)
-            .Include(ps => ps.Dance)
             .OrderByDescending(ps => ps.Date)
             .ThenByDescending(ps => ps.DateAdded)
-            .Select(ps => new PracticeSessionDto
-            {
-                Id = ps.Id,
-                DanceId = ps.DanceId,
-                DanceName = ps.Dance.Name,
-                DanceSlug = ps.Dance.Slug,
-                Date = ps.Date,
-                DurationMinutes = ps.DurationMinutes,
-                Notes = ps.Notes
-            })
+            .Select(ToDto)
             .ToListAsync();
 
     public async Task<PracticeSessionDto?> CreateAsync(int userId, CreatePracticeSessionRequest request)
@@ -45,19 +35,9 @@ public class PracticeService : IPracticeService
         _db.PracticeSessions.Add(session);
         await _db.SaveChangesAsync();
 
-        return await _db.PracticeSessions
+        return await SessionQuery()
             .Where(ps => ps.Id == session.Id)
-            .Include(ps => ps.Dance)
-            .Select(ps => new PracticeSessionDto
-            {
-                Id = ps.Id,
-                DanceId = ps.DanceId,
-                DanceName = ps.Dance.Name,
-                DanceSlug = ps.Dance.Slug,
-                Date = ps.Date,
-                DurationMinutes = ps.DurationMinutes,
-                Notes = ps.Notes
-            })
+            .Select(ToDto)
             .FirstOrDefaultAsync();
     }
 
@@ -69,4 +49,19 @@ public class PracticeService : IPracticeService
         await _db.SaveChangesAsync();
         return true;
     }
+
+    private IQueryable<PracticeSession> SessionQuery() =>
+        _db.PracticeSessions.Include(ps => ps.Dance);
+
+    private static readonly System.Linq.Expressions.Expression<Func<PracticeSession, PracticeSessionDto>> ToDto =
+        ps => new PracticeSessionDto
+        {
+            Id = ps.Id,
+            DanceId = ps.DanceId,
+            DanceName = ps.Dance.Name,
+            DanceSlug = ps.Dance.Slug,
+            Date = ps.Date,
+            DurationMinutes = ps.DurationMinutes,
+            Notes = ps.Notes
+        };
 }

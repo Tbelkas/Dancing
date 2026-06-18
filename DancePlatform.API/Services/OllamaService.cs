@@ -71,7 +71,7 @@ public class OllamaService : IOllamaService
             if (result is null) return null;
 
             var validDifficulties = new[] { "Beginner", "Intermediate", "Advanced", "None" };
-            var difficulty = validDifficulties.Contains(result.Difficulty) ? result.Difficulty : "None";
+            var difficulty = validDifficulties.Contains(result.Difficulty) ? result.Difficulty! : "None";
 
             return new OllamaClassification(
                 result.DanceStyles ?? [],

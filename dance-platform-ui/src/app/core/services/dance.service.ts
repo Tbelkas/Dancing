@@ -54,10 +54,6 @@ export class DanceService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Dance[]> {
-    return this.http.get<Dance[]>(this.base);
-  }
-
   getNames(): Observable<{ id: number; name: string }[]> {
     return this.http.get<{ id: number; name: string }[]>(`${this.base}/names`);
   }
@@ -98,10 +94,6 @@ export class DanceService {
 
   toggleFavorite(id: number): Observable<{ isFavorite: boolean }> {
     return this.http.post<{ isFavorite: boolean }>(`${this.base}/${id}/favorite`, {});
-  }
-
-  toggleLearned(id: number): Observable<{ isLearned: boolean }> {
-    return this.http.post<{ isLearned: boolean }>(`${this.base}/${id}/learned`, {});
   }
 
   toggleInProgress(id: number): Observable<{ isInProgress: boolean }> {

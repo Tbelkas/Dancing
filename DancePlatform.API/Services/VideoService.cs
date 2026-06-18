@@ -75,11 +75,10 @@ public class VideoService : IVideoService
 
     public async Task<bool> IncrementViewCountAsync(int id)
     {
-        var video = await _db.Videos.FindAsync(id);
-        if (video is null) return false;
-        video.ViewCount++;
-        await _db.SaveChangesAsync();
-        return true;
+        var affected = await _db.Videos
+            .Where(v => v.Id == id)
+            .ExecuteUpdateAsync(s => s.SetProperty(v => v.ViewCount, v => v.ViewCount + 1));
+        return affected > 0;
     }
 
     private static string NormalizeVideoType(string? type) =>

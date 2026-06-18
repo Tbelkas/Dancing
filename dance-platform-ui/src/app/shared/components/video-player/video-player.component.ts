@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TrustUrlPipe } from '../../pipes/trust-url.pipe';
 import { VideoSegment } from '../../../models/video.model';
-
+import { formatTimeSecs } from '../../../core/utils/video-url.utils';
 
 @Component({
   selector: 'app-video-player',
@@ -164,11 +164,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loopSegmentId.set(null);
   }
 
-  formatTime(seconds: number): string {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  }
+  formatTime = formatTimeSecs;
 
   toggleRepeat(): void {
     if (this.repeating()) {

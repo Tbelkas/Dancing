@@ -1,3 +1,8 @@
+/** Returns a YYYY-MM-DD string in the user's local timezone (Date.toISOString() gives UTC, which shifts the day west of UTC). */
+export function toLocalDateString(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export function parseVideoUrl(input: string): { platform: string; videoId: string } | null {
   const url = input.trim();
   const tiktok = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);

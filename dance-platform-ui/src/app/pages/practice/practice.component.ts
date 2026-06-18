@@ -5,11 +5,7 @@ import { RouterLink } from '@angular/router';
 import { PracticeService, CreatePracticePayload } from '../../core/services/practice.service';
 import { DanceService } from '../../core/services/dance.service';
 import { PracticeSession } from '../../models/practice-session.model';
-
-/** Calendar date in the user's timezone (toISOString would give the UTC date). */
-function toLocalDateString(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
+import { toLocalDateString } from '../../core/utils/video-url.utils';
 
 @Component({
   selector: 'app-practice',

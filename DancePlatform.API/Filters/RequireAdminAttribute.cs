@@ -5,11 +5,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace DancePlatform.API.Filters;
 
-/// <summary>
-/// Requires the caller to be authenticated and to have IsAdmin = true.
-/// JWT transition: update IRoleService implementation to read the "IsAdmin"
-/// claim from the token instead of querying the database.
-/// </summary>
+/// <summary>Requires the caller to be authenticated and to have IsAdmin = true.</summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class RequireAdminAttribute : Attribute, IAsyncActionFilter
 {
