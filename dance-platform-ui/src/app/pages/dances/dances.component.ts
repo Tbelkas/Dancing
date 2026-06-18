@@ -12,8 +12,14 @@ import { Dance } from '../../models/dance.model';
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
+import { DIFFICULTY_FILTER_OPTIONS, DIFFICULTY_LEVELS } from '../../core/constants/dance.constants';
 
-const DIFFICULTIES = ['Beginner', 'Intermediate', 'Advanced'];
+function toggleSet<T>(s: Set<T>, item: T): Set<T> {
+  const next = new Set(s);
+  next.has(item) ? next.delete(item) : next.add(item);
+  return next;
+}
+
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All' },
   { value: 'notstarted', label: 'Not Started' },
@@ -23,32 +29,6 @@ const STATUS_OPTIONS = [
 ];
 const PAGE_SIZE = 24;
 
-const SEED_STYLES: Style[] = [
-  { id: 1, name: 'Latin', dateAdded: '', danceCount: 0 },
-  { id: 2, name: 'Ballroom', dateAdded: '', danceCount: 0 },
-  { id: 3, name: 'Street / Urban', dateAdded: '', danceCount: 0 },
-  { id: 4, name: 'Classical / Ballet', dateAdded: '', danceCount: 0 },
-  { id: 5, name: 'Folk / Traditional', dateAdded: '', danceCount: 0 },
-  { id: 6, name: 'Swing', dateAdded: '', danceCount: 0 },
-  { id: 7, name: 'Contemporary', dateAdded: '', danceCount: 0 },
-  { id: 8, name: 'Waacking', dateAdded: '', danceCount: 0 },
-  { id: 9, name: 'Tektonik', dateAdded: '', danceCount: 0 },
-  { id: 10, name: 'Hip-hop', dateAdded: '', danceCount: 0 },
-  { id: 11, name: 'House', dateAdded: '', danceCount: 0 }
-];
-const SEED_MUSICAL_STYLES: MusicalStyle[] = [
-  { id: 1, name: 'Salsa', dateAdded: '', danceCount: 0 },
-  { id: 2, name: 'Classical / Orchestral', dateAdded: '', danceCount: 0 },
-  { id: 3, name: 'Hip-Hop', dateAdded: '', danceCount: 0 },
-  { id: 4, name: 'Jazz', dateAdded: '', danceCount: 0 },
-  { id: 5, name: 'Tango', dateAdded: '', danceCount: 0 },
-  { id: 6, name: 'Electronic / EDM', dateAdded: '', danceCount: 0 },
-  { id: 7, name: 'Blues', dateAdded: '', danceCount: 0 },
-  { id: 8, name: 'Reggaeton', dateAdded: '', danceCount: 0 },
-  { id: 9, name: 'Cumbia', dateAdded: '', danceCount: 0 },
-  { id: 10, name: 'Flamenco', dateAdded: '', danceCount: 0 }
-];
-
 @Component({
   selector: 'app-dances',
   standalone: true,
@@ -57,7 +37,8 @@ const SEED_MUSICAL_STYLES: MusicalStyle[] = [
   styleUrls: ['./dances.component.css']
 })
 export class DancesComponent implements OnInit, OnDestroy {
-  readonly difficulties = DIFFICULTIES;
+  readonly difficulties = DIFFICULTY_FILTER_OPTIONS;
+  readonly difficultyLevels = DIFFICULTY_LEVELS;
   readonly statusOptions = STATUS_OPTIONS;
   readonly skeletonCards = [0, 1, 2, 3, 4, 5];
   readonly PAGE_SIZE = PAGE_SIZE;
@@ -66,8 +47,8 @@ export class DancesComponent implements OnInit, OnDestroy {
   searchResults = signal<Dance[]>([]);
   searchTotal = signal(0);
   currentPage = signal(1);
-  styles = signal<Style[]>(SEED_STYLES);
-  musicalStyles = signal<MusicalStyle[]>(SEED_MUSICAL_STYLES);
+  styles = signal<Style[]>([]);
+  musicalStyles = signal<MusicalStyle[]>([]);
   instructors = signal<Instructor[]>([]);
   loading = signal(true);
 
@@ -363,27 +344,15 @@ export class DancesComponent implements OnInit, OnDestroy {
   }
 
   toggleDanceStyle(id: number): void {
-    this.newDanceStyleIds.update(s => {
-      const next = new Set(s);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+    this.newDanceStyleIds.update(s => toggleSet(s, id));
   }
 
   toggleDanceMusicalStyle(id: number): void {
-    this.newDanceMusicalStyleIds.update(s => {
-      const next = new Set(s);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+    this.newDanceMusicalStyleIds.update(s => toggleSet(s, id));
   }
 
   toggleDanceInstructor(id: number): void {
-    this.newDanceInstructorIds.update(s => {
-      const next = new Set(s);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+    this.newDanceInstructorIds.update(s => toggleSet(s, id));
   }
 
   submitAddDance(): void {

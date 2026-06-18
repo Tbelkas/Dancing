@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using DancePlatform.API.DTOs.Dance;
 using DancePlatform.API.Filters;
 using DancePlatform.API.Services;
@@ -10,14 +9,11 @@ namespace DancePlatform.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class DancesController : ControllerBase
+public class DancesController : AppControllerBase
 {
     private readonly IDanceService _danceService;
 
     public DancesController(IDanceService danceService) => _danceService = danceService;
-
-    private int? CurrentUserId =>
-        User.FindFirstValue(ClaimTypes.NameIdentifier) is string id ? int.Parse(id) : null;
 
     [HttpGet]
     public async Task<IActionResult> GetAll() =>

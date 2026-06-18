@@ -227,21 +227,32 @@ public class DanceService : IDanceService
             };
         }
 
-        var all = (await entityQ.ToListAsync()).Select(d => ToDto(d, userId)).ToList();
-
-        all = sortBy switch
-        {
-            "rating"  => all.OrderByDescending(d => d.AverageRating).ThenByDescending(d => d.RatingCount).ToList(),
-            "popular" => all.OrderByDescending(d => d.FavoriteCount).ToList(),
-            "newest"  => all.OrderByDescending(d => d.DateAdded).ToList(),
-            _         => all.OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase).ToList()
-        };
-
-        var total = all.Count;
         var clampedPage = Math.Max(1, page);
-        var items = all.Skip((clampedPage - 1) * pageSize).Take(pageSize).ToList();
 
-        return new SearchDancesResult { Items = items, Total = total, Page = clampedPage, PageSize = pageSize };
+        // Sorts that can be translated to SQL: push ORDER BY + SKIP/TAKE to the database.
+        if (sortBy is null or "name" or "newest")
+        {
+            var total = await entityQ.CountAsync();
+            var sortedQ = sortBy == "newest"
+                ? entityQ.OrderByDescending(d => d.DateAdded)
+                : entityQ.OrderBy(d => d.Name);
+            var items = (await sortedQ.Skip((clampedPage - 1) * pageSize).Take(pageSize).ToListAsync())
+                .Select(d => ToDto(d, userId)).ToList();
+            return new SearchDancesResult { Items = items, Total = total, Page = clampedPage, PageSize = pageSize };
+        }
+
+        // Sorts on computed aggregates (rating average, favorite count) must happen in memory.
+        var all = (await entityQ.ToListAsync()).Select(d => ToDto(d, userId)).ToList();
+        var sorted = sortBy == "rating"
+            ? all.OrderByDescending(d => d.AverageRating).ThenByDescending(d => d.RatingCount).ToList()
+            : all.OrderByDescending(d => d.FavoriteCount).ToList(); // "popular"
+        return new SearchDancesResult
+        {
+            Items = sorted.Skip((clampedPage - 1) * pageSize).Take(pageSize).ToList(),
+            Total = sorted.Count,
+            Page = clampedPage,
+            PageSize = pageSize
+        };
     }
 
     private IQueryable<Dance> BuildEntityQuery() =>
@@ -273,9 +284,9 @@ public class DanceService : IDanceService
         LearnedCount = d.LearnedBy.Count,
         AverageRating = d.Ratings.Count > 0 ? d.Ratings.Average(r => r.Rating) : 0,
         RatingCount = d.Ratings.Count,
-        UserRating = userId.HasValue ? d.Ratings.FirstOrDefault(r => r.UserId == userId.Value) != null
-            ? d.Ratings.First(r => r.UserId == userId.Value).Rating
-            : (int?)null : null,
+        UserRating = userId.HasValue
+            ? d.Ratings.FirstOrDefault(r => r.UserId == userId.Value)?.Rating
+            : null,
         IsFavorite = userId.HasValue && d.FavoritedBy.Any(f => f.UserId == userId.Value),
         IsLearned = userId.HasValue && d.LearnedBy.Any(l => l.UserId == userId.Value),
         IsInProgress = userId.HasValue && d.InProgressBy.Any(ip => ip.UserId == userId.Value)

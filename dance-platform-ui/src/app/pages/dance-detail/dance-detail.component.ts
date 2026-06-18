@@ -16,8 +16,8 @@ import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
-
-const DIFFICULTIES = ['None', 'Beginner', 'Intermediate', 'Advanced'];
+import { DIFFICULTY_LEVELS } from '../../core/constants/dance.constants';
+import { parseVideoUrl, parseTimeSecs, formatTimeSecs } from '../../core/utils/video-url.utils';
 const DEFAULT_SEGMENT_LABELS = ['Theory', 'Steps', 'Practice'];
 
 interface SegmentRow {
@@ -34,7 +34,7 @@ interface SegmentRow {
   styleUrls: ['./dance-detail.component.css']
 })
 export class DanceDetailComponent implements OnInit {
-  readonly difficulties = DIFFICULTIES;
+  readonly difficulties = DIFFICULTY_LEVELS;
   readonly stars = [1, 2, 3, 4, 5];
 
   dance = signal<Dance | null>(null);
@@ -245,32 +245,16 @@ export class DanceDetailComponent implements OnInit {
     const segments: SegmentPayload[] = [];
     for (const row of rows) {
       if (!row.label.trim() && !row.start.trim()) continue; // skip empty rows
-      const startTime = this.parseTimeSecs(row.start);
+      const startTime = parseTimeSecs(row.start);
       if (!row.label.trim() || startTime === undefined) {
         error.set('Each section needs a label and a start time (m:ss or seconds).');
         return null;
       }
-      segments.push({ label: row.label.trim(), startTime, endTime: this.parseTimeSecs(row.end) });
+      segments.push({ label: row.label.trim(), startTime, endTime: parseTimeSecs(row.end) });
     }
     return segments;
   }
 
-  private parseVideoUrl(input: string): { platform: string; videoId: string } | null {
-    const url = input.trim();
-
-    const tiktok = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
-    if (tiktok) return { platform: 'tiktok', videoId: tiktok[1] };
-
-    const ig = url.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
-    if (ig) return { platform: 'instagram', videoId: ig[1] };
-
-    const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
-    if (yt) return { platform: 'youtube', videoId: yt[1] };
-
-    if (/^[A-Za-z0-9_-]{11}$/.test(url)) return { platform: 'youtube', videoId: url };
-
-    return null;
-  }
 
   submitAddVideo(): void {
     const danceId = this.dance()?.id;
@@ -278,7 +262,7 @@ export class DanceDetailComponent implements OnInit {
     if (!this.newVideoTitle.trim()) { this.addVideoError.set('Title is required.'); return; }
     if (!this.newVideoUrl.trim()) { this.addVideoError.set('Video URL or ID is required.'); return; }
 
-    const parsed = this.parseVideoUrl(this.newVideoUrl);
+    const parsed = parseVideoUrl(this.newVideoUrl);
     if (!parsed) { this.addVideoError.set('Unrecognized URL. Paste a YouTube, TikTok, or Instagram link.'); return; }
 
     const segments = this.buildSegments(this.newVideoType, this.newVideoSegments, this.addVideoError);
@@ -318,38 +302,21 @@ export class DanceDetailComponent implements OnInit {
       this.editingVideoId.set(null);
       return;
     }
-    this.editVideoStartTime = video.startTime != null ? this.formatTimeSecs(video.startTime) : '';
-    this.editVideoEndTime = video.endTime != null ? this.formatTimeSecs(video.endTime) : '';
+    this.editVideoStartTime = video.startTime != null ? formatTimeSecs(video.startTime) : '';
+    this.editVideoEndTime = video.endTime != null ? formatTimeSecs(video.endTime) : '';
     this.editVideoType = video.videoType === 'tutorial' ? 'tutorial' : 'steps';
     this.editVideoSegments = video.segments.map(s => ({
       label: s.label,
-      start: this.formatTimeSecs(s.startTime),
-      end: s.endTime != null ? this.formatTimeSecs(s.endTime) : ''
+      start: formatTimeSecs(s.startTime),
+      end: s.endTime != null ? formatTimeSecs(s.endTime) : ''
     }));
     this.editVideoTimeError.set('');
     this.editingVideoId.set(video.id);
   }
 
-  private formatTimeSecs(seconds: number): string {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  }
-
-  private parseTimeSecs(input: string): number | undefined {
-    const s = input.trim();
-    if (!s) return undefined;
-    if (s.includes(':')) {
-      const [m, sec] = s.split(':').map(Number);
-      return isNaN(m) || isNaN(sec) ? undefined : m * 60 + sec;
-    }
-    const n = Number(s);
-    return isNaN(n) ? undefined : n;
-  }
-
   submitEditVideoTime(video: Video): void {
-    const startTime = this.parseTimeSecs(this.editVideoStartTime);
-    const endTime = this.parseTimeSecs(this.editVideoEndTime);
+    const startTime = parseTimeSecs(this.editVideoStartTime);
+    const endTime = parseTimeSecs(this.editVideoEndTime);
     const segments = this.buildSegments(this.editVideoType, this.editVideoSegments, this.editVideoTimeError);
     if (segments === null) return;
     this.savingVideoTime.set(true);
@@ -410,20 +377,17 @@ export class DanceDetailComponent implements OnInit {
 
   toggleEditStyleId(id: number): void {
     this.editStyleIds = this.editStyleIds.includes(id)
-      ? this.editStyleIds.filter(x => x !== id)
-      : [...this.editStyleIds, id];
+      ? this.editStyleIds.filter(x => x !== id) : [...this.editStyleIds, id];
   }
 
   toggleEditMusicalStyleId(id: number): void {
     this.editMusicalStyleIds = this.editMusicalStyleIds.includes(id)
-      ? this.editMusicalStyleIds.filter(x => x !== id)
-      : [...this.editMusicalStyleIds, id];
+      ? this.editMusicalStyleIds.filter(x => x !== id) : [...this.editMusicalStyleIds, id];
   }
 
   toggleEditInstructorId(id: number): void {
     this.editInstructorIds = this.editInstructorIds.includes(id)
-      ? this.editInstructorIds.filter(x => x !== id)
-      : [...this.editInstructorIds, id];
+      ? this.editInstructorIds.filter(x => x !== id) : [...this.editInstructorIds, id];
   }
 
   submitEditDance(): void {

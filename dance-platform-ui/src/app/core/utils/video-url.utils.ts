@@ -1,0 +1,28 @@
+export function parseVideoUrl(input: string): { platform: string; videoId: string } | null {
+  const url = input.trim();
+  const tiktok = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
+  if (tiktok) return { platform: 'tiktok', videoId: tiktok[1] };
+  const ig = url.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+  if (ig) return { platform: 'instagram', videoId: ig[1] };
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
+  if (yt) return { platform: 'youtube', videoId: yt[1] };
+  if (/^[A-Za-z0-9_-]{11}$/.test(url)) return { platform: 'youtube', videoId: url };
+  return null;
+}
+
+export function parseTimeSecs(input: string): number | undefined {
+  const s = input.trim();
+  if (!s) return undefined;
+  if (s.includes(':')) {
+    const [m, sec] = s.split(':').map(Number);
+    return isNaN(m) || isNaN(sec) ? undefined : m * 60 + sec;
+  }
+  const n = Number(s);
+  return isNaN(n) ? undefined : n;
+}
+
+export function formatTimeSecs(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
