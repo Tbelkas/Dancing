@@ -41,6 +41,8 @@ export class DanceDetailComponent implements OnInit {
   notFound = signal(false);
   videos = signal<Video[]>([]);
   selectedVideo = signal<Video | null>(null);
+  recommended = signal<Dance[]>([]);
+  private recThumbFailed = signal<Set<number>>(new Set());
   readonly viewCountBucket = viewCountBucket;
 
   // Feedback
@@ -100,7 +102,25 @@ export class DanceDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
+    // React to paramMap (not snapshot) so navigating between dances — e.g. via the
+    // "More like this" cards, same /dances/:slug route — reloads the page.
+    this.route.paramMap.subscribe(pm => this.load(pm.get('slug') ?? ''));
+    if (this.role.isAdmin()) {
+      this.styleService.getAll().subscribe(s => this.allStyles.set(s));
+      this.musicalStyleService.getAll().subscribe(s => this.allMusicalStyles.set(s));
+      this.instructorService.getAll().subscribe(i => this.allInstructors.set(i));
+    }
+  }
+
+  private load(slug: string): void {
+    // reset per-dance state for re-entry
+    this.dance.set(null);
+    this.notFound.set(false);
+    this.videos.set([]);
+    this.selectedVideo.set(null);
+    this.recommended.set([]);
+    this.showEditDance.set(false);
+
     this.danceService.getByIdOrSlug(slug).subscribe({
       next: d => {
         this.dance.set(d);
@@ -116,6 +136,7 @@ export class DanceDetailComponent implements OnInit {
             this.videoService.recordView(v[0].id).subscribe();
           }
         });
+        this.danceService.getRecommended(d.id).subscribe(r => this.recommended.set(r));
       },
       error: err => {
         if (err?.status === 404) {
@@ -126,11 +147,19 @@ export class DanceDetailComponent implements OnInit {
         }
       }
     });
-    if (this.role.isAdmin()) {
-      this.styleService.getAll().subscribe(s => this.allStyles.set(s));
-      this.musicalStyleService.getAll().subscribe(s => this.allMusicalStyles.set(s));
-      this.instructorService.getAll().subscribe(i => this.allInstructors.set(i));
+  }
+
+  /** YouTube thumbnail for a recommended dance, or null if missing/failed to load. */
+  recThumbnailUrl(dance: Dance): string | null {
+    if (this.recThumbFailed().has(dance.id)) return null;
+    if (dance.thumbnailVideoId && dance.thumbnailPlatform === 'youtube') {
+      return `https://i.ytimg.com/vi/${dance.thumbnailVideoId}/hqdefault.jpg`;
     }
+    return null;
+  }
+
+  onRecThumbError(danceId: number): void {
+    this.recThumbFailed.update(set => new Set(set).add(danceId));
   }
 
   selectVideo(video: Video): void {

@@ -26,6 +26,35 @@ public class DanceService : IDanceService
         return dance is null ? null : ToDto(dance, userId);
     }
 
+    /// <summary>
+    /// "More like this" — other dances that share at least one style (the dance's "type") and have a
+    /// playable video. Ranked: same difficulty first, then most-favorited, then best-rated.
+    /// </summary>
+    public async Task<List<DanceDto>> GetRecommendedAsync(int id, int? userId, int limit = 8)
+    {
+        var styleIds = await _db.DanceStyles
+            .Where(ds => ds.DanceId == id)
+            .Select(ds => ds.StyleId)
+            .ToListAsync();
+        if (styleIds.Count == 0) return new List<DanceDto>();
+
+        var difficulty = await _db.Dances.Where(d => d.Id == id)
+            .Select(d => d.Difficulty).FirstOrDefaultAsync();
+
+        var recs = await BuildEntityQuery()
+            .Where(d => d.Id != id
+                     && d.Videos.Any()
+                     && d.DanceStyles.Any(ds => styleIds.Contains(ds.StyleId)))
+            .OrderByDescending(d => d.Difficulty == difficulty)
+            .ThenByDescending(d => d.FavoriteCount)
+            .ThenByDescending(d => d.AverageRating)
+            .ThenByDescending(d => d.DateAdded)
+            .Take(limit)
+            .ToListAsync();
+
+        return recs.Select(d => ToDto(d, userId)).ToList();
+    }
+
     /// <summary>Slugifies the name; appends -2, -3, ... when another dance already uses the slug.</summary>
     public async Task<string> GenerateUniqueSlugAsync(string name, int? excludeDanceId = null)
     {

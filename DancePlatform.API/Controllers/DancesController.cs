@@ -27,6 +27,10 @@ public class DancesController : AppControllerBase
         return dance is null ? NotFound() : Ok(dance);
     }
 
+    [HttpGet("{id:int}/recommended")]
+    public async Task<IActionResult> GetRecommended(int id) =>
+        Ok(await _danceService.GetRecommendedAsync(id, CurrentUserId));
+
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateDanceRequest request)

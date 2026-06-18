@@ -1,0 +1,316 @@
+[
+  {
+    "norm": "armwave",
+    "survivor": 316,
+    "losers": [
+      441
+    ],
+    "survivor_name": "Arm Wave"
+  },
+  {
+    "norm": "ballheel",
+    "survivor": 942,
+    "losers": [
+      1435
+    ],
+    "survivor_name": "Ball & Heel"
+  },
+  {
+    "norm": "cabbagepatch",
+    "survivor": 30,
+    "losers": [
+      463
+    ],
+    "survivor_name": "Cabbage Patch"
+  },
+  {
+    "norm": "camelwalk",
+    "survivor": 56,
+    "losers": [
+      1620
+    ],
+    "survivor_name": "Camel Walk"
+  },
+  {
+    "norm": "chasse",
+    "survivor": 165,
+    "losers": [
+      360
+    ],
+    "survivor_name": "Chasse"
+  },
+  {
+    "norm": "chestpop",
+    "survivor": 266,
+    "losers": [
+      440
+    ],
+    "survivor_name": "Chest Pop"
+  },
+  {
+    "norm": "cupidshuffle",
+    "survivor": 251,
+    "losers": [
+      434
+    ],
+    "survivor_name": "Cupid Shuffle"
+  },
+  {
+    "norm": "developpe",
+    "survivor": 1354,
+    "losers": [
+      402
+    ],
+    "survivor_name": "Developp\u00e9"
+  },
+  {
+    "norm": "dropitlow",
+    "survivor": 256,
+    "losers": [
+      696
+    ],
+    "survivor_name": "Drop it Low"
+  },
+  {
+    "norm": "electricslide",
+    "survivor": 255,
+    "losers": [
+      433
+    ],
+    "survivor_name": "Electric Slide"
+  },
+  {
+    "norm": "funkychicken",
+    "survivor": 254,
+    "losers": [
+      425
+    ],
+    "survivor_name": "Funky Chicken"
+  },
+  {
+    "norm": "heeltoetap",
+    "survivor": 392,
+    "losers": [
+      444,
+      493
+    ],
+    "survivor_name": "Heel Toe Tap"
+  },
+  {
+    "norm": "hipcircle",
+    "survivor": 452,
+    "losers": [
+      495
+    ],
+    "survivor_name": "The Hip Circle"
+  },
+  {
+    "norm": "hipswivel",
+    "survivor": 250,
+    "losers": [
+      442
+    ],
+    "survivor_name": "Hip Swivel"
+  },
+  {
+    "norm": "hustle",
+    "survivor": 258,
+    "losers": [
+      415
+    ],
+    "survivor_name": "Hustle"
+  },
+  {
+    "norm": "jerk",
+    "survivor": 112,
+    "losers": [
+      471
+    ],
+    "survivor_name": "JERK"
+  },
+  {
+    "norm": "jete",
+    "survivor": 339,
+    "losers": [
+      365
+    ],
+    "survivor_name": "Jet\u00e9"
+  },
+  {
+    "norm": "kneeslide",
+    "survivor": 446,
+    "losers": [
+      780
+    ],
+    "survivor_name": "The Knee Slide"
+  },
+  {
+    "norm": "mashedpotato",
+    "survivor": 260,
+    "losers": [
+      416
+    ],
+    "survivor_name": "Mashed Potato"
+  },
+  {
+    "norm": "moonwalk",
+    "survivor": 461,
+    "losers": [
+      902
+    ],
+    "survivor_name": "The Moonwalk"
+  },
+  {
+    "norm": "neckroll",
+    "survivor": 662,
+    "losers": [
+      698
+    ],
+    "survivor_name": "NECK ROLL"
+  },
+  {
+    "norm": "pony",
+    "survivor": 248,
+    "losers": [
+      424
+    ],
+    "survivor_name": "Pony"
+  },
+  {
+    "norm": "robot",
+    "survivor": 413,
+    "losers": [
+      912
+    ],
+    "survivor_name": "The Robot"
+  },
+  {
+    "norm": "rocksteady",
+    "survivor": 428,
+    "losers": [
+      483
+    ],
+    "survivor_name": "The Rocksteady"
+  },
+  {
+    "norm": "runningman",
+    "survivor": 52,
+    "losers": [
+      462
+    ],
+    "survivor_name": "Running Man"
+  },
+  {
+    "norm": "shimmyshake",
+    "survivor": 371,
+    "losers": [
+      439
+    ],
+    "survivor_name": "Shimmy Shake"
+  },
+  {
+    "norm": "shoulderroll",
+    "survivor": 155,
+    "losers": [
+      472
+    ],
+    "survivor_name": "Shoulder Roll"
+  },
+  {
+    "norm": "sidestep",
+    "survivor": 1288,
+    "losers": [
+      270
+    ],
+    "survivor_name": "Sidestep"
+  },
+  {
+    "norm": "spongebob",
+    "survivor": 47,
+    "losers": [
+      111
+    ],
+    "survivor_name": "Spongebob"
+  },
+  {
+    "norm": "stankyleg",
+    "survivor": 253,
+    "losers": [
+      464
+    ],
+    "survivor_name": "Stanky Leg"
+  },
+  {
+    "norm": "steptouch",
+    "survivor": 398,
+    "losers": [
+      475,
+      821
+    ],
+    "survivor_name": "Step Touch"
+  },
+  {
+    "norm": "stomp",
+    "survivor": 28,
+    "losers": [
+      469
+    ],
+    "survivor_name": "Stomp"
+  },
+  {
+    "norm": "tango",
+    "survivor": 3,
+    "losers": [
+      437
+    ],
+    "survivor_name": "Tango"
+  },
+  {
+    "norm": "underarmturn",
+    "survivor": 1093,
+    "losers": [
+      300
+    ],
+    "survivor_name": "Under Arm Turn"
+  },
+  {
+    "norm": "walkover",
+    "survivor": 773,
+    "losers": [
+      1022
+    ],
+    "survivor_name": "Walk Over"
+  },
+  {
+    "norm": "waltz",
+    "survivor": 2,
+    "losers": [
+      436
+    ],
+    "survivor_name": "Waltz"
+  },
+  {
+    "norm": "wobble",
+    "survivor": 102,
+    "losers": [
+      244
+    ],
+    "survivor_name": "WOBBLE"
+  },
+  {
+    "norm": "wop",
+    "survivor": 77,
+    "losers": [
+      465
+    ],
+    "survivor_name": "Wop"
+  },
+  {
+    "norm": "wutang",
+    "survivor": 80,
+    "losers": [
+      131
+    ],
+    "survivor_name": "Wu-Tang"
+  }
+]

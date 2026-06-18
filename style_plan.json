@@ -1,0 +1,1262 @@
+[
+  {
+    "dance_id": 4,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Breakdance"
+  },
+  {
+    "dance_id": 86,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "FAMOUS DANCER"
+  },
+  {
+    "dance_id": 90,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Krump",
+    "name": "BROOKLYN STOMP"
+  },
+  {
+    "dance_id": 91,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "PARTY DUKE"
+  },
+  {
+    "dance_id": 92,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "TYPERWRITER"
+  },
+  {
+    "dance_id": 93,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "DO THE WOP"
+  },
+  {
+    "dance_id": 99,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "REAL LOVE"
+  },
+  {
+    "dance_id": 101,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "FLAVA FLAVE"
+  },
+  {
+    "dance_id": 116,
+    "remove_style_id": 15,
+    "remove_style": "Krump",
+    "keep_style": "Breakdance",
+    "name": "NASTY"
+  },
+  {
+    "dance_id": 118,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "ROLLER SKATE"
+  },
+  {
+    "dance_id": 143,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Go Down"
+  },
+  {
+    "dance_id": 201,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Bart Simpson (Practice Variation)"
+  },
+  {
+    "dance_id": 208,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Tektonik",
+    "name": "Gucci (Variation)"
+  },
+  {
+    "dance_id": 272,
+    "remove_style_id": 2,
+    "remove_style": "Ballroom",
+    "keep_style": "Latin",
+    "name": "Turn (Natural Turn)"
+  },
+  {
+    "dance_id": 284,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "Turn (Falso)"
+  },
+  {
+    "dance_id": 285,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "Vocal (Step-Touch)"
+  },
+  {
+    "dance_id": 345,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Waacking",
+    "name": "Soutenu"
+  },
+  {
+    "dance_id": 348,
+    "remove_style_id": 7,
+    "remove_style": "Contemporary",
+    "keep_style": "Classical / Ballet",
+    "name": "Tour en l'air"
+  },
+  {
+    "dance_id": 349,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Couru"
+  },
+  {
+    "dance_id": 360,
+    "remove_style_id": 2,
+    "remove_style": "Ballroom",
+    "keep_style": "Latin",
+    "name": "Chass\u00e9"
+  },
+  {
+    "dance_id": 369,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Afrobeats",
+    "name": "Sashay"
+  },
+  {
+    "dance_id": 373,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Slink"
+  },
+  {
+    "dance_id": 374,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Spinning Leap"
+  },
+  {
+    "dance_id": 375,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Waacking",
+    "name": "Swirl"
+  },
+  {
+    "dance_id": 376,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Tap",
+    "name": "Tappin' Toes"
+  },
+  {
+    "dance_id": 379,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Wiggle Walk"
+  },
+  {
+    "dance_id": 380,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Triple Step"
+  },
+  {
+    "dance_id": 385,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Breakdance",
+    "name": "Rockstep"
+  },
+  {
+    "dance_id": 388,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Tuck Turn"
+  },
+  {
+    "dance_id": 390,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Kick Step"
+  },
+  {
+    "dance_id": 392,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Tap",
+    "name": "Heel Toe Tap"
+  },
+  {
+    "dance_id": 393,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Flicks with Rotation"
+  },
+  {
+    "dance_id": 394,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Krump",
+    "name": "Chest Pop with Rotation"
+  },
+  {
+    "dance_id": 396,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Rise Step"
+  },
+  {
+    "dance_id": 397,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Walk-Run Transition"
+  },
+  {
+    "dance_id": 413,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Robot"
+  },
+  {
+    "dance_id": 415,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Afrobeats",
+    "name": "The Hustle"
+  },
+  {
+    "dance_id": 421,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Breakdance",
+    "name": "The Bus Stop"
+  },
+  {
+    "dance_id": 431,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Stroll"
+  },
+  {
+    "dance_id": 432,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "The Chug"
+  },
+  {
+    "dance_id": 439,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "The Shimmy Shake"
+  },
+  {
+    "dance_id": 441,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Waacking",
+    "name": "The Arm Wave"
+  },
+  {
+    "dance_id": 446,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Breakdance",
+    "name": "The Knee Slide"
+  },
+  {
+    "dance_id": 448,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Shoulder Shimmy"
+  },
+  {
+    "dance_id": 456,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Toe Tappin' Shuffle"
+  },
+  {
+    "dance_id": 463,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Krump",
+    "name": "The Cabbage Patch"
+  },
+  {
+    "dance_id": 464,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Stanky Leg"
+  },
+  {
+    "dance_id": 468,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Dab"
+  },
+  {
+    "dance_id": 471,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Jerk"
+  },
+  {
+    "dance_id": 477,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "The Slide"
+  },
+  {
+    "dance_id": 478,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Krump",
+    "name": "The Chest Popping Floss"
+  },
+  {
+    "dance_id": 479,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Chaser Step"
+  },
+  {
+    "dance_id": 481,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Vogue",
+    "name": "Dip It Low"
+  },
+  {
+    "dance_id": 482,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Pocket Drop"
+  },
+  {
+    "dance_id": 483,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Rock Steady"
+  },
+  {
+    "dance_id": 486,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Bicycle"
+  },
+  {
+    "dance_id": 487,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Froggy"
+  },
+  {
+    "dance_id": 489,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Head Tilt"
+  },
+  {
+    "dance_id": 492,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Robot Move"
+  },
+  {
+    "dance_id": 499,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Running Man & Heel Twist"
+  },
+  {
+    "dance_id": 500,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Running Man & T-Step"
+  },
+  {
+    "dance_id": 509,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Spongebob Shuffle Reverse"
+  },
+  {
+    "dance_id": 510,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Spongebob Shuffle Kick Out"
+  },
+  {
+    "dance_id": 511,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Spongebob Shuffle Variation"
+  },
+  {
+    "dance_id": 516,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Breakdance",
+    "name": "Criss Cross Variation"
+  },
+  {
+    "dance_id": 517,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Tap",
+    "name": "Criss Cross Hop & Tap"
+  },
+  {
+    "dance_id": 519,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Happy Feet Combo"
+  },
+  {
+    "dance_id": 520,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Heel Toe Hop"
+  },
+  {
+    "dance_id": 521,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Heel Toe & Toe Twist"
+  },
+  {
+    "dance_id": 522,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Heel Toe Snake"
+  },
+  {
+    "dance_id": 523,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Heel Toe Travel & Flick"
+  },
+  {
+    "dance_id": 553,
+    "remove_style_id": 2,
+    "remove_style": "Ballroom",
+    "keep_style": "Latin",
+    "name": "Paso Doble"
+  },
+  {
+    "dance_id": 634,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Dance Steps To Music"
+  },
+  {
+    "dance_id": 638,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Heel Toe (Walk Out)"
+  },
+  {
+    "dance_id": 663,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Vogue",
+    "name": "CATWALK & WALK IN THE PARK"
+  },
+  {
+    "dance_id": 664,
+    "remove_style_id": 2,
+    "remove_style": "Ballroom",
+    "keep_style": "Latin",
+    "name": "Tango Walks"
+  },
+  {
+    "dance_id": 668,
+    "remove_style_id": 15,
+    "remove_style": "Krump",
+    "keep_style": "Breakdance",
+    "name": "Entire dance without music (facing back)"
+  },
+  {
+    "dance_id": 672,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Krump",
+    "name": "Attitude"
+  },
+  {
+    "dance_id": 677,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Tektonik",
+    "name": "Saut\u00e9"
+  },
+  {
+    "dance_id": 689,
+    "remove_style_id": 8,
+    "remove_style": "Waacking",
+    "keep_style": "Classical / Ballet",
+    "name": "D\u00e9gag\u00e9 fouett\u00e9"
+  },
+  {
+    "dance_id": 692,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Step"
+  },
+  {
+    "dance_id": 697,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Get Down"
+  },
+  {
+    "dance_id": 699,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Finger Point"
+  },
+  {
+    "dance_id": 707,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Hip Swivel Low"
+  },
+  {
+    "dance_id": 708,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Step To The Side"
+  },
+  {
+    "dance_id": 714,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Hip Circle Big"
+  },
+  {
+    "dance_id": 717,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Perico Pincho Pincho Shaka Shaka"
+  },
+  {
+    "dance_id": 720,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Latin",
+    "name": "Reggaeton Bounce"
+  },
+  {
+    "dance_id": 721,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Afrobeats",
+    "name": "Salud"
+  },
+  {
+    "dance_id": 722,
+    "remove_style_id": 1,
+    "remove_style": "Latin",
+    "keep_style": "Afrobeats",
+    "name": "Pa' Lante"
+  },
+  {
+    "dance_id": 723,
+    "remove_style_id": 5,
+    "remove_style": "Folk / Traditional",
+    "keep_style": "Latin",
+    "name": "Guateque"
+  },
+  {
+    "dance_id": 724,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Waacking",
+    "name": "Meneo"
+  },
+  {
+    "dance_id": 727,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Pika"
+  },
+  {
+    "dance_id": 731,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Breakdance",
+    "name": "4 Count Freeze"
+  },
+  {
+    "dance_id": 734,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Guapo"
+  },
+  {
+    "dance_id": 742,
+    "remove_style_id": 1,
+    "remove_style": "Latin",
+    "keep_style": "Afrobeats",
+    "name": "Guantera"
+  },
+  {
+    "dance_id": 755,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Latin",
+    "name": "Dile la Verdad"
+  },
+  {
+    "dance_id": 777,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Razzle Dazzle"
+  },
+  {
+    "dance_id": 780,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Knee Slide"
+  },
+  {
+    "dance_id": 784,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Heel Clicks"
+  },
+  {
+    "dance_id": 786,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Brush Kicks"
+  },
+  {
+    "dance_id": 800,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Waacking",
+    "name": "Pivot Turn with Arm Movement"
+  },
+  {
+    "dance_id": 809,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Toe Heels on the Floor"
+  },
+  {
+    "dance_id": 813,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Backward Walk"
+  },
+  {
+    "dance_id": 818,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Tap",
+    "name": "Tap Steps with a Shimmy"
+  },
+  {
+    "dance_id": 819,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Roll Back"
+  },
+  {
+    "dance_id": 820,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "Roll Forward"
+  },
+  {
+    "dance_id": 822,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Breakdance",
+    "name": "Footwork"
+  },
+  {
+    "dance_id": 831,
+    "remove_style_id": 2,
+    "remove_style": "Ballroom",
+    "keep_style": "Latin",
+    "name": "Cross-Body Lead to Forward Walk"
+  },
+  {
+    "dance_id": 832,
+    "remove_style_id": 2,
+    "remove_style": "Ballroom",
+    "keep_style": "Latin",
+    "name": "Forward Walk to Cross-Body Lead"
+  },
+  {
+    "dance_id": 833,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Vogue",
+    "name": "Underarm Turn with a Dip"
+  },
+  {
+    "dance_id": 844,
+    "remove_style_id": 12,
+    "remove_style": "Breakdance",
+    "keep_style": "Waacking",
+    "name": "Airfreeze"
+  },
+  {
+    "dance_id": 847,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Backflip"
+  },
+  {
+    "dance_id": 860,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Collapsing Flip"
+  },
+  {
+    "dance_id": 863,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Double Flare"
+  },
+  {
+    "dance_id": 894,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "D\u00e9gag\u00e9 5th"
+  },
+  {
+    "dance_id": 899,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Locking"
+  },
+  {
+    "dance_id": 905,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Mule Kick"
+  },
+  {
+    "dance_id": 908,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Power Move"
+  },
+  {
+    "dance_id": 918,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Spin Top"
+  },
+  {
+    "dance_id": 920,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Spring Forward"
+  },
+  {
+    "dance_id": 929,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Shaku Shaku"
+  },
+  {
+    "dance_id": 940,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Small Thing"
+  },
+  {
+    "dance_id": 945,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Shoki"
+  },
+  {
+    "dance_id": 947,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Shuffle"
+  },
+  {
+    "dance_id": 954,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "Dance Like Me"
+  },
+  {
+    "dance_id": 981,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Oyi"
+  },
+  {
+    "dance_id": 1000,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Hip Bop"
+  },
+  {
+    "dance_id": 1016,
+    "remove_style_id": 1,
+    "remove_style": "Latin",
+    "keep_style": "Waacking",
+    "name": "Eje Aje"
+  },
+  {
+    "dance_id": 1022,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Walkover"
+  },
+  {
+    "dance_id": 1024,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Cakewalk / Camelwalk (modern)"
+  },
+  {
+    "dance_id": 1030,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "Gully Side Step"
+  },
+  {
+    "dance_id": 1033,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Scotch Shimmy"
+  },
+  {
+    "dance_id": 1035,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Breakdance",
+    "name": "Cool Breeze (1953) aka 'Grapevine'"
+  },
+  {
+    "dance_id": 1043,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Krump",
+    "name": "Killer Bee"
+  },
+  {
+    "dance_id": 1044,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Krump",
+    "name": "Fall off the Log"
+  },
+  {
+    "dance_id": 1046,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Palm Tree Walk"
+  },
+  {
+    "dance_id": 1048,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Festival Stance"
+  },
+  {
+    "dance_id": 1052,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Hallelujahs aka 'Shouts'"
+  },
+  {
+    "dance_id": 1053,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Wiggle Wiggle"
+  },
+  {
+    "dance_id": 1056,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Hitchhiker"
+  },
+  {
+    "dance_id": 1068,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Rocks"
+  },
+  {
+    "dance_id": 1069,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Tektonik",
+    "name": "Rusty Dusty"
+  },
+  {
+    "dance_id": 1080,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Slip Slops"
+  },
+  {
+    "dance_id": 1083,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Struttin'"
+  },
+  {
+    "dance_id": 1086,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "Tacky Annie"
+  },
+  {
+    "dance_id": 1112,
+    "remove_style_id": 11,
+    "remove_style": "House",
+    "keep_style": "Tap",
+    "name": "Shuffle and Flap"
+  },
+  {
+    "dance_id": 1115,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Triple Time Step"
+  },
+  {
+    "dance_id": 1116,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Waacking",
+    "name": "Conclusion"
+  },
+  {
+    "dance_id": 1238,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Boogie Forward / Back"
+  },
+  {
+    "dance_id": 1252,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Cow Tail"
+  },
+  {
+    "dance_id": 1254,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "Cross Over"
+  },
+  {
+    "dance_id": 1269,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Kick Ball Change"
+  },
+  {
+    "dance_id": 1284,
+    "remove_style_id": 12,
+    "remove_style": "Breakdance",
+    "keep_style": "Waacking",
+    "name": "TOBA-Break (Full Break)"
+  },
+  {
+    "dance_id": 1294,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "Light Jig Step"
+  },
+  {
+    "dance_id": 1304,
+    "remove_style_id": 7,
+    "remove_style": "Contemporary",
+    "keep_style": "Classical / Ballet",
+    "name": "Tendu & Shaping Feet"
+  },
+  {
+    "dance_id": 1463,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Shuffle + Step"
+  },
+  {
+    "dance_id": 1473,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Shuffle + Step(Fast)"
+  },
+  {
+    "dance_id": 1474,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Shuffle + Ball Change(Fast)"
+  },
+  {
+    "dance_id": 1476,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Hop + Shuffle + Step(Fast)"
+  },
+  {
+    "dance_id": 1487,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Hop + Shuffle + Step + Shuffle + Ball Change(Fast)"
+  },
+  {
+    "dance_id": 1519,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "House",
+    "name": "BOUNCE CHALLENGE | SHUFFLE"
+  },
+  {
+    "dance_id": 1525,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "SNAP KICK | STANDARD"
+  },
+  {
+    "dance_id": 1529,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "KNEE UP | STANDARD"
+  },
+  {
+    "dance_id": 1531,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "KNEE UP CHALLENGE | FARMER"
+  },
+  {
+    "dance_id": 1535,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "TWIST | TOE TWIST - KNEE UP"
+  },
+  {
+    "dance_id": 1537,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Breakdance",
+    "name": "TWIST | TOE TWIST - LEG CURL"
+  },
+  {
+    "dance_id": 1567,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Toes"
+  },
+  {
+    "dance_id": 1620,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "The Camel Walk"
+  },
+  {
+    "dance_id": 1629,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Forward Triple Step"
+  },
+  {
+    "dance_id": 1630,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Backward Triple Step"
+  },
+  {
+    "dance_id": 1631,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Step-Touch, Step-Touch, Step-Touch, Step-Touch"
+  },
+  {
+    "dance_id": 1635,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "House",
+    "name": "Forward Cross Over"
+  },
+  {
+    "dance_id": 1636,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Backward Cross Over"
+  },
+  {
+    "dance_id": 1642,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Forward Slide Step"
+  },
+  {
+    "dance_id": 1646,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Krump",
+    "name": "Forward Stomp"
+  },
+  {
+    "dance_id": 1649,
+    "remove_style_id": 10,
+    "remove_style": "Hip-hop",
+    "keep_style": "Krump",
+    "name": "Down Chest Pop"
+  },
+  {
+    "dance_id": 1651,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Backward Hip Bump"
+  },
+  {
+    "dance_id": 1653,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Backward Knee Drop"
+  },
+  {
+    "dance_id": 1659,
+    "remove_style_id": 3,
+    "remove_style": "Street / Urban",
+    "keep_style": "Hip-hop",
+    "name": "Backward Whip"
+  }
+]

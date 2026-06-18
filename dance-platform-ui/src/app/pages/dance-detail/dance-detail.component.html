@@ -363,6 +363,40 @@
         </div>
       }
     </section>
+
+    <!-- Recommended: more dances of the same style/type -->
+    @if (recommended().length > 0) {
+      <section class="recommended-section">
+        <h2>More like this</h2>
+        <div class="grid grid--2 recommended-grid">
+          @for (rec of recommended(); track rec.id) {
+            <a class="card dance-card recommended-card" [routerLink]="['/dances', rec.slug]">
+              <span class="dance-card__media">
+                @if (recThumbnailUrl(rec); as thumb) {
+                  <img [src]="thumb" alt="" loading="lazy" class="dance-card__thumb" (error)="onRecThumbError(rec.id)" />
+                } @else {
+                  <span class="dance-card__media-fallback"><i class="fa-solid fa-music"></i></span>
+                }
+                @if (rec.videoCount > 0) {
+                  <span class="dance-card__media-count"><i class="fa-solid fa-play"></i> {{ rec.videoCount }} video{{ rec.videoCount !== 1 ? 's' : '' }}</span>
+                }
+              </span>
+              <span class="dance-card__body">
+                <h3 class="dance-card__name">{{ rec.name }}</h3>
+                <span class="styles-row">
+                  @if (rec.difficulty !== 'None') {
+                    <span class="badge badge--difficulty badge--difficulty-{{ rec.difficulty | lowercase }}">{{ rec.difficulty }}</span>
+                  }
+                  @for (style of rec.styles; track style) {
+                    <span class="badge">{{ style }}</span>
+                  }
+                </span>
+              </span>
+            </a>
+          }
+        </div>
+      </section>
+    }
   </div>
 } @else if (notFound()) {
   <div class="container loading">

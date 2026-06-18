@@ -63,6 +63,11 @@ export class DanceService {
     return this.http.get<Dance>(`${this.base}/${idOrSlug}`);
   }
 
+  /** "More like this" — other dances sharing this dance's style, ranked by relevance. */
+  getRecommended(id: number): Observable<Dance[]> {
+    return this.http.get<Dance[]>(`${this.base}/${id}/recommended`);
+  }
+
   searchDances(p: SearchDancesParams): Observable<SearchDancesResult> {
     let params = new HttpParams();
     if (p.q) params = params.set('q', p.q);

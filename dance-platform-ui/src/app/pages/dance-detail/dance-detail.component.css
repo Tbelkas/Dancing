@@ -402,3 +402,19 @@
   aspect-ratio: 16 / 9;
   border-radius: var(--radius-lg);
 }
+
+/* Recommended ("More like this") */
+.recommended-section { margin-top: 2.5rem; }
+.recommended-section h2 { margin-bottom: 1rem; }
+.recommended-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.recommended-card:hover { transform: translateY(-2px); }
+.recommended-card .dance-card__body { display: flex; flex-direction: column; gap: .5rem; }
+.recommended-card .dance-card__name { margin: 0; }
+.recommended-card .styles-row { display: flex; flex-wrap: wrap; gap: .35rem; }
