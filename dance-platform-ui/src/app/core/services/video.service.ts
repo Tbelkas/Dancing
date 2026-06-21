@@ -61,6 +61,16 @@ export class VideoService {
     return this.http.put<Video>(`${this.base}/${id}`, payload);
   }
 
+  /** Append one named loop region (section) to a video without touching its others. */
+  addSegment(id: number, payload: SegmentPayload): Observable<Video> {
+    return this.http.post<Video>(`${this.base}/${id}/segments`, payload);
+  }
+
+  /** Remove a single section from a video, leaving the rest intact. */
+  deleteSegment(id: number, segmentId: number): Observable<Video> {
+    return this.http.delete<Video>(`${this.base}/${id}/segments/${segmentId}`);
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }

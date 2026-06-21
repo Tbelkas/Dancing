@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TrustUrlPipe } from '../../pipes/trust-url.pipe';
@@ -22,6 +22,12 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() chapters: VideoChapter[] = [];
   /** Video row id of the dance currently on the page — used to highlight its chip. */
   @Input() activeVideoId?: number;
+  /** Admins can name and persist the current loop region as a reusable section. */
+  @Input() canSaveLoops = false;
+  /** Emits the current loop region when an admin saves it; the parent persists it. */
+  @Output() saveLoop = new EventEmitter<{ label: string; startTime: number; endTime: number }>();
+  /** Emits a section an admin wants removed; the parent deletes it. */
+  @Output() deleteLoop = new EventEmitter<VideoSegment>();
   @ViewChild('playerContainer', { static: false }) playerContainer?: ElementRef;
   @ViewChild('tiktokFrame', { static: false }) tiktokFrame?: ElementRef<HTMLIFrameElement>;
 
@@ -32,12 +38,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   activeSegmentId = signal<number | null>(null);
   loopSegmentId = signal<number | null>(null);
   activeChapterId = signal<number | null>(null);
+  chaptersExpanded = signal(false);
 
   /** Only worth showing the jump row when the source video holds more than one dance. */
   get hasChapters(): boolean { return this.chapters.length > 1; }
 
   repeatStart = 0;
   repeatEnd = 0;
+  loopName = '';
 
   get loopableSegments(): VideoSegment[] {
     return this.segments.filter(s => s.endTime != null);
@@ -109,6 +117,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.activeChapterId.set(this.activeVideoId ?? null);
+    // Short lists open by default; long ones (some videos hold dozens of dances)
+    // start collapsed so they don't bury the player controls.
+    this.chaptersExpanded.set(this.chapters.length > 0 && this.chapters.length <= 6);
     this.repeating.set(localStorage.getItem(this.LOOP_PREF_KEY) === '1');
     if (this.isTikTok) {
       const defaultDur = this.endTime ? this.endTime + 10 : 60;
@@ -191,6 +202,27 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   onEndSliderChange(value: number): void {
     this.repeatEnd = Math.max(value, this.repeatStart + 1);
     this.loopSegmentId.set(null);
+  }
+
+  /** Current playback position, floored to whole seconds. */
+  private currentPlaybackTime(): number {
+    const t = this.isYouTube ? (this.player?.getCurrentTime() ?? 0) : this.tiktokCurrentTime;
+    return Math.max(0, Math.floor(t));
+  }
+
+  setStartToCurrent(): void { this.onStartSliderChange(this.currentPlaybackTime()); }
+  setEndToCurrent(): void { this.onEndSliderChange(this.currentPlaybackTime()); }
+
+  emitSaveLoop(): void {
+    const label = this.loopName.trim();
+    if (!label || this.repeatEnd <= this.repeatStart) return;
+    this.saveLoop.emit({ label, startTime: this.repeatStart, endTime: this.repeatEnd });
+    this.loopName = '';
+  }
+
+  emitDeleteLoop(event: Event, segment: VideoSegment): void {
+    event.stopPropagation();
+    this.deleteLoop.emit(segment);
   }
 
   formatTime = formatTimeSecs;

@@ -89,6 +89,34 @@ public class VideoService : IVideoService
         return await GetByIdAsync(id);
     }
 
+    // Appends a single named loop region without disturbing existing segments, and
+    // independent of VideoType — admins mark practice loops on any video, not just tutorials.
+    public async Task<VideoDto?> AddSegmentAsync(int id, VideoSegmentDto segment)
+    {
+        if (string.IsNullOrWhiteSpace(segment.Label)) return null;
+        var video = await _db.Videos.Include(v => v.Segments).FirstOrDefaultAsync(v => v.Id == id);
+        if (video is null) return null;
+
+        video.Segments.Add(new VideoSegment
+        {
+            Label = segment.Label.Trim(),
+            StartTime = segment.StartTime,
+            EndTime = segment.EndTime
+        });
+        await _db.SaveChangesAsync();
+        return await GetByIdAsync(id);
+    }
+
+    public async Task<VideoDto?> DeleteSegmentAsync(int videoId, int segmentId)
+    {
+        var segment = await _db.VideoSegments
+            .FirstOrDefaultAsync(s => s.Id == segmentId && s.VideoId == videoId);
+        if (segment is null) return null;
+        _db.VideoSegments.Remove(segment);
+        await _db.SaveChangesAsync();
+        return await GetByIdAsync(videoId);
+    }
+
     public async Task<bool> DeleteAsync(int id)
     {
         var video = await _db.Videos.FindAsync(id);

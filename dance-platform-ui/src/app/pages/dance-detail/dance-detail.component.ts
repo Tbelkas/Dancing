@@ -12,7 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
 import { RecentDancesService } from '../../core/services/recent-dances.service';
 import { Dance } from '../../models/dance.model';
-import { Video, VideoChapter, VideoType, viewCountBucket } from '../../models/video.model';
+import { Video, VideoChapter, VideoSegment, VideoType, viewCountBucket } from '../../models/video.model';
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
@@ -371,6 +371,9 @@ export class DanceDetailComponent implements OnInit {
     const endTime = parseTimeSecs(this.editVideoEndTime);
     const segments = this.buildSegments(this.editVideoType, this.editVideoSegments, this.editVideoTimeError);
     if (segments === null) return;
+    // The form only edits sections for tutorials; for other types leave segments
+    // untouched so admin-saved loops aren't wiped when just changing the time.
+    const updateSegments = this.editVideoType === 'tutorial';
     this.savingVideoTime.set(true);
     this.editVideoTimeError.set('');
     this.videoService.update(video.id, {
@@ -378,7 +381,7 @@ export class DanceDetailComponent implements OnInit {
       startTime,
       endTime,
       videoType: this.editVideoType,
-      updateSegments: true,
+      updateSegments,
       segments
     }).subscribe({
       next: updated => {
@@ -388,6 +391,29 @@ export class DanceDetailComponent implements OnInit {
         this.savingVideoTime.set(false);
       },
       error: () => { this.editVideoTimeError.set('Failed to save. Please try again.'); this.savingVideoTime.set(false); }
+    });
+  }
+
+  /** Admin saved a named loop region in the player — persist it as a section. */
+  onSaveLoop(video: Video, payload: SegmentPayload): void {
+    this.videoService.addSegment(video.id, payload).subscribe({
+      next: updated => {
+        this.videos.update(list => list.map(v => v.id === updated.id ? updated : v));
+        if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
+      },
+      error: () => this.actionError.set('Failed to save loop. Please try again.')
+    });
+  }
+
+  /** Admin removed a saved loop/section from the player. */
+  onDeleteLoop(video: Video, segment: VideoSegment): void {
+    if (!confirm(`Delete section "${segment.label}"?`)) return;
+    this.videoService.deleteSegment(video.id, segment.id).subscribe({
+      next: updated => {
+        this.videos.update(list => list.map(v => v.id === updated.id ? updated : v));
+        if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
+      },
+      error: () => this.actionError.set('Failed to delete section. Please try again.')
     });
   }
 

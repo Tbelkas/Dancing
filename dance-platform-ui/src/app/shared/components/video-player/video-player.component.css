@@ -74,34 +74,107 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Jump between the dances cut from one shared source video. Source videos can hold
-   dozens of dances, so cap the height and let it scroll rather than push the player
-   controls far down the page. */
+/* Admin: a section chip pairs with an inline delete button; they read as one
+   unit, so drop the radius/border where they meet. */
+.segment-chip-wrap {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.segment-chip-wrap:has(.segment-chip__delete) .segment-chip {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+}
+
+.segment-chip__delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--color-border);
+  border-left: none;
+  border-top-right-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  padding: 0 9px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.segment-chip__delete:hover {
+  background: var(--color-error);
+  border-color: var(--color-error);
+  color: #07070D;
+}
+
+/* Jump between the dances cut from one shared source video. The list collapses
+   behind a toggle so videos holding dozens of dances don't bury the controls. */
 .control-row--chapters {
+  flex-direction: column;
   align-items: flex-start;
+  gap: 12px;
+}
+
+.chapters-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  transition: color var(--transition);
+}
+
+.chapters-toggle:hover {
+  color: var(--color-text);
+}
+
+.chapters-toggle i {
+  font-size: 0.7rem;
+  width: 0.8em;
+}
+
+.chapters-count {
+  font-variant-numeric: tabular-nums;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .chapter-chips {
   display: flex;
-  gap: 6px;
+  gap: 7px;
   flex-wrap: wrap;
   align-content: flex-start;
-  max-height: 8.5rem;
+  max-height: 11rem;
   overflow-y: auto;
 }
 
 .chapter-chip {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   background: rgba(255,255,255,0.05);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   color: var(--color-text-muted);
   font-family: var(--font-ui);
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  padding: 6px 12px;
+  padding: 9px 15px;
   cursor: pointer;
   transition: all var(--transition);
 }
@@ -114,7 +187,7 @@
 }
 
 .chapter-chip__time {
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 500;
   opacity: 0.75;
   font-variant-numeric: tabular-nums;
@@ -263,6 +336,58 @@
   width: 44px;
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
+}
+
+/* "Set to current playback time" — small icon button at the end of each slider row */
+.set-current-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.set-current-btn:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #07070D;
+}
+
+/* Admin: name and persist the current loop region as a reusable section */
+.save-loop-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.save-loop-name {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.save-loop-name:focus {
+  border-color: var(--color-accent);
+}
+
+.save-loop-row .btn {
+  flex-shrink: 0;
 }
 
 .range-slider {

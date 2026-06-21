@@ -5,10 +5,17 @@
       <span class="segments-label">Sections</span>
       <div class="segment-chips">
         @for (seg of segments; track seg.id) {
-          <button class="segment-chip" [class.active]="activeSegmentId() === seg.id" (click)="jumpToSegment(seg)">
-            {{ seg.label }}
-            <span class="segment-chip__time">{{ formatTime(seg.startTime) }}@if (seg.endTime != null) { – {{ formatTime(seg.endTime) }}}</span>
-          </button>
+          <div class="segment-chip-wrap" [class.segment-chip-wrap--active]="activeSegmentId() === seg.id">
+            <button class="segment-chip" [class.active]="activeSegmentId() === seg.id" (click)="jumpToSegment(seg)">
+              {{ seg.label }}
+              <span class="segment-chip__time">{{ formatTime(seg.startTime) }}@if (seg.endTime != null) { – {{ formatTime(seg.endTime) }}}</span>
+            </button>
+            @if (canSaveLoops) {
+              <button class="segment-chip__delete" (click)="emitDeleteLoop($event, seg)" title="Delete section" aria-label="Delete section">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            }
+          </div>
         }
       </div>
     </div>
@@ -20,15 +27,21 @@
     <div class="controls">
       @if (hasChapters) {
         <div class="control-row control-row--chapters">
-          <label id="yt-chapters-label">In this video</label>
-          <div class="chapter-chips" role="group" aria-labelledby="yt-chapters-label">
-            @for (ch of chapters; track ch.id) {
-              <button class="chapter-chip" [class.active]="activeChapterId() === ch.id" (click)="jumpToChapter(ch)">
-                {{ ch.danceName }}
-                @if (ch.startTime != null) { <span class="chapter-chip__time">{{ formatTime(ch.startTime) }}</span> }
-              </button>
-            }
-          </div>
+          <button class="chapters-toggle" (click)="chaptersExpanded.set(!chaptersExpanded())" [attr.aria-expanded]="chaptersExpanded()">
+            <i class="fa-solid" [class.fa-chevron-down]="chaptersExpanded()" [class.fa-chevron-right]="!chaptersExpanded()"></i>
+            In this video
+            <span class="chapters-count">{{ chapters.length }}</span>
+          </button>
+          @if (chaptersExpanded()) {
+            <div class="chapter-chips" role="group" aria-label="Other dances in this video">
+              @for (ch of chapters; track ch.id) {
+                <button class="chapter-chip" [class.active]="activeChapterId() === ch.id" (click)="jumpToChapter(ch)">
+                  {{ ch.danceName }}
+                  @if (ch.startTime != null) { <span class="chapter-chip__time">{{ formatTime(ch.startTime) }}</span> }
+                </button>
+              }
+            </div>
+          }
         </div>
       }
 
@@ -59,6 +72,9 @@
                 aria-label="Loop start time" [attr.aria-valuetext]="formatTime(repeatStart)"
                 (input)="onStartSliderChange(+$any($event.target).value)" />
               <span class="slider-time">{{ formatTime(repeatStart) }}</span>
+              <button type="button" class="set-current-btn" (click)="setStartToCurrent()" title="Set start to current time" aria-label="Set loop start to current playback time">
+                <i class="fa-solid fa-crosshairs"></i>
+              </button>
             </div>
             <div class="slider-row">
               <span class="slider-label">End</span>
@@ -66,8 +82,20 @@
                 aria-label="Loop end time" [attr.aria-valuetext]="formatTime(repeatEnd)"
                 (input)="onEndSliderChange(+$any($event.target).value)" />
               <span class="slider-time">{{ formatTime(repeatEnd) }}</span>
+              <button type="button" class="set-current-btn" (click)="setEndToCurrent()" title="Set end to current time" aria-label="Set loop end to current playback time">
+                <i class="fa-solid fa-crosshairs"></i>
+              </button>
             </div>
           </div>
+          @if (canSaveLoops) {
+            <div class="save-loop-row">
+              <input type="text" class="save-loop-name" [(ngModel)]="loopName" maxlength="40"
+                placeholder="Name this loop" aria-label="Loop name" (keyup.enter)="emitSaveLoop()" />
+              <button class="btn btn--ghost btn--sm" (click)="emitSaveLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
+                <i class="fa-solid fa-bookmark"></i> Save section
+              </button>
+            </div>
+          }
         } @else {
           <p class="repeat-hint">Start the video, then drag to set your loop points.</p>
         }
@@ -91,15 +119,21 @@
     <div class="controls">
       @if (hasChapters) {
         <div class="control-row control-row--chapters">
-          <label id="tt-chapters-label">In this video</label>
-          <div class="chapter-chips" role="group" aria-labelledby="tt-chapters-label">
-            @for (ch of chapters; track ch.id) {
-              <button class="chapter-chip" [class.active]="activeChapterId() === ch.id" (click)="jumpToChapter(ch)">
-                {{ ch.danceName }}
-                @if (ch.startTime != null) { <span class="chapter-chip__time">{{ formatTime(ch.startTime) }}</span> }
-              </button>
-            }
-          </div>
+          <button class="chapters-toggle" (click)="chaptersExpanded.set(!chaptersExpanded())" [attr.aria-expanded]="chaptersExpanded()">
+            <i class="fa-solid" [class.fa-chevron-down]="chaptersExpanded()" [class.fa-chevron-right]="!chaptersExpanded()"></i>
+            In this video
+            <span class="chapters-count">{{ chapters.length }}</span>
+          </button>
+          @if (chaptersExpanded()) {
+            <div class="chapter-chips" role="group" aria-label="Other dances in this video">
+              @for (ch of chapters; track ch.id) {
+                <button class="chapter-chip" [class.active]="activeChapterId() === ch.id" (click)="jumpToChapter(ch)">
+                  {{ ch.danceName }}
+                  @if (ch.startTime != null) { <span class="chapter-chip__time">{{ formatTime(ch.startTime) }}</span> }
+                </button>
+              }
+            </div>
+          }
         </div>
       }
 
@@ -118,6 +152,9 @@
               aria-label="Repeat region start time" [attr.aria-valuetext]="formatTime(repeatStart)"
               (input)="onStartSliderChange(+$any($event.target).value)" />
             <span class="slider-time">{{ formatTime(repeatStart) }}</span>
+            <button type="button" class="set-current-btn" (click)="setStartToCurrent()" title="Set start to current time" aria-label="Set loop start to current playback time">
+              <i class="fa-solid fa-crosshairs"></i>
+            </button>
           </div>
           <div class="slider-row">
             <span class="slider-label">End</span>
@@ -125,8 +162,20 @@
               aria-label="Repeat region end time" [attr.aria-valuetext]="formatTime(repeatEnd)"
               (input)="onEndSliderChange(+$any($event.target).value)" />
             <span class="slider-time">{{ formatTime(repeatEnd) }}</span>
+            <button type="button" class="set-current-btn" (click)="setEndToCurrent()" title="Set end to current time" aria-label="Set loop end to current playback time">
+              <i class="fa-solid fa-crosshairs"></i>
+            </button>
           </div>
         </div>
+        @if (canSaveLoops) {
+          <div class="save-loop-row">
+            <input type="text" class="save-loop-name" [(ngModel)]="loopName" maxlength="40"
+              placeholder="Name this loop" aria-label="Loop name" (keyup.enter)="emitSaveLoop()" />
+            <button class="btn btn--ghost btn--sm" (click)="emitSaveLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
+              <i class="fa-solid fa-bookmark"></i> Save section
+            </button>
+          </div>
+        }
         <p class="repeat-hint">Loop points update as the video plays. Speed control isn't available for TikTok.</p>
       </div>
     </div>

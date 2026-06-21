@@ -54,6 +54,22 @@ public class VideosController : ControllerBase
     }
 
     [RequireAdmin]
+    [HttpPost("{id}/segments")]
+    public async Task<IActionResult> AddSegment(int id, [FromBody] VideoSegmentDto segment)
+    {
+        var video = await _videoService.AddSegmentAsync(id, segment);
+        return video is null ? NotFound() : Ok(video);
+    }
+
+    [RequireAdmin]
+    [HttpDelete("{id}/segments/{segmentId}")]
+    public async Task<IActionResult> DeleteSegment(int id, int segmentId)
+    {
+        var video = await _videoService.DeleteSegmentAsync(id, segmentId);
+        return video is null ? NotFound() : Ok(video);
+    }
+
+    [RequireAdmin]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
