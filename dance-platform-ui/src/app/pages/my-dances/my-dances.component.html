@@ -11,9 +11,23 @@
 
   @if (continueLearning().length > 0) {
     <section class="continue-learning">
-      <h2 class="section-heading continue-learning__title">Continue learning</h2>
-      <p class="continue-learning__sub">Pick up where you left off</p>
-      <div class="continue-grid">
+      <div class="continue-learning__head">
+        <div class="continue-learning__heading">
+          <h2 class="section-heading continue-learning__title">Continue learning</h2>
+          <p class="continue-learning__sub">Pick up where you left off</p>
+        </div>
+        @if (historyOverflow()) {
+          <div class="continue-nav">
+            <button type="button" class="carousel-arrow" (click)="scrollHistory(-1)" [disabled]="historyAtStart()" aria-label="Scroll to more recent">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button type="button" class="carousel-arrow" (click)="scrollHistory(1)" [disabled]="historyAtEnd()" aria-label="Scroll to older history">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        }
+      </div>
+      <div #historyTrack class="continue-track" (scroll)="onHistoryScroll()">
         @for (dance of continueLearning(); track dance.id) {
           <a class="card continue-card" [routerLink]="['/dances', dance.slug]">
             <span class="continue-card__media">

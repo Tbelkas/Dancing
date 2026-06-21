@@ -7,9 +7,10 @@ export function parseVideoUrl(input: string): { platform: string; videoId: strin
   const url = input.trim();
   const tiktok = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
   if (tiktok) return { platform: 'tiktok', videoId: tiktok[1] };
-  const ig = url.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+  const ig = url.match(/instagram\.com\/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
   if (ig) return { platform: 'instagram', videoId: ig[1] };
-  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
+  // Handles watch?v=, watch?…&v= (params before v), youtu.be/, embed/, shorts/, live/
+  const yt = url.match(/(?:youtube\.com\/(?:watch\?(?:[^&\s]*&)*v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
   if (yt) return { platform: 'youtube', videoId: yt[1] };
   if (/^[A-Za-z0-9_-]{11}$/.test(url)) return { platform: 'youtube', videoId: url };
   return null;

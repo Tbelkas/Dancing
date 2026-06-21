@@ -1,8 +1,8 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, HostListener, ViewChild, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { switchMap, EMPTY } from 'rxjs';
+import { switchMap } from 'rxjs';
 import { parseVideoUrl, parseTimeSecs } from '../../core/utils/video-url.utils';
 import { toggleSet } from '../../core/utils/set.utils';
 import { ProfileService } from '../../core/services/profile.service';
@@ -22,7 +22,7 @@ import { VideoPlayerComponent } from '../../shared/components/video-player/video
   templateUrl: './my-dances.component.html',
   styleUrls: ['./my-dances.component.css']
 })
-export class MyDancesComponent implements OnInit {
+export class MyDancesComponent implements OnInit, AfterViewInit {
   private readonly SELECTED_STYLE_KEY = 'dp_mydances_style';
   private readonly EXPANDED_DANCE_KEY = 'dp_mydances_expanded';
 
@@ -60,8 +60,8 @@ export class MyDancesComponent implements OnInit {
 
   readonly myStyleIds = computed(() => new Set(this.myStyles().map(ms => ms.styleId)));
 
-  /** How many "Continue Learning" cards to show before they become clutter. */
-  private readonly CONTINUE_LIMIT = 6;
+  /** Upper bound of "Continue Learning" cards; the carousel scrolls through them. */
+  private readonly CONTINUE_LIMIT = 20;
   private recThumbFailed = signal<Set<number>>(new Set());
 
   /** Ids the user has already learned, drawn from the live my-dances data. */
@@ -76,6 +76,13 @@ export class MyDancesComponent implements OnInit {
       .filter(d => !d.learned && !learned.has(d.id))
       .slice(0, this.CONTINUE_LIMIT);
   });
+
+  // Continue-learning carousel: the track scrolls horizontally; arrows show only
+  // when it overflows and disable once you hit either end.
+  @ViewChild('historyTrack') private historyTrack?: ElementRef<HTMLElement>;
+  readonly historyOverflow = signal(false);
+  readonly historyAtStart = signal(true);
+  readonly historyAtEnd = signal(false);
 
   readonly selectedStyle = computed(() => {
     const id = this.selectedStyleId();
@@ -104,7 +111,43 @@ export class MyDancesComponent implements OnInit {
     private danceService: DanceService,
     private videoService: VideoService,
     private recentDances: RecentDancesService
-  ) {}
+  ) {
+    // The card list grows/shrinks as history loads or a card is dismissed — re-measure
+    // the track after the DOM settles so the arrows reflect the new scrollable width.
+    effect(() => {
+      this.continueLearning();
+      setTimeout(() => this.updateHistoryScrollState());
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.updateHistoryScrollState();
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updateHistoryScrollState();
+  }
+
+  onHistoryScroll(): void {
+    this.updateHistoryScrollState();
+  }
+
+  /** Scroll the history track by most of its width — dir -1 is newer, +1 is older. */
+  scrollHistory(dir: -1 | 1): void {
+    const el = this.historyTrack?.nativeElement;
+    if (!el) return;
+    el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' });
+  }
+
+  private updateHistoryScrollState(): void {
+    const el = this.historyTrack?.nativeElement;
+    if (!el) { this.historyOverflow.set(false); return; }
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    this.historyOverflow.set(maxScroll > 1);
+    this.historyAtStart.set(el.scrollLeft <= 1);
+    this.historyAtEnd.set(el.scrollLeft >= maxScroll - 1);
+  }
 
   /** YouTube thumbnail for a recently-viewed dance, or null if missing/failed to load. */
   continueThumbnailUrl(dance: { id: number; thumbnailVideoId?: string; thumbnailPlatform?: string }): string | null {
@@ -292,16 +335,24 @@ export class MyDancesComponent implements OnInit {
   }
 
   submitAddDance(): void {
-    if (!this.newDanceName.trim()) { this.addDanceError.set('Dance name is required.'); return; }
-    const videoTitle = this.newVideoTitle.trim();
+    const danceName = this.newDanceName.trim();
+    if (!danceName) { this.addDanceError.set('Dance name is required.'); return; }
     const videoUrl = this.newVideoUrl.trim();
-    if (videoTitle && !videoUrl) { this.addDanceError.set('Video URL is required when adding a video.'); return; }
+    // Title is optional — default it to the dance name so pasting only a URL still saves the video.
+    const videoTitle = this.newVideoTitle.trim() || danceName;
+
+    // Validate the URL up-front so a bad link doesn't leave a dance with no video.
+    const parsedVideo = videoUrl ? parseVideoUrl(videoUrl) : null;
+    if (videoUrl && !parsedVideo) {
+      this.addDanceError.set('Unrecognized URL. Paste a YouTube, TikTok, or Instagram link.');
+      return;
+    }
 
     this.addingDance.set(true);
     this.addDanceError.set('');
 
     const dancePayload: CreateDancePayload = {
-      name: this.newDanceName.trim(),
+      name: danceName,
       description: this.newDanceDesc.trim() || undefined,
       styleIds: [...this.newDanceStyleIds()],
       musicalStyleIds: []
@@ -309,19 +360,13 @@ export class MyDancesComponent implements OnInit {
 
     this.danceService.create(dancePayload).pipe(
       switchMap(dance => {
-        if (videoTitle && videoUrl) {
-          const parsed = parseVideoUrl(videoUrl);
-          if (!parsed) {
-            this.addDanceError.set('Unrecognized URL. Paste a YouTube, TikTok, or Instagram link.');
-            this.addingDance.set(false);
-            return EMPTY;
-          }
+        if (parsedVideo) {
           const videoPayload: CreateVideoPayload = {
             title: videoTitle,
-            videoId: parsed.videoId,
-            platform: parsed.platform,
+            videoId: parsedVideo.videoId,
+            platform: parsedVideo.platform,
             danceId: dance.id,
-            ...(this.setVideoTime && parsed.platform === 'youtube' ? {
+            ...(this.setVideoTime && parsedVideo.platform === 'youtube' ? {
               startTime: parseTimeSecs(this.newVideoStartTime),
               endTime: parseTimeSecs(this.newVideoEndTime)
             } : {})

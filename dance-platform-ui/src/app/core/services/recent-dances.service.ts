@@ -21,8 +21,8 @@ export interface RecentDance {
 @Injectable({ providedIn: 'root' })
 export class RecentDancesService {
   private readonly STORAGE_KEY = 'dp_recent_dances';
-  /** Keep the list small — we only ever show a handful, and old views are noise. */
-  private readonly MAX_ENTRIES = 12;
+  /** The "Continue learning" carousel scrolls through history, so keep a deeper trail. */
+  private readonly MAX_ENTRIES = 30;
 
   private readonly _recent = signal<RecentDance[]>(this.read());
   readonly recent = this._recent.asReadonly();

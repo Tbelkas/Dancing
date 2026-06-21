@@ -515,6 +515,14 @@
   margin-bottom: 36px;
 }
 
+.continue-learning__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
 .continue-learning__title {
   margin-bottom: 2px;
 }
@@ -526,19 +534,70 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-text-muted);
-  margin: 0 0 16px;
+  margin: 0;
 }
 
-.continue-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+.continue-nav {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.carousel-arrow {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition), opacity var(--transition);
+}
+
+.carousel-arrow:hover:not(:disabled) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #07070D;
+}
+
+.carousel-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.continue-track {
+  display: flex;
   gap: 14px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-light) transparent;
+}
+
+.continue-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.continue-track::-webkit-scrollbar-thumb {
+  background: var(--color-border-light);
+  border-radius: 3px;
+}
+
+.continue-track::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .continue-card {
   position: relative;
   display: flex;
   flex-direction: column;
+  flex: 0 0 190px;
+  scroll-snap-align: start;
   padding: 0;
   overflow: hidden;
   transition: transform var(--transition), border-color var(--transition);
@@ -630,6 +689,6 @@
 }
 
 @media (max-width: 640px) {
-  .continue-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .continue-card { flex-basis: 150px; }
   .continue-card__dismiss { opacity: 1; }
 }
