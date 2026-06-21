@@ -509,3 +509,127 @@
   .style-tab { padding: 8px 12px; font-size: 0.68rem; }
   .page-header__top { flex-direction: column; }
 }
+
+/* Continue Learning */
+.continue-learning {
+  margin-bottom: 36px;
+}
+
+.continue-learning__title {
+  margin-bottom: 2px;
+}
+
+.continue-learning__sub {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin: 0 0 16px;
+}
+
+.continue-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.continue-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  transition: transform var(--transition), border-color var(--transition);
+}
+
+.continue-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-light);
+}
+
+.continue-card__media {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  background: var(--color-surface-2);
+  overflow: hidden;
+}
+
+.continue-card__thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.continue-card__media-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  color: var(--color-border-light);
+}
+
+.continue-card__resume {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  background: var(--color-primary);
+  color: #07070D;
+  font-family: var(--font-ui);
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.continue-card__body {
+  padding: 12px 14px;
+}
+
+.continue-card__name {
+  font-size: 0.98rem;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.continue-card__dismiss {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius);
+  background: rgba(7, 7, 13, 0.6);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition), color var(--transition);
+}
+
+.continue-card:hover .continue-card__dismiss,
+.continue-card__dismiss:focus-visible {
+  opacity: 1;
+}
+
+.continue-card__dismiss:hover {
+  color: var(--color-accent);
+}
+
+@media (max-width: 640px) {
+  .continue-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .continue-card__dismiss { opacity: 1; }
+}

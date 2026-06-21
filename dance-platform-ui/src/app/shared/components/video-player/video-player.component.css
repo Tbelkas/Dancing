@@ -74,6 +74,52 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Jump between the dances cut from one shared source video. Source videos can hold
+   dozens of dances, so cap the height and let it scroll rather than push the player
+   controls far down the page. */
+.control-row--chapters {
+  align-items: flex-start;
+}
+
+.chapter-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  max-height: 8.5rem;
+  overflow-y: auto;
+}
+
+.chapter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.chapter-chip:hover,
+.chapter-chip.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #07070D;
+}
+
+.chapter-chip__time {
+  font-size: 0.78rem;
+  font-weight: 500;
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
 /* TikTok / Instagram embeds */
 .embed-container {
   display: flex;

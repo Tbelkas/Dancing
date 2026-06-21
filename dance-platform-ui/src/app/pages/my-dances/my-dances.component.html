@@ -9,6 +9,34 @@
     <p class="page-subtitle">Your dance styles and tracked moves</p>
   </div>
 
+  @if (continueLearning().length > 0) {
+    <section class="continue-learning">
+      <h2 class="section-heading continue-learning__title">Continue learning</h2>
+      <p class="continue-learning__sub">Pick up where you left off</p>
+      <div class="continue-grid">
+        @for (dance of continueLearning(); track dance.id) {
+          <a class="card continue-card" [routerLink]="['/dances', dance.slug]">
+            <span class="continue-card__media">
+              @if (continueThumbnailUrl(dance); as thumb) {
+                <img [src]="thumb" alt="" loading="lazy" class="continue-card__thumb" (error)="onContinueThumbError(dance.id)" />
+              } @else {
+                <span class="continue-card__media-fallback"><i class="fa-solid fa-music"></i></span>
+              }
+              <span class="continue-card__resume"><i class="fa-solid fa-play"></i> Resume</span>
+            </span>
+            <span class="continue-card__body">
+              <h3 class="continue-card__name">{{ dance.name }}</h3>
+            </span>
+            <button type="button" class="continue-card__dismiss" (click)="dismissContinue(dance.id, $event)"
+              [attr.aria-label]="'Remove ' + dance.name + ' from Continue learning'">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </a>
+        }
+      </div>
+    </section>
+  }
+
   @if (showStylePicker()) {
     <div class="card style-picker">
       <div class="style-picker__header">

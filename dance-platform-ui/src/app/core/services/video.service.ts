@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Video, VideoType } from '../../models/video.model';
+import { Video, VideoChapter, VideoType } from '../../models/video.model';
 import { environment } from '../../../environments/environment';
 
 export interface SegmentPayload {
@@ -42,6 +42,11 @@ export class VideoService {
 
   getByDance(danceId: number): Observable<Video[]> {
     return this.http.get<Video[]>(`${this.base}/dance/${danceId}`);
+  }
+
+  /** Other dances cut from the same source video as this one (includes itself). */
+  getRelated(videoId: number): Observable<VideoChapter[]> {
+    return this.http.get<VideoChapter[]>(`${this.base}/${videoId}/related`);
   }
 
   recordView(videoId: number): Observable<void> {

@@ -7,6 +7,17 @@ export interface VideoSegment {
   endTime?: number;
 }
 
+/** One dance that lives inside a shared source video — used to jump the player
+ *  between the dances cut from the same YouTube upload. */
+export interface VideoChapter {
+  id: number;          // Video row id
+  danceId: number;
+  danceName: string;
+  danceSlug: string;
+  startTime?: number;
+  endTime?: number;
+}
+
 export interface Video {
   id: number;
   title: string;

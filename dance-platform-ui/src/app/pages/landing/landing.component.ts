@@ -19,9 +19,9 @@ export class LandingComponent implements OnInit {
   constructor(private router: Router, public auth: AuthService) {}
 
   ngOnInit(): void {
-    // Returning, signed-in dancers skip the pitch and go straight to the catalog.
+    // Returning, signed-in dancers skip the pitch and go straight to their dances.
     if (this.auth.isAuthenticated()) {
-      this.router.navigate(['/dances']);
+      this.router.navigate(['/my-dances']);
     }
   }
 }

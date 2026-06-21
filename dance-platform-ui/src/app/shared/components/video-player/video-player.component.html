@@ -18,6 +18,20 @@
     <div #playerContainer class="yt-player"></div>
 
     <div class="controls">
+      @if (hasChapters) {
+        <div class="control-row control-row--chapters">
+          <label id="yt-chapters-label">In this video</label>
+          <div class="chapter-chips" role="group" aria-labelledby="yt-chapters-label">
+            @for (ch of chapters; track ch.id) {
+              <button class="chapter-chip" [class.active]="activeChapterId() === ch.id" (click)="jumpToChapter(ch)">
+                {{ ch.danceName }}
+                @if (ch.startTime != null) { <span class="chapter-chip__time">{{ formatTime(ch.startTime) }}</span> }
+              </button>
+            }
+          </div>
+        </div>
+      }
+
       <div class="control-row">
         <label id="speed-label">Speed</label>
         <div class="speed-buttons" role="group" aria-labelledby="speed-label">
@@ -75,6 +89,20 @@
     </div>
 
     <div class="controls">
+      @if (hasChapters) {
+        <div class="control-row control-row--chapters">
+          <label id="tt-chapters-label">In this video</label>
+          <div class="chapter-chips" role="group" aria-labelledby="tt-chapters-label">
+            @for (ch of chapters; track ch.id) {
+              <button class="chapter-chip" [class.active]="activeChapterId() === ch.id" (click)="jumpToChapter(ch)">
+                {{ ch.danceName }}
+                @if (ch.startTime != null) { <span class="chapter-chip__time">{{ formatTime(ch.startTime) }}</span> }
+              </button>
+            }
+          </div>
+        </div>
+      }
+
       <div class="control-row control-row--column loop-block">
         <div class="repeat-header">
           <label>Loop</label>

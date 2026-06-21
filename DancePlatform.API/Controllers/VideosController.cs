@@ -18,6 +18,10 @@ public class VideosController : ControllerBase
     public async Task<IActionResult> GetByDance(int danceId) =>
         Ok(await _videoService.GetByDanceAsync(danceId));
 
+    [HttpGet("{id}/related")]
+    public async Task<IActionResult> GetRelated(int id) =>
+        Ok(await _videoService.GetRelatedAsync(id));
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {

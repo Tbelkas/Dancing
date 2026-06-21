@@ -9,6 +9,7 @@ import { ProfileService } from '../../core/services/profile.service';
 import { StyleService } from '../../core/services/style.service';
 import { DanceService, CreateDancePayload } from '../../core/services/dance.service';
 import { VideoService, CreateVideoPayload } from '../../core/services/video.service';
+import { RecentDancesService } from '../../core/services/recent-dances.service';
 import { MyStyleWithDances } from '../../models/user.model';
 import { Style } from '../../models/style.model';
 import { Video } from '../../models/video.model';
@@ -59,6 +60,23 @@ export class MyDancesComponent implements OnInit {
 
   readonly myStyleIds = computed(() => new Set(this.myStyles().map(ms => ms.styleId)));
 
+  /** How many "Continue Learning" cards to show before they become clutter. */
+  private readonly CONTINUE_LIMIT = 6;
+  private recThumbFailed = signal<Set<number>>(new Set());
+
+  /** Ids the user has already learned, drawn from the live my-dances data. */
+  private readonly learnedIds = computed(() =>
+    new Set(this.myStyles().flatMap(ms => ms.dances).filter(d => d.status === 'learned').map(d => d.id))
+  );
+
+  /** Most-recently-opened dances the user hasn't learned yet — "pick up where you left off". */
+  readonly continueLearning = computed(() => {
+    const learned = this.learnedIds();
+    return this.recentDances.recent()
+      .filter(d => !d.learned && !learned.has(d.id))
+      .slice(0, this.CONTINUE_LIMIT);
+  });
+
   readonly selectedStyle = computed(() => {
     const id = this.selectedStyleId();
     return id ? this.myStyles().find(ms => ms.styleId === id) ?? null : null;
@@ -84,8 +102,28 @@ export class MyDancesComponent implements OnInit {
     private profileService: ProfileService,
     private styleService: StyleService,
     private danceService: DanceService,
-    private videoService: VideoService
+    private videoService: VideoService,
+    private recentDances: RecentDancesService
   ) {}
+
+  /** YouTube thumbnail for a recently-viewed dance, or null if missing/failed to load. */
+  continueThumbnailUrl(dance: { id: number; thumbnailVideoId?: string; thumbnailPlatform?: string }): string | null {
+    if (this.recThumbFailed().has(dance.id)) return null;
+    if (dance.thumbnailVideoId && dance.thumbnailPlatform === 'youtube') {
+      return `https://i.ytimg.com/vi/${dance.thumbnailVideoId}/hqdefault.jpg`;
+    }
+    return null;
+  }
+
+  onContinueThumbError(danceId: number): void {
+    this.recThumbFailed.update(set => new Set(set).add(danceId));
+  }
+
+  dismissContinue(danceId: number, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.recentDances.remove(danceId);
+  }
 
   ngOnInit(): void {
     this.load();

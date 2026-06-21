@@ -17,6 +17,31 @@ public class VideoService : IVideoService
     public async Task<VideoDto?> GetByIdAsync(int id) =>
         await BuildQuery().FirstOrDefaultAsync(v => v.Id == id);
 
+    // All dances whose segments live in the same source video (same platform + id),
+    // ordered by where they start so the player can offer in-place jump chips.
+    public async Task<List<VideoChapterDto>> GetRelatedAsync(int id)
+    {
+        var current = await _db.Videos.AsNoTracking()
+            .Where(v => v.Id == id)
+            .Select(v => new { v.VideoId, v.Platform })
+            .FirstOrDefaultAsync();
+        if (current is null) return new List<VideoChapterDto>();
+
+        return await _db.Videos
+            .Where(v => v.VideoId == current.VideoId && v.Platform == current.Platform)
+            .OrderBy(v => v.StartTime ?? 0)
+            .Select(v => new VideoChapterDto
+            {
+                Id = v.Id,
+                DanceId = v.DanceId,
+                DanceName = v.Dance.Name,
+                DanceSlug = v.Dance.Slug,
+                StartTime = v.StartTime,
+                EndTime = v.EndTime
+            })
+            .ToListAsync();
+    }
+
     public async Task<VideoDto?> CreateAsync(CreateVideoRequest request)
     {
         var danceExists = await _db.Dances.AnyAsync(d => d.Id == request.DanceId);

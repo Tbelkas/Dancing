@@ -2,7 +2,7 @@ import { Component, Input, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChi
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TrustUrlPipe } from '../../pipes/trust-url.pipe';
-import { VideoSegment } from '../../../models/video.model';
+import { VideoSegment, VideoChapter } from '../../../models/video.model';
 import { formatTimeSecs } from '../../../core/utils/video-url.utils';
 
 @Component({
@@ -18,6 +18,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() startTime?: number;
   @Input() endTime?: number;
   @Input() segments: VideoSegment[] = [];
+  /** Other dances cut from this same source video; includes the one being shown. */
+  @Input() chapters: VideoChapter[] = [];
+  /** Video row id of the dance currently on the page — used to highlight its chip. */
+  @Input() activeVideoId?: number;
   @ViewChild('playerContainer', { static: false }) playerContainer?: ElementRef;
   @ViewChild('tiktokFrame', { static: false }) tiktokFrame?: ElementRef<HTMLIFrameElement>;
 
@@ -27,6 +31,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   videoDuration = signal(0);
   activeSegmentId = signal<number | null>(null);
   loopSegmentId = signal<number | null>(null);
+  activeChapterId = signal<number | null>(null);
+
+  /** Only worth showing the jump row when the source video holds more than one dance. */
+  get hasChapters(): boolean { return this.chapters.length > 1; }
 
   repeatStart = 0;
   repeatEnd = 0;
@@ -100,6 +108,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   ngOnInit(): void {
+    this.activeChapterId.set(this.activeVideoId ?? null);
     this.repeating.set(localStorage.getItem(this.LOOP_PREF_KEY) === '1');
     if (this.isTikTok) {
       const defaultDur = this.endTime ? this.endTime + 10 : 60;
@@ -130,6 +139,26 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.clearDurationPoll();
     this.player?.destroy();
     window.removeEventListener('message', this.tiktokMessageHandler);
+  }
+
+  /** Seek the embedded player to another dance in the same video and arm its loop
+   *  region, without leaving the page. */
+  jumpToChapter(chapter: VideoChapter): void {
+    this.activeChapterId.set(chapter.id);
+    const start = chapter.startTime ?? 0;
+    this.repeatStart = start;
+    if (chapter.endTime != null) {
+      this.repeatEnd = chapter.endTime;
+      this.loopSegmentId.set(null);
+    }
+    if (this.isYouTube) {
+      this.player?.seekTo(start, true);
+      this.player?.playVideo();
+    } else if (this.isTikTok) {
+      this.tiktokCurrentTime = start;
+      this.tiktokPost({ type: 'seekTo', value: start });
+      this.tiktokPost({ type: 'play' });
+    }
   }
 
   jumpToSegment(segment: VideoSegment): void {
@@ -200,7 +229,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.playerContainer) return;
     const playerVars: YT.PlayerVars = { rel: 0, modestbranding: 1 };
     if (this.startTime != null) playerVars['start'] = this.startTime;
-    if (this.endTime != null) playerVars['end'] = this.endTime;
+    // With multiple dances in one video the player must stay seekable past this
+    // dance's end, so don't hard-bound it — the loop region handles section limits.
+    if (this.endTime != null && !this.hasChapters) playerVars['end'] = this.endTime;
 
     this.player = new window.YT.Player(this.playerContainer.nativeElement, {
       videoId: this.videoId,

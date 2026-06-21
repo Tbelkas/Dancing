@@ -281,7 +281,7 @@
           @if (videos()[0].description) {
             <p class="video-desc">{{ videos()[0].description }}</p>
           }
-          <app-video-player [videoId]="videos()[0].videoId" [platform]="videos()[0].platform" [startTime]="videos()[0].startTime" [endTime]="videos()[0].endTime" [segments]="videos()[0].segments" />
+          <app-video-player [videoId]="videos()[0].videoId" [platform]="videos()[0].platform" [startTime]="videos()[0].startTime" [endTime]="videos()[0].endTime" [segments]="videos()[0].segments" [chapters]="chapters()" [activeVideoId]="videos()[0].id" />
         </div>
       } @else {
         <div class="video-list">
@@ -356,7 +356,7 @@
                 @if (video.description) {
                   <p class="video-desc">{{ video.description }}</p>
                 }
-                <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="video.startTime" [endTime]="video.endTime" [segments]="video.segments" />
+                <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="video.startTime" [endTime]="video.endTime" [segments]="video.segments" [chapters]="chapters()" [activeVideoId]="video.id" />
               </div>
             }
           }

@@ -59,7 +59,7 @@ export class LoginComponent implements OnInit {
       : this.auth.login(this.username, this.password);
 
     obs.subscribe({
-      next: () => this.router.navigate(['/dances']),
+      next: () => this.router.navigate(['/my-dances']),
       error: (err) => {
         this.error.set(err.error?.message ?? 'An error occurred. Please try again.');
         this.loading.set(false);

@@ -10,8 +10,9 @@ import { MusicalStyleService } from '../../core/services/musical-style.service';
 import { InstructorService } from '../../core/services/instructor.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
+import { RecentDancesService } from '../../core/services/recent-dances.service';
 import { Dance } from '../../models/dance.model';
-import { Video, VideoType, viewCountBucket } from '../../models/video.model';
+import { Video, VideoChapter, VideoType, viewCountBucket } from '../../models/video.model';
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
@@ -41,6 +42,8 @@ export class DanceDetailComponent implements OnInit {
   notFound = signal(false);
   videos = signal<Video[]>([]);
   selectedVideo = signal<Video | null>(null);
+  // Other dances sharing the selected video, for in-place jump chips in the player.
+  chapters = signal<VideoChapter[]>([]);
   recommended = signal<Dance[]>([]);
   private recThumbFailed = signal<Set<number>>(new Set());
   readonly viewCountBucket = viewCountBucket;
@@ -97,6 +100,7 @@ export class DanceDetailComponent implements OnInit {
     private styleService: StyleService,
     private musicalStyleService: MusicalStyleService,
     private instructorService: InstructorService,
+    private recentDances: RecentDancesService,
     public auth: AuthService,
     public role: RoleService
   ) {}
@@ -118,12 +122,14 @@ export class DanceDetailComponent implements OnInit {
     this.notFound.set(false);
     this.videos.set([]);
     this.selectedVideo.set(null);
+    this.chapters.set([]);
     this.recommended.set([]);
     this.showEditDance.set(false);
 
     this.danceService.getByIdOrSlug(slug).subscribe({
       next: d => {
         this.dance.set(d);
+        this.recentDances.record(d);
         this.title.setTitle(`${d.name} · Dance Platform`);
         // Rewrite legacy numeric URLs (/dances/22) to the slug form without reloading
         if (slug !== d.slug) {
@@ -132,8 +138,8 @@ export class DanceDetailComponent implements OnInit {
         this.videoService.getByDance(d.id).subscribe(v => {
           this.videos.set(v);
           if (v.length === 1) {
-            this.selectedVideo.set(v[0]);
             this.videoService.recordView(v[0].id).subscribe();
+            this.revealVideo(v[0]);
           }
         });
         this.danceService.getRecommended(d.id).subscribe(r => this.recommended.set(r));
@@ -163,11 +169,25 @@ export class DanceDetailComponent implements OnInit {
   }
 
   selectVideo(video: Video): void {
-    const alreadySelected = this.selectedVideo()?.id === video.id;
-    this.selectedVideo.set(alreadySelected ? null : video);
-    if (!alreadySelected) {
-      this.videoService.recordView(video.id).subscribe();
+    if (this.selectedVideo()?.id === video.id) {
+      this.selectedVideo.set(null);
+      this.chapters.set([]);
+      return;
     }
+    this.videoService.recordView(video.id).subscribe();
+    this.revealVideo(video);
+  }
+
+  // Resolve the sibling dances sharing this source video *before* mounting the
+  // player: the YouTube player reads `chapters` at creation to decide whether to
+  // bound playback at this dance's end, so the chips must be known up front.
+  private revealVideo(video: Video): void {
+    this.selectedVideo.set(null);
+    this.chapters.set([]);
+    this.videoService.getRelated(video.id).subscribe({
+      next: ch => { this.chapters.set(ch); this.selectedVideo.set(video); },
+      error: () => this.selectedVideo.set(video)
+    });
   }
 
   toggleFavorite(): void {
@@ -213,6 +233,7 @@ export class DanceDetailComponent implements OnInit {
       isInProgress: status === 'inprogress',
       learnedCount: cur.learnedCount + learnedDelta
     } : cur);
+    this.recentDances.setLearned(d.id, willLearn);
 
     this.danceService.setStatus(d.id, status).subscribe({
       error: () => {
