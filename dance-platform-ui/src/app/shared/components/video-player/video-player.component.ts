@@ -69,6 +69,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   private repeatInterval: ReturnType<typeof setInterval> | null = null;
   private durationPollInterval: ReturnType<typeof setInterval> | null = null;
   private tiktokCurrentTime = 0;
+  private hasRealDuration = false;
+  private regionInitialised = false;
 
   private readonly tiktokMessageHandler = (event: MessageEvent) => {
     // TikTok may emit events as plain objects or as JSON strings
@@ -274,7 +276,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
           this.pollForDuration();
         },
         onStateChange: () => {
-          if (this.videoDuration() === 0) this.tryCaptureDuration();
+          if (!this.hasRealDuration) this.tryCaptureDuration();
         }
       }
     });
@@ -283,21 +285,41 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   private tryCaptureDuration(): boolean {
     const dur = this.player?.getDuration() ?? 0;
     if (dur <= 0) return false;
+    this.hasRealDuration = true;
     this.videoDuration.set(Math.floor(dur));
-    this.repeatStart = this.startTime ?? 0;
-    this.repeatEnd = this.endTime ?? Math.floor(dur);
-    if (this.repeating() && !this.repeatInterval && this.repeatEnd > this.repeatStart) {
-      this.startLoop();
-    }
+    this.initRegion(Math.floor(dur));
     return true;
   }
 
-  // getDuration() returns 0 until the video's metadata loads, which can
-  // happen well after onReady — poll until it reports a real value.
+  private applyFallbackDuration(): void {
+    const fallback = this.endTime ? this.endTime + 10 : 60;
+    this.videoDuration.set(fallback);
+    this.initRegion(fallback);
+  }
+
+  private initRegion(duration: number): void {
+    if (!this.regionInitialised) {
+      this.repeatStart = this.startTime ?? 0;
+      this.repeatEnd = this.endTime ?? duration;
+      this.regionInitialised = true;
+    }
+    if (this.repeating() && !this.repeatInterval && this.repeatEnd > this.repeatStart) {
+      this.startLoop();
+    }
+  }
+
   private pollForDuration(): void {
     if (this.tryCaptureDuration()) return;
+    let attempts = 0;
     this.durationPollInterval = setInterval(() => {
-      if (this.tryCaptureDuration()) this.clearDurationPoll();
+      attempts++;
+      if (this.tryCaptureDuration()) {
+        this.clearDurationPoll();
+      } else if (attempts === 12) {
+        this.applyFallbackDuration();
+      } else if (attempts >= 40) {
+        this.clearDurationPoll();
+      }
     }, 250);
   }
 
