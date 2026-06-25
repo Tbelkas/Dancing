@@ -5,6 +5,9 @@ export interface RecentDance {
   id: number;
   name: string;
   slug: string;
+  styleSlug: string;
+  /** Display name of the canonical style, shown on the card to disambiguate same-named steps. */
+  styleName?: string;
   thumbnailVideoId?: string;
   thumbnailPlatform?: string;
   /** epoch ms of the last time the dance was opened */
@@ -28,11 +31,13 @@ export class RecentDancesService {
   readonly recent = this._recent.asReadonly();
 
   /** Records (or refreshes) a dance the user just opened, moving it to the front of the list. */
-  record(dance: { id: number; name: string; slug: string; thumbnailVideoId?: string; thumbnailPlatform?: string; isLearned: boolean }): void {
+  record(dance: { id: number; name: string; slug: string; styleSlug: string; styles?: string[]; thumbnailVideoId?: string; thumbnailPlatform?: string; isLearned: boolean }): void {
     const entry: RecentDance = {
       id: dance.id,
       name: dance.name,
       slug: dance.slug,
+      styleSlug: dance.styleSlug,
+      styleName: dance.styles?.[0],
       thumbnailVideoId: dance.thumbnailVideoId,
       thumbnailPlatform: dance.thumbnailPlatform,
       viewedAt: Date.now(),

@@ -84,7 +84,7 @@
           @for (session of group[1]; track session.id) {
             <div class="card session-card">
               <div class="session-card__main">
-                <a [routerLink]="['/dances', session.danceSlug]" class="session-dance-name">{{ session.danceName }}</a>
+                <a [routerLink]="session.danceSlug | dancePath:session.danceStyleSlug" class="session-dance-name">{{ session.danceName }}</a>
                 @if (session.durationMinutes) {
                   <span class="session-duration">{{ session.durationMinutes }} min</span>
                 }

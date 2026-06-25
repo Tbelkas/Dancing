@@ -2,6 +2,8 @@ export interface Dance {
   id: number;
   name: string;
   slug: string;
+  /** Slug of the canonical style, for the /dances/{styleSlug}/{slug} URL. */
+  styleSlug: string;
   description?: string;
   dateAdded: string;
   difficulty: string;

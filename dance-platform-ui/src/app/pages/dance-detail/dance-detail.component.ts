@@ -3,6 +3,7 @@ import { CommonModule, Location } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { DanceService, UpdateDancePayload, DanceStatus } from '../../core/services/dance.service';
 import { VideoService, CreateVideoPayload, SegmentPayload } from '../../core/services/video.service';
 import { StyleService } from '../../core/services/style.service';
@@ -30,7 +31,7 @@ interface SegmentRow {
 @Component({
   selector: 'app-dance-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, VideoPlayerComponent],
+  imports: [CommonModule, FormsModule, RouterLink, VideoPlayerComponent, DancePathPipe],
   templateUrl: './dance-detail.component.html',
   styleUrls: ['./dance-detail.component.css']
 })
@@ -109,8 +110,9 @@ export class DanceDetailComponent implements OnInit {
 
   ngOnInit(): void {
     // React to paramMap (not snapshot) so navigating between dances — e.g. via the
-    // "More like this" cards, same /dances/:slug route — reloads the page.
-    this.route.paramMap.subscribe(pm => this.load(pm.get('slug') ?? ''));
+    // "More like this" cards, same route — reloads the page. URLs are either the
+    // canonical /dances/{style}/{slug} or the legacy /dances/{slug-or-id}.
+    this.route.paramMap.subscribe(pm => this.load(pm.get('style'), pm.get('slug') ?? ''));
     if (this.role.isAdmin()) {
       this.styleService.getAll().subscribe(s => this.allStyles.set(s));
       this.musicalStyleService.getAll().subscribe(s => this.allMusicalStyles.set(s));
@@ -118,7 +120,7 @@ export class DanceDetailComponent implements OnInit {
     }
   }
 
-  private load(slug: string): void {
+  private load(style: string | null, slug: string): void {
     // reset per-dance state for re-entry
     this.dance.set(null);
     this.notFound.set(false);
@@ -129,14 +131,20 @@ export class DanceDetailComponent implements OnInit {
     this.recommended.set([]);
     this.showEditDance.set(false);
 
-    this.danceService.getByIdOrSlug(slug).subscribe({
+    const request$ = style
+      ? this.danceService.getByStyleAndSlug(style, slug)
+      : this.danceService.getByIdOrSlug(slug);
+
+    request$.subscribe({
       next: d => {
         this.dance.set(d);
         this.recentDances.record(d);
         this.title.setTitle(`${d.name} · Dance Platform`);
-        // Rewrite legacy numeric URLs (/dances/22) to the slug form without reloading
-        if (slug !== d.slug) {
-          this.location.replaceState(`/dances/${d.slug}`);
+        // Normalise the URL to the canonical /dances/{style}/{slug} form (handles legacy
+        // numeric ids and single-segment slug links) without triggering a reload.
+        const canonical = this.canonicalPath(d);
+        if (this.location.path().split('?')[0] !== canonical) {
+          this.location.replaceState(canonical);
         }
         this.videoService.getByDance(d.id).subscribe(v => {
           this.videos.set(v);
@@ -156,6 +164,11 @@ export class DanceDetailComponent implements OnInit {
         }
       }
     });
+  }
+
+  /** Canonical URL for a dance: /dances/{styleSlug}/{slug}, or /dances/{slug} if it has no style. */
+  private canonicalPath(d: Dance): string {
+    return d.styleSlug ? `/dances/${d.styleSlug}/${d.slug}` : `/dances/${d.slug}`;
   }
 
   /** YouTube thumbnail for a recommended dance, or null if missing/failed to load. */
@@ -524,8 +537,8 @@ export class DanceDetailComponent implements OnInit {
           learnedCount: d.learnedCount,
           userRating: d.userRating
         });
-        if (updated.slug !== d.slug) {
-          this.location.replaceState(`/dances/${updated.slug}`);
+        if (updated.slug !== d.slug || updated.styleSlug !== d.styleSlug) {
+          this.location.replaceState(this.canonicalPath(updated));
         }
         this.showEditDance.set(false);
         this.savingDance.set(false);

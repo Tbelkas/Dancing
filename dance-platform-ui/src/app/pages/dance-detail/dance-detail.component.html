@@ -370,7 +370,7 @@
         <h2>More like this</h2>
         <div class="grid grid--2 recommended-grid">
           @for (rec of recommended(); track rec.id) {
-            <a class="card dance-card recommended-card" [routerLink]="['/dances', rec.slug]">
+            <a class="card dance-card recommended-card" [routerLink]="rec.slug | dancePath:rec.styleSlug">
               <span class="dance-card__media">
                 @if (recThumbnailUrl(rec); as thumb) {
                   <img [src]="thumb" alt="" loading="lazy" class="dance-card__thumb" (error)="onRecThumbError(rec.id)" />

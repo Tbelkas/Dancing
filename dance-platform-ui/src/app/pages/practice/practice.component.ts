@@ -2,6 +2,7 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { PracticeService, CreatePracticePayload } from '../../core/services/practice.service';
 import { DanceService } from '../../core/services/dance.service';
 import { PracticeSession } from '../../models/practice-session.model';
@@ -11,7 +12,7 @@ import { computeStreak } from '../../core/utils/practice.utils';
 @Component({
   selector: 'app-practice',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, DancePathPipe],
   templateUrl: './practice.component.html',
   styleUrls: ['./practice.component.css']
 })

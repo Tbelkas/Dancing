@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, ElementRef, HostListener, ViewChild, 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { switchMap } from 'rxjs';
 import { parseVideoUrl, parseTimeSecs } from '../../core/utils/video-url.utils';
 import { toggleSet } from '../../core/utils/set.utils';
@@ -18,7 +19,7 @@ import { VideoPlayerComponent } from '../../shared/components/video-player/video
 @Component({
   selector: 'app-my-dances',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, VideoPlayerComponent],
+  imports: [CommonModule, FormsModule, RouterLink, VideoPlayerComponent, DancePathPipe],
   templateUrl: './my-dances.component.html',
   styleUrls: ['./my-dances.component.css']
 })

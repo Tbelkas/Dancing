@@ -46,7 +46,7 @@
           } @else {
             <div class="dance-ref-list">
               @for (d of profile()!.learnedDances; track d.id) {
-                <a [routerLink]="['/dances', d.slug]" class="dance-ref-item">
+                <a [routerLink]="d.slug | dancePath:d.styleSlug" class="dance-ref-item">
                   <span class="dance-ref-icon learned"><i class="fa-solid fa-check"></i></span>
                   <span class="dance-ref-name">{{ d.name }}</span>
                   <span class="dance-ref-arrow">→</span>

@@ -661,6 +661,17 @@
   margin: 0;
 }
 
+.continue-card__style {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-ui);
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
 .continue-card__dismiss {
   position: absolute;
   top: 6px;

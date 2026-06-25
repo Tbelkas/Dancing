@@ -29,7 +29,7 @@
       </div>
       <div #historyTrack class="continue-track" (scroll)="onHistoryScroll()">
         @for (dance of continueLearning(); track dance.id) {
-          <a class="card continue-card" [routerLink]="['/dances', dance.slug]">
+          <a class="card continue-card" [routerLink]="dance.slug | dancePath:dance.styleSlug">
             <span class="continue-card__media">
               @if (continueThumbnailUrl(dance); as thumb) {
                 <img [src]="thumb" alt="" loading="lazy" class="continue-card__thumb" (error)="onContinueThumbError(dance.id)" />
@@ -40,6 +40,9 @@
             </span>
             <span class="continue-card__body">
               <h3 class="continue-card__name">{{ dance.name }}</h3>
+              @if (dance.styleName) {
+                <span class="continue-card__style">{{ dance.styleName }}</span>
+              }
             </span>
             <button type="button" class="continue-card__dismiss" (click)="dismissContinue(dance.id, $event)"
               [attr.aria-label]="'Remove ' + dance.name + ' from Continue learning'">
@@ -226,7 +229,7 @@
               @for (dance of learnedDances(); track dance.id) {
                 <div class="dance-row">
                   <div class="dance-row__bar">
-                    <a [routerLink]="['/dances', dance.slug]" class="dance-item">
+                    <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="dance-item">
                       <span class="dance-status dance-status--learned"><i class="fa-solid fa-check"></i></span>
                       <span class="dance-name">{{ dance.name }}</span>
                       <span class="dance-arrow"><i class="fa-solid fa-arrow-right"></i></span>
@@ -273,7 +276,7 @@
               @for (dance of inProgressDances(); track dance.id) {
                 <div class="dance-row">
                   <div class="dance-row__bar">
-                    <a [routerLink]="['/dances', dance.slug]" class="dance-item">
+                    <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="dance-item">
                       <span class="dance-status dance-status--progress"><i class="fa-solid fa-circle-half-stroke"></i></span>
                       <span class="dance-name">{{ dance.name }}</span>
                       <span class="dance-arrow"><i class="fa-solid fa-arrow-right"></i></span>

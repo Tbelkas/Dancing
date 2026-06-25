@@ -278,7 +278,7 @@
     <div class="grid grid--2">
       @for (dance of searchResults(); track dance.id) {
         <div class="card dance-card">
-          <a [routerLink]="['/dances', dance.slug]" class="dance-card__media" tabindex="-1" aria-hidden="true">
+          <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="dance-card__media" tabindex="-1" aria-hidden="true">
             @if (thumbnailUrl(dance); as thumb) {
               <img [src]="thumb" alt="" loading="lazy" class="dance-card__thumb" (error)="onThumbError(dance.id)" (load)="onThumbLoad(dance.id, $event)" />
             } @else {
@@ -291,7 +291,7 @@
           <div class="dance-card__body">
             <div class="dance-card__header">
               <h3 class="dance-card__name">
-                <a [routerLink]="['/dances', dance.slug]" class="dance-card__title-link">{{ dance.name }}</a>
+                <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="dance-card__title-link">{{ dance.name }}</a>
               </h3>
               @if (auth.isAuthenticated()) {
                 <div class="dance-card__actions">

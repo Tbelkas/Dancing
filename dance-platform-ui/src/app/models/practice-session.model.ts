@@ -3,6 +3,7 @@ export interface PracticeSession {
   danceId: number;
   danceName: string;
   danceSlug: string;
+  danceStyleSlug: string;
   date: string;
   durationMinutes?: number;
   notes?: string;

@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { DanceService, CreateDancePayload, ImportResult, DanceStatus } from '../../core/services/dance.service';
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
@@ -25,7 +26,7 @@ const STATUS_OPTIONS = [
 @Component({
   selector: 'app-dances',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, DancePathPipe],
   templateUrl: './dances.component.html',
   styleUrls: ['./dances.component.css']
 })

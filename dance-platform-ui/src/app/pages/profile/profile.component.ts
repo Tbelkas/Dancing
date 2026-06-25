@@ -2,6 +2,7 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { forkJoin } from 'rxjs';
 import { ProfileService } from '../../core/services/profile.service';
 import { PracticeService } from '../../core/services/practice.service';
@@ -12,7 +13,7 @@ import { computeStreak } from '../../core/utils/practice.utils';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, DancePathPipe],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
