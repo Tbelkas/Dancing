@@ -27,6 +27,28 @@ public class DanceService : IDanceService
     }
 
     /// <summary>
+    /// Resolves /dances/{styleSlug}/{danceSlug}. Dance slugs are unique per style, so the style
+    /// segment is what disambiguates same-named steps across styles. Falls back to a plain slug
+    /// match if the style segment doesn't resolve, so legacy single-segment links still work.
+    /// </summary>
+    public async Task<DanceDto?> GetByStyleAndSlugAsync(string styleSlug, string danceSlug, int? userId)
+    {
+        var styleId = await ResolveStyleIdAsync(styleSlug);
+        var query = BuildEntityQuery().Where(d => d.Slug == danceSlug);
+        if (styleId is not null)
+            query = query.Where(d => d.DanceStyles.Any(ds => ds.StyleId == styleId));
+        var dance = await query.FirstOrDefaultAsync();
+        return dance is null ? null : ToDto(dance, userId);
+    }
+
+    /// <summary>Maps a style slug back to its id by slugifying style names in memory (the set is tiny).</summary>
+    private async Task<int?> ResolveStyleIdAsync(string styleSlug)
+    {
+        var styles = await _db.Styles.Select(s => new { s.Id, s.Name }).ToListAsync();
+        return styles.FirstOrDefault(s => SlugGenerator.Slugify(s.Name) == styleSlug)?.Id;
+    }
+
+    /// <summary>
     /// "More like this" — other dances that share at least one style (the dance's "type") and have a
     /// playable video. Ranked: same difficulty first, then most-favorited, then best-rated.
     /// </summary>
@@ -55,14 +77,54 @@ public class DanceService : IDanceService
         return recs.Select(d => ToDto(d, userId)).ToList();
     }
 
-    /// <summary>Slugifies the name; appends -2, -3, ... when another dance already uses the slug.</summary>
-    public async Task<string> GenerateUniqueSlugAsync(string name, int? excludeDanceId = null)
+    /// <summary>
+    /// Slugifies the name, appending -2, -3, ... only when another dance <em>sharing one of the same
+    /// styles</em> already uses that slug. Slugs are therefore unique per style, so the same step name
+    /// in two different styles can keep the same clean slug (disambiguated by the style URL segment).
+    /// </summary>
+    public async Task<string> GenerateUniqueSlugAsync(string name, IEnumerable<int> styleIds, int? excludeDanceId = null)
     {
+        var styleIdList = styleIds.ToList();
         var baseSlug = SlugGenerator.Slugify(name);
         var slug = baseSlug;
-        for (var i = 2; await _db.Dances.AnyAsync(d => d.Slug == slug && d.Id != excludeDanceId); i++)
+        for (var i = 2; await _db.Dances.AnyAsync(d =>
+                 d.Slug == slug
+                 && d.Id != excludeDanceId
+                 && d.DanceStyles.Any(ds => styleIdList.Contains(ds.StyleId))); i++)
             slug = $"{baseSlug}-{i}";
         return slug;
+    }
+
+    /// <summary>
+    /// Recomputes every dance's slug under the per-style uniqueness rule, in Id order, collapsing
+    /// the legacy global -2/-3 suffixes that were only needed because slugs used to be globally
+    /// unique. Idempotent. Returns the number of slugs that changed. Admin-only, run once.
+    /// </summary>
+    public async Task<int> ReslugAllAsync()
+    {
+        var dances = await _db.Dances
+            .Include(d => d.DanceStyles)
+            .OrderBy(d => d.Id)
+            .ToListAsync();
+
+        // (styleId, slug) pairs already taken — a slug may repeat across styles but not within one.
+        var taken = new HashSet<(int StyleId, string Slug)>();
+        var changed = 0;
+
+        foreach (var dance in dances)
+        {
+            var styleIds = dance.DanceStyles.Select(ds => ds.StyleId).DefaultIfEmpty(0).ToList();
+            var baseSlug = SlugGenerator.Slugify(dance.Name);
+            var slug = baseSlug;
+            for (var i = 2; styleIds.Any(sid => taken.Contains((sid, slug))); i++)
+                slug = $"{baseSlug}-{i}";
+
+            foreach (var sid in styleIds) taken.Add((sid, slug));
+            if (dance.Slug != slug) { dance.Slug = slug; changed++; }
+        }
+
+        if (changed > 0) await _db.SaveChangesAsync();
+        return changed;
     }
 
     public async Task<DanceDto> CreateAsync(CreateDanceRequest request)
@@ -73,7 +135,7 @@ public class DanceService : IDanceService
         var dance = new Dance
         {
             Name = request.Name,
-            Slug = await GenerateUniqueSlugAsync(request.Name),
+            Slug = await GenerateUniqueSlugAsync(request.Name, request.StyleIds),
             Description = request.Description,
             Difficulty = difficulty
         };
@@ -102,10 +164,13 @@ public class DanceService : IDanceService
             .FirstOrDefaultAsync(d => d.Id == id);
         if (dance is null) return null;
 
+        // Use the incoming styles if the update sets them, otherwise the dance's current styles —
+        // slug uniqueness is scoped to whichever styles the dance will end up in.
+        var slugStyleIds = request.StyleIds ?? dance.DanceStyles.Select(ds => ds.StyleId).ToList();
         if (request.Name is not null && request.Name != dance.Name)
         {
             dance.Name = request.Name;
-            dance.Slug = await GenerateUniqueSlugAsync(request.Name, dance.Id);
+            dance.Slug = await GenerateUniqueSlugAsync(request.Name, slugStyleIds, dance.Id);
         }
         if (request.Description is not null) dance.Description = request.Description;
         if (request.Difficulty is not null && Enum.TryParse<DifficultyLevel>(request.Difficulty, true, out var diff))
@@ -308,6 +373,7 @@ public class DanceService : IDanceService
             Id = d.Id,
             Name = d.Name,
             Slug = d.Slug,
+            StyleSlug = SlugGenerator.StyleSlug(d),
             Description = d.Description,
             DateAdded = d.DateAdded,
             Difficulty = d.Difficulty.ToString(),

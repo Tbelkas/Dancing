@@ -27,9 +27,22 @@ public class DancesController : AppControllerBase
         return dance is null ? NotFound() : Ok(dance);
     }
 
+    [HttpGet("{styleSlug}/{danceSlug}")]
+    public async Task<IActionResult> GetByStyleAndSlug(string styleSlug, string danceSlug)
+    {
+        var dance = await _danceService.GetByStyleAndSlugAsync(styleSlug, danceSlug, CurrentUserId);
+        return dance is null ? NotFound() : Ok(dance);
+    }
+
     [HttpGet("{id:int}/recommended")]
     public async Task<IActionResult> GetRecommended(int id) =>
         Ok(await _danceService.GetRecommendedAsync(id, CurrentUserId));
+
+    /// <summary>One-time maintenance: recompute slugs under the per-style uniqueness rule.</summary>
+    [RequireAdmin]
+    [HttpPost("reslug")]
+    public async Task<IActionResult> Reslug() =>
+        Ok(new { changed = await _danceService.ReslugAllAsync() });
 
     [Authorize]
     [HttpPost]

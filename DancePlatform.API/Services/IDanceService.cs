@@ -7,6 +7,8 @@ public interface IDanceService
     Task<List<DanceNameDto>> GetNamesAsync();
     Task<DanceDto?> GetByIdAsync(int id, int? userId);
     Task<DanceDto?> GetBySlugAsync(string slug, int? userId);
+    Task<DanceDto?> GetByStyleAndSlugAsync(string styleSlug, string danceSlug, int? userId);
+    Task<int> ReslugAllAsync();
     Task<List<DanceDto>> GetRecommendedAsync(int id, int? userId, int limit = 8);
     Task<DanceDto> CreateAsync(CreateDanceRequest request);
     Task<DanceDto?> UpdateAsync(int id, UpdateDanceRequest request);

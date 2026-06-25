@@ -11,25 +11,32 @@ public class UserService : IUserService
 
     public UserService(AppDbContext db) => _db = db;
 
-    public async Task<UserProfileDto?> GetProfileAsync(int userId) =>
-        await _db.Users
-            .Include(u => u.FavoriteDances).ThenInclude(f => f.Dance)
-            .Include(u => u.LearnedDances).ThenInclude(l => l.Dance)
-            .Include(u => u.InProgressDances).ThenInclude(ip => ip.Dance)
-            .Where(u => u.Id == userId)
-            .Select(u => new UserProfileDto
-            {
-                Id = u.Id,
-                Username = u.Username,
-                Name = u.Name,
-                Nickname = u.Nickname,
-                AvatarUrl = u.AvatarUrl,
-                Visibility = u.Visibility.ToString(),
-                DateAdded = u.DateAdded,
-                FavoriteDances = u.FavoriteDances.Select(f => new DanceRef(f.Dance.Id, f.Dance.Name, f.Dance.Slug)).ToList(),
-                LearnedDances = u.LearnedDances.Select(l => new DanceRef(l.Dance.Id, l.Dance.Name, l.Dance.Slug)).ToList(),
-                InProgressDances = u.InProgressDances.Select(ip => new DanceRef(ip.Dance.Id, ip.Dance.Name, ip.Dance.Slug)).ToList()
-            }).FirstOrDefaultAsync();
+    /// <summary>Maps a dance entity (with its styles loaded) to a link-ready reference.</summary>
+    private static DanceRef ToRef(Dance d) => new(d.Id, d.Name, d.Slug, SlugGenerator.StyleSlug(d));
+
+    public async Task<UserProfileDto?> GetProfileAsync(int userId)
+    {
+        var user = await _db.Users
+            .Include(u => u.FavoriteDances).ThenInclude(f => f.Dance).ThenInclude(d => d.DanceStyles).ThenInclude(ds => ds.Style)
+            .Include(u => u.LearnedDances).ThenInclude(l => l.Dance).ThenInclude(d => d.DanceStyles).ThenInclude(ds => ds.Style)
+            .Include(u => u.InProgressDances).ThenInclude(ip => ip.Dance).ThenInclude(d => d.DanceStyles).ThenInclude(ds => ds.Style)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is null) return null;
+
+        return new UserProfileDto
+        {
+            Id = user.Id,
+            Username = user.Username,
+            Name = user.Name,
+            Nickname = user.Nickname,
+            AvatarUrl = user.AvatarUrl,
+            Visibility = user.Visibility.ToString(),
+            DateAdded = user.DateAdded,
+            FavoriteDances = user.FavoriteDances.Select(f => ToRef(f.Dance)).ToList(),
+            LearnedDances = user.LearnedDances.Select(l => ToRef(l.Dance)).ToList(),
+            InProgressDances = user.InProgressDances.Select(ip => ToRef(ip.Dance)).ToList()
+        };
+    }
 
     public async Task<UserProfileDto?> UpdateProfileAsync(int userId, UpdateProfileRequest request)
     {
@@ -47,19 +54,22 @@ public class UserService : IUserService
         return await GetProfileAsync(userId);
     }
 
-    public async Task<PublicProfileDto?> GetPublicProfileAsync(string username) =>
-        await _db.Users
-            .Include(u => u.LearnedDances).ThenInclude(l => l.Dance)
-            .Where(u => u.Username == username && u.Visibility == ProfileVisibility.Public)
-            .Select(u => new PublicProfileDto
-            {
-                Id = u.Id,
-                Username = u.Username,
-                Nickname = u.Nickname,
-                AvatarUrl = u.AvatarUrl,
-                LearnedDances = u.LearnedDances.Select(l => new DanceRef(l.Dance.Id, l.Dance.Name, l.Dance.Slug)).ToList()
-            })
-            .FirstOrDefaultAsync();
+    public async Task<PublicProfileDto?> GetPublicProfileAsync(string username)
+    {
+        var user = await _db.Users
+            .Include(u => u.LearnedDances).ThenInclude(l => l.Dance).ThenInclude(d => d.DanceStyles).ThenInclude(ds => ds.Style)
+            .FirstOrDefaultAsync(u => u.Username == username && u.Visibility == ProfileVisibility.Public);
+        if (user is null) return null;
+
+        return new PublicProfileDto
+        {
+            Id = user.Id,
+            Username = user.Username,
+            Nickname = user.Nickname,
+            AvatarUrl = user.AvatarUrl,
+            LearnedDances = user.LearnedDances.Select(l => ToRef(l.Dance)).ToList()
+        };
+    }
 
     public async Task<List<MyStyleWithDancesDto>> GetMyDancesAsync(int userId)
     {
@@ -92,6 +102,8 @@ public class UserService : IUserService
                         Id = d.Id,
                         Name = d.Name,
                         Slug = d.Slug,
+                        // Link under the style tab the dance is shown in.
+                        StyleSlug = SlugGenerator.Slugify(ms.Style.Name),
                         Status = learnedIds.Contains(d.Id) ? "learned" : "inProgress"
                     })
                     .ToList()

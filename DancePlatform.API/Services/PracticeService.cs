@@ -12,12 +12,13 @@ public class PracticeService : IPracticeService
     public PracticeService(AppDbContext db) => _db = db;
 
     public async Task<List<PracticeSessionDto>> GetAsync(int userId) =>
-        await SessionQuery()
+        (await SessionQuery()
             .Where(ps => ps.UserId == userId)
             .OrderByDescending(ps => ps.Date)
             .ThenByDescending(ps => ps.DateAdded)
-            .Select(ToDto)
-            .ToListAsync();
+            .ToListAsync())
+            .Select(MapToDto)
+            .ToList();
 
     public async Task<PracticeSessionDto?> CreateAsync(int userId, CreatePracticeSessionRequest request)
     {
@@ -35,10 +36,10 @@ public class PracticeService : IPracticeService
         _db.PracticeSessions.Add(session);
         await _db.SaveChangesAsync();
 
-        return await SessionQuery()
+        var created = await SessionQuery()
             .Where(ps => ps.Id == session.Id)
-            .Select(ToDto)
             .FirstOrDefaultAsync();
+        return created is null ? null : MapToDto(created);
     }
 
     public async Task<bool> DeleteAsync(int userId, int id)
@@ -51,15 +52,17 @@ public class PracticeService : IPracticeService
     }
 
     private IQueryable<PracticeSession> SessionQuery() =>
-        _db.PracticeSessions.Include(ps => ps.Dance);
+        _db.PracticeSessions
+            .Include(ps => ps.Dance).ThenInclude(d => d.DanceStyles).ThenInclude(ds => ds.Style);
 
-    private static readonly System.Linq.Expressions.Expression<Func<PracticeSession, PracticeSessionDto>> ToDto =
-        ps => new PracticeSessionDto
+    private static PracticeSessionDto MapToDto(PracticeSession ps) =>
+        new PracticeSessionDto
         {
             Id = ps.Id,
             DanceId = ps.DanceId,
             DanceName = ps.Dance.Name,
             DanceSlug = ps.Dance.Slug,
+            DanceStyleSlug = SlugGenerator.StyleSlug(ps.Dance),
             Date = ps.Date,
             DurationMinutes = ps.DurationMinutes,
             Notes = ps.Notes
