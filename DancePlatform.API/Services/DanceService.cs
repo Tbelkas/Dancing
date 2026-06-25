@@ -338,9 +338,23 @@ public class DanceService : IDanceService
 
         var clampedPage = Math.Max(1, page);
 
-        // All sorts now use stored columns — push ORDER BY + COUNT + SKIP/TAKE to the database.
+        // Sorts push ORDER BY + COUNT + SKIP/TAKE to the database. "recommended"/"tutorials" rank on
+        // video shape via EXISTS/COUNT subqueries: a full-length tutorial (VideoType "tutorial" with no
+        // StartTime clip window) is the signal for "extensive teaching content", as opposed to a short
+        // clip or a slice carved out of a many-dance compilation (which always carries StartTime).
         IQueryable<Dance> orderedQ = sortBy switch
         {
+            "recommended" => entityQ
+                .OrderByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial" && v.StartTime == null))
+                .ThenByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial"))
+                .ThenByDescending(d => d.AverageRating)
+                .ThenByDescending(d => d.FavoriteCount)
+                .ThenBy(d => d.Name),
+            "tutorials" => entityQ
+                .OrderByDescending(d => d.Videos.Count(v => v.VideoType == "tutorial" && v.StartTime == null))
+                .ThenByDescending(d => d.Videos.Count(v => v.VideoType == "tutorial"))
+                .ThenByDescending(d => d.AverageRating)
+                .ThenBy(d => d.Name),
             "rating"  => entityQ.OrderByDescending(d => d.AverageRating).ThenByDescending(d => d.RatingCount),
             "popular" => entityQ.OrderByDescending(d => d.FavoriteCount),
             "newest"  => entityQ.OrderByDescending(d => d.DateAdded),

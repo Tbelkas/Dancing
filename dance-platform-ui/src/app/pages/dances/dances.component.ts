@@ -52,7 +52,7 @@ export class DancesComponent implements OnInit, OnDestroy {
   selectedMusicalStyleId = signal<number | null>(null);
   selectedDifficulty = signal<string | null>(null);
   selectedStatus = signal<string>('all');
-  sortBy = signal<string>('name');
+  sortBy = signal<string>('recommended');
 
   styleQuery = signal('');
   musicQuery = signal('');

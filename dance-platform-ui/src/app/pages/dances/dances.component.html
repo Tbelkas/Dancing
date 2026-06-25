@@ -236,6 +236,8 @@
         <label class="sort-control">
           <span class="sort-control__label">Sort</span>
           <select [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)" aria-label="Sort dances">
+            <option value="recommended">Recommended</option>
+            <option value="tutorials">Tutorials first</option>
             <option value="name">Name (A–Z)</option>
             <option value="rating">Top rated</option>
             <option value="popular">Most favorited</option>
