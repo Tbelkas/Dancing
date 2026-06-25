@@ -9,6 +9,18 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+/* Title column takes the slack and is allowed to shrink (min-width: 0) so a long
+   dance name wraps onto its own lines instead of shoving the action buttons to a
+   new row. The actions keep their intrinsic width beside it. */
+.detail-header__main {
+  flex: 1 1 340px;
+  min-width: 0;
+}
+
+.detail-header .page-title {
+  overflow-wrap: anywhere;
+}
+
 .styles-row {
   display: flex;
   gap: 6px;
@@ -128,6 +140,7 @@
   flex-direction: column;
   gap: 10px;
   align-items: flex-end;
+  flex: 0 0 auto;
 }
 
 .admin-actions {

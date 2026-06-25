@@ -351,12 +351,23 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
 
   rateVideo(video: Video, rating: number): void {
     this.actionError.set('');
+    // Optimistic: fill the star immediately, keeping the row in place (the 4–5★-first
+    // ordering applies on the next load). Snapshot for revert if the request fails.
+    const snapshot: Partial<Video> = {
+      userRating: video.userRating,
+      averageRating: video.averageRating,
+      ratingCount: video.ratingCount
+    };
+    this.patchVideo(video.id, { userRating: rating });
+
     this.videoService.rate(video.id, rating).subscribe({
       next: updated => {
-        // Replace the rated video in place (its order stays put for this visit; the
-        // 4–5★-first ordering applies the next time the dance loads).
-        this.videos.update(list => list.map(v => v.id === updated.id ? updated : v));
-        if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
+        // Reconcile with the server's authoritative figures (new average + count).
+        this.patchVideo(updated.id, {
+          userRating: updated.userRating,
+          averageRating: updated.averageRating,
+          ratingCount: updated.ratingCount
+        });
         // The dance's community rating aggregates its videos — refresh the header figure.
         this.dance.update(cur => cur ? {
           ...cur,
@@ -364,8 +375,18 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
           ratingCount: this.aggregateRatingCount()
         } : cur);
       },
-      error: () => this.actionError.set('Rating failed. Please log in again.')
+      error: () => {
+        this.patchVideo(video.id, snapshot);
+        this.actionError.set('Rating failed. Please log in again.');
+      }
     });
+  }
+
+  /** Merge a partial update into a video wherever it's held (list + open player). */
+  private patchVideo(videoId: number, patch: Partial<Video>): void {
+    this.videos.update(list => list.map(v => v.id === videoId ? { ...v, ...patch } : v));
+    const sel = this.selectedVideo();
+    if (sel?.id === videoId) this.selectedVideo.set({ ...sel, ...patch });
   }
 
   private aggregateRatingCount(): number {

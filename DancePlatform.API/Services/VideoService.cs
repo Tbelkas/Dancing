@@ -176,18 +176,23 @@ public class VideoService : IVideoService
     // average plus its dance's aggregate (the mean of all ratings across the dance's videos).
     public async Task<VideoDto?> RateVideoAsync(int userId, int videoId, int rating)
     {
-        var video = await _db.Videos.FirstOrDefaultAsync(v => v.Id == videoId);
-        if (video is null) return null;
+        var danceId = await _db.Videos.Where(v => v.Id == videoId)
+            .Select(v => (int?)v.DanceId)
+            .FirstOrDefaultAsync();
+        if (danceId is null) return null;
 
-        var existing = await _db.VideoRatings.FindAsync(userId, videoId);
-        if (existing is not null)
-            existing.Rating = rating;
-        else
-            _db.VideoRatings.Add(new VideoRating { UserId = userId, VideoId = videoId, Rating = rating });
-        await _db.SaveChangesAsync();
+        // Atomic upsert: a read-then-insert races when the same user fires two rate
+        // requests for the same video (e.g. a quick double-tap) — both see "no row" and
+        // both INSERT, and the second hits the PK and 500s. ON CONFLICT makes it one
+        // race-free statement that inserts or overwrites the existing rating.
+        await _db.Database.ExecuteSqlInterpolatedAsync($@"
+            INSERT INTO ""VideoRatings"" (""UserId"", ""VideoId"", ""Rating"", ""DateAdded"")
+            VALUES ({userId}, {videoId}, {rating}, {DateTime.UtcNow})
+            ON CONFLICT (""UserId"", ""VideoId"")
+            DO UPDATE SET ""Rating"" = EXCLUDED.""Rating"", ""DateAdded"" = EXCLUDED.""DateAdded""");
 
         await RecomputeVideoRatingAsync(videoId);
-        await RecomputeDanceRatingAsync(video.DanceId);
+        await RecomputeDanceRatingAsync(danceId.Value);
 
         return await GetByIdAsync(videoId, userId);
     }
