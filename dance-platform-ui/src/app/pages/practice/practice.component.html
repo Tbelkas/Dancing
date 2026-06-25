@@ -3,7 +3,7 @@
     <div class="page-header__top">
       <div>
         <h1 class="page-title">Practice Log</h1>
-        <p class="page-subtitle">Track your practice sessions and build consistency</p>
+        <p class="page-subtitle">Time is tracked automatically while you watch — or log a session by hand</p>
       </div>
       <button class="btn btn--primary btn--sm" (click)="toggleAddForm()">
         @if (showAddForm()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Log Session }
@@ -74,7 +74,7 @@
     </div>
   } @else if (sessions().length === 0) {
     <div class="empty-state">
-      <p>No practice sessions yet. Hit "Log Session" to start tracking!</p>
+      <p>No practice sessions yet. Watch a dance video — the clock starts on its own — or hit "Log Session"!</p>
     </div>
   } @else {
     <div class="sessions-list">
@@ -83,16 +83,29 @@
           <h3 class="session-date-header">{{ formatDate(group[0]) }}</h3>
           @for (session of group[1]; track session.id) {
             <div class="card session-card">
-              <div class="session-card__main">
-                <a [routerLink]="session.danceSlug | dancePath:session.danceStyleSlug" class="session-dance-name">{{ session.danceName }}</a>
-                @if (session.durationMinutes) {
-                  <span class="session-duration">{{ session.durationMinutes }} min</span>
+              <div class="session-card__head">
+                <span class="session-time-range">{{ formatSessionTime(session) }}</span>
+                @if (session.durationMinutes > 0) {
+                  <span class="session-duration"><i class="fa-solid fa-stopwatch"></i> {{ session.durationMinutes }} min</span>
                 }
+                <button class="btn btn--danger btn--xs session-delete" (click)="deleteSession(session.id)">Delete</button>
               </div>
+              <ul class="session-items">
+                @for (item of session.items; track item.danceId) {
+                  <li class="session-item">
+                    <a [routerLink]="item.danceSlug | dancePath:item.danceStyleSlug" class="session-dance-name">{{ item.danceName }}</a>
+                    @if (item.seconds > 0) {
+                      <span class="session-item__time">{{ formatItemTime(item.seconds) }}</span>
+                    }
+                  </li>
+                }
+                @if (session.items.length === 0) {
+                  <li class="session-item session-item--empty">No dances recorded</li>
+                }
+              </ul>
               @if (session.notes) {
                 <p class="session-notes">{{ session.notes }}</p>
               }
-              <button class="btn btn--danger btn--xs session-delete" (click)="deleteSession(session.id)">Delete</button>
             </div>
           }
         </div>

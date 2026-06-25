@@ -6,7 +6,7 @@ import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { PracticeService, CreatePracticePayload } from '../../core/services/practice.service';
 import { DanceService } from '../../core/services/dance.service';
 import { PracticeSession } from '../../models/practice-session.model';
-import { toLocalDateString } from '../../core/utils/video-url.utils';
+import { toLocalDateString, formatClock } from '../../core/utils/video-url.utils';
 import { computeStreak } from '../../core/utils/practice.utils';
 
 @Component({
@@ -101,6 +101,16 @@ export class PracticeComponent implements OnInit {
   formatDate(dateStr: string): string {
     // Parse as local midnight: new Date('YYYY-MM-DD') is UTC midnight and renders a day early west of UTC
     return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  formatItemTime = formatClock;
+
+  /** Clock time range for a session, e.g. "3:45 PM – 4:12 PM" (collapses to one time if instant). */
+  formatSessionTime(session: PracticeSession): string {
+    const opts: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit' };
+    const start = new Date(session.startedAt).toLocaleTimeString('en-US', opts);
+    const end = new Date(session.lastActivityAt).toLocaleTimeString('en-US', opts);
+    return start === end ? start : `${start} – ${end}`;
   }
 
   totalMinutes(): number {

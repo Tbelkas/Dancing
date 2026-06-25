@@ -36,6 +36,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() savePersonalLoop = new EventEmitter<{ label: string; startTime: number; endTime: number }>();
   /** Emits a personal loop the user wants removed; the parent deletes it. */
   @Output() deletePersonalLoop = new EventEmitter<VideoSegment>();
+  /** Emits true when the video starts playing, false when it pauses/ends — drives practice timing. */
+  @Output() playingChange = new EventEmitter<boolean>();
   @ViewChild('playerContainer', { static: false }) playerContainer?: ElementRef;
   @ViewChild('tiktokFrame', { static: false }) tiktokFrame?: ElementRef<HTMLIFrameElement>;
 
@@ -80,6 +82,15 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   private tiktokCurrentTime = 0;
   private hasRealDuration = false;
   private regionInitialised = false;
+  private lastPlayingEmit = false;
+  private tiktokStallHandle: ReturnType<typeof setTimeout> | null = null;
+
+  /** Emit play-state transitions only (parent dedupes anyway, but this keeps the stream clean). */
+  private emitPlaying(playing: boolean): void {
+    if (playing === this.lastPlayingEmit) return;
+    this.lastPlayingEmit = playing;
+    this.playingChange.emit(playing);
+  }
 
   private readonly tiktokMessageHandler = (event: MessageEvent) => {
     // TikTok may emit events as plain objects or as JSON strings
@@ -108,6 +119,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (type === 'onCurrentTime') {
       this.tiktokCurrentTime = value as number;
+      // TikTok has no clean play/pause event, so treat a flow of time updates as "playing"
+      // and fall back to paused when they stall.
+      this.emitPlaying(true);
+      if (this.tiktokStallHandle) clearTimeout(this.tiktokStallHandle);
+      this.tiktokStallHandle = setTimeout(() => this.emitPlaying(false), 1500);
       // Expand duration estimate as we see the video play further
       if (value > this.videoDuration() - 2) {
         const newDur = Math.ceil(value) + 5;
@@ -117,7 +133,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (type === 'onStateChange' && value === 0) {
-      // Video ended — lock in actual duration
+      // Video ended — stop the practice clock and lock in actual duration
+      if (this.tiktokStallHandle) clearTimeout(this.tiktokStallHandle);
+      this.emitPlaying(false);
       const dur = Math.ceil(this.tiktokCurrentTime);
       if (dur > 0) {
         this.videoDuration.set(dur);
@@ -159,6 +177,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.clearRepeat();
     this.clearDurationPoll();
+    if (this.tiktokStallHandle) clearTimeout(this.tiktokStallHandle);
+    this.emitPlaying(false);
     this.player?.destroy();
     window.removeEventListener('message', this.tiktokMessageHandler);
   }
@@ -312,8 +332,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
           this.player?.setPlaybackRate(this.currentRate());
           this.pollForDuration();
         },
-        onStateChange: () => {
+        onStateChange: (e: YT.OnStateChangeEvent) => {
           if (!this.hasRealDuration) this.tryCaptureDuration();
+          const State = window.YT.PlayerState;
+          if (e.data === State.PLAYING) this.emitPlaying(true);
+          else if (e.data === State.PAUSED || e.data === State.ENDED) this.emitPlaying(false);
         }
       }
     });

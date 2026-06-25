@@ -11,6 +11,12 @@ export interface CreatePracticePayload {
   notes?: string;
 }
 
+export interface PracticeHeartbeatPayload {
+  danceId: number;
+  seconds: number;
+  localDate: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PracticeService {
   private readonly base = `${environment.apiUrl}/practice`;
@@ -23,6 +29,10 @@ export class PracticeService {
 
   create(payload: CreatePracticePayload): Observable<PracticeSession> {
     return this.http.post<PracticeSession>(this.base, payload);
+  }
+
+  heartbeat(payload: PracticeHeartbeatPayload): Observable<PracticeSession> {
+    return this.http.post<PracticeSession>(`${this.base}/heartbeat`, payload);
   }
 
   delete(id: number): Observable<void> {

@@ -3,6 +3,15 @@
   <div class="container header__inner">
     <a routerLink="/dances" class="header__logo" (click)="closeMenu()">Dance Platform</a>
 
+    @if (auth.isAuthenticated() && practiceTimer.active()) {
+      <a routerLink="/practice" class="practice-clock" (click)="closeMenu()"
+         title="Practice session in progress — view log" aria-label="Practice session time, view practice log">
+        <span class="practice-clock__dot" aria-hidden="true"></span>
+        <i class="fa-solid fa-stopwatch" aria-hidden="true"></i>
+        <span class="practice-clock__time">{{ formatClock(practiceTimer.liveSeconds()) }}</span>
+      </a>
+    }
+
     <button
       class="header__toggle"
       type="button"

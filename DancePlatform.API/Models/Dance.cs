@@ -23,5 +23,5 @@ public class Dance
     public ICollection<UserInProgressDance> InProgressBy { get; set; } = new List<UserInProgressDance>();
     public ICollection<DanceRating> Ratings { get; set; } = new List<DanceRating>();
     public ICollection<DanceInstructor> DanceInstructors { get; set; } = new List<DanceInstructor>();
-    public ICollection<PracticeSession> PracticeSessions { get; set; } = new List<PracticeSession>();
+    public ICollection<PracticeSessionItem> PracticeItems { get; set; } = new List<PracticeSessionItem>();
 }

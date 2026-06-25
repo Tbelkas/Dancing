@@ -22,6 +22,7 @@ public class AppDbContext : DbContext
     public DbSet<UserMyStyle> UserMyStyles => Set<UserMyStyle>();
     public DbSet<DanceRating> DanceRatings => Set<DanceRating>();
     public DbSet<PracticeSession> PracticeSessions => Set<PracticeSession>();
+    public DbSet<PracticeSessionItem> PracticeSessionItems => Set<PracticeSessionItem>();
     public DbSet<Instructor> Instructors => Set<Instructor>();
     public DbSet<DanceInstructor> DanceInstructors => Set<DanceInstructor>();
 
@@ -156,11 +157,24 @@ public class AppDbContext : DbContext
             .HasForeignKey(ps => ps.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Finding the user's live session keys off (UserId, LastActivityAt) on every heartbeat.
         modelBuilder.Entity<PracticeSession>()
-            .HasOne(ps => ps.Dance)
-            .WithMany(d => d.PracticeSessions)
-            .HasForeignKey(ps => ps.DanceId)
+            .HasIndex(ps => new { ps.UserId, ps.LastActivityAt });
+
+        modelBuilder.Entity<PracticeSessionItem>()
+            .HasOne(pi => pi.Session)
+            .WithMany(ps => ps.Items)
+            .HasForeignKey(pi => pi.PracticeSessionId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PracticeSessionItem>()
+            .HasOne(pi => pi.Dance)
+            .WithMany(d => d.PracticeItems)
+            .HasForeignKey(pi => pi.DanceId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PracticeSessionItem>()
+            .HasIndex(pi => new { pi.PracticeSessionId, pi.DanceId });
 
         modelBuilder.Entity<DanceInstructor>()
             .HasKey(di => new { di.DanceId, di.InstructorId });

@@ -25,6 +25,13 @@ public class PracticeController : AppControllerBase
         return session is null ? BadRequest(new { message = "Dance not found." }) : Ok(session);
     }
 
+    [HttpPost("heartbeat")]
+    public async Task<IActionResult> Heartbeat([FromBody] PracticeHeartbeatRequest request)
+    {
+        var session = await _practiceService.HeartbeatAsync(CurrentUserId!.Value, request);
+        return session is null ? BadRequest(new { message = "Dance not found." }) : Ok(session);
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

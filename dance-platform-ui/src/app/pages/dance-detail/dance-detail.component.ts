@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +12,7 @@ import { InstructorService } from '../../core/services/instructor.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
 import { RecentDancesService } from '../../core/services/recent-dances.service';
+import { PracticeTimerService } from '../../core/services/practice-timer.service';
 import { Dance } from '../../models/dance.model';
 import { Video, VideoChapter, VideoSegment, VideoType, viewCountBucket } from '../../models/video.model';
 import { Style } from '../../models/style.model';
@@ -35,7 +36,7 @@ interface SegmentRow {
   templateUrl: './dance-detail.component.html',
   styleUrls: ['./dance-detail.component.css']
 })
-export class DanceDetailComponent implements OnInit {
+export class DanceDetailComponent implements OnInit, OnDestroy {
   readonly difficulties = DIFFICULTY_LEVELS;
   readonly stars = [1, 2, 3, 4, 5];
 
@@ -104,9 +105,23 @@ export class DanceDetailComponent implements OnInit {
     private musicalStyleService: MusicalStyleService,
     private instructorService: InstructorService,
     private recentDances: RecentDancesService,
+    private practiceTimer: PracticeTimerService,
     public auth: AuthService,
     public role: RoleService
   ) {}
+
+  ngOnDestroy(): void {
+    // Leaving the page ends watching; the session lives on (server-side buffer) for a return visit.
+    this.practiceTimer.stop();
+  }
+
+  /** Player reported a play/pause transition — feed the practice clock for the current dance. */
+  onPlayerPlaying(playing: boolean): void {
+    const d = this.dance();
+    if (!d || !this.auth.isAuthenticated()) return;
+    this.practiceTimer.setActiveDance(d.id);
+    this.practiceTimer.setPlaying(playing);
+  }
 
   ngOnInit(): void {
     // React to paramMap (not snapshot) so navigating between dances — e.g. via the
@@ -121,6 +136,9 @@ export class DanceDetailComponent implements OnInit {
   }
 
   private load(style: string | null, slug: string): void {
+    // Switching dances (same-route nav doesn't re-run ngOnDestroy) ends the current watch;
+    // the server buffer keeps the session alive so the next dance continues it.
+    this.practiceTimer.stop();
     // reset per-dance state for re-entry
     this.dance.set(null);
     this.notFound.set(false);
@@ -188,6 +206,7 @@ export class DanceDetailComponent implements OnInit {
     if (this.selectedVideo()?.id === video.id) {
       this.selectedVideo.set(null);
       this.chapters.set([]);
+      this.practiceTimer.stop();
       return;
     }
     this.videoService.recordView(video.id).subscribe();

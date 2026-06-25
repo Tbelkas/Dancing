@@ -47,6 +47,53 @@
   &:hover { opacity: 0.85; color: var(--color-primary); }
 }
 
+/* Live practice clock — sits beside the logo while a session is running. */
+.practice-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+  margin-right: auto;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  transition: border-color var(--transition), background var(--transition);
+}
+.practice-clock:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+.practice-clock .fa-stopwatch { color: var(--color-primary); font-size: 0.9rem; }
+.practice-clock__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 60%, transparent);
+  animation: practice-pulse 1.6s ease-in-out infinite;
+}
+.practice-clock__time { min-width: 3.2ch; }
+
+@keyframes practice-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 55%, transparent); opacity: 1; }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-primary) 0%, transparent); opacity: 0.6; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .practice-clock__dot { animation: none; }
+}
+
+.practice-clock:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .header__toggle {
   display: none;
   background: transparent;

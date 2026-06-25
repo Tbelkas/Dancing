@@ -118,10 +118,46 @@
   padding: 16px 20px;
 }
 
-.session-card__main {
+.session-card__head {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+}
+
+.session-time-range {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.session-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.session-item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.session-item__time {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.session-item--empty {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-style: italic;
 }
 
 .session-dance-name {
@@ -156,7 +192,7 @@
 }
 
 .session-delete {
-  align-self: flex-end;
+  margin-left: auto;
 }
 
 .empty-state {
