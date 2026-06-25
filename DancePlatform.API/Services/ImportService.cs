@@ -100,7 +100,7 @@ public class ImportService : IImportService
                         StartTime = startSeconds,
                         EndTime = endSeconds,
                         Segments = []
-                    });
+                    }, null);
                 }
 
                 result.Created.Add(dance);
@@ -129,7 +129,7 @@ public class ImportService : IImportService
             StartTime = request.StartTime,
             EndTime = request.EndTime,
             Segments = request.Segments
-        });
+        }, null);
     }
 
     private static int ParseTimestamp(string ts)

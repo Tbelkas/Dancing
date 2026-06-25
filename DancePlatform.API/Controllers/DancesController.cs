@@ -100,11 +100,4 @@ public class DancesController : AppControllerBase
         return Ok(result);
     }
 
-    [Authorize]
-    [HttpPost("{id}/rate")]
-    public async Task<IActionResult> Rate(int id, [FromBody] RateDanceRequest request)
-    {
-        var dance = await _danceService.RateDanceAsync(CurrentUserId!.Value, id, request.Rating);
-        return dance is null ? NotFound() : Ok(dance);
-    }
 }

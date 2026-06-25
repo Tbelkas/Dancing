@@ -16,7 +16,7 @@ public class User
     public ICollection<UserLearnedDance> LearnedDances { get; set; } = new List<UserLearnedDance>();
     public ICollection<UserInProgressDance> InProgressDances { get; set; } = new List<UserInProgressDance>();
     public ICollection<UserMyStyle> MyStyles { get; set; } = new List<UserMyStyle>();
-    public ICollection<DanceRating> Ratings { get; set; } = new List<DanceRating>();
+    public ICollection<VideoRating> Ratings { get; set; } = new List<VideoRating>();
     public ICollection<PracticeSession> PracticeSessions { get; set; } = new List<PracticeSession>();
 }
 

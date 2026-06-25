@@ -31,8 +31,9 @@ Nav: FavoriteDances, LearnedDances, InProgressDances, MyStyles, Ratings, Practic
 | Difficulty | enum `DifficultyLevel` | `None=0, Beginner=1, Intermediate=2, Advanced=3` |
 | DateAdded | datetime | |
 
-Nav: DanceStyles, DanceMusicalStyles, Videos, FavoritedBy, LearnedBy, InProgressBy,
-Ratings, DanceInstructors, PracticeSessions.
+Also carries denormalized `FavoriteCount`, `LearnedCount`, and `AverageRating`/`RatingCount`
+(the latter aggregated from its videos' ratings). Nav: DanceStyles, DanceMusicalStyles, Videos,
+FavoritedBy, LearnedBy, InProgressBy, DanceInstructors, PracticeSessions.
 
 ### Video  (one-to-many: Dance → Videos)
 | Column | Type | Notes |
@@ -46,10 +47,12 @@ Ratings, DanceInstructors, PracticeSessions.
 | ViewCount | long | default 0; bumped via `POST /videos/{id}/view` |
 | StartTime | int? | seconds — clip start |
 | EndTime | int? | seconds — clip end |
+| AverageRating | double | denormalized; mean of this video's `VideoRating`s |
+| RatingCount | int | denormalized; count of this video's `VideoRating`s |
 | DanceId | int FK → Dance | |
 | DateAdded | datetime | |
 
-Nav: Segments (cascade delete with Video).
+Nav: Segments (cascade delete with Video), Ratings (`VideoRating`, cascade delete with Video).
 
 ### VideoSegment  (one-to-many: Video → Segments, cascade)
 | Column | Type | Notes |
@@ -71,9 +74,11 @@ Id PK · Name · Description? · DateAdded. Nav: DanceMusicalStyles.
 ### Instructor
 Id PK · Name · Bio? · AvatarUrl? · Website?. Nav: DanceInstructors. *(No `DateAdded`.)*
 
-### DanceRating
-Composite PK **(UserId, DanceId)** · Rating (int, 1–5) · DateAdded. One rating per user per
-dance (upsert). Cascade delete from both User and Dance.
+### VideoRating
+Composite PK **(UserId, VideoId)** · Rating (int, 1–5) · DateAdded. One rating per user per
+**video** (upsert). Cascade delete from both User and Video. A video carries its own
+denormalized `AverageRating`/`RatingCount`; a dance's `AverageRating`/`RatingCount` aggregate
+the ratings across all of its videos (recomputed on rate, video delete, and video move).
 
 ### PracticeSession
 | Column | Type | Notes |
@@ -104,7 +109,7 @@ dance (upsert). Cascade delete from both User and Dance.
 
 ## Relationship notes (from `OnModelCreating`)
 - `Dance.Slug` and `User.Username` are unique indexes.
-- VideoSegment, DanceRating, PracticeSession, DanceInstructor(dance side) → cascade delete.
+- VideoSegment, VideoRating, PracticeSession, DanceInstructor(dance side) → cascade delete.
 - DanceInstructor → Instructor side is **Restrict** (can't delete an instructor still linked
   to a dance via cascade; remove links first).
 

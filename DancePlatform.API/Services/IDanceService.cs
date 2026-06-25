@@ -18,5 +18,4 @@ public interface IDanceService
     Task<bool> ToggleInProgressAsync(int userId, int danceId);
     Task<DanceStatusDto> SetStatusAsync(int userId, int danceId, string status);
     Task<SearchDancesResult> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, string? sortBy, int? userId, int page = 1, int pageSize = 24);
-    Task<DanceDto?> RateDanceAsync(int userId, int danceId, int rating);
 }

@@ -20,7 +20,6 @@ public class DanceDto
     public int LearnedCount { get; set; }
     public double AverageRating { get; set; }
     public int RatingCount { get; set; }
-    public int? UserRating { get; set; }
     public bool IsFavorite { get; set; }
     public bool IsLearned { get; set; }
     public bool IsInProgress { get; set; }

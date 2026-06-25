@@ -20,7 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<UserLearnedDance> UserLearnedDances => Set<UserLearnedDance>();
     public DbSet<UserInProgressDance> UserInProgressDances => Set<UserInProgressDance>();
     public DbSet<UserMyStyle> UserMyStyles => Set<UserMyStyle>();
-    public DbSet<DanceRating> DanceRatings => Set<DanceRating>();
+    public DbSet<VideoRating> VideoRatings => Set<VideoRating>();
     public DbSet<PracticeSession> PracticeSessions => Set<PracticeSession>();
     public DbSet<PracticeSessionItem> PracticeSessionItems => Set<PracticeSessionItem>();
     public DbSet<Instructor> Instructors => Set<Instructor>();
@@ -136,19 +136,19 @@ public class AppDbContext : DbContext
             .HasIndex(u => u.Username)
             .IsUnique();
 
-        modelBuilder.Entity<DanceRating>()
-            .HasKey(dr => new { dr.UserId, dr.DanceId });
+        modelBuilder.Entity<VideoRating>()
+            .HasKey(vr => new { vr.UserId, vr.VideoId });
 
-        modelBuilder.Entity<DanceRating>()
-            .HasOne(dr => dr.User)
+        modelBuilder.Entity<VideoRating>()
+            .HasOne(vr => vr.User)
             .WithMany(u => u.Ratings)
-            .HasForeignKey(dr => dr.UserId)
+            .HasForeignKey(vr => vr.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<DanceRating>()
-            .HasOne(dr => dr.Dance)
-            .WithMany(d => d.Ratings)
-            .HasForeignKey(dr => dr.DanceId)
+        modelBuilder.Entity<VideoRating>()
+            .HasOne(vr => vr.Video)
+            .WithMany(v => v.Ratings)
+            .HasForeignKey(vr => vr.VideoId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<PracticeSession>()

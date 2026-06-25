@@ -284,28 +284,6 @@ public class DanceService : IDanceService
         return new DanceStatusDto(wantLearned, wantInProgress);
     }
 
-    public async Task<DanceDto?> RateDanceAsync(int userId, int danceId, int rating)
-    {
-        var existing = await _db.DanceRatings.FindAsync(userId, danceId);
-        if (existing is not null)
-            existing.Rating = rating;
-        else
-            _db.DanceRatings.Add(new DanceRating { UserId = userId, DanceId = danceId, Rating = rating });
-
-        await _db.SaveChangesAsync();
-
-        var stats = await _db.DanceRatings
-            .Where(r => r.DanceId == danceId)
-            .GroupBy(r => r.DanceId)
-            .Select(g => new { Count = g.Count(), Avg = g.Average(r => (double)r.Rating) })
-            .FirstOrDefaultAsync();
-        await _db.Dances.Where(d => d.Id == danceId).ExecuteUpdateAsync(s => s
-            .SetProperty(d => d.RatingCount, stats != null ? stats.Count : 0)
-            .SetProperty(d => d.AverageRating, stats != null ? stats.Avg : 0.0));
-
-        return await GetByIdAsync(danceId, userId);
-    }
-
     public async Task<SearchDancesResult> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, string? sortBy, int? userId, int page = 1, int pageSize = 24)
     {
         var entityQ = BuildEntityQuery().AsQueryable();
@@ -376,8 +354,7 @@ public class DanceService : IDanceService
             .Include(d => d.Videos)
             .Include(d => d.FavoritedBy)
             .Include(d => d.LearnedBy)
-            .Include(d => d.InProgressBy)
-            .Include(d => d.Ratings);
+            .Include(d => d.InProgressBy);
 
     private static DanceDto ToDto(Dance d, int? userId)
     {
@@ -401,9 +378,6 @@ public class DanceService : IDanceService
             LearnedCount = d.LearnedCount,
             AverageRating = d.AverageRating,
             RatingCount = d.RatingCount,
-            UserRating = userId.HasValue
-                ? d.Ratings.FirstOrDefault(r => r.UserId == userId.Value)?.Rating
-                : null,
             IsFavorite = userId.HasValue && d.FavoritedBy.Any(f => f.UserId == userId.Value),
             IsLearned = userId.HasValue && d.LearnedBy.Any(l => l.UserId == userId.Value),
             IsInProgress = userId.HasValue && d.InProgressBy.Any(ip => ip.UserId == userId.Value)

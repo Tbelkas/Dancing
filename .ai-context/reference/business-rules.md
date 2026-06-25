@@ -28,8 +28,9 @@ fix whichever is wrong — but decide deliberately.
 ## Engagement (per-user status)
 - Favorite / In Progress / Learned are independent **toggles** (composite-key join rows). A
   dance can be in any combination; toggling adds/removes the row.
-- **Ratings are 1–5, one per user per dance** (composite PK `(UserId, DanceId)` → upsert).
-  Aggregate (average + count) is surfaced on cards and detail.
+- **Ratings are 1–5, one per user per video** (composite PK `(UserId, VideoId)` → upsert).
+  Each video shows its own average; a dance aggregates its videos' ratings (average + count)
+  for cards and detail. On a dance's detail page, the current user's 4–5★ videos sort first.
 - "My Styles" lets a user tag preferred dance styles (toggle on `Style`).
 
 ## Practice log & streaks  (timezone-sensitive — read carefully)

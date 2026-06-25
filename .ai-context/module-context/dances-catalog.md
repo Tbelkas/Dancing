@@ -6,11 +6,13 @@
 ## Backend
 - Controller: `Controllers/DancesController.cs`, `Controllers/SearchController.cs`
 - Service: `IDanceService` / `DanceService.cs` (browse, get-by-id-or-slug, create/update/delete,
-  toggles, rate, **`SearchAsync(q, styleId, musicalStyleId, difficulty, status, currentUserId)`**)
+  toggles, **`SearchAsync(q, styleId, musicalStyleId, difficulty, status, currentUserId)`**).
+  Rating now lives on `IVideoService.RateVideoAsync` (per video), not on `DanceService`.
 - Slug: `Services/SlugGenerator.Slugify`
-- Models: `Dance`, `DanceRating`, joins `DanceStyle`/`DanceMusicalStyle`/`DanceInstructor`,
+- Models: `Dance`, `Video`/`VideoRating`, joins `DanceStyle`/`DanceMusicalStyle`/`DanceInstructor`,
   status joins `UserFavoriteDance`/`UserLearnedDance`/`UserInProgressDance`
-- DTOs: `DTOs/Dance/` — `DanceDto`, `CreateDanceRequest`, `UpdateDanceRequest`, `RateDanceRequest`
+- DTOs: `DTOs/Dance/` — `DanceDto`, `CreateDanceRequest`, `UpdateDanceRequest`;
+  rating DTO is `DTOs/Video/RateVideoRequest`
 - Endpoints: see api-contracts → Dances + Search.
 
 ## Frontend
@@ -28,8 +30,9 @@
   (`notstarted`/`inprogress`/`learned`/`favorite`). `status` is per-user when authed.
   Some filtering is also done client-side on the dances page — keep server + client in sync
   if you change filter semantics.
-- **Ratings:** 1–5, one per user/dance (upsert via `POST /dances/{id}/rate`); aggregate
-  average + count shown on cards and detail.
+- **Ratings:** 1–5, one per user **per video** (upsert via `POST /videos/{id}/rate`). Each
+  video shows its own average; the dance aggregates its videos' ratings for the average + count
+  on cards and detail. On detail, the current user's 4–5★ videos sort to the top of the list.
 - Favorite/Learned/In-Progress are independent toggles (`POST /dances/{id}/{favorite|learned|inprogress}`).
 
 ## Gotchas

@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace DancePlatform.API.DTOs.Dance;
+namespace DancePlatform.API.DTOs.Video;
 
-public class RateDanceRequest
+public class RateVideoRequest
 {
     [Required, Range(1, 5)] public int Rating { get; set; }
 }

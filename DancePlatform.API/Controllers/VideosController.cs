@@ -21,7 +21,7 @@ public class VideosController : AppControllerBase
 
     [HttpGet("dance/{danceId}")]
     public async Task<IActionResult> GetByDance(int danceId) =>
-        Ok(await _videoService.GetByDanceAsync(danceId));
+        Ok(await _videoService.GetByDanceAsync(danceId, CurrentUserId));
 
     [HttpGet("{id}/related")]
     public async Task<IActionResult> GetRelated(int id) =>
@@ -30,7 +30,15 @@ public class VideosController : AppControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var video = await _videoService.GetByIdAsync(id);
+        var video = await _videoService.GetByIdAsync(id, CurrentUserId);
+        return video is null ? NotFound() : Ok(video);
+    }
+
+    [Authorize]
+    [HttpPost("{id}/rate")]
+    public async Task<IActionResult> Rate(int id, [FromBody] RateVideoRequest request)
+    {
+        var video = await _videoService.RateVideoAsync(CurrentUserId!.Value, id, request.Rating);
         return video is null ? NotFound() : Ok(video);
     }
 
@@ -45,7 +53,7 @@ public class VideosController : AppControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateVideoRequest request)
     {
-        var video = await _videoService.CreateAsync(request);
+        var video = await _videoService.CreateAsync(request, CurrentUserId);
         if (video is null) return BadRequest(new { message = "Dance not found." });
         return CreatedAtAction(nameof(GetById), new { id = video.Id }, video);
     }
@@ -54,7 +62,7 @@ public class VideosController : AppControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateVideoRequest request)
     {
-        var video = await _videoService.UpdateAsync(id, request);
+        var video = await _videoService.UpdateAsync(id, request, CurrentUserId);
         return video is null ? NotFound() : Ok(video);
     }
 
@@ -62,7 +70,7 @@ public class VideosController : AppControllerBase
     [HttpPut("{id}/dance")]
     public async Task<IActionResult> MoveToDance(int id, [FromBody] MoveVideoRequest request)
     {
-        var (result, video) = await _videoService.MoveToDanceAsync(id, request.DanceId);
+        var (result, video) = await _videoService.MoveToDanceAsync(id, request.DanceId, CurrentUserId);
         return result switch
         {
             MoveVideoResult.VideoNotFound => NotFound(),
@@ -75,7 +83,7 @@ public class VideosController : AppControllerBase
     [HttpPost("{id}/segments")]
     public async Task<IActionResult> AddSegment(int id, [FromBody] VideoSegmentDto segment)
     {
-        var video = await _videoService.AddSegmentAsync(id, segment);
+        var video = await _videoService.AddSegmentAsync(id, segment, CurrentUserId);
         return video is null ? NotFound() : Ok(video);
     }
 
@@ -83,7 +91,7 @@ public class VideosController : AppControllerBase
     [HttpDelete("{id}/segments/{segmentId}")]
     public async Task<IActionResult> DeleteSegment(int id, int segmentId)
     {
-        var video = await _videoService.DeleteSegmentAsync(id, segmentId);
+        var video = await _videoService.DeleteSegmentAsync(id, segmentId, CurrentUserId);
         return video is null ? NotFound() : Ok(video);
     }
 

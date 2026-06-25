@@ -12,6 +12,9 @@ public class VideoDto
     public long ViewCount { get; set; }
     public int? StartTime { get; set; }
     public int? EndTime { get; set; }
+    public double AverageRating { get; set; }
+    public int RatingCount { get; set; }
+    public int? UserRating { get; set; }
     public int DanceId { get; set; }
     public string DanceName { get; set; } = string.Empty;
     public List<VideoSegmentDto> Segments { get; set; } = new();

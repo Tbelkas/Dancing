@@ -14,8 +14,12 @@ public class Video
     public int? StartTime { get; set; }
     public int? EndTime { get; set; }
 
+    public double AverageRating { get; set; }
+    public int RatingCount { get; set; }
+
     public int DanceId { get; set; }
     public Dance Dance { get; set; } = null!;
 
     public List<VideoSegment> Segments { get; set; } = new();
+    public ICollection<VideoRating> Ratings { get; set; } = new List<VideoRating>();
 }

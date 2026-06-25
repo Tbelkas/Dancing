@@ -34,9 +34,10 @@ JWT claims: `NameIdentifier`=userId, `Name`=username. **No IsAdmin claim.**
 | POST | `/dances/{id}/favorite` | Auth | toggle favorite for current user |
 | POST | `/dances/{id}/learned` | Auth | toggle learned |
 | POST | `/dances/{id}/inprogress` | Auth | toggle in-progress |
-| POST | `/dances/{id}/rate` | Auth | `RateDanceRequest { rating 1–5 }` (upsert; one per user/dance) |
 
-`DanceDto` aggregates ratings (average + count) and per-user status flags when authenticated.
+Ratings are **per video**, not per dance — see `POST /videos/{id}/rate` below. `DanceDto`
+still exposes `averageRating`/`ratingCount`, now aggregated from the dance's videos' ratings,
+plus per-user status flags when authenticated.
 
 ## Search — `/api/search`
 | Method | Path | Auth | Query params |
@@ -49,9 +50,10 @@ some client-side filtering; see module-context/dances-catalog.md.)
 ## Videos — `/api/videos`
 | Method | Path | Auth | Notes |
 |--------|------|------|-------|
-| GET | `/videos/dance/{danceId}` | — | videos for a dance |
+| GET | `/videos/dance/{danceId}` | — | videos for a dance; current user's 4–5★ videos sorted first |
 | GET | `/videos/{id}` | — | single video (+ segments) |
 | POST | `/videos/{id}/view` | — | increment `ViewCount` |
+| POST | `/videos/{id}/rate` | Auth | `RateVideoRequest { rating 1–5 }` (upsert; one per user/video) → updated `VideoDto` |
 | POST | `/videos` | ⚠️ **none** | `CreateVideoRequest` |
 | PUT | `/videos/{id}` | Admin | `UpdateVideoRequest` |
 | DELETE | `/videos/{id}` | Admin | cascades to segments |
