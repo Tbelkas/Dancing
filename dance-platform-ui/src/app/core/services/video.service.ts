@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Video, VideoChapter, VideoType } from '../../models/video.model';
+import { Video, VideoChapter, VideoSegment, VideoType } from '../../models/video.model';
 import { environment } from '../../../environments/environment';
 
 export interface SegmentPayload {
@@ -73,5 +73,22 @@ export class VideoService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  // --- Personal loops: saved to the current user's account, private to them ---
+
+  /** The signed-in user's saved loops for this video. */
+  getMyLoops(videoId: number): Observable<VideoSegment[]> {
+    return this.http.get<VideoSegment[]>(`${this.base}/${videoId}/loops`);
+  }
+
+  /** Save a personal loop; resolves to the user's updated loop list for the video. */
+  addMyLoop(videoId: number, payload: SegmentPayload): Observable<VideoSegment[]> {
+    return this.http.post<VideoSegment[]>(`${this.base}/${videoId}/loops`, payload);
+  }
+
+  /** Delete one of the user's own loops; resolves to the updated loop list. */
+  deleteMyLoop(videoId: number, loopId: number): Observable<VideoSegment[]> {
+    return this.http.delete<VideoSegment[]>(`${this.base}/${videoId}/loops/${loopId}`);
   }
 }

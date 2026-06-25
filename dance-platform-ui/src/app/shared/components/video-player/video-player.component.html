@@ -1,23 +1,43 @@
 <div class="player-wrapper">
 
-  @if (segments.length > 0 && !isInstagram) {
+  @if ((segments.length > 0 || personalLoops.length > 0) && !isInstagram) {
     <div class="segments-bar">
-      <span class="segments-label">Sections</span>
-      <div class="segment-chips">
-        @for (seg of segments; track seg.id) {
-          <div class="segment-chip-wrap" [class.segment-chip-wrap--active]="activeSegmentId() === seg.id">
-            <button class="segment-chip" [class.active]="activeSegmentId() === seg.id" (click)="jumpToSegment(seg)">
-              {{ seg.label }}
-              <span class="segment-chip__time">{{ formatTime(seg.startTime) }}@if (seg.endTime != null) { – {{ formatTime(seg.endTime) }}}</span>
-            </button>
-            @if (canSaveLoops) {
-              <button class="segment-chip__delete" (click)="emitDeleteLoop($event, seg)" title="Delete section" aria-label="Delete section">
-                <i class="fa-solid fa-xmark"></i>
+      @if (segments.length > 0) {
+        <span class="segments-label">Sections</span>
+        <div class="segment-chips">
+          @for (seg of segments; track seg.id) {
+            <div class="segment-chip-wrap" [class.segment-chip-wrap--active]="activeSegmentId() === seg.id">
+              <button class="segment-chip" [class.active]="activeSegmentId() === seg.id" (click)="jumpToSegment(seg)">
+                {{ seg.label }}
+                <span class="segment-chip__time">{{ formatTime(seg.startTime) }}@if (seg.endTime != null) { – {{ formatTime(seg.endTime) }}}</span>
               </button>
-            }
-          </div>
-        }
-      </div>
+              @if (canSaveLoops) {
+                <button class="segment-chip__delete" (click)="emitDeleteLoop($event, seg)" title="Delete section" aria-label="Delete section">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+      @if (personalLoops.length > 0) {
+        <span class="segments-label"><i class="fa-solid fa-user"></i> My loops</span>
+        <div class="segment-chips">
+          @for (loop of personalLoops; track loop.id) {
+            <div class="segment-chip-wrap" [class.segment-chip-wrap--active]="activePersonalLoopId() === loop.id">
+              <button class="segment-chip segment-chip--personal" [class.active]="activePersonalLoopId() === loop.id" (click)="jumpToPersonalLoop(loop)">
+                {{ loop.label }}
+                <span class="segment-chip__time">{{ formatTime(loop.startTime) }}@if (loop.endTime != null) { – {{ formatTime(loop.endTime) }}}</span>
+              </button>
+              @if (canSavePersonal) {
+                <button class="segment-chip__delete" (click)="emitDeletePersonalLoop($event, loop)" title="Delete loop" aria-label="Delete loop">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
     </div>
   }
 
@@ -87,13 +107,21 @@
               </button>
             </div>
           </div>
-          @if (canSaveLoops) {
+          @if (canSaveLoops || canSavePersonal) {
             <div class="save-loop-row">
               <input type="text" class="save-loop-name" [(ngModel)]="loopName" maxlength="40"
-                placeholder="Name this loop" aria-label="Loop name" (keyup.enter)="emitSaveLoop()" />
-              <button class="btn btn--ghost btn--sm" (click)="emitSaveLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
-                <i class="fa-solid fa-bookmark"></i> Save section
-              </button>
+                placeholder="Name this loop" aria-label="Loop name"
+                (keyup.enter)="canSavePersonal ? emitSavePersonalLoop() : emitSaveLoop()" />
+              @if (canSavePersonal) {
+                <button class="btn btn--ghost btn--sm" (click)="emitSavePersonalLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
+                  <i class="fa-solid fa-bookmark"></i> Save for me
+                </button>
+              }
+              @if (canSaveLoops) {
+                <button class="btn btn--accent btn--sm" (click)="emitSaveLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
+                  <i class="fa-solid fa-users"></i> Save for everyone
+                </button>
+              }
             </div>
           }
         } @else {
@@ -167,13 +195,21 @@
             </button>
           </div>
         </div>
-        @if (canSaveLoops) {
+        @if (canSaveLoops || canSavePersonal) {
           <div class="save-loop-row">
             <input type="text" class="save-loop-name" [(ngModel)]="loopName" maxlength="40"
-              placeholder="Name this loop" aria-label="Loop name" (keyup.enter)="emitSaveLoop()" />
-            <button class="btn btn--ghost btn--sm" (click)="emitSaveLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
-              <i class="fa-solid fa-bookmark"></i> Save section
-            </button>
+              placeholder="Name this loop" aria-label="Loop name"
+              (keyup.enter)="canSavePersonal ? emitSavePersonalLoop() : emitSaveLoop()" />
+            @if (canSavePersonal) {
+              <button class="btn btn--ghost btn--sm" (click)="emitSavePersonalLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
+                <i class="fa-solid fa-bookmark"></i> Save for me
+              </button>
+            }
+            @if (canSaveLoops) {
+              <button class="btn btn--accent btn--sm" (click)="emitSaveLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
+                <i class="fa-solid fa-users"></i> Save for everyone
+              </button>
+            }
           </div>
         }
         <p class="repeat-hint">Loop points update as the video plays. Speed control isn't available for TikTok.</p>

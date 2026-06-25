@@ -109,6 +109,20 @@
   color: #07070D;
 }
 
+/* Personal loops read as the user's own, tinted with the accent so they stand
+   apart from the global (admin) sections sharing the bar. */
+.segment-chip--personal {
+  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+  color: var(--color-accent);
+}
+
+.segment-chip--personal:hover,
+.segment-chip--personal.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #07070D;
+}
+
 /* Jump between the dances cut from one shared source video. The list collapses
    behind a toggle so videos holding dozens of dances don't bury the controls. */
 .control-row--chapters {

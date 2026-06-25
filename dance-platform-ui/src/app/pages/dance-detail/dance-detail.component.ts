@@ -44,6 +44,8 @@ export class DanceDetailComponent implements OnInit {
   selectedVideo = signal<Video | null>(null);
   // Other dances sharing the selected video, for in-place jump chips in the player.
   chapters = signal<VideoChapter[]>([]);
+  // The signed-in user's private loops, keyed by video id.
+  private personalLoops = signal<Map<number, VideoSegment[]>>(new Map());
   recommended = signal<Dance[]>([]);
   private recThumbFailed = signal<Set<number>>(new Set());
   readonly viewCountBucket = viewCountBucket;
@@ -123,6 +125,7 @@ export class DanceDetailComponent implements OnInit {
     this.videos.set([]);
     this.selectedVideo.set(null);
     this.chapters.set([]);
+    this.personalLoops.set(new Map());
     this.recommended.set([]);
     this.showEditDance.set(false);
 
@@ -184,9 +187,44 @@ export class DanceDetailComponent implements OnInit {
   private revealVideo(video: Video): void {
     this.selectedVideo.set(null);
     this.chapters.set([]);
+    this.loadPersonalLoops(video.id);
     this.videoService.getRelated(video.id).subscribe({
       next: ch => { this.chapters.set(ch); this.selectedVideo.set(video); },
       error: () => this.selectedVideo.set(video)
+    });
+  }
+
+  /** Personal loops the signed-in user saved for a given video (empty if none/anon). */
+  personalLoopsFor(videoId: number): VideoSegment[] {
+    return this.personalLoops().get(videoId) ?? [];
+  }
+
+  private setPersonalLoops(videoId: number, loops: VideoSegment[]): void {
+    this.personalLoops.update(m => new Map(m).set(videoId, loops));
+  }
+
+  private loadPersonalLoops(videoId: number): void {
+    if (!this.auth.isAuthenticated()) return;
+    this.videoService.getMyLoops(videoId).subscribe({
+      next: loops => this.setPersonalLoops(videoId, loops),
+      error: () => { /* loops are a nicety; ignore fetch failures */ }
+    });
+  }
+
+  /** A signed-in user saved a named loop region to their own account. */
+  onSavePersonalLoop(video: Video, payload: SegmentPayload): void {
+    this.videoService.addMyLoop(video.id, payload).subscribe({
+      next: loops => this.setPersonalLoops(video.id, loops),
+      error: () => this.actionError.set('Failed to save your loop. Please try again.')
+    });
+  }
+
+  /** A signed-in user removed one of their own saved loops. */
+  onDeletePersonalLoop(video: Video, loop: VideoSegment): void {
+    if (!confirm(`Delete your loop "${loop.label}"?`)) return;
+    this.videoService.deleteMyLoop(video.id, loop.id).subscribe({
+      next: loops => this.setPersonalLoops(video.id, loops),
+      error: () => this.actionError.set('Failed to delete your loop. Please try again.')
     });
   }
 

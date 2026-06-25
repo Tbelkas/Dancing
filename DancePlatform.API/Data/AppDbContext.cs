@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<MusicalStyle> MusicalStyles => Set<MusicalStyle>();
     public DbSet<Video> Videos => Set<Video>();
     public DbSet<VideoSegment> VideoSegments => Set<VideoSegment>();
+    public DbSet<UserVideoLoop> UserVideoLoops => Set<UserVideoLoop>();
     public DbSet<DanceStyle> DanceStyles => Set<DanceStyle>();
     public DbSet<DanceMusicalStyle> DanceMusicalStyles => Set<DanceMusicalStyle>();
     public DbSet<UserFavoriteDance> UserFavoriteDances => Set<UserFavoriteDance>();
@@ -35,6 +36,22 @@ public class AppDbContext : DbContext
             .WithMany(v => v.Segments)
             .HasForeignKey(vs => vs.VideoId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Personal loops: removed when either the owning user or the video is deleted.
+        modelBuilder.Entity<UserVideoLoop>()
+            .HasOne(l => l.User)
+            .WithMany()
+            .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserVideoLoop>()
+            .HasOne(l => l.Video)
+            .WithMany()
+            .HasForeignKey(l => l.VideoId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserVideoLoop>()
+            .HasIndex(l => new { l.UserId, l.VideoId });
 
         modelBuilder.Entity<DanceStyle>()
             .HasKey(ds => new { ds.DanceId, ds.StyleId });

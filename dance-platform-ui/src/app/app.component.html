@@ -14,9 +14,11 @@
     </button>
 
     <nav id="primary-nav" class="header__nav" [class.header__nav--open]="menuOpen()">
-      <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Browse</a>
       @if (auth.isAuthenticated()) {
         <a routerLink="/my-dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">My Dances</a>
+      }
+      <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Browse</a>
+      @if (auth.isAuthenticated()) {
         <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Practice</a>
         <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Profile</a>
         <button class="btn btn--ghost" (click)="closeMenu(); auth.logout()">Sign out</button>

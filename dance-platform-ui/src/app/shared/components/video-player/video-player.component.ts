@@ -22,12 +22,20 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() chapters: VideoChapter[] = [];
   /** Video row id of the dance currently on the page — used to highlight its chip. */
   @Input() activeVideoId?: number;
-  /** Admins can name and persist the current loop region as a reusable section. */
+  /** Admins can name and persist the current loop region as a global section. */
   @Input() canSaveLoops = false;
-  /** Emits the current loop region when an admin saves it; the parent persists it. */
+  /** This user's private loops for the video; shown alongside the global sections. */
+  @Input() personalLoops: VideoSegment[] = [];
+  /** Any signed-in user can save the current region as a personal (private) loop. */
+  @Input() canSavePersonal = false;
+  /** Emits the current loop region when an admin saves it globally; the parent persists it. */
   @Output() saveLoop = new EventEmitter<{ label: string; startTime: number; endTime: number }>();
-  /** Emits a section an admin wants removed; the parent deletes it. */
+  /** Emits a global section an admin wants removed; the parent deletes it. */
   @Output() deleteLoop = new EventEmitter<VideoSegment>();
+  /** Emits the current loop region when the user saves it to their own account. */
+  @Output() savePersonalLoop = new EventEmitter<{ label: string; startTime: number; endTime: number }>();
+  /** Emits a personal loop the user wants removed; the parent deletes it. */
+  @Output() deletePersonalLoop = new EventEmitter<VideoSegment>();
   @ViewChild('playerContainer', { static: false }) playerContainer?: ElementRef;
   @ViewChild('tiktokFrame', { static: false }) tiktokFrame?: ElementRef<HTMLIFrameElement>;
 
@@ -36,6 +44,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   repeating = signal(false);
   videoDuration = signal(0);
   activeSegmentId = signal<number | null>(null);
+  activePersonalLoopId = signal<number | null>(null);
   loopSegmentId = signal<number | null>(null);
   activeChapterId = signal<number | null>(null);
   chaptersExpanded = signal(false);
@@ -176,6 +185,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   jumpToSegment(segment: VideoSegment): void {
     this.activeSegmentId.set(segment.id);
+    this.activePersonalLoopId.set(null);
     if (segment.endTime != null) {
       this.loopSegmentId.set(segment.id);
       this.repeatStart = segment.startTime;
@@ -215,16 +225,43 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   setStartToCurrent(): void { this.onStartSliderChange(this.currentPlaybackTime()); }
   setEndToCurrent(): void { this.onEndSliderChange(this.currentPlaybackTime()); }
 
-  emitSaveLoop(): void {
+  /** Jump the player to a personal loop and arm its region. Shares jump mechanics
+   *  with sections but tracks its own active chip so highlights don't cross over. */
+  jumpToPersonalLoop(loop: VideoSegment): void {
+    this.jumpToSegment(loop);
+    this.activeSegmentId.set(null);
+    this.activePersonalLoopId.set(loop.id);
+  }
+
+  /** Current loop region, or null when it isn't a valid (named, non-empty) range. */
+  private currentLoopPayload(): { label: string; startTime: number; endTime: number } | null {
     const label = this.loopName.trim();
-    if (!label || this.repeatEnd <= this.repeatStart) return;
-    this.saveLoop.emit({ label, startTime: this.repeatStart, endTime: this.repeatEnd });
+    if (!label || this.repeatEnd <= this.repeatStart) return null;
+    return { label, startTime: this.repeatStart, endTime: this.repeatEnd };
+  }
+
+  emitSaveLoop(): void {
+    const payload = this.currentLoopPayload();
+    if (!payload) return;
+    this.saveLoop.emit(payload);
+    this.loopName = '';
+  }
+
+  emitSavePersonalLoop(): void {
+    const payload = this.currentLoopPayload();
+    if (!payload) return;
+    this.savePersonalLoop.emit(payload);
     this.loopName = '';
   }
 
   emitDeleteLoop(event: Event, segment: VideoSegment): void {
     event.stopPropagation();
     this.deleteLoop.emit(segment);
+  }
+
+  emitDeletePersonalLoop(event: Event, loop: VideoSegment): void {
+    event.stopPropagation();
+    this.deletePersonalLoop.emit(loop);
   }
 
   formatTime = formatTimeSecs;

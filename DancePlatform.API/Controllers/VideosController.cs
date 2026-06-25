@@ -8,11 +8,16 @@ namespace DancePlatform.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class VideosController : ControllerBase
+public class VideosController : AppControllerBase
 {
     private readonly IVideoService _videoService;
+    private readonly IUserVideoLoopService _loopService;
 
-    public VideosController(IVideoService videoService) => _videoService = videoService;
+    public VideosController(IVideoService videoService, IUserVideoLoopService loopService)
+    {
+        _videoService = videoService;
+        _loopService = loopService;
+    }
 
     [HttpGet("dance/{danceId}")]
     public async Task<IActionResult> GetByDance(int danceId) =>
@@ -75,5 +80,28 @@ public class VideosController : ControllerBase
     {
         var deleted = await _videoService.DeleteAsync(id);
         return deleted ? NoContent() : NotFound();
+    }
+
+    // --- Personal loops: any authenticated user saves loops for their own account ---
+
+    [Authorize]
+    [HttpGet("{id}/loops")]
+    public async Task<IActionResult> GetMyLoops(int id) =>
+        Ok(await _loopService.GetForVideoAsync(CurrentUserId!.Value, id));
+
+    [Authorize]
+    [HttpPost("{id}/loops")]
+    public async Task<IActionResult> AddMyLoop(int id, [FromBody] VideoSegmentDto loop)
+    {
+        var loops = await _loopService.AddAsync(CurrentUserId!.Value, id, loop);
+        return loops is null ? BadRequest(new { message = "Invalid loop or video not found." }) : Ok(loops);
+    }
+
+    [Authorize]
+    [HttpDelete("{id}/loops/{loopId}")]
+    public async Task<IActionResult> DeleteMyLoop(int id, int loopId)
+    {
+        var loops = await _loopService.DeleteAsync(CurrentUserId!.Value, id, loopId);
+        return loops is null ? NotFound() : Ok(loops);
     }
 }

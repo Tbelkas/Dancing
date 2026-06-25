@@ -247,7 +247,7 @@
 }
 
 .learned-icon { color: var(--color-success); }
-.progress-icon { color: var(--color-music); }
+.progress-icon { color: var(--color-primary); }
 
 .section-count {
   font-family: var(--font-mono);
@@ -297,7 +297,7 @@
 }
 
 .style-progress__stat--learned .style-progress__dot { background: var(--color-success); }
-.style-progress__stat--progress .style-progress__dot { background: var(--color-music); }
+.style-progress__stat--progress .style-progress__dot { background: var(--color-primary); }
 
 .style-progress__pct {
   font-family: var(--font-mono);
@@ -321,7 +321,7 @@
 }
 
 .style-progress__seg--learned { background: var(--color-success); }
-.style-progress__seg--progress { background: var(--color-music); }
+.style-progress__seg--progress { background: var(--color-primary); }
 
 .dance-list {
   display: flex;
@@ -429,7 +429,7 @@
 }
 
 .dance-status--learned { color: var(--color-success); }
-.dance-status--progress { color: var(--color-music); }
+.dance-status--progress { color: var(--color-primary); }
 
 .dance-name {
   flex: 1;
