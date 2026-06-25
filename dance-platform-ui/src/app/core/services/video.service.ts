@@ -61,6 +61,11 @@ export class VideoService {
     return this.http.put<Video>(`${this.base}/${id}`, payload);
   }
 
+  /** Admin: reassign a video to a different dance (it inherits that dance's style/category). */
+  moveToDance(id: number, danceId: number): Observable<Video> {
+    return this.http.put<Video>(`${this.base}/${id}/dance`, { danceId });
+  }
+
   /** Append one named loop region (section) to a video without touching its others. */
   addSegment(id: number, payload: SegmentPayload): Observable<Video> {
     return this.http.post<Video>(`${this.base}/${id}/segments`, payload);

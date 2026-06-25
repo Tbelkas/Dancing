@@ -231,6 +231,7 @@
             }
             @if (role.isAdmin()) {
               <button class="btn btn--ghost btn--sm" (click)="toggleEditVideoTime(videos()[0])"><i class="fa-solid fa-clock"></i> Edit Time</button>
+              <button class="btn btn--ghost btn--sm" (click)="toggleMoveVideo(videos()[0])"><i class="fa-solid fa-arrow-right-arrow-left"></i> Move</button>
               <button class="btn btn--danger btn--sm" (click)="deleteVideo(videos()[0])"><i class="fa-solid fa-trash"></i> Delete</button>
             }
           </div>
@@ -278,6 +279,9 @@
               </div>
             </div>
           }
+          @if (movingVideoId() === videos()[0].id) {
+            <ng-container [ngTemplateOutlet]="moveVideoPanel" [ngTemplateOutletContext]="{ $implicit: videos()[0] }"></ng-container>
+          }
           @if (videos()[0].description) {
             <p class="video-desc">{{ videos()[0].description }}</p>
           }
@@ -301,12 +305,16 @@
               </div>
               <div class="video-list-item__end">
                 @if (role.isAdmin()) {
-                  <button class="btn btn--ghost btn--xs" (click)="$event.stopPropagation(); toggleEditVideoTime(video)"><i class="fa-solid fa-clock"></i></button>
-                  <button class="btn btn--danger btn--xs" (click)="$event.stopPropagation(); deleteVideo(video)"><i class="fa-solid fa-trash"></i></button>
+                  <button class="btn btn--ghost btn--xs" (click)="$event.stopPropagation(); toggleEditVideoTime(video)" title="Edit time/sections"><i class="fa-solid fa-clock"></i></button>
+                  <button class="btn btn--ghost btn--xs" (click)="$event.stopPropagation(); toggleMoveVideo(video)" title="Move to another dance"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
+                  <button class="btn btn--danger btn--xs" (click)="$event.stopPropagation(); deleteVideo(video)" title="Delete video"><i class="fa-solid fa-trash"></i></button>
                 }
                 @if (selectedVideo()?.id === video.id) { <span class="video-list-item__toggle"><i class="fa-solid fa-chevron-up"></i></span> } @else { <span class="video-list-item__toggle"><i class="fa-solid fa-chevron-down"></i></span> }
               </div>
             </div>
+            @if (movingVideoId() === video.id) {
+              <ng-container [ngTemplateOutlet]="moveVideoPanel" [ngTemplateOutletContext]="{ $implicit: video }"></ng-container>
+            }
             @if (selectedVideo()?.id === video.id) {
               <div class="video-player-expanded">
                 @if (editingVideoId() === video.id) {
@@ -362,6 +370,29 @@
           }
         </div>
       }
+
+      <!-- Admin: reassign a video to a different dance — it inherits that dance's style/category. -->
+      <ng-template #moveVideoPanel let-video>
+        <div class="admin-form card admin-form--inline">
+          @if (moveError()) { <div class="error-message">{{ moveError() }}</div> }
+          <div class="form-group">
+            <label>Move to dance <span class="optional">(search by name; the video takes on that dance's style)</span></label>
+            <input type="text" [ngModel]="moveQuery()" (ngModelChange)="moveQuery.set($event)" placeholder="Type a dance name..." />
+          </div>
+          @if (moveMatches().length > 0) {
+            <div class="move-matches">
+              @for (m of moveMatches(); track m.id) {
+                <button class="btn btn--ghost btn--sm" (click)="submitMoveVideo(video, m)" [disabled]="movingVideo()">{{ m.name }}</button>
+              }
+            </div>
+          } @else if (moveQuery().trim()) {
+            <p class="empty">No matching dances.</p>
+          }
+          <div class="admin-form__actions">
+            <button class="btn btn--ghost btn--sm" (click)="movingVideoId.set(null)" [disabled]="movingVideo()">Cancel</button>
+          </div>
+        </div>
+      </ng-template>
     </section>
 
     <!-- Recommended: more dances of the same style/type -->

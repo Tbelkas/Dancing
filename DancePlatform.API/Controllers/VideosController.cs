@@ -59,6 +59,19 @@ public class VideosController : AppControllerBase
     }
 
     [RequireAdmin]
+    [HttpPut("{id}/dance")]
+    public async Task<IActionResult> MoveToDance(int id, [FromBody] MoveVideoRequest request)
+    {
+        var (result, video) = await _videoService.MoveToDanceAsync(id, request.DanceId);
+        return result switch
+        {
+            MoveVideoResult.VideoNotFound => NotFound(),
+            MoveVideoResult.DanceNotFound => BadRequest(new { message = "Target dance not found." }),
+            _ => Ok(video)
+        };
+    }
+
+    [RequireAdmin]
     [HttpPost("{id}/segments")]
     public async Task<IActionResult> AddSegment(int id, [FromBody] VideoSegmentDto segment)
     {

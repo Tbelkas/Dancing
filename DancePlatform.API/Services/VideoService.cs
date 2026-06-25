@@ -89,6 +89,26 @@ public class VideoService : IVideoService
         return await GetByIdAsync(id);
     }
 
+    // Reassigns a video to another dance. Only DanceId changes — the source clip
+    // (VideoId/Platform), times, and segments are untouched, so any "related" chapter
+    // grouping (which keys off VideoId+Platform) still holds; the video simply now
+    // lists under the target dance and inherits its style.
+    public async Task<(MoveVideoResult Result, VideoDto? Video)> MoveToDanceAsync(int id, int danceId)
+    {
+        var video = await _db.Videos.FirstOrDefaultAsync(v => v.Id == id);
+        if (video is null) return (MoveVideoResult.VideoNotFound, null);
+
+        if (!await _db.Dances.AnyAsync(d => d.Id == danceId))
+            return (MoveVideoResult.DanceNotFound, null);
+
+        if (video.DanceId != danceId)
+        {
+            video.DanceId = danceId;
+            await _db.SaveChangesAsync();
+        }
+        return (MoveVideoResult.Success, await GetByIdAsync(id));
+    }
+
     // Appends a single named loop region without disturbing existing segments, and
     // independent of VideoType — admins mark practice loops on any video, not just tutorials.
     public async Task<VideoDto?> AddSegmentAsync(int id, VideoSegmentDto segment)

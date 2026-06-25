@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, WritableSignal } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, signal, WritableSignal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
@@ -88,6 +88,22 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   savingVideoTime = signal(false);
   editVideoTimeError = signal('');
 
+  // Admin: move video to a different dance (the video inherits that dance's style)
+  movingVideoId = signal<number | null>(null);
+  moveQuery = signal('');
+  private danceNames = signal<{ id: number; name: string }[]>([]);
+  movingVideo = signal(false);
+  moveError = signal('');
+  // Dances matching the search box, excluding the current one; capped for a tidy list.
+  moveMatches = computed(() => {
+    const q = this.moveQuery().trim().toLowerCase();
+    if (!q) return [];
+    const currentId = this.dance()?.id;
+    return this.danceNames()
+      .filter(d => d.id !== currentId && d.name.toLowerCase().includes(q))
+      .slice(0, 20);
+  });
+
   // Admin: delete dance
   deletingDance = signal(false);
 
@@ -132,6 +148,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
       this.styleService.getAll().subscribe(s => this.allStyles.set(s));
       this.musicalStyleService.getAll().subscribe(s => this.allMusicalStyles.set(s));
       this.instructorService.getAll().subscribe(i => this.allInstructors.set(i));
+      this.danceService.getNames().subscribe(n => this.danceNames.set(n));
     }
   }
 
@@ -148,6 +165,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.personalLoops.set(new Map());
     this.recommended.set([]);
     this.showEditDance.set(false);
+    this.movingVideoId.set(null);
 
     const request$ = style
       ? this.danceService.getByStyleAndSlug(style, slug)
@@ -484,6 +502,34 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
         if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
       },
       error: () => this.actionError.set('Failed to delete section. Please try again.')
+    });
+  }
+
+  // Admin: move video to a different dance
+  toggleMoveVideo(video: Video): void {
+    if (this.movingVideoId() === video.id) {
+      this.movingVideoId.set(null);
+      return;
+    }
+    this.moveQuery.set('');
+    this.moveError.set('');
+    this.movingVideoId.set(video.id);
+  }
+
+  submitMoveVideo(video: Video, target: { id: number; name: string }): void {
+    this.movingVideo.set(true);
+    this.moveError.set('');
+    this.videoService.moveToDance(video.id, target.id).subscribe({
+      next: () => {
+        // The video now lives under another dance — drop it from this page.
+        this.videos.update(list => list.filter(v => v.id !== video.id));
+        this.dance.update(d => d ? { ...d, videoCount: Math.max(0, d.videoCount - 1) } : d);
+        if (this.selectedVideo()?.id === video.id) this.selectedVideo.set(null);
+        this.movingVideoId.set(null);
+        this.movingVideo.set(false);
+        this.actionError.set('');
+      },
+      error: () => { this.moveError.set('Failed to move video. Please try again.'); this.movingVideo.set(false); }
     });
   }
 

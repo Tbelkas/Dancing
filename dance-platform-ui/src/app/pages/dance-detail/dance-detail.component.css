@@ -418,3 +418,13 @@
 .recommended-card .dance-card__body { display: flex; flex-direction: column; gap: .5rem; }
 .recommended-card .dance-card__name { margin: 0; }
 .recommended-card .styles-row { display: flex; flex-wrap: wrap; gap: .35rem; }
+
+/* Admin: "move video to another dance" search results */
+.move-matches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
