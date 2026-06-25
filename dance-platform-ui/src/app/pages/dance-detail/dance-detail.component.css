@@ -327,6 +327,20 @@
   font-size: 0.7rem;
 }
 
+/* Rating cue in the list row: community average, or the user's own rating (highlighted). */
+.rating-badge {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+
+  & i { color: var(--color-primary); }
+}
+
+.rating-badge--yours {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
 .video-list-item__toggle {
   color: var(--color-text-muted);
   font-size: 0.68rem;

@@ -86,10 +86,6 @@ export class DanceService {
     return this.http.get<SearchDancesResult>(`${environment.apiUrl}/search/dances`, { params });
   }
 
-  rate(id: number, rating: number): Observable<Dance> {
-    return this.http.post<Dance>(`${this.base}/${id}/rate`, { rating });
-  }
-
   create(payload: CreateDancePayload): Observable<Dance> {
     return this.http.post<Dance>(this.base, payload);
   }

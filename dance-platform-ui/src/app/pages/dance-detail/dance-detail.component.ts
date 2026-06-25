@@ -107,8 +107,9 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   // Admin: delete dance
   deletingDance = signal(false);
 
-  // Rating hover state
+  // Per-video rating hover state: which video is being hovered, and at what star.
   hoverRating = signal(0);
+  hoverVideoId = signal<number | null>(null);
 
   constructor(
     private route: ActivatedRoute,
@@ -331,19 +332,51 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Rating
-  rateDance(rating: number): void {
-    const d = this.dance();
-    if (!d) return;
-    this.danceService.rate(d.id, rating).subscribe({
-      next: updated => this.dance.update(cur => cur ? {
-        ...cur,
-        userRating: updated.userRating,
-        averageRating: updated.averageRating,
-        ratingCount: updated.ratingCount
-      } : cur),
+  // Rating is per video. Whether a given star should render filled: show the live
+  // hover state for the video under the cursor, otherwise the user's saved rating.
+  videoStarFilled(video: Video, star: number): boolean {
+    const active = this.hoverVideoId() === video.id ? this.hoverRating() : 0;
+    return star <= (active || video.userRating || 0);
+  }
+
+  onStarHover(video: Video, star: number): void {
+    this.hoverVideoId.set(video.id);
+    this.hoverRating.set(star);
+  }
+
+  onStarLeave(): void {
+    this.hoverVideoId.set(null);
+    this.hoverRating.set(0);
+  }
+
+  rateVideo(video: Video, rating: number): void {
+    this.actionError.set('');
+    this.videoService.rate(video.id, rating).subscribe({
+      next: updated => {
+        // Replace the rated video in place (its order stays put for this visit; the
+        // 4–5★-first ordering applies the next time the dance loads).
+        this.videos.update(list => list.map(v => v.id === updated.id ? updated : v));
+        if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
+        // The dance's community rating aggregates its videos — refresh the header figure.
+        this.dance.update(cur => cur ? {
+          ...cur,
+          averageRating: this.aggregateRating(),
+          ratingCount: this.aggregateRatingCount()
+        } : cur);
+      },
       error: () => this.actionError.set('Rating failed. Please log in again.')
     });
+  }
+
+  private aggregateRatingCount(): number {
+    return this.videos().reduce((sum, v) => sum + v.ratingCount, 0);
+  }
+
+  private aggregateRating(): number {
+    const totalCount = this.aggregateRatingCount();
+    if (totalCount === 0) return 0;
+    const weighted = this.videos().reduce((sum, v) => sum + v.averageRating * v.ratingCount, 0);
+    return weighted / totalCount;
   }
 
   // Admin: add video
@@ -599,8 +632,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
           isLearned: d.isLearned,
           isInProgress: d.isInProgress,
           favoriteCount: d.favoriteCount,
-          learnedCount: d.learnedCount,
-          userRating: d.userRating
+          learnedCount: d.learnedCount
         });
         if (updated.slug !== d.slug || updated.styleSlug !== d.styleSlug) {
           this.location.replaceState(this.canonicalPath(updated));

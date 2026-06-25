@@ -17,7 +17,6 @@ export interface Dance {
   learnedCount: number;
   averageRating: number;
   ratingCount: number;
-  userRating?: number;
   isFavorite: boolean;
   isLearned: boolean;
   isInProgress: boolean;

@@ -29,6 +29,9 @@ export interface Video {
   viewCount: number;
   startTime?: number;
   endTime?: number;
+  averageRating: number;
+  ratingCount: number;
+  userRating?: number;
   danceId: number;
   danceName: string;
   segments: VideoSegment[];

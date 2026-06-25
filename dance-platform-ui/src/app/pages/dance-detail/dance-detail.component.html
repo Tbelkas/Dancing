@@ -44,27 +44,6 @@
             </div>
           </div>
 
-          <div class="rating-section">
-            <span class="rating-label" id="rating-label">Your rating:</span>
-            <div class="star-rating" role="group" aria-labelledby="rating-label">
-              @for (star of stars; track star) {
-                <button
-                  class="star-btn"
-                  [class.filled]="star <= (hoverRating() || dance()!.userRating || 0)"
-                  (mouseenter)="hoverRating.set(star)"
-                  (mouseleave)="hoverRating.set(0)"
-                  (click)="rateDance(star)"
-                  [attr.aria-label]="'Rate ' + star + ' star' + (star > 1 ? 's' : '')"
-                  [attr.aria-pressed]="star === dance()!.userRating"
-                  [title]="star + ' star' + (star > 1 ? 's' : '')"
-                ><i class="fa-solid fa-star" aria-hidden="true"></i></button>
-              }
-            </div>
-            @if (dance()!.userRating) {
-              <span class="rating-value">{{ dance()!.userRating }}/5</span>
-            }
-          </div>
-
           @if (actionError()) {
             <p class="action-error">{{ actionError() }}</p>
           }
@@ -286,6 +265,7 @@
             <p class="video-desc">{{ videos()[0].description }}</p>
           }
           <app-video-player [videoId]="videos()[0].videoId" [platform]="videos()[0].platform" [startTime]="videos()[0].startTime" [endTime]="videos()[0].endTime" [segments]="videos()[0].segments" [chapters]="chapters()" [activeVideoId]="videos()[0].id" [canSaveLoops]="role.isAdmin()" [personalLoops]="personalLoopsFor(videos()[0].id)" [canSavePersonal]="auth.isAuthenticated()" (saveLoop)="onSaveLoop(videos()[0], $event)" (deleteLoop)="onDeleteLoop(videos()[0], $event)" (savePersonalLoop)="onSavePersonalLoop(videos()[0], $event)" (deletePersonalLoop)="onDeletePersonalLoop(videos()[0], $event)" (playingChange)="onPlayerPlaying($event)" />
+          <ng-container [ngTemplateOutlet]="videoRating" [ngTemplateOutletContext]="{ $implicit: videos()[0] }"></ng-container>
         </div>
       } @else {
         <div class="video-list">
@@ -301,6 +281,11 @@
                 <span class="video-list-item__meta">
                   <span>{{ video.dateAdded | date:'mediumDate' }}</span>
                   <span class="views-badge"><i class="fa-solid fa-eye"></i> {{ viewCountBucket(video.viewCount) }}</span>
+                  @if (video.userRating) {
+                    <span class="rating-badge rating-badge--yours" title="Your rating"><i class="fa-solid fa-star"></i> {{ video.userRating }}</span>
+                  } @else if (video.ratingCount > 0) {
+                    <span class="rating-badge" title="Community rating"><i class="fa-solid fa-star"></i> {{ video.averageRating | number:'1.1-1' }}</span>
+                  }
                 </span>
               </div>
               <div class="video-list-item__end">
@@ -365,11 +350,42 @@
                   <p class="video-desc">{{ video.description }}</p>
                 }
                 <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="video.startTime" [endTime]="video.endTime" [segments]="video.segments" [chapters]="chapters()" [activeVideoId]="video.id" [canSaveLoops]="role.isAdmin()" [personalLoops]="personalLoopsFor(video.id)" [canSavePersonal]="auth.isAuthenticated()" (saveLoop)="onSaveLoop(video, $event)" (deleteLoop)="onDeleteLoop(video, $event)" (savePersonalLoop)="onSavePersonalLoop(video, $event)" (deletePersonalLoop)="onDeletePersonalLoop(video, $event)" (playingChange)="onPlayerPlaying($event)" />
+                <ng-container [ngTemplateOutlet]="videoRating" [ngTemplateOutletContext]="{ $implicit: video }"></ng-container>
               </div>
             }
           }
         </div>
       }
+
+      <!-- Per-video star rating: signed-in users rate; everyone sees the community average. -->
+      <ng-template #videoRating let-video>
+        @if (auth.isAuthenticated()) {
+          <div class="rating-section">
+            <span class="rating-label">Your rating:</span>
+            <div class="star-rating" role="group" aria-label="Rate this video">
+              @for (star of stars; track star) {
+                <button
+                  class="star-btn"
+                  [class.filled]="videoStarFilled(video, star)"
+                  (mouseenter)="onStarHover(video, star)"
+                  (mouseleave)="onStarLeave()"
+                  (click)="rateVideo(video, star)"
+                  [attr.aria-label]="'Rate ' + star + ' star' + (star > 1 ? 's' : '')"
+                  [attr.aria-pressed]="star === video.userRating"
+                  [title]="star + ' star' + (star > 1 ? 's' : '')"
+                ><i class="fa-solid fa-star" aria-hidden="true"></i></button>
+              }
+            </div>
+            @if (video.ratingCount > 0) {
+              <span class="rating-value" title="Community rating">{{ video.averageRating | number:'1.1-1' }} ({{ video.ratingCount }})</span>
+            }
+          </div>
+        } @else if (video.ratingCount > 0) {
+          <div class="rating-section">
+            <span class="rating-value"><i class="fa-solid fa-star"></i> {{ video.averageRating | number:'1.1-1' }} ({{ video.ratingCount }} rating{{ video.ratingCount !== 1 ? 's' : '' }})</span>
+          </div>
+        }
+      </ng-template>
 
       <!-- Admin: reassign a video to a different dance — it inherits that dance's style/category. -->
       <ng-template #moveVideoPanel let-video>

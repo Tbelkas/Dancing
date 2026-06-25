@@ -53,6 +53,11 @@ export class VideoService {
     return this.http.post<void>(`${this.base}/${videoId}/view`, {});
   }
 
+  /** Rate a single video 1–5; resolves to the updated video (new average + the user's rating). */
+  rate(videoId: number, rating: number): Observable<Video> {
+    return this.http.post<Video>(`${this.base}/${videoId}/rate`, { rating });
+  }
+
   create(payload: CreateVideoPayload): Observable<Video> {
     return this.http.post<Video>(this.base, payload);
   }
