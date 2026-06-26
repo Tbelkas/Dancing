@@ -394,6 +394,53 @@
   color: var(--color-text-muted);
 }
 
+/* Missing-dance state — mirrors the 404 "missed step" so a dead link still
+   lands on-theme instead of a bare line of muted text. */
+.dance-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 56vh;
+  text-align: center;
+  gap: 12px;
+}
+
+.dance-missing__icon {
+  font-size: 3.5rem;
+  margin-bottom: 8px;
+  color: var(--color-primary);
+  /* One-shot drop-and-settle — the dancer lands, then holds. No idle loop. */
+  animation: missed-step 0.5s cubic-bezier(0.2, 0.85, 0.3, 1) both;
+}
+
+@keyframes missed-step {
+  0% { transform: translateY(-22px) rotate(-8deg); opacity: 0; }
+  60% { transform: translateY(4px) rotate(3deg); opacity: 1; }
+  100% { transform: translateY(0) rotate(0); opacity: 1; }
+}
+
+.dance-missing__title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 2.6rem;
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.dance-missing__msg {
+  max-width: 38ch;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dance-missing__icon { animation: none; }
+}
+
 @media (max-width: 640px) {
   .detail-header {
     flex-direction: column;

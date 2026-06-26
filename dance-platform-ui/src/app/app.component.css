@@ -116,15 +116,29 @@
   gap: 2px;
 }
 
+/* Sign out is a utility, not a destination — keep it quiet beside the nav. */
+.header__nav .header__signout {
+  margin-left: 10px;
+  padding: 6px 13px;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+.header__nav .header__signout:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 .header__nav a {
   position: relative;
   font-family: var(--font-ui);
-  font-size: 0.85rem;
+  font-size: 0.98rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
-  padding: 7px 14px;
+  color: color-mix(in srgb, var(--color-text) 68%, var(--color-text-muted));
+  padding: 8px 16px;
   border-radius: var(--radius);
   transition: color var(--transition);
   &:hover { color: var(--color-text); }
@@ -137,8 +151,8 @@
 .header__nav a.is-active:not(.btn)::after {
   content: '';
   position: absolute;
-  left: 14px;
-  right: 14px;
+  left: 16px;
+  right: 16px;
   bottom: 1px;
   height: 2px;
   background: var(--color-primary);

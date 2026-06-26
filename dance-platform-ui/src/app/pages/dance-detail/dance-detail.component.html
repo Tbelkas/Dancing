@@ -446,8 +446,10 @@
     }
   </div>
 } @else if (notFound()) {
-  <div class="container loading">
-    <p>Dance not found. It may have been removed or the link is wrong.</p>
+  <div class="container dance-missing">
+    <div class="dance-missing__icon"><i class="fa-solid fa-shoe-prints"></i></div>
+    <h1 class="dance-missing__title">This dance left the floor</h1>
+    <p class="dance-missing__msg">It may have been removed, or the link is a step off. Browse the catalog to find your next one.</p>
     <a routerLink="/dances" class="btn btn--primary">Browse dances</a>
   </div>
 } @else {
