@@ -5,12 +5,13 @@ Distilled "what to watch out for." Long-form QA log lives in repo-root `BUG_REPO
 
 ## Open / unresolved
 
-### A. Public write endpoints are unauthenticated  ⚠️ (security gap)
-`POST /api/dances`, `POST /api/videos`, `POST /api/styles` have **no auth attribute** —
-anyone can create dances/videos/styles. Their `PUT`/`DELETE` siblings are `[RequireAdmin]`,
-and `POST /musicalstyles` / `POST /instructors` *are* admin-gated. Almost certainly an
-oversight. **Fix:** add `[RequireAdmin]` (or `[Authorize]`, per intent) to those three POSTs.
-Until fixed, do not treat "dance exists" as implying an admin created it.
+### A. ~~Public write endpoints are unauthenticated~~ ✅ RESOLVED (2026-06-28)
+Historically `POST /dances|/videos|/styles` were a concern. Actual state: `POST /dances` and
+`POST /videos` were already `[Authorize]`; `POST /styles` genuinely had **no** attribute (anon
+could create styles) — now fixed to `[Authorize]`. These three are intentionally `[Authorize]`
+(any signed-in user), **not** `[RequireAdmin]`, because the **My Dances** page is a self-service
+add flow. Don't "promote" them to admin-only without reworking that flow. (PUT/DELETE siblings
+and `POST /musicalstyles` / `POST /instructors` remain `[RequireAdmin]`.)
 
 ### B. Duplicate dances allowed (data quality) — was known-issues #5
 API accepts duplicate dance names and auto-suffixes the slug (`reebok`, `reebok-2`…). Prod

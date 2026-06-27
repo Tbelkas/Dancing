@@ -87,12 +87,12 @@ public class OllamaService : IOllamaService
         }
     }
 
-    private class OllamaGenerateResponse
+    private sealed class OllamaGenerateResponse
     {
         [JsonPropertyName("response")] public string? Response { get; set; }
     }
 
-    private class OllamaResult
+    private sealed class OllamaResult
     {
         [JsonPropertyName("dance_styles")] public List<string>? DanceStyles { get; set; }
         [JsonPropertyName("musical_styles")] public List<string>? MusicalStyles { get; set; }

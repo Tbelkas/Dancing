@@ -1,0 +1,15 @@
+{
+  "_comment": "Copy this to appsettings.Development.json (gitignored) and fill in real local values. Production supplies these via environment variables (ConnectionStrings__Default, Jwt__Key, ...).",
+  "ConnectionStrings": {
+    "Default": "Host=YOUR_DB_HOST;Database=dancing;Username=dance_user;Password=YOUR_DB_PASSWORD"
+  },
+  "Jwt": {
+    "Key": "a-local-dev-signing-key-at-least-32-characters-long"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Debug",
+      "Microsoft.AspNetCore": "Information"
+    }
+  }
+}

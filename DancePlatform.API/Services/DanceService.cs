@@ -16,14 +16,14 @@ public class DanceService : IDanceService
 
     public async Task<DanceDto?> GetByIdAsync(int id, int? userId)
     {
-        var dance = await BuildEntityQuery().FirstOrDefaultAsync(d => d.Id == id);
-        return dance is null ? null : ToDto(dance, userId);
+        var row = await ProjectRows(_db.Dances.Where(d => d.Id == id), userId).FirstOrDefaultAsync();
+        return row is null ? null : ToDto(row);
     }
 
     public async Task<DanceDto?> GetBySlugAsync(string slug, int? userId)
     {
-        var dance = await BuildEntityQuery().FirstOrDefaultAsync(d => d.Slug == slug);
-        return dance is null ? null : ToDto(dance, userId);
+        var row = await ProjectRows(_db.Dances.Where(d => d.Slug == slug), userId).FirstOrDefaultAsync();
+        return row is null ? null : ToDto(row);
     }
 
     /// <summary>
@@ -34,11 +34,11 @@ public class DanceService : IDanceService
     public async Task<DanceDto?> GetByStyleAndSlugAsync(string styleSlug, string danceSlug, int? userId)
     {
         var styleId = await ResolveStyleIdAsync(styleSlug);
-        var query = BuildEntityQuery().Where(d => d.Slug == danceSlug);
+        var query = _db.Dances.Where(d => d.Slug == danceSlug);
         if (styleId is not null)
             query = query.Where(d => d.DanceStyles.Any(ds => ds.StyleId == styleId));
-        var dance = await query.FirstOrDefaultAsync();
-        return dance is null ? null : ToDto(dance, userId);
+        var row = await ProjectRows(query, userId).FirstOrDefaultAsync();
+        return row is null ? null : ToDto(row);
     }
 
     /// <summary>Maps a style slug back to its id by slugifying style names in memory (the set is tiny).</summary>
@@ -63,7 +63,7 @@ public class DanceService : IDanceService
         var difficulty = await _db.Dances.Where(d => d.Id == id)
             .Select(d => d.Difficulty).FirstOrDefaultAsync();
 
-        var recs = await BuildEntityQuery()
+        var ranked = _db.Dances
             .Where(d => d.Id != id
                      && d.Videos.Any()
                      && d.DanceStyles.Any(ds => styleIds.Contains(ds.StyleId)))
@@ -71,10 +71,10 @@ public class DanceService : IDanceService
             .ThenByDescending(d => d.FavoriteCount)
             .ThenByDescending(d => d.AverageRating)
             .ThenByDescending(d => d.DateAdded)
-            .Take(limit)
-            .ToListAsync();
+            .Take(limit);
 
-        return recs.Select(d => ToDto(d, userId)).ToList();
+        var rows = await ProjectRows(ranked, userId).ToListAsync();
+        return rows.Select(ToDto).ToList();
     }
 
     /// <summary>
@@ -137,20 +137,14 @@ public class DanceService : IDanceService
             Name = request.Name,
             Slug = await GenerateUniqueSlugAsync(request.Name, request.StyleIds),
             Description = request.Description,
-            Difficulty = difficulty
+            Difficulty = difficulty,
+            DanceStyles = request.StyleIds.Select(id => new DanceStyle { StyleId = id }).ToList(),
+            DanceMusicalStyles = request.MusicalStyleIds.Select(id => new DanceMusicalStyle { MusicalStyleId = id }).ToList(),
+            DanceInstructors = request.InstructorIds.Select(id => new DanceInstructor { InstructorId = id }).ToList()
         };
+
+        // One SaveChanges in one implicit transaction — the dance and its join rows persist together.
         _db.Dances.Add(dance);
-        await _db.SaveChangesAsync();
-
-        foreach (var styleId in request.StyleIds)
-            _db.DanceStyles.Add(new DanceStyle { DanceId = dance.Id, StyleId = styleId });
-
-        foreach (var musicalStyleId in request.MusicalStyleIds)
-            _db.DanceMusicalStyles.Add(new DanceMusicalStyle { DanceId = dance.Id, MusicalStyleId = musicalStyleId });
-
-        foreach (var instructorId in request.InstructorIds)
-            _db.DanceInstructors.Add(new DanceInstructor { DanceId = dance.Id, InstructorId = instructorId });
-
         await _db.SaveChangesAsync();
         return (await GetByIdAsync(dance.Id, null))!;
     }
@@ -218,9 +212,13 @@ public class DanceService : IDanceService
             _db.UserFavoriteDances.Remove(existing);
         else
             _db.UserFavoriteDances.Add(new UserFavoriteDance { UserId = userId, DanceId = danceId });
+
+        // The join row and its denormalized counter move together, or not at all.
+        await using var tx = await _db.Database.BeginTransactionAsync();
         await _db.SaveChangesAsync();
         await _db.Dances.Where(d => d.Id == danceId)
             .ExecuteUpdateAsync(s => s.SetProperty(d => d.FavoriteCount, d => d.FavoriteCount + (isFavorite ? 1 : -1)));
+        await tx.CommitAsync();
         return isFavorite;
     }
 
@@ -232,9 +230,12 @@ public class DanceService : IDanceService
             _db.UserLearnedDances.Remove(existing);
         else
             _db.UserLearnedDances.Add(new UserLearnedDance { UserId = userId, DanceId = danceId });
+
+        await using var tx = await _db.Database.BeginTransactionAsync();
         await _db.SaveChangesAsync();
         await _db.Dances.Where(d => d.Id == danceId)
             .ExecuteUpdateAsync(s => s.SetProperty(d => d.LearnedCount, d => d.LearnedCount + (isLearned ? 1 : -1)));
+        await tx.CommitAsync();
         return isLearned;
     }
 
@@ -275,21 +276,28 @@ public class DanceService : IDanceService
         else if (!wantInProgress && inProgress is not null)
             _db.UserInProgressDances.Remove(inProgress);
 
+        // Status rows and the learned counter commit atomically.
+        await using var tx = await _db.Database.BeginTransactionAsync();
         await _db.SaveChangesAsync();
-
         if (learnedDelta != 0)
             await _db.Dances.Where(d => d.Id == danceId)
                 .ExecuteUpdateAsync(s => s.SetProperty(d => d.LearnedCount, d => d.LearnedCount + learnedDelta));
+        await tx.CommitAsync();
 
         return new DanceStatusDto(wantLearned, wantInProgress);
     }
 
     public async Task<SearchDancesResult> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, string? sortBy, int? userId, int page = 1, int pageSize = 24)
     {
-        var entityQ = BuildEntityQuery().AsQueryable();
+        var entityQ = _db.Dances.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(query))
-            entityQ = entityQ.Where(d => d.Name.ToLower().Contains(query.ToLower()));
+        {
+            // Case-insensitive name match via Postgres ILIKE; escape LIKE wildcards so a stray
+            // % or _ in the search box is treated literally.
+            var pattern = "%" + query.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_") + "%";
+            entityQ = entityQ.Where(d => EF.Functions.ILike(d.Name, pattern));
+        }
 
         if (styleId.HasValue)
             entityQ = entityQ.Where(d => d.DanceStyles.Any(ds => ds.StyleId == styleId.Value));
@@ -302,7 +310,7 @@ public class DanceService : IDanceService
 
         if (!string.IsNullOrWhiteSpace(status) && userId.HasValue)
         {
-            entityQ = status.ToLower() switch
+            entityQ = status.ToLowerInvariant() switch
             {
                 "favorite"   => entityQ.Where(d => d.FavoritedBy.Any(f => f.UserId == userId.Value)),
                 "learned"    => entityQ.Where(d => d.LearnedBy.Any(l => l.UserId == userId.Value)),
@@ -340,47 +348,89 @@ public class DanceService : IDanceService
         };
 
         var total = await entityQ.CountAsync();
-        var items = (await orderedQ.Skip((clampedPage - 1) * pageSize).Take(pageSize).ToListAsync())
-            .Select(d => ToDto(d, userId)).ToList();
+        var rows = await ProjectRows(orderedQ.Skip((clampedPage - 1) * pageSize).Take(pageSize), userId).ToListAsync();
 
-        return new SearchDancesResult { Items = items, Total = total, Page = clampedPage, PageSize = pageSize };
+        return new SearchDancesResult { Items = rows.Select(ToDto).ToList(), Total = total, Page = clampedPage, PageSize = pageSize };
     }
 
-    private IQueryable<Dance> BuildEntityQuery() =>
-        _db.Dances
-            .Include(d => d.DanceStyles).ThenInclude(ds => ds.Style)
-            .Include(d => d.DanceMusicalStyles).ThenInclude(dms => dms.MusicalStyle)
-            .Include(d => d.DanceInstructors).ThenInclude(di => di.Instructor)
-            .Include(d => d.Videos)
-            .Include(d => d.FavoritedBy)
-            .Include(d => d.LearnedBy)
-            .Include(d => d.InProgressBy);
-
-    private static DanceDto ToDto(Dance d, int? userId)
+    // Projects to a lean row entirely in SQL: scalar columns, correlated name lists, and EXISTS
+    // flags for the current user — so a list page never materialises full favorite/learned/video
+    // collections (which previously caused a cartesian fetch and loaded every fan row per dance).
+    private static IQueryable<DanceRow> ProjectRows(IQueryable<Dance> source, int? userId)
     {
-        var thumb = d.Videos.OrderBy(v => v.DateAdded).FirstOrDefault();
-        return new DanceDto
+        var uid = userId ?? 0;
+        var hasUser = userId.HasValue;
+        return source.Select(d => new DanceRow
         {
             Id = d.Id,
             Name = d.Name,
             Slug = d.Slug,
-            StyleSlug = SlugGenerator.StyleSlug(d),
+            CanonicalStyleName = d.DanceStyles.OrderBy(ds => ds.StyleId).Select(ds => ds.Style.Name).FirstOrDefault(),
             Description = d.Description,
             DateAdded = d.DateAdded,
-            Difficulty = d.Difficulty.ToString(),
+            Difficulty = d.Difficulty,
             Styles = d.DanceStyles.Select(ds => ds.Style.Name).ToList(),
             MusicalStyles = d.DanceMusicalStyles.Select(dms => dms.MusicalStyle.Name).ToList(),
             Instructors = d.DanceInstructors.Select(di => di.Instructor.Name).ToList(),
             VideoCount = d.Videos.Count,
-            ThumbnailVideoId = thumb?.VideoId,
-            ThumbnailPlatform = thumb?.Platform,
+            ThumbnailVideoId = d.Videos.OrderBy(v => v.DateAdded).Select(v => v.VideoId).FirstOrDefault(),
+            ThumbnailPlatform = d.Videos.OrderBy(v => v.DateAdded).Select(v => v.Platform).FirstOrDefault(),
             FavoriteCount = d.FavoriteCount,
             LearnedCount = d.LearnedCount,
             AverageRating = d.AverageRating,
             RatingCount = d.RatingCount,
-            IsFavorite = userId.HasValue && d.FavoritedBy.Any(f => f.UserId == userId.Value),
-            IsLearned = userId.HasValue && d.LearnedBy.Any(l => l.UserId == userId.Value),
-            IsInProgress = userId.HasValue && d.InProgressBy.Any(ip => ip.UserId == userId.Value)
-        };
+            IsFavorite = hasUser && d.FavoritedBy.Any(f => f.UserId == uid),
+            IsLearned = hasUser && d.LearnedBy.Any(l => l.UserId == uid),
+            IsInProgress = hasUser && d.InProgressBy.Any(ip => ip.UserId == uid)
+        });
+    }
+
+    private static DanceDto ToDto(DanceRow r) => new()
+    {
+        Id = r.Id,
+        Name = r.Name,
+        Slug = r.Slug,
+        StyleSlug = r.CanonicalStyleName is null ? string.Empty : SlugGenerator.Slugify(r.CanonicalStyleName),
+        Description = r.Description,
+        DateAdded = r.DateAdded,
+        Difficulty = r.Difficulty.ToString(),
+        Styles = r.Styles,
+        MusicalStyles = r.MusicalStyles,
+        Instructors = r.Instructors,
+        VideoCount = r.VideoCount,
+        ThumbnailVideoId = r.ThumbnailVideoId,
+        ThumbnailPlatform = r.ThumbnailPlatform,
+        FavoriteCount = r.FavoriteCount,
+        LearnedCount = r.LearnedCount,
+        AverageRating = r.AverageRating,
+        RatingCount = r.RatingCount,
+        IsFavorite = r.IsFavorite,
+        IsLearned = r.IsLearned,
+        IsInProgress = r.IsInProgress
+    };
+
+    // In-SQL projection target; mapped to DanceDto in memory (enum→string and slug need C#).
+    private sealed class DanceRow
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Slug { get; set; } = string.Empty;
+        public string? CanonicalStyleName { get; set; }
+        public string? Description { get; set; }
+        public DateTime DateAdded { get; set; }
+        public DifficultyLevel Difficulty { get; set; }
+        public List<string> Styles { get; set; } = new();
+        public List<string> MusicalStyles { get; set; } = new();
+        public List<string> Instructors { get; set; } = new();
+        public int VideoCount { get; set; }
+        public string? ThumbnailVideoId { get; set; }
+        public string? ThumbnailPlatform { get; set; }
+        public int FavoriteCount { get; set; }
+        public int LearnedCount { get; set; }
+        public double AverageRating { get; set; }
+        public int RatingCount { get; set; }
+        public bool IsFavorite { get; set; }
+        public bool IsLearned { get; set; }
+        public bool IsInProgress { get; set; }
     }
 }

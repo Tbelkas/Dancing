@@ -1,0 +1,11 @@
+# Normalize line endings to LF in the repo; check out native on each platform.
+# Stops the perpetual "LF will be replaced by CRLF" churn on Windows.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

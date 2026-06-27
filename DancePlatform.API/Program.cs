@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
@@ -32,7 +33,15 @@ builder.Services.AddHttpClient<IOllamaService, OllamaService>(client =>
     client.Timeout = TimeSpan.FromSeconds(120);
 });
 
-var jwtKey = builder.Configuration["Jwt:Key"]!;
+var jwtKey = builder.Configuration["Jwt:Key"];
+// Refuse to boot a non-Development environment with a missing or insecure signing key —
+// the committed default is a dev-only placeholder; prod must supply a strong Jwt__Key.
+if (string.IsNullOrWhiteSpace(jwtKey) ||
+    (!builder.Environment.IsDevelopment() && (jwtKey.Length < 32 || jwtKey.Contains("dev-insecure", StringComparison.Ordinal))))
+{
+    throw new InvalidOperationException(
+        "Jwt:Key is missing or insecure. Set a strong Jwt__Key (>= 32 chars) via environment configuration before running outside Development.");
+}
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -55,6 +64,9 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()));
 
 var app = builder.Build();
+
+// Unhandled exceptions become RFC-7807 ProblemDetails instead of leaking stack traces.
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

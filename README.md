@@ -78,8 +78,9 @@ cd DancePlatform.API
 # Restore packages
 dotnet restore
 
-# Update appsettings.json with your PostgreSQL credentials
-# "Default": "Host=localhost;Database=dance_platform;Username=YOUR_USER;Password=YOUR_PASS"
+# Provide local secrets (NOT committed — appsettings.Development.json is gitignored):
+cp appsettings.Development.json.example appsettings.Development.json
+# then edit it with your PostgreSQL connection string and a local Jwt:Key (>= 32 chars).
 
 # Apply migrations (creates DB schema)
 dotnet ef database update
@@ -99,6 +100,21 @@ npm install
 npm start
 # App available at http://localhost:4200
 ```
+
+---
+
+## Testing
+
+```bash
+# Backend — xUnit (SlugGenerator + DanceService against SQLite in-memory)
+dotnet test DancePlatform.Tests/DancePlatform.Tests.csproj
+
+# Frontend — Vitest (pure utils: jwt + video-url parsing)
+cd dance-platform-ui && npm test
+```
+
+Both run headless in CI on every push / PR — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml),
+which also builds the API and a production Angular bundle.
 
 ---
 
@@ -225,23 +241,17 @@ sudo journalctl -u dance-platform -f
 
 ## Configuration
 
-Edit `DancePlatform.API/appsettings.json` before deploying:
+The committed `DancePlatform.API/appsettings.json` holds **no secrets** — only safe dev defaults
+(empty DB password, a `dev-insecure` JWT key). Real values are supplied per environment and are
+never committed:
 
-```json
-{
-  "ConnectionStrings": {
-    "Default": "Host=localhost;Database=dance_platform;Username=dance_user;Password=YOUR_SECURE_PASSWORD"
-  },
-  "Jwt": {
-    "Key": "replace-with-a-long-random-secret",
-    "Issuer": "DancePlatform",
-    "Audience": "DancePlatformUsers"
-  },
-  "Cors": {
-    "Origin": "http://YOUR_PI_IP_OR_DOMAIN"
-  }
-}
-```
+- **Local dev:** `appsettings.Development.json` (gitignored; copy from `.example`).
+- **Production:** environment variables on the host, which override `appsettings.json`. The systemd
+  unit sets `ConnectionStrings__Default`, `Jwt__Key`, `Cors__Origin`, and `ASPNETCORE_ENVIRONMENT=Production`.
+
+`Jwt:Key` must be a strong random string (>= 32 chars). The API **refuses to boot outside Development**
+if the key is missing or still the `dev-insecure` placeholder — so a misconfigured deploy fails fast
+instead of signing tokens with a public key.
 
 **Never commit production secrets to source control.**
 

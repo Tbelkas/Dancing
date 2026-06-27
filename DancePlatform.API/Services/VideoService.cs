@@ -185,14 +185,19 @@ public class VideoService : IVideoService
         // requests for the same video (e.g. a quick double-tap) — both see "no row" and
         // both INSERT, and the second hits the PK and 500s. ON CONFLICT makes it one
         // race-free statement that inserts or overwrites the existing rating.
-        await _db.Database.ExecuteSqlInterpolatedAsync($@"
-            INSERT INTO ""VideoRatings"" (""UserId"", ""VideoId"", ""Rating"", ""DateAdded"")
-            VALUES ({userId}, {videoId}, {rating}, {DateTime.UtcNow})
-            ON CONFLICT (""UserId"", ""VideoId"")
-            DO UPDATE SET ""Rating"" = EXCLUDED.""Rating"", ""DateAdded"" = EXCLUDED.""DateAdded""");
+        // The upsert and both denormalized rating refreshes commit together.
+        await using (var tx = await _db.Database.BeginTransactionAsync())
+        {
+            await _db.Database.ExecuteSqlInterpolatedAsync($@"
+                INSERT INTO ""VideoRatings"" (""UserId"", ""VideoId"", ""Rating"", ""DateAdded"")
+                VALUES ({userId}, {videoId}, {rating}, {DateTime.UtcNow})
+                ON CONFLICT (""UserId"", ""VideoId"")
+                DO UPDATE SET ""Rating"" = EXCLUDED.""Rating"", ""DateAdded"" = EXCLUDED.""DateAdded""");
 
-        await RecomputeVideoRatingAsync(videoId);
-        await RecomputeDanceRatingAsync(danceId.Value);
+            await RecomputeVideoRatingAsync(videoId);
+            await RecomputeDanceRatingAsync(danceId.Value);
+            await tx.CommitAsync();
+        }
 
         return await GetByIdAsync(videoId, userId);
     }

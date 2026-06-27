@@ -1,0 +1,36 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.{cs}]
+indent_size = 4
+# Prefer modern C# idioms (already the house style)
+csharp_style_namespace_declarations = file_scoped:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = true:suggestion
+
+# --- Analyzer tuning: keep correctness rules, silence noise that doesn't apply here ---
+dotnet_diagnostic.CA2007.severity = none   # no .ConfigureAwait in app code (ASP.NET Core has no sync ctx)
+dotnet_diagnostic.CA1305.severity = none   # globalization: ids/slugs are invariant, single-locale app
+dotnet_diagnostic.CA1304.severity = none
+dotnet_diagnostic.CA1310.severity = none
+dotnet_diagnostic.CA1311.severity = none
+dotnet_diagnostic.CA1848.severity = none   # LoggerMessage delegates: micro-opt, overkill here
+dotnet_diagnostic.CA1716.severity = none   # param names vs VB keywords: no VB consumers
+dotnet_diagnostic.CA1805.severity = none   # explicit default init is intentional/clearer
+dotnet_diagnostic.CA1861.severity = none   # constant array args
+
+# Generated EF migrations are not hand-maintained code.
+[**/Migrations/*.cs]
+generated_code = true
+dotnet_analyzer_diagnostic.severity = none
+
+[*.{ts,js,json,html,css,scss,yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

@@ -62,10 +62,11 @@ _Certs/
 # Rider
 .idea/
 *.sln.iml
-# User-specific appsettings overrides
+# User-specific appsettings overrides (hold real secrets — never commit).
+# Only the secret-free base appsettings.json and the .example template are tracked.
 appsettings.*.json
 !appsettings.json
-!appsettings.Development.json
+!appsettings.Development.json.example
 
 # ============================================================
 # Angular / Node
