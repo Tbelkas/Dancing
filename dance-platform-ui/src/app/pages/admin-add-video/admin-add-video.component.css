@@ -1,0 +1,84 @@
+.add-video-page {
+  max-width: 680px;
+  padding-top: 32px;
+  padding-bottom: 64px;
+}
+
+.add-video-page__lead {
+  color: var(--color-text-muted);
+  margin: 6px 0 26px;
+  font-size: 0.92rem;
+}
+
+.add-video-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  margin-bottom: 22px;
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--color-success) 10%, transparent);
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.add-video-banner i {
+  color: var(--color-success);
+}
+
+.add-video-banner a {
+  margin-left: auto;
+}
+
+.add-video-form .form-group {
+  margin-bottom: 18px;
+}
+
+.picked-dance {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg-subtle, transparent);
+}
+
+.picked-dance__name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.dance-matches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Tutorial section editor — mirrors the dance-detail inline editor. */
+.segment-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.segment-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  max-width: 520px;
+}
+
+.segment-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.segment-row .segment-row__time {
+  flex: 0 0 110px;
+}

@@ -27,6 +27,9 @@
         <a routerLink="/my-dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">My Dances</a>
       }
       <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Browse</a>
+      @if (role.isAdmin()) {
+        <a routerLink="/admin/add-video" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__admin-link" (click)="closeMenu()"><i class="fa-solid fa-plus"></i> Add Video</a>
+      }
       @if (auth.isAuthenticated()) {
         <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Practice</a>
         <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Profile</a>
