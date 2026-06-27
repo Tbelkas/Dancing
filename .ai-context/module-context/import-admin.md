@@ -11,12 +11,13 @@
   - `POST /import/youtube-video` — import a YouTube video onto a dance
 
 ## Admin surface in general
-- Admin = `IsAdmin == true` in DB, enforced by `RequireAdminAttribute` (live check). FE learns
-  admin status from `GET /role/me`.
+- Admin = signed `isAdmin` JWT claim (stamped from `Users.IsAdmin` at login), enforced by
+  `RequireAdminAttribute`. FE reads it from the token via `jwtIsAdmin()`.
 - Admin-gated writes: dance/video update+delete, style delete, musical-style create+delete,
   instructor create+delete, all import.
-- **Gaps to be aware of:** `POST /dances`, `POST /videos`, `POST /styles` are NOT yet gated
-  (known-issues #A) — if you touch the admin create flows, close these.
+- **`POST /dances`, `POST /videos`, `POST /styles` are `[Authorize]` (any signed-in user), by
+  design** — the "My Dances" page lets a normal user add their own style/dance/video. They are
+  intentionally NOT `[RequireAdmin]`; don't "fix" that without also reworking the My Dances flow.
 
 ## Seeding
 - `Data/SeedData.cs` runs on API startup **only if the Dances table is empty**

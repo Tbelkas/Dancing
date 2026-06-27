@@ -16,12 +16,8 @@ responses are `XxxDto` (never raw entities).
 | POST | `/auth/login` | — | `LoginRequest { username, password }` | `AuthResponse { token, userId, username }` (400 on bad creds) |
 | POST | `/auth/register` | — | `RegisterRequest { username, password, name, nickname }` | `AuthResponse` |
 
-JWT claims: `NameIdentifier`=userId, `Name`=username. **No IsAdmin claim.**
-
-## Role — `/api/role`
-| Method | Path | Auth | Returns |
-|--------|------|------|---------|
-| GET | `/role/me` | Auth | the caller's role/admin flag (FE loads this on startup) |
+JWT claims: `NameIdentifier`=userId, `Name`=username, `isAdmin`=`"true"`/`"false"` (signed).
+The FE reads admin from the token claim (`jwtIsAdmin()`); there is no role endpoint.
 
 ## Dances — `/api/dances`
 | Method | Path | Auth | Notes |

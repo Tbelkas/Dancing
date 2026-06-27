@@ -96,12 +96,15 @@ Dance/                              ← repo root
 
 - Login/register → API returns `{ token, userId, username }`. FE stores token under
   `localStorage['dp_token']` and `{userId,username}` under the user key.
-- **The JWT contains only `NameIdentifier` (user id) and `Name` (username) claims.**
-  It does **NOT** carry `IsAdmin`.
-- Therefore **admin is checked against the database every request** via `IRoleService`
-  inside `RequireAdminAttribute`, and the frontend learns its role from `GET /api/role/me`
-  (loaded on app start when a token exists). See the DO-NOT rules.
-- `[Authorize]` = any logged-in user. `[RequireAdmin]` = `IsAdmin == true` in DB.
+- **The JWT carries `NameIdentifier` (user id), `Name` (username), and a signed `isAdmin`
+  claim** (`AuthService.GenerateToken` stamps it from `User.IsAdmin` at login/register).
+- **Admin is read from that signed claim — no per-request DB lookup, no `/role/me` endpoint.**
+  `RequireAdminAttribute` checks `isAdmin == "true"`; the frontend reads it client-side via
+  `jwtIsAdmin()` (`core/utils/jwt.utils.ts`), used by `RoleService.loadFromToken()` and
+  `adminGuard`. Trusting it is safe because the HMAC signature is verified on every request.
+- **Trade-off:** the claim is fixed for the token's 30-day life, so a new grant/revoke only
+  takes effect on the user's next login. (Set `Users.IsAdmin` in the DB, then re-login.)
+- `[Authorize]` = any logged-in user. `[RequireAdmin]` = signed `isAdmin` claim is `"true"`.
 - Current-user id inside controllers comes from the `NameIdentifier` claim
   (`CurrentUserId`), not from request input.
 
@@ -120,9 +123,10 @@ Dance/                              ← repo root
 
 ## 8. ⛔ DO NOT (hard rules — violating these breaks the system or its conventions)
 
-1. **Do not put `IsAdmin` in the JWT or trust a client-sent admin flag.** Admin is a
-   live DB check (`IRoleService.IsAdminAsync`). If you "optimize" by reading a token claim,
-   you create a privilege-escalation hole and break `RequireAdminAttribute`.
+1. **Do not trust a client-sent admin flag (request body/header/query).** Admin comes
+   only from the **signed `isAdmin` JWT claim** verified by `RequireAdminAttribute`. The
+   signature makes the claim tamper-proof; an unsigned/client-supplied flag must never gate
+   anything. When granting admin, remember the claim is fixed until the user's next login.
 2. **Do not return EF entity classes from controllers.** Map to a DTO. Returning entities
    leaks navigation properties / causes serialization cycles.
 3. **Do not bypass the service layer.** Controllers call `IXxxService`, never `AppDbContext`.

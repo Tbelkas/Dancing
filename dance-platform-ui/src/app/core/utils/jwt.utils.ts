@@ -1,7 +1,7 @@
 /** Reads the signed `isAdmin` claim from a JWT without verifying the signature
- *  (the server enforces that). Returns true/false when the claim is present, or
- *  null for a missing claim / malformed token — the caller then falls back to the
- *  live /role/me endpoint, which covers legacy tokens issued before the claim existed. */
+ *  (the server enforces that on every request). Returns true/false when the claim is
+ *  present, or null for a missing claim / malformed token — callers treat null as
+ *  non-admin (e.g. legacy tokens issued before the claim existed). */
 export function jwtIsAdmin(token: string | null): boolean | null {
   if (!token) return null;
   const parts = token.split('.');

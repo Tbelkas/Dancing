@@ -28,6 +28,9 @@ public class StylesController : ControllerBase
         return style is null ? NotFound() : Ok(style);
     }
 
+    // Any signed-in user can add a style from the "My Dances" self-service flow
+    // (same access level as POST /dances and POST /videos).
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateStyleRequest request)
     {

@@ -4,9 +4,10 @@ The rules the system enforces (or should), and *why*. When code and this file di
 fix whichever is wrong — but decide deliberately.
 
 ## Identity & access
-- **Admin is a database fact, not a token claim.** `IsAdmin` is checked live per request via
-  `IRoleService` (in `RequireAdminAttribute`). *Why:* the JWT only carries id + username, so
-  revoking admin takes effect immediately and the token can't be forged into admin.
+- **Admin is the signed `isAdmin` JWT claim**, stamped from `Users.IsAdmin` at login and
+  checked by `RequireAdminAttribute` (no per-request DB lookup). *Why:* the HMAC signature
+  makes the claim tamper-proof, and gating is stateless. *Trade-off:* a grant/revoke only
+  takes effect on the user's next login (the claim is fixed for the token's 30-day life).
 - **`[Authorize]`** = any authenticated user; **`[RequireAdmin]`** = curators only.
 - The **current user id always comes from the JWT** (`NameIdentifier`), never from request
   body/route. Users act only on their own favorites/learned/in-progress/ratings/practice.
