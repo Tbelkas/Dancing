@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using DancePlatform.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,11 @@ public class RoleController : AppControllerBase
     [HttpGet("me")]
     public async Task<IActionResult> GetMyRole()
     {
-        var isAdmin = await _roleService.IsAdminAsync(CurrentUserId!.Value);
+        // Prefer the signed claim; fall back to the DB for legacy tokens that predate it.
+        var adminClaim = User.FindFirstValue("isAdmin");
+        var isAdmin = adminClaim is not null
+            ? adminClaim == "true"
+            : await _roleService.IsAdminAsync(CurrentUserId!.Value);
         return Ok(new { isAdmin });
     }
 }

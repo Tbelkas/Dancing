@@ -20,18 +20,18 @@ export class AuthService {
   })());
 
   constructor(private http: HttpClient, private router: Router, private roleService: RoleService) {
-    // If already authenticated on app start, load role
-    if (this._token()) this.roleService.loadRole();
+    // If already authenticated on app start, resolve admin from the stored token's claim.
+    if (this._token()) this.roleService.loadFromToken(this._token());
   }
 
   login(username: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, { username, password })
-      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadRole(); }));
+      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); }));
   }
 
   register(data: { username: string; password: string; name: string; nickname: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, data)
-      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadRole(); }));
+      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); }));
   }
 
   logout(): void {

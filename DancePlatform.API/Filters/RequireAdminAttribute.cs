@@ -25,8 +25,13 @@ public class RequireAdminAttribute : Attribute, IAsyncActionFilter
             return;
         }
 
-        var roleService = context.HttpContext.RequestServices.GetRequiredService<IRoleService>();
-        if (!await roleService.IsAdminAsync(userId))
+        // Trust the signed isAdmin claim. Tokens issued before admin was carried in the
+        // JWT lack the claim, so fall back to the DB for those until the user re-logs in.
+        var adminClaim = user.FindFirstValue("isAdmin");
+        var isAdmin = adminClaim is not null
+            ? adminClaim == "true"
+            : await context.HttpContext.RequestServices.GetRequiredService<IRoleService>().IsAdminAsync(userId);
+        if (!isAdmin)
         {
             context.Result = new ForbidResult();
             return;

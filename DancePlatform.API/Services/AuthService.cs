@@ -66,7 +66,11 @@ public class AuthService : IAuthService
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Username)
+            new Claim(ClaimTypes.Name, user.Username),
+            // Admin is carried in the signed token so authorization needs no per-request DB
+            // lookup. Trade-off: a grant/revoke only takes effect once the user gets a new
+            // token (re-login), since the claim is fixed for the token's lifetime.
+            new Claim("isAdmin", user.IsAdmin ? "true" : "false")
         };
 
         var token = new JwtSecurityToken(
