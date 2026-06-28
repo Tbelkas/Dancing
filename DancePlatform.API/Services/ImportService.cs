@@ -56,8 +56,14 @@ public class ImportService : IImportService
 
         var allStyles = await _styleService.GetAllAsync();
         var allMusicalStyles = await _musicalStyleService.GetAllAsync();
-        var stylesByName = allStyles.ToDictionary(s => s.Name.ToLower(), s => s.Id);
-        var musicByName = allMusicalStyles.ToDictionary(ms => ms.Name.ToLower(), ms => ms.Id);
+        // Collapse any case-insensitive duplicate tag names (prod has historically had them) to the
+        // first id rather than letting ToDictionary throw and abort the whole import.
+        var stylesByName = allStyles
+            .GroupBy(s => s.Name.ToLower())
+            .ToDictionary(g => g.Key, g => g.First().Id);
+        var musicByName = allMusicalStyles
+            .GroupBy(ms => ms.Name.ToLower())
+            .ToDictionary(g => g.Key, g => g.First().Id);
 
         var classifications = await Task.WhenAll(entries.Select(e =>
             _ollama.ClassifyDanceAsync(e.Name, allStyles.Select(s => s.Name), allMusicalStyles.Select(ms => ms.Name))));
@@ -65,9 +71,13 @@ public class ImportService : IImportService
         for (int i = 0; i < entries.Count; i++)
         {
             var (name, startSeconds) = entries[i];
-            int? endSeconds = i + 1 < entries.Count ? entries[i + 1].Start - 1 : null;
+            // Only bound this clip by the next entry when chapters are in order; an out-of-order or
+            // repeated timestamp would otherwise yield EndTime <= StartTime (a negative-length clip).
+            int? nextStart = i + 1 < entries.Count ? entries[i + 1].Start : null;
+            int? endSeconds = nextStart > startSeconds ? nextStart - 1 : null;
             var classification = classifications[i];
 
+            DanceDto? dance = null;
             try
             {
                 var styleIds = classification?.DanceStyles?
@@ -80,7 +90,7 @@ public class ImportService : IImportService
                     .Select(ms => musicByName[ms.ToLower()])
                     .ToList() ?? [];
 
-                var dance = await _danceService.CreateAsync(new CreateDanceRequest
+                dance = await _danceService.CreateAsync(new CreateDanceRequest
                 {
                     Name = name,
                     Description = classification?.Description is { Length: > 0 } d ? d : null,
@@ -107,6 +117,12 @@ public class ImportService : IImportService
             }
             catch (Exception ex)
             {
+                // The dance persisted but its video failed — roll the dance back so the import doesn't
+                // leave an orphaned, video-less entry the user can't tell succeeded.
+                if (dance is not null)
+                {
+                    try { await _danceService.DeleteAsync(dance.Id); } catch { /* best effort */ }
+                }
                 result.Errors.Add($"Failed to create '{name}': {ex.Message}");
             }
         }

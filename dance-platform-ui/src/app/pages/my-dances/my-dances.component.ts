@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
-import { switchMap } from 'rxjs';
+import { switchMap, catchError, throwError } from 'rxjs';
 import { parseVideoUrl, parseTimeSecs } from '../../core/utils/video-url.utils';
 import { toggleSet } from '../../core/utils/set.utils';
 import { ProfileService } from '../../core/services/profile.service';
@@ -373,6 +373,12 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
             } : {})
           };
           return this.videoService.create(videoPayload).pipe(
+            // If the video step fails, the dance was already created — roll it back so we don't
+            // leave a video-less orphan that a retry would duplicate.
+            catchError(err => {
+              this.danceService.delete(dance.id).subscribe({ error: () => {} });
+              return throwError(() => err);
+            }),
             switchMap(() => this.danceService.toggleInProgress(dance.id))
           );
         }

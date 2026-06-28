@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { DanceService, CreateDancePayload, ImportResult, DanceStatus } from '../../core/services/dance.service';
 import { StyleService } from '../../core/services/style.service';
@@ -97,6 +98,7 @@ export class DancesComponent implements OnInit, OnDestroy {
   thumbFailed = signal<Set<number>>(new Set());
 
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
+  private searchSub: Subscription | null = null;
 
   // Admin: add style form
   showAddStyle = signal(false);
@@ -141,11 +143,15 @@ export class DancesComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.searchDebounce) clearTimeout(this.searchDebounce);
+    this.searchSub?.unsubscribe();
   }
 
   private runSearch(): void {
     this.loading.set(true);
-    this.danceService.searchDances({
+    // Cancel any in-flight search so a slower earlier response can't overwrite a newer filter's
+    // results (HttpClient aborts the request on unsubscribe).
+    this.searchSub?.unsubscribe();
+    this.searchSub = this.danceService.searchDances({
       q: this.searchQuery().trim() || undefined,
       styleId: this.selectedStyleId(),
       musicalStyleId: this.selectedMusicalStyleId(),

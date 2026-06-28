@@ -28,9 +28,12 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Slugs are unique PER STYLE, not globally — the same step name in two different styles keeps
+        // the same clean slug, disambiguated by the {styleSlug} URL segment (see DanceService). A
+        // non-unique index still backs the /dances/{style}/{slug} lookup; uniqueness is enforced in
+        // app code (GenerateUniqueSlugAsync) scoped to the dance's styles.
         modelBuilder.Entity<Dance>()
-            .HasIndex(d => d.Slug)
-            .IsUnique();
+            .HasIndex(d => d.Slug);
 
         modelBuilder.Entity<VideoSegment>()
             .HasOne(vs => vs.Video)

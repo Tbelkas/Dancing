@@ -23,8 +23,12 @@ export class ChunkErrorHandler implements ErrorHandler {
       return;
     }
 
-    // Not a recoverable chunk error (or we already tried) — clear the flag on a
-    // successful, unrelated error so a future real stale-deploy can recover too.
+    // A non-chunk error means the app booted far enough to throw normally, so the current chunks
+    // loaded fine — clear the one-shot guard so a later stale-deploy (e.g. a second deploy in this
+    // same session) can recover with a fresh reload instead of being permanently blocked.
+    if (!this.isChunkLoadError(error)) {
+      sessionStorage.removeItem(ChunkErrorHandler.RELOAD_FLAG);
+    }
     console.error(error);
   }
 

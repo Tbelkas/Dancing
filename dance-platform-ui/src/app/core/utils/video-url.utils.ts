@@ -20,8 +20,12 @@ export function parseTimeSecs(input: string): number | undefined {
   const s = input.trim();
   if (!s) return undefined;
   if (s.includes(':')) {
-    const [m, sec] = s.split(':').map(Number);
-    return isNaN(m) || isNaN(sec) ? undefined : m * 60 + sec;
+    // Accept both m:ss and h:mm:ss (formatClock emits the latter for clips >= 1 hour).
+    const parts = s.split(':').map(Number);
+    if (parts.some(isNaN)) return undefined;
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
+    return undefined;
   }
   const n = Number(s);
   return isNaN(n) ? undefined : n;

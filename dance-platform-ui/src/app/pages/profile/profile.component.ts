@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { ProfileService } from '../../core/services/profile.service';
 import { PracticeService } from '../../core/services/practice.service';
 import { UserProfile } from '../../models/user.model';
@@ -20,6 +21,7 @@ import { computeStreak } from '../../core/utils/practice.utils';
 export class ProfileComponent implements OnInit {
   profile = signal<UserProfile | null>(null);
   sessions = signal<PracticeSession[]>([]);
+  loadError = signal(false);
   editing = signal(false);
   editName = '';
   editNickname = '';
@@ -42,10 +44,15 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     forkJoin({
       profile: this.profileService.getProfile(),
-      sessions: this.practiceService.getAll()
-    }).subscribe(({ profile, sessions }) => {
-      this.profile.set(profile);
-      this.sessions.set(sessions);
+      // Practice history is secondary — if it fails, still show the profile with an empty streak
+      // rather than letting one failed call leave the whole page stuck on the loading skeleton.
+      sessions: this.practiceService.getAll().pipe(catchError(() => of([] as PracticeSession[])))
+    }).subscribe({
+      next: ({ profile, sessions }) => {
+        this.profile.set(profile);
+        this.sessions.set(sessions);
+      },
+      error: () => this.loadError.set(true)
     });
   }
 

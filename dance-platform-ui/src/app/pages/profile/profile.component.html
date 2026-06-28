@@ -136,6 +136,11 @@
         </div>
       </div>
     </div>
+  } @else if (loadError()) {
+    <div class="profile-error">
+      <p>We couldn't load your profile. Check your connection and try again.</p>
+      <button class="btn btn--primary" (click)="loadError.set(false); ngOnInit()">Retry</button>
+    </div>
   } @else {
     <div class="profile-layout" aria-busy="true" aria-label="Loading profile">
       <div class="card">

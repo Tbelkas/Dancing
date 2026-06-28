@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { AuthResponse } from '../../models/user.model';
 import { environment } from '../../../environments/environment';
 import { RoleService } from './role.service';
+import { isTokenExpired } from '../utils/jwt.utils';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -13,11 +14,21 @@ export class AuthService {
   private readonly USER_KEY = 'dp_user';
 
   private _token = signal<string | null>(localStorage.getItem(this.TOKEN_KEY));
-  readonly isAuthenticated = computed(() => !!this._token());
-  readonly currentUserId = signal<number | null>((() => {
+  readonly isAuthenticated = computed(() => !!this._token() && !isTokenExpired(this._token()));
+  readonly currentUserId = signal<number | null>(this.readStoredUserId());
+
+  /** Reads the stored user id defensively — a corrupt dp_user must not throw during DI construction
+   *  (this service is injected app-wide; a throw here white-screens the whole app at bootstrap). */
+  private readStoredUserId(): number | null {
     const stored = localStorage.getItem(this.USER_KEY);
-    return stored ? JSON.parse(stored).userId : null;
-  })());
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored).userId ?? null;
+    } catch {
+      localStorage.removeItem(this.USER_KEY);
+      return null;
+    }
+  }
 
   constructor(private http: HttpClient, private router: Router, private roleService: RoleService) {
     // If already authenticated on app start, resolve admin from the stored token's claim.

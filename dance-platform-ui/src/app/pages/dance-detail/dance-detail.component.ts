@@ -3,6 +3,8 @@ import { CommonModule, Location } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { EMPTY, Observable } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { DanceService, UpdateDancePayload, DanceStatus } from '../../core/services/dance.service';
 import { VideoService, CreateVideoPayload, SegmentPayload } from '../../core/services/video.service';
@@ -144,7 +146,11 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     // React to paramMap (not snapshot) so navigating between dances — e.g. via the
     // "More like this" cards, same route — reloads the page. URLs are either the
     // canonical /dances/{style}/{slug} or the legacy /dances/{slug-or-id}.
-    this.route.paramMap.subscribe(pm => this.load(pm.get('style'), pm.get('slug') ?? ''));
+    // switchMap cancels an in-flight load when the user jumps to another dance, so a
+    // slower earlier response can't land last and show the wrong dance under the new URL.
+    this.route.paramMap.pipe(
+      switchMap(pm => this.load(pm.get('style'), pm.get('slug') ?? ''))
+    ).subscribe(d => this.onDanceLoaded(d));
     if (this.role.isAdmin()) {
       this.styleService.getAll().subscribe(s => this.allStyles.set(s));
       this.musicalStyleService.getAll().subscribe(s => this.allMusicalStyles.set(s));
@@ -153,7 +159,9 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  private load(style: string | null, slug: string): void {
+  /** Resets per-dance state and returns the (cancellable) dance request; errors are handled here so
+   *  the outer switchMap stream stays alive for the next navigation. */
+  private load(style: string | null, slug: string): Observable<Dance> {
     // Switching dances (same-route nav doesn't re-run ngOnDestroy) ends the current watch;
     // the server buffer keeps the session alive so the next dance continues it.
     this.practiceTimer.stop();
@@ -172,34 +180,40 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
       ? this.danceService.getByStyleAndSlug(style, slug)
       : this.danceService.getByIdOrSlug(slug);
 
-    request$.subscribe({
-      next: d => {
-        this.dance.set(d);
-        this.recentDances.record(d);
-        this.title.setTitle(`${d.name} · Dance Platform`);
-        // Normalise the URL to the canonical /dances/{style}/{slug} form (handles legacy
-        // numeric ids and single-segment slug links) without triggering a reload.
-        const canonical = this.canonicalPath(d);
-        if (this.location.path().split('?')[0] !== canonical) {
-          this.location.replaceState(canonical);
-        }
-        this.videoService.getByDance(d.id).subscribe(v => {
-          this.videos.set(v);
-          if (v.length === 1) {
-            this.videoService.recordView(v[0].id).subscribe();
-            this.revealVideo(v[0]);
-          }
-        });
-        this.danceService.getRecommended(d.id).subscribe(r => this.recommended.set(r));
-      },
-      error: err => {
+    return request$.pipe(
+      catchError(err => {
         if (err?.status === 404) {
           this.notFound.set(true);
           this.title.setTitle('Dance not found · Dance Platform');
         } else {
           this.router.navigate(['/dances']);
         }
+        return EMPTY;
+      })
+    );
+  }
+
+  private onDanceLoaded(d: Dance): void {
+    this.dance.set(d);
+    this.recentDances.record(d);
+    this.title.setTitle(`${d.name} · Dance Platform`);
+    // Normalise the URL to the canonical /dances/{style}/{slug} form (handles legacy
+    // numeric ids and single-segment slug links) without triggering a reload.
+    const canonical = this.canonicalPath(d);
+    if (this.location.path().split('?')[0] !== canonical) {
+      this.location.replaceState(canonical);
+    }
+    this.videoService.getByDance(d.id).subscribe(v => {
+      // Guard against a stale response landing after the user already navigated away.
+      if (this.dance()?.id !== d.id) return;
+      this.videos.set(v);
+      if (v.length === 1) {
+        this.videoService.recordView(v[0].id).subscribe();
+        this.revealVideo(v[0]);
       }
+    });
+    this.danceService.getRecommended(d.id).subscribe(r => {
+      if (this.dance()?.id === d.id) this.recommended.set(r);
     });
   }
 
@@ -327,6 +341,9 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.danceService.setStatus(d.id, status).subscribe({
       error: () => {
         this.dance.update(cur => cur ? { ...cur, ...snap } : cur);
+        // Revert the carousel's learned flag too, or a failed save would wrongly drop the dance
+        // from "Continue Learning" until a hard refresh.
+        this.recentDances.setLearned(d.id, snap.isLearned);
         this.actionError.set('Couldn\'t save that. Check your connection and try again.');
       }
     });
