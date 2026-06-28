@@ -54,8 +54,21 @@ no existing segments). 99 distinct YouTube videos / 106 Videos rows. Live DB, no
 - 8mWyE6aBHio (617–621) multi-dance montage; h3DSYn2jIKE (358/433/464/916) broken fetch (dur 0).
 - Sub-4-min single-move clips left as-is (one move, no sub-topics needed).
 
+### Full-catalog expansion 2026-06-29 (beyond tutorial-titled)
+Triaged ALL 304 distinct chip-less YouTube videos (`triage_meta.py` → `_proto/triage_meta.tsv`).
+Of 95 single-dance videos with real content: **53 clean-chapter** (adopted via `clean_apply.py`,
+which title-cases ALL-CAPS, renames Untitled→Intro, drops promo chapters), **5 descriptive-fragment
+chapters**, **17 transcript-inferred** (incl. the 38-min "Jamaican Dance Moves" → 4 named moves, and
+the 22-min salsa workout). **147 videos now have segments** (was 21).
+
+Excluded (NOT chipped): 30 multi-dance montages (→ "In this video" chapters feature handles those);
+11 long no-caption/no-chapter; wrong-domain mis-sourced (db1580 figure-skating, db1581 boxing jump-rope,
+db1594 golf); music videos/performances (737 Pitbull, 913 K9, 689 JumpStyle, 792/1686/oj 25-move
+bachata montages); garbled-caption (1710 Portuguese auto-translate); talk-show (316 Juju). Notation-/
+Turkish-messy chapters (285/286/276/369) left. New helpers: `triage_meta.py`, `clean_apply.py`.
+
 <!-- CHIP-QUEUE:START -->
-## Auto-detected chip queue _(last checked 2026-06-29 01:16)_
+## Auto-detected chip queue _(last checked 2026-06-29 02:02)_
 
 No videos awaiting chips. ✅
 <!-- CHIP-QUEUE:END -->

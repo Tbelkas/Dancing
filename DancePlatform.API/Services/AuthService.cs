@@ -9,6 +9,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace DancePlatform.API.Services;
 
+// CA1862 wants StringComparison.OrdinalIgnoreCase, but these comparisons run as EF Core LINQ that
+// must translate to SQL LOWER() to hit the functional unique index — StringComparison isn't
+// SQL-translatable here, so ToLower() is deliberate.
+#pragma warning disable CA1862
 public class AuthService : IAuthService
 {
     private readonly AppDbContext _db;
@@ -22,7 +26,10 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse?> LoginAsync(LoginRequest request)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+        // Case-insensitive match (LOWER equality, not ILIKE — usernames can contain '_'/'%', which
+        // ILIKE would treat as wildcards). Uses the functional unique index on LOWER("Username").
+        var username = request.Username.ToLower();
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username);
         if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return null;
 
@@ -36,7 +43,9 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
     {
-        if (await _db.Users.AnyAsync(u => u.Username == request.Username))
+        // Reject a name already taken in any casing — "Justas" and "justas" are one account.
+        var username = request.Username.ToLower();
+        if (await _db.Users.AnyAsync(u => u.Username.ToLower() == username))
             return null;
 
         var user = new User
@@ -48,7 +57,16 @@ public class AuthService : IAuthService
         };
 
         _db.Users.Add(user);
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            // Lost a race against a concurrent registration of the same name (the functional unique
+            // index rejected the insert) — surface it as "taken" rather than a 500.
+            return null;
+        }
 
         return new AuthResponse
         {
@@ -83,3 +101,4 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
+#pragma warning restore CA1862

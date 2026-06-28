@@ -135,9 +135,12 @@ public class AppDbContext : DbContext
             .WithMany(s => s.MyStyleUsers)
             .HasForeignKey(ums => ums.StyleId);
 
+        // Usernames are unique case-INSENSITIVELY, enforced by a functional unique index on
+        // LOWER("Username") created in the migration (EF's fluent model can't express a functional
+        // index). A plain non-unique index still backs exact lookups; login/register compare on
+        // LOWER(...) so "Justas" and "justas" are the same account.
         modelBuilder.Entity<User>()
-            .HasIndex(u => u.Username)
-            .IsUnique();
+            .HasIndex(u => u.Username);
 
         modelBuilder.Entity<VideoRating>()
             .HasKey(vr => new { vr.UserId, vr.VideoId });
