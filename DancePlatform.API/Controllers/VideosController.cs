@@ -25,7 +25,7 @@ public class VideosController : AppControllerBase
 
     [HttpGet("{id}/related")]
     public async Task<IActionResult> GetRelated(int id) =>
-        Ok(await _videoService.GetRelatedAsync(id));
+        Ok(await _videoService.GetRelatedAsync(id, CurrentUserId));
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
@@ -53,7 +53,7 @@ public class VideosController : AppControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateVideoRequest request)
     {
-        var video = await _videoService.CreateAsync(request, CurrentUserId);
+        var video = await _videoService.CreateAsync(request, CurrentUserId, CurrentUserIsAdmin);
         if (video is null) return BadRequest(new { message = "Dance not found." });
         return CreatedAtAction(nameof(GetById), new { id = video.Id }, video);
     }
@@ -95,12 +95,18 @@ public class VideosController : AppControllerBase
         return video is null ? NotFound() : Ok(video);
     }
 
-    [RequireAdmin]
+    // Authenticated (not admin-only): admins delete any video, owners delete their own personal one.
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await _videoService.DeleteAsync(id);
-        return deleted ? NoContent() : NotFound();
+        var result = await _videoService.DeleteAsync(id, CurrentUserId, CurrentUserIsAdmin);
+        return result switch
+        {
+            DeleteVideoResult.Success => NoContent(),
+            DeleteVideoResult.Forbidden => Forbid(),
+            _ => NotFound()
+        };
     }
 
     // --- Personal loops: any authenticated user saves loops for their own account ---

@@ -17,6 +17,8 @@ export interface CreateVideoPayload {
   videoType?: VideoType;
   description?: string;
   danceId: number;
+  /** Admin-only: 'global' (everyone) or 'local' (just me). Ignored for non-admins (always personal). */
+  scope?: 'global' | 'local';
   startTime?: number;
   endTime?: number;
   segments?: SegmentPayload[];

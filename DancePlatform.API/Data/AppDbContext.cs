@@ -41,6 +41,18 @@ public class AppDbContext : DbContext
             .HasForeignKey(vs => vs.VideoId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Personal videos: a user's private additions are removed when their account is deleted;
+        // null OwnerUserId means the video is global. Indexed so the global-or-own visibility
+        // filter (VideoService) stays cheap.
+        modelBuilder.Entity<Video>()
+            .HasOne(v => v.Owner)
+            .WithMany()
+            .HasForeignKey(v => v.OwnerUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Video>()
+            .HasIndex(v => v.OwnerUserId);
+
         // Personal loops: removed when either the owning user or the video is deleted.
         modelBuilder.Entity<UserVideoLoop>()
             .HasOne(l => l.User)

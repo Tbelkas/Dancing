@@ -11,12 +11,17 @@ public class VideoService : IVideoService
 
     public VideoService(AppDbContext db) => _db = db;
 
+    // A viewer sees global videos (OwnerUserId == null) plus their own personal ones.
+    // Anonymous viewers (userId == null) see only global. Used everywhere videos are
+    // listed/fetched so a user's private additions never leak to others.
+    private static IQueryable<Video> VisibleTo(IQueryable<Video> source, int? userId) =>
+        source.Where(v => v.OwnerUserId == null || v.OwnerUserId == userId);
+
     // Within a dance, surface the videos the current user rated 4–5 stars first
     // (their personal favourites for this dance), then everything else by add order.
     public async Task<List<VideoDto>> GetByDanceAsync(int danceId, int? userId)
     {
-        var ordered = _db.Videos
-            .Where(v => v.DanceId == danceId)
+        var ordered = VisibleTo(_db.Videos.Where(v => v.DanceId == danceId), userId)
             .OrderByDescending(v => userId != null && v.Ratings.Any(r => r.UserId == userId && r.Rating >= 4))
             .ThenByDescending(v => userId == null
                 ? 0
@@ -26,11 +31,12 @@ public class VideoService : IVideoService
     }
 
     public async Task<VideoDto?> GetByIdAsync(int id, int? userId) =>
-        await Project(_db.Videos.Where(v => v.Id == id), userId).FirstOrDefaultAsync();
+        await Project(VisibleTo(_db.Videos.Where(v => v.Id == id), userId), userId).FirstOrDefaultAsync();
 
     // All dances whose segments live in the same source video (same platform + id),
-    // ordered by where they start so the player can offer in-place jump chips.
-    public async Task<List<VideoChapterDto>> GetRelatedAsync(int id)
+    // ordered by where they start so the player can offer in-place jump chips. Scoped
+    // to the viewer so another user's personal cut never appears as a jump-chip.
+    public async Task<List<VideoChapterDto>> GetRelatedAsync(int id, int? userId)
     {
         var current = await _db.Videos.AsNoTracking()
             .Where(v => v.Id == id)
@@ -38,7 +44,7 @@ public class VideoService : IVideoService
             .FirstOrDefaultAsync();
         if (current is null) return new List<VideoChapterDto>();
 
-        return await _db.Videos
+        return await VisibleTo(_db.Videos, userId)
             .Where(v => v.VideoId == current.VideoId && v.Platform == current.Platform)
             .OrderBy(v => v.StartTime ?? 0)
             .Select(v => new VideoChapterDto
@@ -53,10 +59,16 @@ public class VideoService : IVideoService
             .ToListAsync();
     }
 
-    public async Task<VideoDto?> CreateAsync(CreateVideoRequest request, int? userId)
+    public async Task<VideoDto?> CreateAsync(CreateVideoRequest request, int? userId, bool isAdmin)
     {
         var danceExists = await _db.Dances.AnyAsync(d => d.Id == request.DanceId);
         if (!danceExists) return null;
+
+        // Scope: non-admins can only add personal videos (owned by them). Admins choose —
+        // "local" keeps it private to them, anything else (default) makes it global (null owner).
+        var ownerUserId = !isAdmin
+            ? userId
+            : request.Scope == "local" ? userId : (int?)null;
 
         var video = new Video
         {
@@ -66,14 +78,32 @@ public class VideoService : IVideoService
             VideoType = NormalizeVideoType(request.VideoType),
             Description = request.Description,
             DanceId = request.DanceId,
+            OwnerUserId = ownerUserId,
             StartTime = request.StartTime,
             EndTime = request.EndTime,
             Segments = MapSegments(request.VideoType, request.Segments)
         };
 
         _db.Videos.Add(video);
+
+        // Adding a personal video to a dance starts tracking it (In Progress) so it shows
+        // up in My Dances — unless the user already learned it or is tracking it.
+        if (ownerUserId is int uid)
+            await EnsureInProgressAsync(uid, request.DanceId);
+
         await _db.SaveChangesAsync();
         return await GetByIdAsync(video.Id, userId);
+    }
+
+    // Marks a dance In Progress for a user if they aren't already tracking or have learned it.
+    // Mirrors DanceService.SetStatusAsync's In-Progress handling, kept local to avoid a service dependency.
+    private async Task EnsureInProgressAsync(int userId, int danceId)
+    {
+        var learned = await _db.UserLearnedDances.FindAsync(userId, danceId);
+        if (learned is not null) return;
+        var inProgress = await _db.UserInProgressDances.FindAsync(userId, danceId);
+        if (inProgress is null)
+            _db.UserInProgressDances.Add(new UserInProgressDance { UserId = userId, DanceId = danceId });
     }
 
     public async Task<VideoDto?> UpdateAsync(int id, UpdateVideoRequest request, int? userId)
@@ -152,16 +182,18 @@ public class VideoService : IVideoService
         return await GetByIdAsync(videoId, userId);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<DeleteVideoResult> DeleteAsync(int id, int? userId, bool isAdmin)
     {
         var video = await _db.Videos.FindAsync(id);
-        if (video is null) return false;
+        if (video is null) return DeleteVideoResult.NotFound;
+        // Admins delete anything; a regular user may delete only their own personal video.
+        if (!isAdmin && video.OwnerUserId != userId) return DeleteVideoResult.Forbidden;
         var danceId = video.DanceId;
         _db.Videos.Remove(video);
         await _db.SaveChangesAsync();
         // The deleted video's ratings (cascade-removed) no longer count toward its dance.
         await RecomputeDanceRatingAsync(danceId);
-        return true;
+        return DeleteVideoResult.Success;
     }
 
     public async Task<bool> IncrementViewCountAsync(int id)
@@ -264,6 +296,7 @@ public class VideoService : IVideoService
                 : v.Ratings.Where(r => r.UserId == userId).Select(r => (int?)r.Rating).FirstOrDefault(),
             DanceId = v.DanceId,
             DanceName = v.Dance.Name,
+            OwnerUserId = v.OwnerUserId,
             Segments = v.Segments
                 .OrderBy(s => s.StartTime)
                 .Select(s => new VideoSegmentDto

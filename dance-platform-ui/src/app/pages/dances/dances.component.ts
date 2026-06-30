@@ -8,8 +8,10 @@ import { DanceService, CreateDancePayload, ImportResult, DanceStatus } from '../
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
 import { InstructorService } from '../../core/services/instructor.service';
+import { VideoService, CreateVideoPayload } from '../../core/services/video.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
+import { parseVideoUrl } from '../../core/utils/video-url.utils';
 import { Dance } from '../../models/dance.model';
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
@@ -114,6 +116,25 @@ export class DancesComponent implements OnInit, OnDestroy {
   importResult = signal<ImportResult | null>(null);
   importError = signal('');
 
+  // Add Video (any authenticated user; admins also choose Global vs Local scope)
+  showAddVideo = signal(false);
+  private addVideoDanceNames = signal<{ id: number; name: string }[]>([]);
+  addVideoDanceQuery = signal('');
+  selectedAddVideoDance = signal<{ id: number; name: string } | null>(null);
+  addVideoDanceMatches = computed(() => {
+    const q = this.addVideoDanceQuery().trim().toLowerCase();
+    if (!q) return [];
+    return this.addVideoDanceNames()
+      .filter(d => d.name.toLowerCase().includes(q))
+      .slice(0, 20);
+  });
+  newVideoTitle = '';
+  newVideoUrl = '';
+  newVideoScope: 'global' | 'local' = 'global';
+  addingVideo = signal(false);
+  addVideoError = signal('');
+  addVideoCreated = signal<{ danceId: number; danceName: string; title: string } | null>(null);
+
   // Admin: add dance form
   showAddDance = signal(false);
   newDanceName = '';
@@ -130,6 +151,7 @@ export class DancesComponent implements OnInit, OnDestroy {
     private styleService: StyleService,
     private musicalStyleService: MusicalStyleService,
     private instructorService: InstructorService,
+    private videoService: VideoService,
     public auth: AuthService,
     public role: RoleService
   ) {}
@@ -328,6 +350,63 @@ export class DancesComponent implements OnInit, OnDestroy {
         this.newStyleDesc = '';
       },
       error: () => { this.addStyleError.set('Failed to create style.'); this.addingStyle.set(false); }
+    });
+  }
+
+  // --- Add Video ---
+  toggleAddVideo(): void {
+    const open = !this.showAddVideo();
+    this.showAddVideo.set(open);
+    this.addVideoError.set('');
+    this.addVideoCreated.set(null);
+    this.addVideoDanceQuery.set('');
+    this.selectedAddVideoDance.set(null);
+    this.newVideoTitle = '';
+    this.newVideoUrl = '';
+    this.newVideoScope = 'global';
+    // Lazy-load the dance name list the picker searches over, once.
+    if (open && this.addVideoDanceNames().length === 0) {
+      this.danceService.getNames().subscribe(n => this.addVideoDanceNames.set(n));
+    }
+  }
+
+  pickAddVideoDance(d: { id: number; name: string }): void {
+    this.selectedAddVideoDance.set(d);
+    this.addVideoDanceQuery.set('');
+  }
+
+  clearAddVideoDance(): void {
+    this.selectedAddVideoDance.set(null);
+  }
+
+  submitAddVideo(): void {
+    const dance = this.selectedAddVideoDance();
+    if (!dance) { this.addVideoError.set('Pick a dance to attach this video to.'); return; }
+    if (!this.newVideoUrl.trim()) { this.addVideoError.set('Video URL or ID is required.'); return; }
+
+    const parsed = parseVideoUrl(this.newVideoUrl);
+    if (!parsed) { this.addVideoError.set('Unrecognized URL. Paste a YouTube, TikTok, or Instagram link.'); return; }
+
+    const payload: CreateVideoPayload = {
+      title: this.newVideoTitle.trim() || dance.name,
+      videoId: parsed.videoId,
+      platform: parsed.platform,
+      danceId: dance.id,
+      // Scope only matters for admins; the server ignores it for everyone else (always personal).
+      ...(this.role.isAdmin() ? { scope: this.newVideoScope } : {})
+    };
+
+    this.addingVideo.set(true);
+    this.addVideoError.set('');
+    this.videoService.create(payload).subscribe({
+      next: video => {
+        this.addVideoCreated.set({ danceId: video.danceId, danceName: video.danceName, title: video.title });
+        this.addingVideo.set(false);
+        // Keep the dance selected for adding another; clear the per-video inputs.
+        this.newVideoTitle = '';
+        this.newVideoUrl = '';
+      },
+      error: () => { this.addVideoError.set('Failed to add video. Please try again.'); this.addingVideo.set(false); }
     });
   }
 

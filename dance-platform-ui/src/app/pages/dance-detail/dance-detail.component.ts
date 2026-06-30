@@ -64,6 +64,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   newVideoDesc = '';
   newVideoType: VideoType = 'steps';
   newVideoSegments: SegmentRow[] = [];
+  newVideoScope: 'global' | 'local' = 'global';
   addingVideo = signal(false);
   addVideoError = signal('');
 
@@ -417,7 +418,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     return weighted / totalCount;
   }
 
-  // Admin: add video
+  // Add video (any authenticated user; non-admins always create personal videos)
   toggleAddVideo(): void {
     this.showAddVideo.update(v => !v);
     this.addVideoError.set('');
@@ -426,6 +427,17 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.newVideoDesc = '';
     this.newVideoType = 'steps';
     this.newVideoSegments = [];
+    this.newVideoScope = 'global';
+  }
+
+  /** A personal (private) video is visible only to its owner. */
+  isPersonalVideo(video: Video): boolean {
+    return video.ownerUserId != null;
+  }
+
+  /** Admins delete any video; a regular user may delete their own personal one. */
+  canDeleteVideo(video: Video): boolean {
+    return this.role.isAdmin() || (video.ownerUserId != null && video.ownerUserId === this.auth.currentUserId());
   }
 
   private defaultSegmentRows(): SegmentRow[] {
@@ -486,6 +498,8 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
       videoType: this.newVideoType,
       description: this.newVideoDesc.trim() || undefined,
       danceId,
+      // Scope only matters for admins; the server forces personal for everyone else.
+      ...(this.role.isAdmin() ? { scope: this.newVideoScope } : {}),
       segments
     };
 
@@ -494,7 +508,13 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.videoService.create(payload).subscribe({
       next: video => {
         this.videos.update(list => [...list, video]);
-        this.dance.update(d => d ? { ...d, videoCount: d.videoCount + 1 } : d);
+        // Adding a personal video auto-tracks the dance server-side; reflect it now.
+        const nowTracked = this.isPersonalVideo(video);
+        this.dance.update(d => d ? {
+          ...d,
+          videoCount: d.videoCount + 1,
+          isInProgress: d.isInProgress || (nowTracked && !d.isLearned)
+        } : d);
         this.showAddVideo.set(false);
         this.addingVideo.set(false);
         this.newVideoTitle = '';

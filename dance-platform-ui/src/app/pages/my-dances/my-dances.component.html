@@ -251,7 +251,11 @@
                       } @else {
                         @for (video of expandedVideos(); track video.id) {
                           <div class="expanded-video">
-                            <span class="expanded-video__title">{{ video.title }}</span>
+                            <span class="expanded-video__title">{{ video.title }}
+                              @if (video.ownerUserId) {
+                                <span class="badge badge--personal"><i class="fa-solid fa-lock"></i> Personal</span>
+                              }
+                            </span>
                             <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="video.startTime" [endTime]="video.endTime" [segments]="video.segments" />
                           </div>
                         }
@@ -298,7 +302,11 @@
                       } @else {
                         @for (video of expandedVideos(); track video.id) {
                           <div class="expanded-video">
-                            <span class="expanded-video__title">{{ video.title }}</span>
+                            <span class="expanded-video__title">{{ video.title }}
+                              @if (video.ownerUserId) {
+                                <span class="badge badge--personal"><i class="fa-solid fa-lock"></i> Personal</span>
+                              }
+                            </span>
                             <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="video.startTime" [endTime]="video.endTime" [segments]="video.segments" />
                           </div>
                         }

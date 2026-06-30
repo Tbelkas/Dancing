@@ -34,6 +34,8 @@ export interface Video {
   userRating?: number;
   danceId: number;
   danceName: string;
+  /** Owner of a personal (private) video; null/undefined for global videos. */
+  ownerUserId?: number;
   segments: VideoSegment[];
 }
 

@@ -144,22 +144,25 @@
     <section class="videos-section">
       <div class="videos-section__header">
         <h2>Videos</h2>
-        @if (role.isAdmin()) {
+        @if (auth.isAuthenticated()) {
           <button class="btn btn--primary btn--sm" (click)="toggleAddVideo()">
             @if (showAddVideo()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Video }
           </button>
         }
       </div>
 
-      <!-- Admin: Add Video Form -->
+      <!-- Add Video Form (any signed-in user; non-admins create personal videos) -->
       @if (showAddVideo()) {
         <div class="admin-form card">
           <h3 class="admin-form__title">Add Video</h3>
+          @if (!role.isAdmin()) {
+            <p class="admin-form__hint">This video is <strong>private to you</strong> — only you'll see it on this dance, and the dance will be added to My Dances.</p>
+          }
           @if (addVideoError()) { <div class="error-message">{{ addVideoError() }}</div> }
           <div class="admin-form__fields">
             <div class="form-group">
-              <label for="new-video-title">Title</label>
-              <input id="new-video-title" type="text" [(ngModel)]="newVideoTitle" placeholder="e.g. Basic Steps Tutorial" />
+              <label for="new-video-title">Title <span class="optional">(optional)</span></label>
+              <input id="new-video-title" type="text" [(ngModel)]="newVideoTitle" placeholder="Defaults to the dance name" />
             </div>
             <div class="form-group">
               <label for="new-video-url">Video URL</label>
@@ -169,15 +172,24 @@
               <label for="new-video-desc">Description <span class="optional">(optional)</span></label>
               <input id="new-video-desc" type="text" [(ngModel)]="newVideoDesc" placeholder="Brief description" />
             </div>
-            <div class="form-group">
-              <label for="new-video-type">Type</label>
-              <select id="new-video-type" [(ngModel)]="newVideoType" (ngModelChange)="onNewVideoTypeChange()">
-                <option value="steps">Steps</option>
-                <option value="tutorial">Tutorial</option>
-              </select>
-            </div>
+            @if (role.isAdmin()) {
+              <div class="form-group">
+                <label for="new-video-type">Type</label>
+                <select id="new-video-type" [(ngModel)]="newVideoType" (ngModelChange)="onNewVideoTypeChange()">
+                  <option value="steps">Steps</option>
+                  <option value="tutorial">Tutorial</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Scope</label>
+                <div class="style-filters">
+                  <button class="filter-pill" [class.active]="newVideoScope === 'global'" (click)="newVideoScope = 'global'">Global</button>
+                  <button class="filter-pill" [class.active]="newVideoScope === 'local'" (click)="newVideoScope = 'local'">Local (just me)</button>
+                </div>
+              </div>
+            }
           </div>
-          @if (newVideoType === 'tutorial') {
+          @if (role.isAdmin() && newVideoType === 'tutorial') {
             <div class="form-group">
               <label>Sections <span class="optional">(e.g. Theory, Steps, Practice — start time as m:ss or seconds)</span></label>
               <div class="segment-rows">
@@ -208,9 +220,14 @@
             @if (videos()[0].videoType === 'tutorial') {
               <span class="badge badge--tutorial"><i class="fa-solid fa-graduation-cap"></i> Tutorial</span>
             }
+            @if (isPersonalVideo(videos()[0])) {
+              <span class="badge badge--personal"><i class="fa-solid fa-lock"></i> Personal</span>
+            }
             @if (role.isAdmin()) {
               <button class="btn btn--ghost btn--sm" (click)="toggleEditVideoTime(videos()[0])"><i class="fa-solid fa-clock"></i> Edit Time</button>
               <button class="btn btn--ghost btn--sm" (click)="toggleMoveVideo(videos()[0])"><i class="fa-solid fa-arrow-right-arrow-left"></i> Move</button>
+            }
+            @if (canDeleteVideo(videos()[0])) {
               <button class="btn btn--danger btn--sm" (click)="deleteVideo(videos()[0])"><i class="fa-solid fa-trash"></i> Delete</button>
             }
           </div>
@@ -277,6 +294,9 @@
                   @if (video.videoType === 'tutorial') {
                     <span class="badge badge--tutorial"><i class="fa-solid fa-graduation-cap"></i> Tutorial</span>
                   }
+                  @if (isPersonalVideo(video)) {
+                    <span class="badge badge--personal"><i class="fa-solid fa-lock"></i> Personal</span>
+                  }
                 </span>
                 <span class="video-list-item__meta">
                   <span>{{ video.dateAdded | date:'mediumDate' }}</span>
@@ -292,6 +312,8 @@
                 @if (role.isAdmin()) {
                   <button class="btn btn--ghost btn--xs" (click)="$event.stopPropagation(); toggleEditVideoTime(video)" title="Edit time/sections"><i class="fa-solid fa-clock"></i></button>
                   <button class="btn btn--ghost btn--xs" (click)="$event.stopPropagation(); toggleMoveVideo(video)" title="Move to another dance"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
+                }
+                @if (canDeleteVideo(video)) {
                   <button class="btn btn--danger btn--xs" (click)="$event.stopPropagation(); deleteVideo(video)" title="Delete video"><i class="fa-solid fa-trash"></i></button>
                 }
                 @if (selectedVideo()?.id === video.id) { <span class="video-list-item__toggle"><i class="fa-solid fa-chevron-up"></i></span> } @else { <span class="video-list-item__toggle"><i class="fa-solid fa-chevron-down"></i></span> }

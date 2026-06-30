@@ -17,5 +17,8 @@ public class VideoDto
     public int? UserRating { get; set; }
     public int DanceId { get; set; }
     public string DanceName { get; set; } = string.Empty;
+    // Null = global; set = personal to this user. Lets the UI badge personal videos and
+    // offer their owner a delete control.
+    public int? OwnerUserId { get; set; }
     public List<VideoSegmentDto> Segments { get; set; } = new();
 }

@@ -10,6 +10,8 @@ public class CreateVideoRequest
     public string VideoType { get; set; } = "steps";
     public string? Description { get; set; }
     [Required] public int DanceId { get; set; }
+    // "global" | "local". Honoured only for admins; non-admins always create personal videos.
+    public string? Scope { get; set; }
     public int? StartTime { get; set; }
     public int? EndTime { get; set; }
     public List<VideoSegmentDto> Segments { get; set; } = new();

@@ -20,6 +20,11 @@ public class Video
     public int DanceId { get; set; }
     public Dance Dance { get; set; } = null!;
 
+    // Null = global (curated, visible to everyone). Set = personal to that user — only the
+    // owner sees it on the dance. Mirrors the per-user UserVideoLoop privacy model.
+    public int? OwnerUserId { get; set; }
+    public User? Owner { get; set; }
+
     public List<VideoSegment> Segments { get; set; } = new();
     public ICollection<VideoRating> Ratings { get; set; } = new List<VideoRating>();
 }

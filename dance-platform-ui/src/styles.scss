@@ -226,6 +226,13 @@ textarea:focus-visible,
     color: #a98ffc;
     border-color: rgba(151, 117, 250, 0.25);
   }
+
+  /* Personal (private) video — owner-only, neutral grey to read as "just yours". */
+  &--personal {
+    background: rgba(148, 163, 184, 0.12);
+    color: #b6c2d4;
+    border-color: rgba(148, 163, 184, 0.28);
+  }
 }
 
 .error-message {
