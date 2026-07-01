@@ -27,6 +27,8 @@ const STATUS_OPTIONS = [
   { value: 'favorite', label: 'Favorited' }
 ];
 
+const FILTERS_KEY = 'dances.filters.v1';
+
 /** First `n` items, but pull the selected item into view if it falls past the cutoff. */
 function clampWithSelected<T extends { id: number }>(list: T[], selectedId: number | null, n: number): T[] {
   if (list.length <= n) return list;
@@ -203,7 +205,40 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.styleService.getAll().subscribe(s => this.styles.set(s));
     this.musicalStyleService.getAll().subscribe(ms => this.musicalStyles.set(ms));
     this.instructorService.getAll().subscribe(i => this.instructors.set(i));
+    this.restoreFilters();
     this.runSearch();
+  }
+
+  /** Restore the last-used filters so open/refresh lands where the user left off. */
+  private restoreFilters(): void {
+    try {
+      const raw = localStorage.getItem(FILTERS_KEY);
+      if (!raw) return;
+      const s = JSON.parse(raw);
+      if (typeof s.searchQuery === 'string') this.searchQuery.set(s.searchQuery);
+      if (s.selectedStyleId === null || typeof s.selectedStyleId === 'number') this.selectedStyleId.set(s.selectedStyleId);
+      if (s.selectedMusicalStyleId === null || typeof s.selectedMusicalStyleId === 'number') this.selectedMusicalStyleId.set(s.selectedMusicalStyleId);
+      if (s.selectedDifficulty === null || typeof s.selectedDifficulty === 'string') this.selectedDifficulty.set(s.selectedDifficulty);
+      if (typeof s.selectedStatus === 'string') this.selectedStatus.set(s.selectedStatus);
+      if (typeof s.sortBy === 'string') this.sortBy.set(s.sortBy);
+      if (typeof s.currentPage === 'number' && s.currentPage >= 1) this.currentPage.set(s.currentPage);
+    } catch { /* ignore malformed/unavailable storage */ }
+    // Status only applies to signed-in users; drop a stale personal filter when logged out.
+    if (!this.auth.isAuthenticated()) this.selectedStatus.set('all');
+  }
+
+  private persistFilters(): void {
+    try {
+      localStorage.setItem(FILTERS_KEY, JSON.stringify({
+        searchQuery: this.searchQuery(),
+        selectedStyleId: this.selectedStyleId(),
+        selectedMusicalStyleId: this.selectedMusicalStyleId(),
+        selectedDifficulty: this.selectedDifficulty(),
+        selectedStatus: this.selectedStatus(),
+        sortBy: this.sortBy(),
+        currentPage: this.currentPage()
+      }));
+    } catch { /* storage unavailable (private mode, quota) — non-fatal */ }
   }
 
   ngOnDestroy(): void {
@@ -212,6 +247,7 @@ export class DancesComponent implements OnInit, OnDestroy {
   }
 
   private runSearch(): void {
+    this.persistFilters();
     this.loading.set(true);
     // Cancel any in-flight search so a slower earlier response can't overwrite a newer filter's
     // results (HttpClient aborts the request on unsubscribe).
