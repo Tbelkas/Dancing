@@ -170,10 +170,15 @@
         </div>
         <div class="style-filters">
           <button class="filter-pill" [class.active]="selectedStyleId() === null" (click)="filterByStyle(null)">All</button>
-          @for (style of visibleStyles(); track style.id) {
+          @for (style of displayedStyles(); track style.id) {
             <button class="filter-pill" [class.active]="selectedStyleId() === style.id" (click)="filterByStyle(style.id)">
               {{ style.name }}
             </button>
+          }
+          @if (hiddenStyleCount() > 0) {
+            <button class="filter-pill filter-pill--more" (click)="stylesExpanded.set(true)">+{{ hiddenStyleCount() }} more</button>
+          } @else if (stylesExpanded() && !styleQuery()) {
+            <button class="filter-pill filter-pill--more" (click)="stylesExpanded.set(false)">Show less</button>
           }
         </div>
       </div>
@@ -191,10 +196,15 @@
         </div>
         <div class="style-filters">
           <button class="filter-pill" [class.active]="selectedMusicalStyleId() === null" (click)="filterByMusicalStyle(null)">All</button>
-          @for (ms of visibleMusicalStyles(); track ms.id) {
+          @for (ms of displayedMusicalStyles(); track ms.id) {
             <button class="filter-pill" [class.active]="selectedMusicalStyleId() === ms.id" (click)="filterByMusicalStyle(ms.id)">
               {{ ms.name }}
             </button>
+          }
+          @if (hiddenMusicCount() > 0) {
+            <button class="filter-pill filter-pill--more" (click)="musicExpanded.set(true)">+{{ hiddenMusicCount() }} more</button>
+          } @else if (musicExpanded() && !musicQuery()) {
+            <button class="filter-pill filter-pill--more" (click)="musicExpanded.set(false)">Show less</button>
           }
         </div>
       </div>

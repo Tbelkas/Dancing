@@ -26,6 +26,17 @@ const STATUS_OPTIONS = [
   { value: 'learned', label: 'Learned' },
   { value: 'favorite', label: 'Favorited' }
 ];
+
+/** First `n` items, but pull the selected item into view if it falls past the cutoff. */
+function clampWithSelected<T extends { id: number }>(list: T[], selectedId: number | null, n: number): T[] {
+  if (list.length <= n) return list;
+  const head = list.slice(0, n);
+  if (selectedId != null && !head.some(x => x.id === selectedId)) {
+    const selected = list.find(x => x.id === selectedId);
+    if (selected) return [selected, ...head.slice(0, n - 1)];
+  }
+  return head;
+}
 @Component({
   selector: 'app-dances',
   standalone: true,
@@ -60,6 +71,12 @@ export class DancesComponent implements OnInit, OnDestroy {
   styleQuery = signal('');
   musicQuery = signal('');
 
+  // Collapse the long pill lists to a single row by default so the catalog stays
+  // near the fold; the user expands on demand or narrows via the search box.
+  stylesExpanded = signal(false);
+  musicExpanded = signal(false);
+  readonly COLLAPSED_PILLS = 11;
+
   readonly visibleStyles = computed(() => {
     const q = this.styleQuery().trim().toLowerCase();
     if (!q) return this.styles();
@@ -73,6 +90,32 @@ export class DancesComponent implements OnInit, OnDestroy {
     const sel = this.selectedMusicalStyleId();
     return this.musicalStyles().filter(ms => ms.id === sel || ms.name.toLowerCase().includes(q));
   });
+
+  // What actually renders: the full list while searching or expanded, otherwise a
+  // single-row slice that always keeps the active pill visible.
+  readonly displayedStyles = computed(() =>
+    this.styleQuery().trim() || this.stylesExpanded()
+      ? this.visibleStyles()
+      : clampWithSelected(this.visibleStyles(), this.selectedStyleId(), this.COLLAPSED_PILLS)
+  );
+
+  readonly displayedMusicalStyles = computed(() =>
+    this.musicQuery().trim() || this.musicExpanded()
+      ? this.visibleMusicalStyles()
+      : clampWithSelected(this.visibleMusicalStyles(), this.selectedMusicalStyleId(), this.COLLAPSED_PILLS)
+  );
+
+  readonly hiddenStyleCount = computed(() =>
+    this.styleQuery().trim() || this.stylesExpanded()
+      ? 0
+      : Math.max(0, this.visibleStyles().length - this.COLLAPSED_PILLS)
+  );
+
+  readonly hiddenMusicCount = computed(() =>
+    this.musicQuery().trim() || this.musicExpanded()
+      ? 0
+      : Math.max(0, this.visibleMusicalStyles().length - this.COLLAPSED_PILLS)
+  );
 
   readonly hasActiveFilters = computed(() =>
     this.searchQuery().trim() !== '' ||

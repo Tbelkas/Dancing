@@ -11,7 +11,7 @@
     </div>
   </div>
 
-  @if (sessions().length > 0) {
+  @if (visibleSessions().length > 0) {
     <div class="stats-row">
       <div class="stat-chip stat-chip--streak" [class.is-cold]="streak() === 0">
         <span class="streak-flame"><i class="fa-solid fa-fire"></i></span>
@@ -22,7 +22,7 @@
       </div>
       <div class="stat-chip">
         <span class="stat-chip__label">Sessions</span>
-        <span class="stat-chip__value">{{ sessions().length }}</span>
+        <span class="stat-chip__value">{{ visibleSessions().length }}</span>
       </div>
       @if (totalMinutes() > 0) {
         <div class="stat-chip">
@@ -72,7 +72,7 @@
         <div class="skeleton skeleton-line" style="height: 86px; border-radius: var(--radius-lg);"></div>
       }
     </div>
-  } @else if (sessions().length === 0) {
+  } @else if (visibleSessions().length === 0) {
     <div class="empty-state">
       <p>No practice sessions yet. Watch a dance video — the clock starts on its own — or hit "Log Session"!</p>
     </div>

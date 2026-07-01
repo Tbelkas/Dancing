@@ -29,11 +29,14 @@ export class PracticeComponent implements OnInit {
   addError = signal('');
   adding = signal(false);
 
-  readonly streak = computed(() => computeStreak(this.sessions()));
+  /** Only surface sessions that lasted more than a minute — sub-minute blips (stray watches) are noise. */
+  readonly visibleSessions = computed(() => this.sessions().filter(s => s.totalSeconds > 60));
+
+  readonly streak = computed(() => computeStreak(this.visibleSessions()));
 
   readonly groupedSessions = computed(() => {
     const map = new Map<string, PracticeSession[]>();
-    for (const s of this.sessions()) {
+    for (const s of this.visibleSessions()) {
       const list = map.get(s.date) ?? [];
       list.push(s);
       map.set(s.date, list);
@@ -114,6 +117,6 @@ export class PracticeComponent implements OnInit {
   }
 
   totalMinutes(): number {
-    return this.sessions().reduce((sum, s) => sum + (s.durationMinutes ?? 0), 0);
+    return this.visibleSessions().reduce((sum, s) => sum + (s.durationMinutes ?? 0), 0);
   }
 }

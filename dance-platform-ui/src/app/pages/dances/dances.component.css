@@ -279,6 +279,18 @@
   }
 }
 
+/* Expander: reads as a text action, not another category */
+.filter-pill--more {
+  border-style: dashed;
+  color: var(--color-primary);
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-glow);
+  }
+}
+
 /* Dance cards */
 .dance-card {
   position: relative;

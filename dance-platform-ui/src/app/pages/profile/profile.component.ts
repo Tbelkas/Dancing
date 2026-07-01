@@ -56,7 +56,8 @@ export class ProfileComponent implements OnInit {
     }).subscribe({
       next: ({ profile, sessions }) => {
         this.profile.set(profile);
-        this.sessions.set(sessions);
+        // Ignore sub-minute blips so streak/totals match the Practice Log page.
+        this.sessions.set(sessions.filter(s => s.totalSeconds > 60));
       },
       error: () => this.loadError.set(true)
     });
