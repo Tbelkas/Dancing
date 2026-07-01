@@ -11,6 +11,10 @@ public enum DeleteVideoResult { Success, NotFound, Forbidden }
 public interface IVideoService
 {
     Task<List<VideoDto>> GetByDanceAsync(int danceId, int? userId);
+    /// <summary>Videos the given user added privately (their personal library).</summary>
+    Task<List<VideoLibraryItemDto>> GetMineAsync(int userId);
+    /// <summary>All global (curated) videos, newest first — admin library view.</summary>
+    Task<List<VideoLibraryItemDto>> GetGlobalAsync();
     Task<List<VideoChapterDto>> GetRelatedAsync(int id, int? userId);
     Task<VideoDto?> GetByIdAsync(int id, int? userId);
     Task<VideoDto?> CreateAsync(CreateVideoRequest request, int? userId, bool isAdmin);

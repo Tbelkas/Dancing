@@ -23,6 +23,18 @@ public class VideosController : AppControllerBase
     public async Task<IActionResult> GetByDance(int danceId) =>
         Ok(await _videoService.GetByDanceAsync(danceId, CurrentUserId));
 
+    // The current user's own privately-added videos.
+    [Authorize]
+    [HttpGet("mine")]
+    public async Task<IActionResult> GetMine() =>
+        Ok(await _videoService.GetMineAsync(CurrentUserId!.Value));
+
+    // Every global (curated) video — admin library view.
+    [RequireAdmin]
+    [HttpGet("global")]
+    public async Task<IActionResult> GetGlobal() =>
+        Ok(await _videoService.GetGlobalAsync());
+
     [HttpGet("{id}/related")]
     public async Task<IActionResult> GetRelated(int id) =>
         Ok(await _videoService.GetRelatedAsync(id, CurrentUserId));

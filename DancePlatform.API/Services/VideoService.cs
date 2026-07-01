@@ -30,6 +30,49 @@ public class VideoService : IVideoService
         return await Project(ordered, userId).ToListAsync();
     }
 
+    public Task<List<VideoLibraryItemDto>> GetMineAsync(int userId) =>
+        ProjectLibraryAsync(_db.Videos.Where(v => v.OwnerUserId == userId));
+
+    public Task<List<VideoLibraryItemDto>> GetGlobalAsync() =>
+        ProjectLibraryAsync(_db.Videos.Where(v => v.OwnerUserId == null));
+
+    // Library listing: newest first, with the fields needed to render a row and link back to
+    // the dance. StyleSlug is slugified in memory (SlugGenerator can't run inside an EF query),
+    // so we pull the primary style name in the projection and convert after materializing.
+    private static async Task<List<VideoLibraryItemDto>> ProjectLibraryAsync(IQueryable<Video> source)
+    {
+        var rows = await source
+            .OrderByDescending(v => v.DateAdded)
+            .ThenByDescending(v => v.Id)
+            .Select(v => new
+            {
+                v.Id, v.Title, v.VideoId, v.Platform, v.VideoType, v.DateAdded,
+                v.ViewCount, v.StartTime, v.EndTime, v.OwnerUserId, v.DanceId,
+                DanceName = v.Dance.Name,
+                DanceSlug = v.Dance.Slug,
+                StyleName = v.Dance.DanceStyles.OrderBy(ds => ds.StyleId).Select(ds => ds.Style.Name).FirstOrDefault()
+            })
+            .ToListAsync();
+
+        return rows.Select(r => new VideoLibraryItemDto
+        {
+            Id = r.Id,
+            Title = r.Title,
+            VideoId = r.VideoId,
+            Platform = r.Platform,
+            VideoType = r.VideoType,
+            DateAdded = r.DateAdded,
+            ViewCount = r.ViewCount,
+            StartTime = r.StartTime,
+            EndTime = r.EndTime,
+            OwnerUserId = r.OwnerUserId,
+            DanceId = r.DanceId,
+            DanceName = r.DanceName,
+            DanceSlug = r.DanceSlug,
+            StyleSlug = r.StyleName is null ? string.Empty : SlugGenerator.Slugify(r.StyleName)
+        }).ToList();
+    }
+
     public async Task<VideoDto?> GetByIdAsync(int id, int? userId) =>
         await Project(VisibleTo(_db.Videos.Where(v => v.Id == id), userId), userId).FirstOrDefaultAsync();
 
