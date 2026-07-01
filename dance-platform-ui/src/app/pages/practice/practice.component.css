@@ -1,7 +1,13 @@
-/* A touch more breathing room above the page title. */
+/* Breathing room around the signature title: space above it, and clear air
+   below the title/subtitle block before the stats (global .page-title only
+   leaves 6px). */
 :host {
   display: block;
-  padding-top: 20px;
+  padding-top: 28px;
+}
+
+.page-header {
+  margin-bottom: 28px;
 }
 
 .stats-row {
