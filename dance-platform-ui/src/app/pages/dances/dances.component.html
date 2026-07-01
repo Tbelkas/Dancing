@@ -184,6 +184,7 @@
       </div>
     </div>
 
+    <!-- Music filter hidden for now (music tags de-emphasized).
     <div class="filter-row filter-row--searchable">
       <span class="filter-label">Music:</span>
       <div class="filter-row__body">
@@ -209,6 +210,7 @@
         </div>
       </div>
     </div>
+    -->
 
     <div class="filter-row">
       <span class="filter-label">Level:</span>
@@ -396,9 +398,11 @@
                 @for (style of dance.styles; track style) {
                   <span class="badge">{{ style }}</span>
                 }
+                <!-- Music tags hidden for now.
                 @for (ms of dance.musicalStyles; track ms) {
                   <span class="badge badge--music"><i class="fa-solid fa-music"></i> {{ ms }}</span>
                 }
+                -->
               </div>
               <div class="dance-card__counts">
                 @if (dance.ratingCount > 0) {
