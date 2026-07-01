@@ -27,13 +27,12 @@
         <a routerLink="/my-dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">My Dances</a>
       }
       <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Browse</a>
-      @if (role.isAdmin()) {
-        <a routerLink="/admin/add-video" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__admin-link" (click)="closeMenu()"><i class="fa-solid fa-plus"></i> Add Video</a>
-      }
       @if (auth.isAuthenticated()) {
         <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Practice</a>
         <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Profile</a>
-        <button class="btn btn--ghost header__signout" (click)="closeMenu(); auth.logout()">Sign out</button>
+        @if (role.isAdmin()) {
+          <a routerLink="/admin/add-video" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__admin-link" (click)="closeMenu()"><i class="fa-solid fa-plus"></i> Add Video</a>
+        }
       } @else {
         <a routerLink="/register" class="btn btn--ghost" (click)="closeMenu()">Sign up</a>
         <a routerLink="/login" class="btn btn--primary" (click)="closeMenu()">Sign in</a>

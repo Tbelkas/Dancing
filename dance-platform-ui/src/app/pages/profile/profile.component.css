@@ -2,6 +2,28 @@
    are shared with the public /users/:username page and live in global
    styles.scss (single source). Only profile-only (edit form) styles remain here. */
 
+/* A touch more breathing room above the page title. */
+:host {
+  display: block;
+  padding-top: 20px;
+}
+
+.profile-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Sign out lives here now (moved out of the header nav). Keep it quiet next to
+   Edit Profile until hover, where it warms toward the error/exit tone. */
+.profile-signout {
+  color: var(--color-text-muted);
+}
+.profile-signout:hover {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
 .profile-info {
   margin: 12px 0;
 }

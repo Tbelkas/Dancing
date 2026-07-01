@@ -54,7 +54,10 @@
               <a [routerLink]="['/users', profile()!.username]" class="profile-public-link">View public profile →</a>
             }
           </div>
-          <button class="btn btn--ghost" (click)="startEdit()">Edit Profile</button>
+          <div class="profile-card__actions">
+            <button class="btn btn--ghost" (click)="startEdit()">Edit Profile</button>
+            <button class="btn btn--ghost profile-signout" (click)="signOut()">Sign out</button>
+          </div>
         }
       </div>
 

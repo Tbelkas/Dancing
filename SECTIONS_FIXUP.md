@@ -282,6 +282,59 @@ Ballet (Grand Jete), Vogue (Spins and Dips), Soca (Chipping), Bhangra (Dandiya R
   Dandiya Raas, Adowa, Kpanlogo, Kuduro, Salsa Enchufla, Boogie Woogie, Hopak).
 - **Cumulative after 11 rounds: 1007 dances / 1046 videos / 2891 segments / 15 TikToks / 14 new styles.** Verified live (API). Dances crossed 1000.
 
+### Full video-quality audit + cleanup (2026-06-30)
+User: "go through all stored videos, find low-quality ones (really short, bad/no chips, not in correct place)."
+Audited all 1,046 videos (698 distinct YT ids) via `audit_videos.py` / `fetch_durations.py` / `check_alive.py`.
+Findings + fixes (all defect targets had **zero user data**):
+- **Embeddability clean** — only known `xWiAh_EizqI` jazz montage remains. Big vocabulary montages
+  (jAIwJd2tQo0 etc.) correctly per-move sliced via `StartTime` — not defects.
+- **8 duplicate dances deleted** (round 10–11 dupes that got the identical video as an older dance):
+  Heels Hair Flip, Floor Rolls, Vogue Spins and Dips, Tap Wings, Locking Basics, Salsa Cross Body Lead,
+  Krump-"Attitude", Jazz-"Heels Basics". Cross-Body Lead's 6 chips copied onto the kept dance first.
+- **1 duplicate video ROW deleted** (Pas de Bourrée d1725 had `d5-TKHTOTdU` twice).
+- **4 re-sourced** to verified-embeddable tutorials: Knee Slide d446, The Slide d477, House "Spiral"
+  d411 (was a Contemporary clip), Backward Shuffle d1639. Scripts `resource_search.py`/`resource_apply.py`.
+- **2 fabricated montage-artifact dances deleted** (Lift-Off, Small Thing — generic kids routine, not real moves).
+- **Chipped 14 long (≥4 min) no-chip tutorials** (`batch_prep.py` triage → 20 chippable / 55 no-signal):
+  8 chapter-adopt (En pointe 10, Half Break, Tap Steps in Place, Fishtail, Knee Slide, Tango Backward
+  Walk, Free Style Salsa, Dancer's Stretching Routine 11) + 6 transcript-inferred (Cultural Dance/African
+  clock, Lock Turn, Dembow, Tahitian Otea, Capoeira Ginga, Hula Basics). Skipped Heels Walk (1 giant
+  chapter), Stag Leap (anatomy chapters), Loko Loko/Bachata Dip/Bachata Body Wave/Juju (garbled/lyrics/talk).
+- 50 no-signal videos appended to `_proto/chip_skip.tsv`.
+- **Totals after: 997 dances / 1035 videos / 2924 segments / 15 TikToks / 461 videos chipped.** Verified live.
+
+### Tutting sweep + catalog 0-seg pass 2026-06-30
+- Tutting (#1710) already well covered (vids 1706/1707/1708/1709 chipped 3–8); the 3 remaining
+  tutting tutorials (h98tavLjL8o garbled PT captions, YMrANzoXy-c 0:25, qhc_VouKj4g 0:54/no-caps)
+  were already in `chip_skip.tsv` — confirmed still correct.
+- Broadened to all 30 tutorial-type 0-seg videos not yet skipped → triaged via `prep_sections`.
+- **Chipped 7 transcript-inferred** (4–6 sections each, verified live via API):
+  Backward Shuffle d1639 (v1583), Argentine Tango Gancho d1963 (v2009), Balboa Basic d1965 (v2011),
+  Shuffle Off to Buffalo d1969 (v2015), Tarantella d2013 (v2059), Jarabe Tapatio d2016 (v2062),
+  Salsa Enchufla d2023 (v2069).
+- **3 skipped** (no usable section structure): King Tut v1771 (program promo intro, no move),
+  Skip To Ma Lou v1802 (garbled lyric captions), Sgija v1856 (hype-callout challenge).
+- **16 no-caption + 4 TikTok-fetch-fail rows appended to `_proto/chip_skip.tsv`** (no text signal;
+  flagged "needs multimodal" for a future watch-the-video pass).
+
+### 10x catalog sweep + multimodal pass 2026-07-01
+Goal: maximize chips across as many dance categories as possible.
+- **Widened scope to ALL 0-seg full videos (both `tutorial` + `steps` types)** — 217 total, 104 not-yet-skipped,
+  93 fetchable. Batch-triaged via `prep_sections` (`_proto/_cand3_triage.tsv`). Most `steps` rows are genuine
+  sub-90s single-move clips → correct to skip.
+- **Chipped 5 from captions/chapters**: Waltz Jump v369 (chapters), Quickstep v276 (chapters),
+  6-Step v818, Side-to-Side/Charleston v1573, Popping Basics v1929 (en auto-sub pulled via yt-dlp).
+- **`p2JrE6JICKk` = 31-chapter shuffle-moves compilation wrongly attached to 6 unrelated dances**
+  (Scrape/Ankle Bounce/Pocket Drop/Knee Slide Sway/Fwd Knee Slide/Fwd Shuffle) → wrong-video, fix-videos
+  territory, not chipped.
+- **Multimodal contact-sheet pipeline** (yt-dlp low-res dl → `ffmpeg fps=1/12,scale,tile=5x4` → read one
+  tiled PNG/video). Verdict: works great ONLY when the video burns on-screen move labels.
+  - **Chipped 1**: Old Way Vogue v1763 (10 segs) — richly text-labeled arm-drills tutorial.
+  - **9 skipped after eyeballing** (continuous performance/class footage, no labels): Kuduro, Sbhujwa,
+    Toe Wop, Soapy, Row Di Boat, Gqom, Dancehall Gallis, Sirtaki, Loft(403). Notes updated in `chip_skip.tsv`.
+- **This session total: 6 videos chipped** (13 across the conversation). Removed 2 now-chipped rows from skip.
+- **Totals after: 1036 videos / 475 chipped / 2996 segments.** Verified live via API.
+
 <!-- CHIP-QUEUE:START -->
 ## Auto-detected chip queue _(last checked 2026-06-29 11:51)_
 

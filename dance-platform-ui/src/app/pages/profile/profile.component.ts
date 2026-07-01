@@ -7,6 +7,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ProfileService } from '../../core/services/profile.service';
 import { PracticeService } from '../../core/services/practice.service';
+import { AuthService } from '../../core/services/auth.service';
 import { UserProfile } from '../../models/user.model';
 import { PracticeSession } from '../../models/practice-session.model';
 import { computeStreak } from '../../core/utils/practice.utils';
@@ -38,8 +39,13 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private profileService: ProfileService,
-    private practiceService: PracticeService
+    private practiceService: PracticeService,
+    private auth: AuthService
   ) {}
+
+  signOut(): void {
+    this.auth.logout();
+  }
 
   ngOnInit(): void {
     forkJoin({

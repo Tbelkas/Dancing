@@ -1,3 +1,9 @@
+/* A touch more breathing room above the page title. */
+:host {
+  display: block;
+  padding-top: 20px;
+}
+
 .stats-row {
   display: flex;
   gap: 12px;
