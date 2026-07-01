@@ -571,6 +571,11 @@
   margin-top: 10px;
 }
 
+/* Inline "create this dance" affordance under the search field. */
+.create-dance {
+  margin-top: 10px;
+}
+
 .admin-form__hint code {
   font-family: var(--font-mono);
   font-size: 0.75rem;

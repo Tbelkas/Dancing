@@ -303,6 +303,11 @@
             } @else if (addVideoDanceQuery().trim()) {
               <p class="optional">No matching dances.</p>
             }
+            @if (addVideoDanceQuery().trim()) {
+              <button class="btn btn--ghost btn--sm create-dance" (click)="createAddVideoDanceFromQuery()" [disabled]="creatingAddVideoDance()">
+                <i class="fa-solid fa-plus"></i> {{ creatingAddVideoDance() ? 'Creating...' : 'Create "' + addVideoDanceQuery().trim() + '"' }}
+              </button>
+            }
           }
         </div>
         <div class="form-group">

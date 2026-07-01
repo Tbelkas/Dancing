@@ -32,6 +32,11 @@
         } @else if (danceQuery().trim()) {
           <p class="empty">No matching dances.</p>
         }
+        @if (danceQuery().trim()) {
+          <button class="btn btn--ghost btn--sm create-dance" (click)="createDanceFromQuery()" [disabled]="creatingDance()">
+            <i class="fa-solid fa-plus"></i> {{ creatingDance() ? 'Creating...' : 'Create "' + danceQuery().trim() + '"' }}
+          </button>
+        }
       }
     </div>
 

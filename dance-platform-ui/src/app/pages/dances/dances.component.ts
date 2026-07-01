@@ -479,6 +479,29 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.selectedAddVideoDance.set(null);
   }
 
+  // Inline dance creation: when the search finds no dance, create one (name only) and select it.
+  creatingAddVideoDance = signal(false);
+
+  createAddVideoDanceFromQuery(): void {
+    const name = this.addVideoDanceQuery().trim();
+    if (!name || this.creatingAddVideoDance()) return;
+    this.creatingAddVideoDance.set(true);
+    this.addVideoError.set('');
+    this.danceService.create({ name, styleIds: [], musicalStyleIds: [] }).subscribe({
+      next: dance => {
+        const created = { id: dance.id, name: dance.name };
+        this.addVideoDanceNames.update(list => [...list, created]);
+        this.selectedAddVideoDance.set(created);
+        this.addVideoDanceQuery.set('');
+        this.creatingAddVideoDance.set(false);
+        // Surface the new dance in the catalog list too.
+        this.searchResults.update(list => [dance, ...list]);
+        this.searchTotal.update(t => t + 1);
+      },
+      error: () => { this.addVideoError.set('Failed to create dance. Please try again.'); this.creatingAddVideoDance.set(false); }
+    });
+  }
+
   submitAddVideo(): void {
     const dance = this.selectedAddVideoDance();
     if (!dance) { this.addVideoError.set('Pick a dance to attach this video to.'); return; }

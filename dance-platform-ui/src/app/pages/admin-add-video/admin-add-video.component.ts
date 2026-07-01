@@ -68,6 +68,27 @@ export class AdminAddVideoComponent implements OnInit {
     this.selectedDance.set(null);
   }
 
+  // Inline dance creation: when the search finds nothing, let the user create the dance
+  // right here (name only) and select it. Style/music can be filled in later on the dance page.
+  creatingDance = signal(false);
+
+  createDanceFromQuery(): void {
+    const name = this.danceQuery().trim();
+    if (!name || this.creatingDance()) return;
+    this.creatingDance.set(true);
+    this.error.set('');
+    this.danceService.create({ name, styleIds: [], musicalStyleIds: [] }).subscribe({
+      next: dance => {
+        const created = { id: dance.id, name: dance.name };
+        this.danceNames.update(list => [...list, created]);
+        this.selectedDance.set(created);
+        this.danceQuery.set('');
+        this.creatingDance.set(false);
+      },
+      error: () => { this.error.set('Failed to create dance. Please try again.'); this.creatingDance.set(false); }
+    });
+  }
+
   onVideoTypeChange(): void {
     if (this.videoType === 'tutorial' && this.segments.length === 0)
       this.segments = DEFAULT_SEGMENT_LABELS.map(label => ({ label, start: '', end: '' }));

@@ -58,6 +58,11 @@
   margin-top: 10px;
 }
 
+/* Inline "create this dance" affordance under the search field. */
+.create-dance {
+  margin-top: 10px;
+}
+
 /* Tutorial section editor — mirrors the dance-detail inline editor. */
 .segment-rows {
   display: flex;
