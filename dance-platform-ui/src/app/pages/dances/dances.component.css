@@ -260,11 +260,11 @@
   color: var(--color-text-muted);
   cursor: pointer;
   font-family: var(--font-ui);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  padding: 5px 12px;
+  letter-spacing: 0.06em;
+  padding: 8px 15px;
   transition: all var(--transition);
 
   &:hover {
