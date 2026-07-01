@@ -11,6 +11,7 @@ import { InstructorService } from '../../core/services/instructor.service';
 import { VideoService, CreateVideoPayload } from '../../core/services/video.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
+import { RecentDancesService } from '../../core/services/recent-dances.service';
 import { parseVideoUrl } from '../../core/utils/video-url.utils';
 import { Dance } from '../../models/dance.model';
 import { Style } from '../../models/style.model';
@@ -79,11 +80,30 @@ export class DancesComponent implements OnInit, OnDestroy {
   musicExpanded = signal(false);
   readonly COLLAPSED_PILLS = 8;
 
+  // Styles the user recently opened (via a dance) float to the front so they land in the
+  // collapsed single-row view; everything else keeps the server's original order.
+  readonly sortedStyles = computed(() => {
+    const styles = this.styles();
+    const rank = new Map<string, number>();
+    for (const r of this.recentDances.recent()) {
+      if (r.styleName && !rank.has(r.styleName)) rank.set(r.styleName, rank.size);
+    }
+    if (rank.size === 0) return styles;
+    return styles
+      .map((s, i) => ({ s, i }))
+      .sort((a, b) => {
+        const ra = rank.get(a.s.name) ?? Infinity;
+        const rb = rank.get(b.s.name) ?? Infinity;
+        return ra !== rb ? ra - rb : a.i - b.i;
+      })
+      .map(x => x.s);
+  });
+
   readonly visibleStyles = computed(() => {
     const q = this.styleQuery().trim().toLowerCase();
-    if (!q) return this.styles();
+    if (!q) return this.sortedStyles();
     const sel = this.selectedStyleId();
-    return this.styles().filter(s => s.id === sel || s.name.toLowerCase().includes(q));
+    return this.sortedStyles().filter(s => s.id === sel || s.name.toLowerCase().includes(q));
   });
 
   readonly visibleMusicalStyles = computed(() => {
@@ -198,7 +218,8 @@ export class DancesComponent implements OnInit, OnDestroy {
     private instructorService: InstructorService,
     private videoService: VideoService,
     public auth: AuthService,
-    public role: RoleService
+    public role: RoleService,
+    private recentDances: RecentDancesService
   ) {}
 
   ngOnInit(): void {
