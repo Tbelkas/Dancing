@@ -75,7 +75,7 @@ export class DancesComponent implements OnInit, OnDestroy {
   // near the fold; the user expands on demand or narrows via the search box.
   stylesExpanded = signal(false);
   musicExpanded = signal(false);
-  readonly COLLAPSED_PILLS = 9;
+  readonly COLLAPSED_PILLS = 8;
 
   readonly visibleStyles = computed(() => {
     const q = this.styleQuery().trim().toLowerCase();
