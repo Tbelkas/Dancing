@@ -39,6 +39,25 @@ export interface Video {
   segments: VideoSegment[];
 }
 
+/** A video row in the "added videos" library — personal (own) or global (admin view). */
+export interface VideoLibraryItem {
+  id: number;
+  title: string;
+  videoId: string;
+  platform: string;
+  videoType: VideoType;
+  dateAdded: string;
+  viewCount: number;
+  startTime?: number;
+  endTime?: number;
+  /** Owner of a personal video; null/undefined for global videos. */
+  ownerUserId?: number;
+  danceId: number;
+  danceName: string;
+  danceSlug: string;
+  styleSlug: string;
+}
+
 export function viewCountBucket(count: number): string {
   if (count >= 10_000_000) return '10M+';
   if (count >= 5_000_000) return '5M+';

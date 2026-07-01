@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Video, VideoChapter, VideoSegment, VideoType } from '../../models/video.model';
+import { Video, VideoChapter, VideoLibraryItem, VideoSegment, VideoType } from '../../models/video.model';
 import { environment } from '../../../environments/environment';
 
 export interface SegmentPayload {
@@ -44,6 +44,16 @@ export class VideoService {
 
   getByDance(danceId: number): Observable<Video[]> {
     return this.http.get<Video[]>(`${this.base}/dance/${danceId}`);
+  }
+
+  /** The current user's own privately-added videos. */
+  getMine(): Observable<VideoLibraryItem[]> {
+    return this.http.get<VideoLibraryItem[]>(`${this.base}/mine`);
+  }
+
+  /** All global (curated) videos — admin only. */
+  getGlobal(): Observable<VideoLibraryItem[]> {
+    return this.http.get<VideoLibraryItem[]>(`${this.base}/global`);
   }
 
   /** Other dances cut from the same source video as this one (includes itself). */

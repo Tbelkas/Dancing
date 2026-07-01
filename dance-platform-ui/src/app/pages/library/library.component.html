@@ -1,0 +1,85 @@
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">Added videos</h1>
+    <p class="page-subtitle">
+      @if (scope() === 'global') {
+        Every curated video on the platform. Jump to a video's dance or remove it.
+      } @else {
+        Videos you've added. They're private to you and live on each move's page.
+      }
+    </p>
+  </div>
+
+  @if (role.isAdmin()) {
+    <div class="scope-tabs" role="tablist" aria-label="Video scope">
+      <button class="scope-tab" [class.active]="scope() === 'mine'" role="tab" [attr.aria-selected]="scope() === 'mine'" (click)="setScope('mine')">
+        <i class="fa-solid fa-user"></i> My videos
+      </button>
+      <button class="scope-tab" [class.active]="scope() === 'global'" role="tab" [attr.aria-selected]="scope() === 'global'" (click)="setScope('global')">
+        <i class="fa-solid fa-globe"></i> Global
+      </button>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="video-list" aria-busy="true" aria-label="Loading videos">
+      @for (i of [0,1,2,3,4]; track i) {
+        <div class="video-row video-row--skeleton">
+          <div class="video-row__thumb skeleton"></div>
+          <div class="video-row__main">
+            <div class="skeleton skeleton-line skeleton-line--title"></div>
+            <div class="skeleton skeleton-line skeleton-line--short"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (items().length === 0) {
+    <div class="empty-state card">
+      <div class="empty-state__icon"><i class="fa-solid fa-film"></i></div>
+      <h2>No videos yet</h2>
+      @if (scope() === 'global') {
+        <p>No global videos have been added.</p>
+      } @else {
+        <p>You haven't added any videos yet. Add one from a move's page or the catalog.</p>
+        <a routerLink="/dances" class="btn btn--primary btn--sm"><i class="fa-solid fa-magnifying-glass"></i> Browse dances</a>
+      }
+    </div>
+  } @else {
+    <p class="results-count">{{ items().length }} video{{ items().length !== 1 ? 's' : '' }}</p>
+    <ul class="video-list">
+      @for (item of items(); track item.id) {
+        <li class="video-row">
+          <a class="video-row__link" [routerLink]="item.danceSlug | dancePath:item.styleSlug" [attr.aria-label]="'Open ' + item.danceName">
+            <span class="video-row__thumb">
+              @if (thumbnailUrl(item); as thumb) {
+                <img [src]="thumb" alt="" loading="lazy" (error)="onThumbError(item.id)" />
+              } @else {
+                <span class="video-row__thumb-fallback"><i class="fa-solid fa-play"></i></span>
+              }
+            </span>
+            <span class="video-row__main">
+              <span class="video-row__title">{{ item.title }}</span>
+              <span class="video-row__meta">
+                <span class="video-row__dance"><i class="fa-solid fa-shoe-prints"></i> {{ item.danceName }}</span>
+                <span class="badge badge--sm">{{ platformLabel(item.platform) }}</span>
+                @if (item.videoType === 'tutorial') {
+                  <span class="badge badge--sm badge--tutorial">Tutorial</span>
+                }
+                @if (scope() === 'global') {
+                  <span class="badge badge--sm badge--public">Global</span>
+                } @else {
+                  <span class="badge badge--sm badge--private">Private</span>
+                }
+              </span>
+            </span>
+          </a>
+          @if (canDelete(item)) {
+            <button class="video-row__delete" (click)="deleteVideo(item, $event)" [disabled]="deletingId() === item.id" title="Delete video" aria-label="Delete video">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>
