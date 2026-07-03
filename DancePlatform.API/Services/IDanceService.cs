@@ -17,5 +17,8 @@ public interface IDanceService
     Task<bool> ToggleLearnedAsync(int userId, int danceId);
     Task<bool> ToggleInProgressAsync(int userId, int danceId);
     Task<DanceStatusDto> SetStatusAsync(int userId, int danceId, string status);
-    Task<SearchDancesResult> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, string? sortBy, int? userId, int page = 1, int pageSize = 24);
+    Task<SearchDancesResult> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, string? sortBy, int? userId, int page = 1, int pageSize = 24, bool favoritesOnly = false);
+
+    /// <summary>One random dance matching the same filters as <see cref="SearchAsync"/>, or null if none match.</summary>
+    Task<DanceDto?> RandomAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, int? userId, bool favoritesOnly = false);
 }

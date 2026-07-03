@@ -1,13 +1,43 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { PracticeService, CreatePracticePayload } from '../../core/services/practice.service';
 import { DanceService } from '../../core/services/dance.service';
-import { PracticeSession } from '../../models/practice-session.model';
-import { toLocalDateString, formatClock } from '../../core/utils/video-url.utils';
-import { computeStreak } from '../../core/utils/practice.utils';
+import { PracticeSession, PracticeSessionItem } from '../../models/practice-session.model';
+import { toLocalDateString, toPracticeDateString, formatClock } from '../../core/utils/video-url.utils';
+import { computeStreak, computeLongestStreak } from '../../core/utils/practice.utils';
+
+type Timeframe = 'week' | 'month' | 'all';
+
+const GOAL_KEY = 'practice.weeklyGoal.v1';
+
+/** Items shorter than this are tracking noise (a stray autoplay, a mis-click) and get folded away. */
+const SLIVER_SECONDS = 30;
+
+interface HeatmapDay {
+  date: string;
+  minutes: number;
+  /** 0–4 intensity bucket; -1 marks days in the future (rendered blank). */
+  level: number;
+  title: string;
+}
+
+interface HeatmapWeek {
+  monthLabel: string | null;
+  days: HeatmapDay[];
+}
+
+interface DanceBreakdownRow {
+  danceId: number;
+  name: string;
+  slug: string;
+  styleSlug: string;
+  minutes: number;
+  /** Bar width relative to the top dance, 0–100. */
+  pct: number;
+}
 
 @Component({
   selector: 'app-practice',
@@ -16,7 +46,7 @@ import { computeStreak } from '../../core/utils/practice.utils';
   templateUrl: './practice.component.html',
   styleUrls: ['./practice.component.css']
 })
-export class PracticeComponent implements OnInit {
+export class PracticeComponent implements OnInit, OnDestroy {
   sessions = signal<PracticeSession[]>([]);
   dances = signal<{ id: number; name: string }[]>([]);
   loading = signal(true);
@@ -29,10 +59,71 @@ export class PracticeComponent implements OnInit {
   addError = signal('');
   adding = signal(false);
 
+  // Stats can be scoped to a rolling window; streaks are inherently all-time.
+  timeframe = signal<Timeframe>('all');
+
+  // Weekly goal lives in localStorage — it's personal pacing, not shared data.
+  weeklyGoal = signal<number | null>(this.readGoal());
+  editingGoal = signal(false);
+  goalInput: number | null = null;
+
+  // Inline session editing
+  editingId = signal<number | null>(null);
+  editDate = '';
+  editDuration: number | null = null;
+  editNotes = '';
+  savingEdit = signal(false);
+  editError = signal('');
+
+  // Optimistic delete with an undo window; the API delete only fires once the toast expires.
+  pendingDelete = signal<PracticeSession | null>(null);
+  private deleteTimer: ReturnType<typeof setTimeout> | null = null;
+
   /** Only surface sessions that lasted more than a minute — sub-minute blips (stray watches) are noise. */
   readonly visibleSessions = computed(() => this.sessions().filter(s => s.totalSeconds > 60));
 
   readonly streak = computed(() => computeStreak(this.visibleSessions()));
+  readonly longestStreak = computed(() => computeLongestStreak(this.visibleSessions()));
+
+  /** The streak survives today only if the user practices — nudge while it's still alive. */
+  readonly streakAtRisk = computed(() => {
+    const today = toPracticeDateString(new Date());
+    return this.streak() > 0 && !this.visibleSessions().some(s => s.date === today);
+  });
+
+  readonly scopedSessions = computed(() => {
+    const tf = this.timeframe();
+    if (tf === 'all') return this.visibleSessions();
+    const days = tf === 'week' ? 7 : 30;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - (days - 1));
+    const cutoffStr = toLocalDateString(cutoff);
+    return this.visibleSessions().filter(s => s.date >= cutoffStr);
+  });
+
+  readonly scopedTotalMinutes = computed(() =>
+    this.scopedSessions().reduce((sum, s) => sum + (s.durationMinutes ?? 0), 0));
+
+  /** Minutes practiced in the current Monday-start week, for the goal ring. */
+  readonly thisWeekMinutes = computed(() => {
+    const monday = this.mondayOfCurrentWeek();
+    const mondayStr = toLocalDateString(monday);
+    return this.visibleSessions()
+      .filter(s => s.date >= mondayStr)
+      .reduce((sum, s) => sum + (s.durationMinutes ?? 0), 0);
+  });
+
+  readonly goalPct = computed(() => {
+    const goal = this.weeklyGoal();
+    if (!goal || goal <= 0) return 0;
+    return Math.min(100, Math.round(this.thisWeekMinutes() / goal * 100));
+  });
+
+  /** Circumference-based dash offset for the SVG goal ring (r = 15.5). */
+  readonly goalDash = computed(() => {
+    const c = 2 * Math.PI * 15.5;
+    return `${c * this.goalPct() / 100} ${c}`;
+  });
 
   readonly groupedSessions = computed(() => {
     const map = new Map<string, PracticeSession[]>();
@@ -42,6 +133,63 @@ export class PracticeComponent implements OnInit {
       map.set(s.date, list);
     }
     return [...map.entries()].sort((a, b) => b[0].localeCompare(a[0]));
+  });
+
+  readonly heatmapWeeks = computed<HeatmapWeek[]>(() => {
+    const minutesByDate = new Map<string, number>();
+    for (const s of this.visibleSessions()) {
+      minutesByDate.set(s.date, (minutesByDate.get(s.date) ?? 0) + (s.durationMinutes ?? 0));
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const thisMonday = this.mondayOfCurrentWeek();
+    const WEEKS = 12;
+    const weeks: HeatmapWeek[] = [];
+    let prevMonth = -1;
+    for (let w = WEEKS - 1; w >= 0; w--) {
+      const monday = new Date(thisMonday);
+      monday.setDate(thisMonday.getDate() - w * 7);
+      const days: HeatmapDay[] = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const ds = toLocalDateString(d);
+        const minutes = minutesByDate.get(ds) ?? 0;
+        const future = d.getTime() > today.getTime();
+        const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        days.push({
+          date: ds,
+          minutes,
+          level: future ? -1 : this.heatLevel(minutes),
+          title: future ? '' : `${label} — ${minutes > 0 ? this.formatDuration(minutes) : 'no practice'}`
+        });
+      }
+      const month = monday.getMonth();
+      weeks.push({
+        monthLabel: month !== prevMonth ? monday.toLocaleDateString('en-US', { month: 'short' }) : null,
+        days
+      });
+      prevMonth = month;
+    }
+    return weeks;
+  });
+
+  readonly danceBreakdown = computed<DanceBreakdownRow[]>(() => {
+    const byDance = new Map<number, DanceBreakdownRow & { seconds: number }>();
+    for (const s of this.scopedSessions()) {
+      for (const item of s.items) {
+        const row = byDance.get(item.danceId)
+          ?? { danceId: item.danceId, name: item.danceName, slug: item.danceSlug, styleSlug: item.danceStyleSlug, minutes: 0, pct: 0, seconds: 0 };
+        row.seconds += item.seconds;
+        byDance.set(item.danceId, row);
+      }
+    }
+    const rows = [...byDance.values()]
+      .filter(r => r.seconds >= SLIVER_SECONDS)
+      .sort((a, b) => b.seconds - a.seconds)
+      .slice(0, 8);
+    const max = rows[0]?.seconds ?? 1;
+    return rows.map(r => ({ ...r, minutes: Math.round(r.seconds / 60), pct: Math.max(4, Math.round(r.seconds / max * 100)) }));
   });
 
   constructor(
@@ -57,6 +205,74 @@ export class PracticeComponent implements OnInit {
       error: () => this.loading.set(false)
     });
   }
+
+  ngOnDestroy(): void {
+    // Leaving the page forfeits the undo window — commit the pending delete now.
+    this.commitPendingDelete();
+  }
+
+  // --- Stats helpers ---
+
+  setTimeframe(tf: Timeframe): void {
+    this.timeframe.set(tf);
+  }
+
+  /** "45 min" under an hour, "2 h 35 min" above it. */
+  formatDuration(minutes: number): string {
+    if (minutes < 60) return `${minutes} min`;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `${h} h ${m} min` : `${h} h`;
+  }
+
+  private mondayOfCurrentWeek(): Date {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dow = (today.getDay() + 6) % 7; // 0 = Monday
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - dow);
+    return monday;
+  }
+
+  private heatLevel(minutes: number): number {
+    if (minutes <= 0) return 0;
+    if (minutes < 10) return 1;
+    if (minutes < 20) return 2;
+    if (minutes < 40) return 3;
+    return 4;
+  }
+
+  // --- Weekly goal ---
+
+  private readGoal(): number | null {
+    try {
+      const raw = localStorage.getItem(GOAL_KEY);
+      const n = raw === null ? NaN : Number(raw);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    } catch { return null; }
+  }
+
+  startEditGoal(): void {
+    this.goalInput = this.weeklyGoal() ?? 60;
+    this.editingGoal.set(true);
+  }
+
+  saveGoal(): void {
+    const n = this.goalInput;
+    const goal = n && n > 0 ? Math.round(n) : null;
+    this.weeklyGoal.set(goal);
+    this.editingGoal.set(false);
+    try {
+      if (goal) localStorage.setItem(GOAL_KEY, String(goal));
+      else localStorage.removeItem(GOAL_KEY);
+    } catch { /* storage unavailable — the signal still applies for the session */ }
+  }
+
+  cancelEditGoal(): void {
+    this.editingGoal.set(false);
+  }
+
+  // --- Manual add ---
 
   toggleAddForm(): void {
     this.showAddForm.update(v => !v);
@@ -82,7 +298,7 @@ export class PracticeComponent implements OnInit {
     this.addError.set('');
     this.practiceService.create(payload).subscribe({
       next: session => {
-        this.sessions.update(list => [session, ...list].sort((a, b) => b.date.localeCompare(a.date)));
+        this.sessions.update(list => this.sorted([session, ...list]));
         this.showAddForm.set(false);
         this.adding.set(false);
         this.newDanceId = null;
@@ -93,13 +309,84 @@ export class PracticeComponent implements OnInit {
     });
   }
 
-  deleteSession(id: number): void {
-    if (!confirm('Delete this practice session?')) return;
-    this.practiceService.delete(id).subscribe({
-      next: () => this.sessions.update(list => list.filter(s => s.id !== id)),
-      error: () => alert('Failed to delete session.')
+  // --- Inline edit ---
+
+  startEdit(session: PracticeSession): void {
+    this.editingId.set(session.id);
+    this.editDate = session.date;
+    this.editDuration = session.items.length === 1 ? session.durationMinutes : null;
+    this.editNotes = session.notes ?? '';
+    this.editError.set('');
+  }
+
+  cancelEdit(): void {
+    this.editingId.set(null);
+  }
+
+  /** Duration is only editable when the session holds a single dance — matches the server rule. */
+  canEditDuration(session: PracticeSession): boolean {
+    return session.items.length === 1;
+  }
+
+  saveEdit(session: PracticeSession): void {
+    if (!this.editDate) { this.editError.set('Date is required.'); return; }
+    this.savingEdit.set(true);
+    this.editError.set('');
+    this.practiceService.update(session.id, {
+      date: this.editDate,
+      notes: this.editNotes.trim() || undefined,
+      durationMinutes: this.canEditDuration(session) && this.editDuration != null ? this.editDuration : undefined
+    }).subscribe({
+      next: updated => {
+        this.sessions.update(list => this.sorted(list.map(s => s.id === updated.id ? updated : s)));
+        this.editingId.set(null);
+        this.savingEdit.set(false);
+      },
+      error: () => { this.editError.set('Failed to save changes.'); this.savingEdit.set(false); }
     });
   }
+
+  // --- Delete with undo ---
+
+  deleteSession(session: PracticeSession): void {
+    // Only one pending delete at a time; a second delete commits the first immediately.
+    this.commitPendingDelete();
+    this.sessions.update(list => list.filter(s => s.id !== session.id));
+    this.pendingDelete.set(session);
+    this.deleteTimer = setTimeout(() => this.commitPendingDelete(), 6000);
+  }
+
+  undoDelete(): void {
+    const session = this.pendingDelete();
+    if (!session) return;
+    this.clearDeleteTimer();
+    this.pendingDelete.set(null);
+    this.sessions.update(list => this.sorted([session, ...list]));
+  }
+
+  private commitPendingDelete(): void {
+    const session = this.pendingDelete();
+    if (!session) return;
+    this.clearDeleteTimer();
+    this.pendingDelete.set(null);
+    this.practiceService.delete(session.id).subscribe({
+      // If the server refuses, quietly put the session back rather than losing data.
+      error: () => this.sessions.update(list => this.sorted([session, ...list]))
+    });
+  }
+
+  private clearDeleteTimer(): void {
+    if (this.deleteTimer) {
+      clearTimeout(this.deleteTimer);
+      this.deleteTimer = null;
+    }
+  }
+
+  private sorted(list: PracticeSession[]): PracticeSession[] {
+    return [...list].sort((a, b) => b.date.localeCompare(a.date) || b.startedAt.localeCompare(a.startedAt));
+  }
+
+  // --- Display helpers ---
 
   formatDate(dateStr: string): string {
     // Parse as local midnight: new Date('YYYY-MM-DD') is UTC midnight and renders a day early west of UTC
@@ -116,7 +403,64 @@ export class PracticeComponent implements OnInit {
     return start === end ? start : `${start} – ${end}`;
   }
 
-  totalMinutes(): number {
-    return this.visibleSessions().reduce((sum, s) => sum + (s.durationMinutes ?? 0), 0);
+  /** Sessions that started deep in the night get a moon marker. */
+  isNightSession(session: PracticeSession): boolean {
+    const hour = new Date(session.startedAt).getHours();
+    return hour >= 22 || hour < 5;
+  }
+
+  /** Explains why the duration chip can be smaller than the clock window (pauses aren't counted). */
+  durationTitle(session: PracticeSession): string {
+    const spanMinutes = Math.round((new Date(session.lastActivityAt).getTime() - new Date(session.startedAt).getTime()) / 60000);
+    if (spanMinutes >= session.durationMinutes + 2) {
+      return `${session.durationMinutes} min of practice across a ${spanMinutes}-minute window — pauses don't count`;
+    }
+    return `${session.durationMinutes} min of practice`;
+  }
+
+  /** Sub-30s items are noise in a multi-dance session; fold them into a "+n more" line. */
+  visibleItems(session: PracticeSession): PracticeSessionItem[] {
+    if (session.items.length <= 1) return session.items;
+    const real = session.items.filter(i => i.seconds >= SLIVER_SECONDS);
+    return real.length > 0 ? real : session.items;
+  }
+
+  hiddenItemCount(session: PracticeSession): number {
+    return session.items.length - this.visibleItems(session).length;
+  }
+
+  dayTotalLabel(sessions: PracticeSession[]): string {
+    const minutes = sessions.reduce((sum, s) => sum + (s.durationMinutes ?? 0), 0);
+    return `${sessions.length} session${sessions.length !== 1 ? 's' : ''} · ${this.formatDuration(minutes)}`;
+  }
+
+  // --- CSV export ---
+
+  exportCsv(): void {
+    const esc = (v: string | number | undefined | null): string => {
+      const s = String(v ?? '');
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = ['Date,Start,End,Dance,Minutes,Seconds,Notes'];
+    for (const s of this.visibleSessions()) {
+      for (const item of s.items) {
+        lines.push([
+          s.date,
+          new Date(s.startedAt).toLocaleTimeString(),
+          new Date(s.lastActivityAt).toLocaleTimeString(),
+          esc(item.danceName),
+          Math.round(item.seconds / 60),
+          item.seconds,
+          esc(s.notes)
+        ].join(','));
+      }
+    }
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `practice-log-${toLocalDateString(new Date())}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 }

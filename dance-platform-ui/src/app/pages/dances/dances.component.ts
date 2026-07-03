@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { DanceService, CreateDancePayload, ImportResult, DanceStatus } from '../../core/services/dance.service';
@@ -20,12 +20,13 @@ import { Instructor } from '../../models/instructor.model';
 import { DIFFICULTY_FILTER_OPTIONS, DIFFICULTY_LEVELS } from '../../core/constants/dance.constants';
 import { toggleSet } from '../../core/utils/set.utils';
 
+// Favorited is intentionally not here: it's orthogonal to learning progress and
+// rendered as an independent heart toggle instead.
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All' },
   { value: 'notstarted', label: 'Not Started' },
   { value: 'inprogress', label: 'In Progress' },
-  { value: 'learned', label: 'Learned' },
-  { value: 'favorite', label: 'Favorited' }
+  { value: 'learned', label: 'Learned' }
 ];
 
 const FILTERS_KEY = 'dances.filters.v1';
@@ -57,7 +58,12 @@ export class DancesComponent implements OnInit, OnDestroy {
   // Data
   searchResults = signal<Dance[]>([]);
   searchTotal = signal(0);
+  /** Catalog size ignoring filters, for "N of M dances". */
+  grandTotal = signal(0);
   currentPage = signal(1);
+  /** "Continue learning" rail: the user's in-progress dances (fetched once, authed only). */
+  railDances = signal<Dance[]>([]);
+  surprising = signal(false);
   styles = signal<Style[]>([]);
   musicalStyles = signal<MusicalStyle[]>([]);
   instructors = signal<Instructor[]>([]);
@@ -69,6 +75,7 @@ export class DancesComponent implements OnInit, OnDestroy {
   selectedMusicalStyleId = signal<number | null>(null);
   selectedDifficulty = signal<string | null>(null);
   selectedStatus = signal<string>('all');
+  favoritesOnly = signal(false);
   sortBy = signal<string>('recommended');
 
   styleQuery = signal('');
@@ -144,8 +151,34 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.selectedStyleId() !== null ||
     this.selectedMusicalStyleId() !== null ||
     this.selectedDifficulty() !== null ||
-    this.selectedStatus() !== 'all'
+    this.selectedStatus() !== 'all' ||
+    this.favoritesOnly()
   );
+
+  /** One chip per active filter, each individually removable. */
+  readonly activeFilterChips = computed(() => {
+    const chips: { key: string; label: string }[] = [];
+    const q = this.searchQuery().trim();
+    if (q) chips.push({ key: 'q', label: `"${q}"` });
+    const styleId = this.selectedStyleId();
+    if (styleId !== null) {
+      const style = this.styles().find(s => s.id === styleId);
+      chips.push({ key: 'style', label: style?.name ?? 'Style' });
+    }
+    const diff = this.selectedDifficulty();
+    if (diff) chips.push({ key: 'level', label: diff });
+    const status = this.selectedStatus();
+    if (status !== 'all') {
+      const opt = this.statusOptions.find(o => o.value === status);
+      chips.push({ key: 'status', label: opt?.label ?? status });
+    }
+    if (this.favoritesOnly()) chips.push({ key: 'favorites', label: 'Favorites' });
+    return chips;
+  });
+
+  /** In-progress rail when the user has any; otherwise recently-viewed unlearned dances. */
+  readonly recentRail = computed(() =>
+    this.recentDances.recent().filter(d => !d.learned).slice(0, 12));
 
   readonly totalPages = computed(() => Math.ceil(this.searchTotal() / this.PAGE_SIZE));
 
@@ -219,7 +252,9 @@ export class DancesComponent implements OnInit, OnDestroy {
     private videoService: VideoService,
     public auth: AuthService,
     public role: RoleService,
-    private recentDances: RecentDancesService
+    private recentDances: RecentDancesService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -228,24 +263,55 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.instructorService.getAll().subscribe(i => this.instructors.set(i));
     this.restoreFilters();
     this.runSearch();
+    if (this.auth.isAuthenticated()) {
+      this.danceService.searchDances({ status: 'inprogress', sortBy: 'name', pageSize: 12 })
+        .subscribe({ next: r => this.railDances.set(r.items), error: () => {} });
+    }
   }
 
-  /** Restore the last-used filters so open/refresh lands where the user left off. */
+  /**
+   * Restore filters: an explicit URL (shared link, back button) wins; otherwise fall back to
+   * the last-used set in localStorage so open/refresh lands where the user left off.
+   */
   private restoreFilters(): void {
-    try {
-      const raw = localStorage.getItem(FILTERS_KEY);
-      if (!raw) return;
-      const s = JSON.parse(raw);
-      if (typeof s.searchQuery === 'string') this.searchQuery.set(s.searchQuery);
-      if (s.selectedStyleId === null || typeof s.selectedStyleId === 'number') this.selectedStyleId.set(s.selectedStyleId);
-      if (s.selectedMusicalStyleId === null || typeof s.selectedMusicalStyleId === 'number') this.selectedMusicalStyleId.set(s.selectedMusicalStyleId);
-      if (s.selectedDifficulty === null || typeof s.selectedDifficulty === 'string') this.selectedDifficulty.set(s.selectedDifficulty);
-      if (typeof s.selectedStatus === 'string') this.selectedStatus.set(s.selectedStatus);
-      if (typeof s.sortBy === 'string') this.sortBy.set(s.sortBy);
-      if (typeof s.currentPage === 'number' && s.currentPage >= 1) this.currentPage.set(s.currentPage);
-    } catch { /* ignore malformed/unavailable storage */ }
-    // Status only applies to signed-in users; drop a stale personal filter when logged out.
-    if (!this.auth.isAuthenticated()) this.selectedStatus.set('all');
+    const qp = this.route.snapshot.queryParamMap;
+    const urlHasFilters = ['q', 'style', 'level', 'status', 'fav', 'sort', 'page'].some(k => qp.has(k));
+    if (urlHasFilters) {
+      this.searchQuery.set(qp.get('q') ?? '');
+      const style = Number(qp.get('style'));
+      this.selectedStyleId.set(Number.isInteger(style) && style > 0 ? style : null);
+      this.selectedDifficulty.set(qp.get('level'));
+      this.selectedStatus.set(qp.get('status') ?? 'all');
+      this.favoritesOnly.set(qp.get('fav') === '1');
+      if (qp.get('sort')) this.sortBy.set(qp.get('sort')!);
+      const page = Number(qp.get('page'));
+      if (Number.isInteger(page) && page >= 1) this.currentPage.set(page);
+    } else {
+      try {
+        const raw = localStorage.getItem(FILTERS_KEY);
+        if (raw) {
+          const s = JSON.parse(raw);
+          if (typeof s.searchQuery === 'string') this.searchQuery.set(s.searchQuery);
+          if (s.selectedStyleId === null || typeof s.selectedStyleId === 'number') this.selectedStyleId.set(s.selectedStyleId);
+          if (s.selectedMusicalStyleId === null || typeof s.selectedMusicalStyleId === 'number') this.selectedMusicalStyleId.set(s.selectedMusicalStyleId);
+          if (s.selectedDifficulty === null || typeof s.selectedDifficulty === 'string') this.selectedDifficulty.set(s.selectedDifficulty);
+          if (typeof s.selectedStatus === 'string') this.selectedStatus.set(s.selectedStatus);
+          if (typeof s.favoritesOnly === 'boolean') this.favoritesOnly.set(s.favoritesOnly);
+          if (typeof s.sortBy === 'string') this.sortBy.set(s.sortBy);
+          if (typeof s.currentPage === 'number' && s.currentPage >= 1) this.currentPage.set(s.currentPage);
+        }
+      } catch { /* ignore malformed/unavailable storage */ }
+    }
+    // Legacy stored/linked value from when Favorited lived inside status.
+    if (this.selectedStatus() === 'favorite') {
+      this.selectedStatus.set('all');
+      this.favoritesOnly.set(true);
+    }
+    // Status/favorites only apply to signed-in users; drop stale personal filters when logged out.
+    if (!this.auth.isAuthenticated()) {
+      this.selectedStatus.set('all');
+      this.favoritesOnly.set(false);
+    }
   }
 
   private persistFilters(): void {
@@ -256,15 +322,35 @@ export class DancesComponent implements OnInit, OnDestroy {
         selectedMusicalStyleId: this.selectedMusicalStyleId(),
         selectedDifficulty: this.selectedDifficulty(),
         selectedStatus: this.selectedStatus(),
+        favoritesOnly: this.favoritesOnly(),
         sortBy: this.sortBy(),
         currentPage: this.currentPage()
       }));
     } catch { /* storage unavailable (private mode, quota) — non-fatal */ }
+    this.syncUrl();
+  }
+
+  /** Mirror the filters into the URL so any filtered view is shareable and back-button-safe. */
+  private syncUrl(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      replaceUrl: true,
+      queryParams: {
+        q: this.searchQuery().trim() || null,
+        style: this.selectedStyleId(),
+        level: this.selectedDifficulty(),
+        status: this.selectedStatus() !== 'all' ? this.selectedStatus() : null,
+        fav: this.favoritesOnly() ? '1' : null,
+        sort: this.sortBy() !== 'recommended' ? this.sortBy() : null,
+        page: this.currentPage() > 1 ? this.currentPage() : null
+      }
+    });
   }
 
   ngOnDestroy(): void {
     if (this.searchDebounce) clearTimeout(this.searchDebounce);
     this.searchSub?.unsubscribe();
+    this.clearHoverTimer();
   }
 
   private runSearch(): void {
@@ -279,6 +365,7 @@ export class DancesComponent implements OnInit, OnDestroy {
       musicalStyleId: this.selectedMusicalStyleId(),
       difficulty: this.selectedDifficulty() ?? undefined,
       status: this.selectedStatus(),
+      favoritesOnly: this.favoritesOnly(),
       sortBy: this.sortBy(),
       page: this.currentPage(),
       pageSize: this.PAGE_SIZE
@@ -286,6 +373,7 @@ export class DancesComponent implements OnInit, OnDestroy {
       next: result => {
         this.searchResults.set(result.items);
         this.searchTotal.set(result.total);
+        this.grandTotal.set(result.grandTotal ?? result.total);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
@@ -323,6 +411,45 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.runSearch();
   }
 
+  toggleFavoritesOnly(): void {
+    this.favoritesOnly.update(v => !v);
+    this.currentPage.set(1);
+    this.runSearch();
+  }
+
+  /** Removes one active-filter chip by key. */
+  removeFilter(key: string): void {
+    switch (key) {
+      case 'q': this.searchQuery.set(''); break;
+      case 'style': this.selectedStyleId.set(null); break;
+      case 'level': this.selectedDifficulty.set(null); break;
+      case 'status': this.selectedStatus.set('all'); break;
+      case 'favorites': this.favoritesOnly.set(false); break;
+    }
+    this.currentPage.set(1);
+    this.runSearch();
+  }
+
+  /** Jump to a random dance matching the current filters — for the "what do I practice?" moment. */
+  surpriseMe(): void {
+    if (this.surprising()) return;
+    this.surprising.set(true);
+    this.danceService.randomDance({
+      q: this.searchQuery().trim() || undefined,
+      styleId: this.selectedStyleId(),
+      musicalStyleId: this.selectedMusicalStyleId(),
+      difficulty: this.selectedDifficulty() ?? undefined,
+      status: this.selectedStatus(),
+      favoritesOnly: this.favoritesOnly()
+    }).subscribe({
+      next: dance => {
+        this.surprising.set(false);
+        this.router.navigate(dance.styleSlug ? ['/dances', dance.styleSlug, dance.slug] : ['/dances', dance.slug]);
+      },
+      error: () => this.surprising.set(false)
+    });
+  }
+
   onSortChange(value: string): void {
     this.sortBy.set(value);
     this.currentPage.set(1);
@@ -341,16 +468,52 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.selectedMusicalStyleId.set(null);
     this.selectedDifficulty.set(null);
     this.selectedStatus.set('all');
+    this.favoritesOnly.set(false);
     this.currentPage.set(1);
     this.runSearch();
+  }
+
+  // Hovering a card cycles through YouTube's storyboard frames (mq1–mq3) as a lightweight
+  // motion preview; leaving restores the default thumbnail.
+  private hoverDanceId = signal<number | null>(null);
+  private hoverFrame = signal(0);
+  private hoverTimer: ReturnType<typeof setInterval> | null = null;
+
+  onMediaEnter(dance: Dance): void {
+    if (!dance.thumbnailVideoId || dance.thumbnailPlatform !== 'youtube' || this.thumbFailed().has(dance.id)) return;
+    this.hoverDanceId.set(dance.id);
+    this.hoverFrame.set(1);
+    this.clearHoverTimer();
+    this.hoverTimer = setInterval(() => this.hoverFrame.update(f => f % 3 + 1), 800);
+  }
+
+  onMediaLeave(): void {
+    this.clearHoverTimer();
+    this.hoverDanceId.set(null);
+    this.hoverFrame.set(0);
+  }
+
+  private clearHoverTimer(): void {
+    if (this.hoverTimer) {
+      clearInterval(this.hoverTimer);
+      this.hoverTimer = null;
+    }
   }
 
   thumbnailUrl(dance: Dance): string | null {
     if (this.thumbFailed().has(dance.id)) return null;
     if (dance.thumbnailVideoId && dance.thumbnailPlatform === 'youtube') {
+      if (this.hoverDanceId() === dance.id && this.hoverFrame() > 0) {
+        return `https://i.ytimg.com/vi/${dance.thumbnailVideoId}/mq${this.hoverFrame()}.jpg`;
+      }
       return `https://i.ytimg.com/vi/${dance.thumbnailVideoId}/hqdefault.jpg`;
     }
     return null;
+  }
+
+  /** Style badges minus any that just repeat the dance's own name (pure noise on the card). */
+  styleBadges(dance: Dance): string[] {
+    return dance.styles.filter(s => s.toLowerCase() !== dance.name.toLowerCase());
   }
 
   onThumbError(danceId: number): void {

@@ -11,6 +11,13 @@ export interface CreatePracticePayload {
   notes?: string;
 }
 
+export interface UpdatePracticePayload {
+  date: string;
+  notes?: string;
+  /** Only applied server-side when the session holds a single dance. */
+  durationMinutes?: number;
+}
+
 export interface PracticeHeartbeatPayload {
   danceId: number;
   seconds: number;
@@ -33,6 +40,10 @@ export class PracticeService {
 
   heartbeat(payload: PracticeHeartbeatPayload): Observable<PracticeSession> {
     return this.http.post<PracticeSession>(`${this.base}/heartbeat`, payload);
+  }
+
+  update(id: number, payload: UpdatePracticePayload): Observable<PracticeSession> {
+    return this.http.put<PracticeSession>(`${this.base}/${id}`, payload);
   }
 
   delete(id: number): Observable<void> {

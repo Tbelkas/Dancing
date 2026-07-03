@@ -336,7 +336,13 @@ Goal: maximize chips across as many dance categories as possible.
 - **Totals after: 1036 videos / 475 chipped / 2996 segments.** Verified live via API.
 
 <!-- CHIP-QUEUE:START -->
-## Auto-detected chip queue _(last checked 2026-06-29 11:51)_
+## Auto-detected chip queue _(last checked 2026-07-02 09:00)_
 
-No videos awaiting chips. ✅
+1 tutorial video(s) awaiting section chips (1 new since last check):
+
+| VideoDbId | YtId | Dance |
+|---|---|---|
+| 2026 | 3gBbvQ_mgjw | Heels Choreography ⭐ |
+
+_Run `/find-chips` in a local session to process these (LAN DB access required)._
 <!-- CHIP-QUEUE:END -->

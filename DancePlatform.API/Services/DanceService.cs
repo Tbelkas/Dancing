@@ -287,7 +287,66 @@ public class DanceService : IDanceService
         return new DanceStatusDto(wantLearned, wantInProgress);
     }
 
-    public async Task<SearchDancesResult> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, string? sortBy, int? userId, int page = 1, int pageSize = 24)
+    public async Task<SearchDancesResult> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, string? sortBy, int? userId, int page = 1, int pageSize = 24, bool favoritesOnly = false)
+    {
+        var entityQ = BuildFilteredQuery(query, styleId, musicalStyleId, difficulty, status, userId, favoritesOnly);
+        var clampedPage = Math.Max(1, page);
+
+        // Sorts push ORDER BY + COUNT + SKIP/TAKE to the database. "recommended"/"tutorials" rank on
+        // video shape via EXISTS/COUNT subqueries: a full-length tutorial (VideoType "tutorial" with no
+        // StartTime clip window) is the signal for "extensive teaching content", as opposed to a short
+        // clip or a slice carved out of a many-dance compilation (which always carries StartTime).
+        // For signed-in users, "recommended" additionally floats styles they favorite/practice.
+        var affinityStyleIds = sortBy == "recommended" && userId.HasValue
+            ? await GetAffinityStyleIdsAsync(userId.Value)
+            : new List<int>();
+
+        IQueryable<Dance> orderedQ = sortBy switch
+        {
+            "recommended" when affinityStyleIds.Count > 0 => entityQ
+                .OrderByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial" && v.StartTime == null))
+                .ThenByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial"))
+                .ThenByDescending(d => d.DanceStyles.Any(ds => affinityStyleIds.Contains(ds.StyleId)))
+                .ThenByDescending(d => d.AverageRating)
+                .ThenByDescending(d => d.FavoriteCount)
+                .ThenBy(d => d.Name),
+            "recommended" => entityQ
+                .OrderByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial" && v.StartTime == null))
+                .ThenByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial"))
+                .ThenByDescending(d => d.AverageRating)
+                .ThenByDescending(d => d.FavoriteCount)
+                .ThenBy(d => d.Name),
+            "tutorials" => entityQ
+                .OrderByDescending(d => d.Videos.Count(v => v.VideoType == "tutorial" && v.StartTime == null))
+                .ThenByDescending(d => d.Videos.Count(v => v.VideoType == "tutorial"))
+                .ThenByDescending(d => d.AverageRating)
+                .ThenBy(d => d.Name),
+            "rating"  => entityQ.OrderByDescending(d => d.AverageRating).ThenByDescending(d => d.RatingCount),
+            "popular" => entityQ.OrderByDescending(d => d.FavoriteCount),
+            "newest"  => entityQ.OrderByDescending(d => d.DateAdded),
+            _         => entityQ.OrderBy(d => d.Name)
+        };
+
+        var total = await entityQ.CountAsync();
+        var grandTotal = await _db.Dances.CountAsync();
+        var rows = await ProjectRows(orderedQ.Skip((clampedPage - 1) * pageSize).Take(pageSize), userId).ToListAsync();
+
+        return new SearchDancesResult { Items = rows.Select(ToDto).ToList(), Total = total, GrandTotal = grandTotal, Page = clampedPage, PageSize = pageSize };
+    }
+
+    public async Task<DanceDto?> RandomAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, int? userId, bool favoritesOnly = false)
+    {
+        var entityQ = BuildFilteredQuery(query, styleId, musicalStyleId, difficulty, status, userId, favoritesOnly);
+        var total = await entityQ.CountAsync();
+        if (total == 0) return null;
+
+        var skip = Random.Shared.Next(total);
+        // A stable order makes the random offset well-defined (unordered SKIP is nondeterministic in SQL).
+        var row = await ProjectRows(entityQ.OrderBy(d => d.Id).Skip(skip).Take(1), userId).FirstOrDefaultAsync();
+        return row is null ? null : ToDto(row);
+    }
+
+    private IQueryable<Dance> BuildFilteredQuery(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, int? userId, bool favoritesOnly)
     {
         var entityQ = _db.Dances.AsQueryable();
 
@@ -308,10 +367,14 @@ public class DanceService : IDanceService
         if (!string.IsNullOrWhiteSpace(difficulty) && Enum.TryParse<DifficultyLevel>(difficulty, true, out var diffLevel))
             entityQ = entityQ.Where(d => d.Difficulty == diffLevel);
 
+        if (favoritesOnly && userId.HasValue)
+            entityQ = entityQ.Where(d => d.FavoritedBy.Any(f => f.UserId == userId.Value));
+
         if (!string.IsNullOrWhiteSpace(status) && userId.HasValue)
         {
             entityQ = status.ToLowerInvariant() switch
             {
+                // "favorite" kept for backwards compatibility; new clients send favoritesOnly instead.
                 "favorite"   => entityQ.Where(d => d.FavoritedBy.Any(f => f.UserId == userId.Value)),
                 "learned"    => entityQ.Where(d => d.LearnedBy.Any(l => l.UserId == userId.Value)),
                 "inprogress" => entityQ.Where(d => d.InProgressBy.Any(ip => ip.UserId == userId.Value)),
@@ -322,36 +385,18 @@ public class DanceService : IDanceService
             };
         }
 
-        var clampedPage = Math.Max(1, page);
-
-        // Sorts push ORDER BY + COUNT + SKIP/TAKE to the database. "recommended"/"tutorials" rank on
-        // video shape via EXISTS/COUNT subqueries: a full-length tutorial (VideoType "tutorial" with no
-        // StartTime clip window) is the signal for "extensive teaching content", as opposed to a short
-        // clip or a slice carved out of a many-dance compilation (which always carries StartTime).
-        IQueryable<Dance> orderedQ = sortBy switch
-        {
-            "recommended" => entityQ
-                .OrderByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial" && v.StartTime == null))
-                .ThenByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial"))
-                .ThenByDescending(d => d.AverageRating)
-                .ThenByDescending(d => d.FavoriteCount)
-                .ThenBy(d => d.Name),
-            "tutorials" => entityQ
-                .OrderByDescending(d => d.Videos.Count(v => v.VideoType == "tutorial" && v.StartTime == null))
-                .ThenByDescending(d => d.Videos.Count(v => v.VideoType == "tutorial"))
-                .ThenByDescending(d => d.AverageRating)
-                .ThenBy(d => d.Name),
-            "rating"  => entityQ.OrderByDescending(d => d.AverageRating).ThenByDescending(d => d.RatingCount),
-            "popular" => entityQ.OrderByDescending(d => d.FavoriteCount),
-            "newest"  => entityQ.OrderByDescending(d => d.DateAdded),
-            _         => entityQ.OrderBy(d => d.Name)
-        };
-
-        var total = await entityQ.CountAsync();
-        var rows = await ProjectRows(orderedQ.Skip((clampedPage - 1) * pageSize).Take(pageSize), userId).ToListAsync();
-
-        return new SearchDancesResult { Items = rows.Select(ToDto).ToList(), Total = total, Page = clampedPage, PageSize = pageSize };
+        return entityQ;
     }
+
+    /// <summary>Styles the user has signalled interest in: favorited, in-progress, or actually practiced dances.</summary>
+    private async Task<List<int>> GetAffinityStyleIdsAsync(int userId) =>
+        await _db.UserFavoriteDances.Where(f => f.UserId == userId)
+            .SelectMany(f => f.Dance.DanceStyles).Select(ds => ds.StyleId)
+        .Union(_db.UserInProgressDances.Where(ip => ip.UserId == userId)
+            .SelectMany(ip => ip.Dance.DanceStyles).Select(ds => ds.StyleId))
+        .Union(_db.PracticeSessionItems.Where(i => i.Session.UserId == userId)
+            .SelectMany(i => i.Dance.DanceStyles).Select(ds => ds.StyleId))
+        .ToListAsync();
 
     // Projects to a lean row entirely in SQL: scalar columns, correlated name lists, and EXISTS
     // flags for the current user — so a list page never materialises full favorite/learned/video

@@ -725,3 +725,206 @@
   text-align: center;
   color: var(--color-text-muted);
 }
+
+/* ---------- ADMIN "MORE" DISCLOSURE ---------- */
+.admin-more {
+  position: relative;
+}
+
+.admin-more summary {
+  list-style: none;
+  user-select: none;
+}
+
+.admin-more summary::-webkit-details-marker { display: none; }
+
+.admin-more[open] summary {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.admin-more__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 180px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 30;
+}
+
+.admin-more__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius);
+  color: var(--color-text);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 9px 12px;
+  transition: all var(--transition);
+}
+
+.admin-more__item:hover {
+  background: rgba(245, 200, 66, 0.08);
+  color: var(--color-primary);
+}
+
+/* ---------- CONTINUE-LEARNING / RECENTLY-VIEWED RAIL ---------- */
+.rail {
+  margin-bottom: 28px;
+}
+
+.rail__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #B7B2D4;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 10px;
+}
+
+.rail__title i { color: var(--color-music); }
+
+.rail__scroller {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x proximity;
+}
+
+.rail-card {
+  flex: 0 0 150px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.rail-card__thumb {
+  width: 150px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  transition: border-color var(--transition);
+}
+
+.rail-card:hover .rail-card__thumb { border-color: var(--color-primary); }
+
+.rail-card__thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 1.2rem;
+}
+
+.rail-card__name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rail-card:hover .rail-card__name { color: var(--color-primary); }
+
+/* ---------- FAVORITES TOGGLE + ACTIVE FILTER CHIPS ---------- */
+.filter-pill--fav i {
+  font-size: 0.7rem;
+  margin-right: 4px;
+  color: var(--color-accent);
+}
+
+.filter-pill--fav.active i { color: #07070D; }
+
+.active-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(245, 200, 66, 0.1);
+  border: 1px solid rgba(245, 200, 66, 0.4);
+  border-radius: 999px;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 5px 12px;
+  transition: all var(--transition);
+}
+
+.active-chip:hover {
+  background: rgba(232, 80, 58, 0.12);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.active-chip i { font-size: 0.68rem; }
+
+.active-filters__clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  padding: 4px 6px;
+}
+
+.active-filters__clear:hover { color: var(--color-accent); }
+
+/* ---------- CARD EXTRAS ---------- */
+.dance-card__instructor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.dance-card__instructor i { font-size: 0.72rem; opacity: 0.8; }
+
+.empty-state__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 14px 0 18px;
+}

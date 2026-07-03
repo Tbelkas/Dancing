@@ -1,7 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { PracticeService } from './practice.service';
 import { AuthService } from './auth.service';
-import { toLocalDateString } from '../utils/video-url.utils';
+import { toPracticeDateString } from '../utils/video-url.utils';
 
 /**
  * Accumulates practice time while a dance video is actually playing and streams it to the API as
@@ -91,7 +91,7 @@ export class PracticeTimerService {
     const sent = Math.min(this.pendingSeconds, 600);
     const danceId = this.activeDanceId;
     this.flushing = true;
-    this.practice.heartbeat({ danceId, seconds: sent, localDate: toLocalDateString(new Date()) }).subscribe({
+    this.practice.heartbeat({ danceId, seconds: sent, localDate: toPracticeDateString(new Date()) }).subscribe({
       next: session => {
         this.serverTotalSeconds = session.totalSeconds;
         // Keep any seconds that accrued while the request was in flight.

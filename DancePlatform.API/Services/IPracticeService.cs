@@ -13,5 +13,8 @@ public interface IPracticeService
     /// </summary>
     Task<PracticeSessionDto?> HeartbeatAsync(int userId, PracticeHeartbeatRequest request);
 
+    /// <summary>Edits a session's date/notes (and duration when it holds a single dance). Null when not found.</summary>
+    Task<PracticeSessionDto?> UpdateAsync(int userId, int id, UpdatePracticeSessionRequest request);
+
     Task<bool> DeleteAsync(int userId, int id);
 }

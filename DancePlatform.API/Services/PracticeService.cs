@@ -91,6 +91,25 @@ public class PracticeService : IPracticeService
         return await GetByIdAsync(session.Id);
     }
 
+    public async Task<PracticeSessionDto?> UpdateAsync(int userId, int id, UpdatePracticeSessionRequest request)
+    {
+        var session = await _db.PracticeSessions
+            .Include(ps => ps.Items)
+            .FirstOrDefaultAsync(ps => ps.Id == id && ps.UserId == userId);
+        if (session is null) return null;
+
+        session.Date = request.Date;
+        session.Notes = string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes.Trim();
+
+        // Duration edits only make sense when there's one dance to attribute the time to;
+        // multi-dance (tracked) sessions keep their per-dance split untouched.
+        if (request.DurationMinutes.HasValue && session.Items.Count == 1)
+            session.Items.First().Seconds = Math.Max(0, request.DurationMinutes.Value) * 60;
+
+        await _db.SaveChangesAsync();
+        return await GetByIdAsync(session.Id);
+    }
+
     public async Task<bool> DeleteAsync(int userId, int id)
     {
         var session = await _db.PracticeSessions.FirstOrDefaultAsync(ps => ps.Id == id && ps.UserId == userId);

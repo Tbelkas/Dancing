@@ -32,6 +32,13 @@ public class PracticeController : AppControllerBase
         return session is null ? BadRequest(new { message = "Dance not found." }) : Ok(session);
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdatePracticeSessionRequest request)
+    {
+        var session = await _practiceService.UpdateAsync(CurrentUserId!.Value, id, request);
+        return session is null ? NotFound() : Ok(session);
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

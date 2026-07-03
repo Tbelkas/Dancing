@@ -5,29 +5,134 @@
         <h1 class="page-title">Practice Log</h1>
         <p class="page-subtitle">Time is tracked automatically while you watch — or log a session by hand</p>
       </div>
-      <button class="btn btn--primary btn--sm" (click)="toggleAddForm()">
-        @if (showAddForm()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Log Session }
-      </button>
+      <div class="page-header__actions">
+        @if (visibleSessions().length > 0) {
+          <button class="btn btn--ghost btn--sm" (click)="exportCsv()" title="Download your full practice history as CSV">
+            <i class="fa-solid fa-download"></i> Export CSV
+          </button>
+        }
+        <button class="btn btn--primary btn--sm" (click)="toggleAddForm()">
+          @if (showAddForm()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Log Session }
+        </button>
+      </div>
     </div>
   </div>
 
+  @if (streakAtRisk()) {
+    <div class="streak-risk">
+      <i class="fa-solid fa-fire"></i>
+      <span>Your <strong>{{ streak() }}-day streak</strong> is on the line — practice today to keep it alive.</span>
+    </div>
+  }
+
   @if (visibleSessions().length > 0) {
-    <div class="stats-row">
-      <div class="stat-chip stat-chip--streak" [class.is-cold]="streak() === 0">
-        <span class="streak-flame"><i class="fa-solid fa-fire"></i></span>
-        <span class="streak-figure">
-          <span class="streak-num">{{ streak() }}</span>
-          <span class="stat-chip__label">day streak</span>
-        </span>
-      </div>
-      <div class="stat-chip">
-        <span class="stat-chip__label">Sessions</span>
-        <span class="stat-chip__value">{{ visibleSessions().length }}</span>
-      </div>
-      @if (totalMinutes() > 0) {
+    <div class="stats-block">
+      <div class="stats-row">
+        <div class="stat-chip stat-chip--streak" [class.is-cold]="streak() === 0">
+          <span class="streak-flame"><i class="fa-solid fa-fire"></i></span>
+          <span class="streak-figure">
+            <span class="streak-num">{{ streak() }}</span>
+            <span class="stat-chip__label">day streak</span>
+          </span>
+        </div>
+        @if (longestStreak() > 1) {
+          <div class="stat-chip">
+            <span class="stat-chip__label">Best streak</span>
+            <span class="stat-chip__value">{{ longestStreak() }} <span class="stat-chip__unit">days</span></span>
+          </div>
+        }
         <div class="stat-chip">
-          <span class="stat-chip__label">Total time</span>
-          <span class="stat-chip__value">{{ totalMinutes() }} min</span>
+          <span class="stat-chip__label">Sessions</span>
+          <span class="stat-chip__value">{{ scopedSessions().length }}</span>
+        </div>
+        @if (scopedTotalMinutes() > 0) {
+          <div class="stat-chip">
+            <span class="stat-chip__label">Total time</span>
+            <span class="stat-chip__value">{{ formatDuration(scopedTotalMinutes()) }}</span>
+          </div>
+        }
+        <div class="stat-chip stat-chip--goal">
+          @if (editingGoal()) {
+            <span class="stat-chip__label">Weekly goal (min)</span>
+            <span class="goal-edit">
+              <input type="number" min="5" step="5" [(ngModel)]="goalInput" aria-label="Weekly goal in minutes" (keyup.enter)="saveGoal()" />
+              <button class="icon-btn" (click)="saveGoal()" aria-label="Save goal" title="Save"><i class="fa-solid fa-check"></i></button>
+              <button class="icon-btn" (click)="cancelEditGoal()" aria-label="Cancel" title="Cancel"><i class="fa-solid fa-xmark"></i></button>
+            </span>
+          } @else if (weeklyGoal() !== null) {
+            <span class="goal-ring" [title]="thisWeekMinutes() + ' of ' + weeklyGoal() + ' min this week'">
+              <svg viewBox="0 0 36 36" aria-hidden="true">
+                <circle class="goal-ring__track" cx="18" cy="18" r="15.5" />
+                <circle class="goal-ring__fill" cx="18" cy="18" r="15.5"
+                        [attr.stroke-dasharray]="goalDash()" [class.is-done]="goalPct() >= 100" />
+              </svg>
+              <span class="goal-ring__pct">{{ goalPct() }}<small>%</small></span>
+            </span>
+            <span class="streak-figure">
+              <span class="stat-chip__value">{{ thisWeekMinutes() }}<span class="stat-chip__unit">/{{ weeklyGoal() }} min</span></span>
+              <button class="goal-label-btn" (click)="startEditGoal()" title="Change weekly goal">
+                <span class="stat-chip__label">weekly goal <i class="fa-solid fa-pen"></i></span>
+              </button>
+            </span>
+          } @else {
+            <button class="goal-set-btn" (click)="startEditGoal()">
+              <i class="fa-regular fa-circle-dot"></i> Set a weekly goal
+            </button>
+          }
+        </div>
+      </div>
+      <div class="timeframe-pills" role="group" aria-label="Stats timeframe">
+        <button class="filter-pill" [class.active]="timeframe() === 'week'" (click)="setTimeframe('week')">7 days</button>
+        <button class="filter-pill" [class.active]="timeframe() === 'month'" (click)="setTimeframe('month')">30 days</button>
+        <button class="filter-pill" [class.active]="timeframe() === 'all'" (click)="setTimeframe('all')">All time</button>
+      </div>
+    </div>
+
+    <div class="insights-row">
+      <div class="card insight-card insight-card--heatmap">
+        <h3 class="insight-card__title">Last 12 weeks</h3>
+        <div class="heatmap" role="img" aria-label="Practice calendar heatmap for the last 12 weeks">
+          <div class="heatmap__dows" aria-hidden="true">
+            <span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span><span></span>
+          </div>
+          <div class="heatmap__grid">
+            @for (week of heatmapWeeks(); track week.days[0].date) {
+              <div class="heatmap__week">
+                <span class="heatmap__month" aria-hidden="true">{{ week.monthLabel ?? ' ' }}</span>
+                @for (day of week.days; track day.date) {
+                  <span class="heatmap__cell" [class.heatmap__cell--future]="day.level < 0"
+                        [attr.data-level]="day.level" [title]="day.title"></span>
+                }
+              </div>
+            }
+          </div>
+          <div class="heatmap__legend" aria-hidden="true">
+            <span>Less</span>
+            <span class="heatmap__cell" data-level="0"></span>
+            <span class="heatmap__cell" data-level="1"></span>
+            <span class="heatmap__cell" data-level="2"></span>
+            <span class="heatmap__cell" data-level="3"></span>
+            <span class="heatmap__cell" data-level="4"></span>
+            <span>More</span>
+          </div>
+        </div>
+      </div>
+
+      @if (danceBreakdown().length > 0) {
+        <div class="card insight-card insight-card--breakdown">
+          <h3 class="insight-card__title">
+            Time per dance
+            <span class="insight-card__scope">{{ timeframe() === 'week' ? 'last 7 days' : timeframe() === 'month' ? 'last 30 days' : 'all time' }}</span>
+          </h3>
+          <ul class="breakdown-list">
+            @for (row of danceBreakdown(); track row.danceId) {
+              <li class="breakdown-row">
+                <a [routerLink]="row.slug | dancePath:row.styleSlug" class="breakdown-row__name">{{ row.name }}</a>
+                <span class="breakdown-row__minutes">{{ formatDuration(row.minutes) }}</span>
+                <span class="breakdown-row__bar"><span class="breakdown-row__fill" [style.width.%]="row.pct"></span></span>
+              </li>
+            }
+          </ul>
         </div>
       }
     </div>
@@ -80,36 +185,88 @@
     <div class="sessions-list">
       @for (group of groupedSessions(); track group[0]) {
         <div class="session-group">
-          <h3 class="session-date-header">{{ formatDate(group[0]) }}</h3>
+          <h3 class="session-date-header">
+            <span>{{ formatDate(group[0]) }}</span>
+            <span class="session-date-header__total">{{ dayTotalLabel(group[1]) }}</span>
+          </h3>
           @for (session of group[1]; track session.id) {
             <div class="card session-card">
               <div class="session-card__head">
+                @if (isNightSession(session)) {
+                  <span class="session-night" title="Late-night session"><i class="fa-solid fa-moon"></i></span>
+                }
                 <span class="session-time-range">{{ formatSessionTime(session) }}</span>
                 @if (session.durationMinutes > 0) {
-                  <span class="session-duration"><i class="fa-solid fa-stopwatch"></i> {{ session.durationMinutes }} min</span>
+                  <span class="session-duration" [title]="durationTitle(session)"><i class="fa-solid fa-stopwatch"></i> {{ session.durationMinutes }} min</span>
                 }
-                <button class="btn btn--danger btn--xs session-delete" (click)="deleteSession(session.id)">Delete</button>
+                <div class="session-actions">
+                  <button class="icon-btn session-action" (click)="startEdit(session)" aria-label="Edit session" title="Edit">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button class="icon-btn session-action session-action--danger" (click)="deleteSession(session)" aria-label="Delete session" title="Delete">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
               </div>
-              <ul class="session-items">
-                @for (item of session.items; track item.danceId) {
-                  <li class="session-item">
-                    <a [routerLink]="item.danceSlug | dancePath:item.danceStyleSlug" class="session-dance-name">{{ item.danceName }}</a>
-                    @if (item.seconds > 0) {
-                      <span class="session-item__time">{{ formatItemTime(item.seconds) }}</span>
+
+              @if (editingId() === session.id) {
+                <div class="session-edit">
+                  @if (editError()) { <div class="error-message">{{ editError() }}</div> }
+                  <div class="session-edit__fields">
+                    <label class="session-edit__field">
+                      <span>Date</span>
+                      <input type="date" [(ngModel)]="editDate" />
+                    </label>
+                    @if (canEditDuration(session)) {
+                      <label class="session-edit__field">
+                        <span>Duration (min)</span>
+                        <input type="number" min="1" [(ngModel)]="editDuration" />
+                      </label>
                     }
-                  </li>
+                    <label class="session-edit__field session-edit__field--notes">
+                      <span>Notes</span>
+                      <textarea rows="2" [(ngModel)]="editNotes" placeholder="What did you work on?"></textarea>
+                    </label>
+                  </div>
+                  <div class="session-edit__actions">
+                    <button class="btn btn--primary btn--xs" (click)="saveEdit(session)" [disabled]="savingEdit()">
+                      {{ savingEdit() ? 'Saving...' : 'Save' }}
+                    </button>
+                    <button class="btn btn--ghost btn--xs" (click)="cancelEdit()">Cancel</button>
+                  </div>
+                </div>
+              } @else {
+                <ul class="session-items">
+                  @for (item of visibleItems(session); track item.danceId) {
+                    <li class="session-item">
+                      <a [routerLink]="item.danceSlug | dancePath:item.danceStyleSlug" class="session-dance-name">{{ item.danceName }}</a>
+                      @if (item.seconds > 0) {
+                        <span class="session-item__time">{{ formatItemTime(item.seconds) }}</span>
+                      }
+                    </li>
+                  }
+                  @if (hiddenItemCount(session) > 0) {
+                    <li class="session-item session-item--minor">+ {{ hiddenItemCount(session) }} more under 30 s</li>
+                  }
+                  @if (session.items.length === 0) {
+                    <li class="session-item session-item--empty">No dances recorded</li>
+                  }
+                </ul>
+                @if (session.notes) {
+                  <p class="session-notes">{{ session.notes }}</p>
                 }
-                @if (session.items.length === 0) {
-                  <li class="session-item session-item--empty">No dances recorded</li>
-                }
-              </ul>
-              @if (session.notes) {
-                <p class="session-notes">{{ session.notes }}</p>
               }
             </div>
           }
         </div>
       }
+    </div>
+  }
+
+  @if (pendingDelete(); as deleted) {
+    <div class="undo-toast" role="status">
+      <span>Session deleted.</span>
+      <button class="undo-toast__btn" (click)="undoDelete()">Undo</button>
     </div>
   }
 </div>

@@ -36,6 +36,7 @@ export interface SearchDancesParams {
   musicalStyleId?: number | null;
   difficulty?: string | null;
   status?: string;
+  favoritesOnly?: boolean;
   sortBy?: string;
   page?: number;
   pageSize?: number;
@@ -44,6 +45,8 @@ export interface SearchDancesParams {
 export interface SearchDancesResult {
   items: Dance[];
   total: number;
+  /** Catalog size ignoring filters, for "N of M dances" display. */
+  grandTotal: number;
   page: number;
   pageSize: number;
 }
@@ -74,16 +77,26 @@ export class DanceService {
   }
 
   searchDances(p: SearchDancesParams): Observable<SearchDancesResult> {
+    return this.http.get<SearchDancesResult>(`${environment.apiUrl}/search/dances`, { params: this.searchParams(p) });
+  }
+
+  /** One random dance matching the same filters as searchDances (404s when nothing matches). */
+  randomDance(p: SearchDancesParams): Observable<Dance> {
+    return this.http.get<Dance>(`${environment.apiUrl}/search/dances/random`, { params: this.searchParams(p) });
+  }
+
+  private searchParams(p: SearchDancesParams): HttpParams {
     let params = new HttpParams();
     if (p.q) params = params.set('q', p.q);
     if (p.styleId) params = params.set('styleId', p.styleId.toString());
     if (p.musicalStyleId) params = params.set('musicalStyleId', p.musicalStyleId.toString());
     if (p.difficulty) params = params.set('difficulty', p.difficulty);
     if (p.status && p.status !== 'all') params = params.set('status', p.status);
+    if (p.favoritesOnly) params = params.set('favoritesOnly', 'true');
     if (p.sortBy) params = params.set('sortBy', p.sortBy);
     if (p.page) params = params.set('page', p.page.toString());
     if (p.pageSize) params = params.set('pageSize', p.pageSize.toString());
-    return this.http.get<SearchDancesResult>(`${environment.apiUrl}/search/dances`, { params });
+    return params;
   }
 
   create(payload: CreateDancePayload): Observable<Dance> {

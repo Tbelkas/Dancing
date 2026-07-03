@@ -7,12 +7,18 @@
       </div>
       @if (role.isAdmin()) {
         <div class="admin-actions">
-          <button class="btn btn--ghost btn--sm" (click)="toggleAddStyle()">
-            @if (showAddStyle()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Style }
-          </button>
-          <button class="btn btn--ghost btn--sm" (click)="toggleImport()">
-            @if (showImport()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-file-import"></i> Import }
-          </button>
+          <!-- Rare admin utilities live behind one "More" disclosure so the header stays calm. -->
+          <details class="admin-more">
+            <summary class="btn btn--ghost btn--sm"><i class="fa-solid fa-ellipsis"></i> More</summary>
+            <div class="admin-more__menu">
+              <button class="admin-more__item" (click)="toggleAddStyle()">
+                <i class="fa-solid fa-plus"></i> {{ showAddStyle() ? 'Cancel Add Style' : 'Add Style' }}
+              </button>
+              <button class="admin-more__item" (click)="toggleImport()">
+                <i class="fa-solid fa-file-import"></i> {{ showImport() ? 'Cancel Import' : 'Import' }}
+              </button>
+            </div>
+          </details>
           <button class="btn btn--primary btn--sm" (click)="toggleAddDance()">
             @if (showAddDance()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Dance }
           </button>
@@ -149,6 +155,41 @@
     </div>
   }
 
+  <!-- Continue-learning rail: pick up where you left off before diving into the catalog. -->
+  @if (railDances().length > 0) {
+    <section class="rail" aria-label="Continue learning">
+      <h2 class="rail__title"><i class="fa-solid fa-person-running"></i> Continue learning</h2>
+      <div class="rail__scroller">
+        @for (d of railDances(); track d.id) {
+          <a class="rail-card" [routerLink]="d.slug | dancePath:d.styleSlug">
+            @if (d.thumbnailVideoId && d.thumbnailPlatform === 'youtube') {
+              <img class="rail-card__thumb" [src]="'https://i.ytimg.com/vi/' + d.thumbnailVideoId + '/mqdefault.jpg'" alt="" loading="lazy" />
+            } @else {
+              <span class="rail-card__thumb rail-card__thumb--empty"><i class="fa-solid fa-music"></i></span>
+            }
+            <span class="rail-card__name">{{ d.name }}</span>
+          </a>
+        }
+      </div>
+    </section>
+  } @else if (recentRail().length > 0) {
+    <section class="rail" aria-label="Recently viewed">
+      <h2 class="rail__title"><i class="fa-solid fa-clock-rotate-left"></i> Recently viewed</h2>
+      <div class="rail__scroller">
+        @for (d of recentRail(); track d.id) {
+          <a class="rail-card" [routerLink]="d.slug | dancePath:d.styleSlug">
+            @if (d.thumbnailVideoId && d.thumbnailPlatform === 'youtube') {
+              <img class="rail-card__thumb" [src]="'https://i.ytimg.com/vi/' + d.thumbnailVideoId + '/mqdefault.jpg'" alt="" loading="lazy" />
+            } @else {
+              <span class="rail-card__thumb rail-card__thumb--empty"><i class="fa-solid fa-music"></i></span>
+            }
+            <span class="rail-card__name">{{ d.name }}</span>
+          </a>
+        }
+      </div>
+    </section>
+  }
+
   <div class="filters">
     <div class="search-wrapper">
       <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
@@ -233,15 +274,43 @@
               {{ opt.label }}
             </button>
           }
+          <button class="filter-pill filter-pill--fav" [class.active]="favoritesOnly()" (click)="toggleFavoritesOnly()"
+                  [attr.aria-pressed]="favoritesOnly()" title="Only show dances you've favorited">
+            <i class="fa-solid fa-heart"></i> Favorites
+          </button>
         </div>
+      </div>
+    }
+
+    @if (activeFilterChips().length > 0) {
+      <div class="active-filters" aria-label="Active filters">
+        <span class="filter-label">Active:</span>
+        @for (chip of activeFilterChips(); track chip.key) {
+          <button class="active-chip" (click)="removeFilter(chip.key)" [attr.aria-label]="'Remove filter ' + chip.label">
+            {{ chip.label }} <i class="fa-solid fa-xmark"></i>
+          </button>
+        }
+        <button class="active-filters__clear" (click)="clearFilters()">Clear all</button>
       </div>
     }
   </div>
 
   @if (!loading()) {
     <div class="results-bar">
-      <span class="results-count">{{ searchTotal() }} dance{{ searchTotal() !== 1 ? 's' : '' }}</span>
+      <span class="results-count">
+        @if (hasActiveFilters() && searchTotal() < grandTotal()) {
+          <strong>{{ searchTotal() }}</strong> of {{ grandTotal() }} dances
+        } @else {
+          {{ searchTotal() }} dance{{ searchTotal() !== 1 ? 's' : '' }}
+        }
+      </span>
       <div class="results-bar__controls">
+        @if (searchTotal() > 1) {
+          <button class="btn btn--ghost btn--xs" (click)="surpriseMe()" [disabled]="surprising()"
+                  title="Jump to a random dance matching your filters">
+            <i class="fa-solid fa-dice"></i> {{ surprising() ? 'Rolling...' : 'Surprise me' }}
+          </button>
+        }
         @if (auth.isAuthenticated()) {
           <button class="btn btn--ghost btn--xs" (click)="toggleAddVideo()">
             @if (showAddVideo()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Video }
@@ -252,7 +321,8 @@
         }
         <label class="sort-control">
           <span class="sort-control__label">Sort</span>
-          <select [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)" aria-label="Sort dances">
+          <select [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)" aria-label="Sort dances"
+                  title="Recommended = dances with full tutorials first, then rating and favorites — tilted toward styles you practice when signed in">
             <option value="recommended">Recommended</option>
             <option value="tutorials">Tutorials first</option>
             <option value="name">Name (A–Z)</option>
@@ -356,8 +426,15 @@
       <div class="empty-state__icon"><i class="fa-solid fa-magnifying-glass"></i></div>
       <h2>No dances found</h2>
       @if (hasActiveFilters()) {
-        <p>No dances match your current filters.</p>
-        <button class="btn btn--primary btn--sm" (click)="clearFilters()"><i class="fa-solid fa-xmark"></i> Clear filters</button>
+        <p>No dances match this combination — try loosening one filter:</p>
+        <div class="empty-state__suggestions">
+          @for (chip of activeFilterChips(); track chip.key) {
+            <button class="btn btn--ghost btn--sm" (click)="removeFilter(chip.key)">
+              <i class="fa-solid fa-xmark"></i> Remove {{ chip.label }}
+            </button>
+          }
+        </div>
+        <button class="btn btn--primary btn--sm" (click)="clearFilters()"><i class="fa-solid fa-xmark"></i> Clear all filters</button>
       } @else {
         <p>There are no dances here yet.</p>
       }
@@ -366,7 +443,8 @@
     <div class="grid grid--2">
       @for (dance of searchResults(); track dance.id) {
         <div class="card dance-card">
-          <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="dance-card__media" tabindex="-1" aria-hidden="true">
+          <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="dance-card__media" tabindex="-1" aria-hidden="true"
+             (mouseenter)="onMediaEnter(dance)" (mouseleave)="onMediaLeave()">
             @if (thumbnailUrl(dance); as thumb) {
               <img [src]="thumb" alt="" loading="lazy" class="dance-card__thumb" (error)="onThumbError(dance.id)" (load)="onThumbLoad(dance.id, $event)" />
             } @else {
@@ -383,11 +461,15 @@
               </h3>
               @if (auth.isAuthenticated()) {
                 <div class="dance-card__actions">
-                  <button class="icon-btn" [class.active]="dance.isFavorite" (click)="toggleFavorite(dance, $event)" [attr.aria-pressed]="dance.isFavorite" [attr.aria-label]="dance.isFavorite ? 'Remove ' + dance.name + ' from favorites' : 'Add ' + dance.name + ' to favorites'">
+                  <button class="icon-btn" [class.active]="dance.isFavorite" (click)="toggleFavorite(dance, $event)" [attr.aria-pressed]="dance.isFavorite"
+                          [title]="dance.isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+                          [attr.aria-label]="dance.isFavorite ? 'Remove ' + dance.name + ' from favorites' : 'Add ' + dance.name + ' to favorites'">
                     @if (dance.isFavorite) { <i class="fa-solid fa-star"></i> } @else { <i class="fa-regular fa-star"></i> }
                   </button>
-                  <button class="icon-btn" [class.active]="dance.isLearned" (click)="toggleLearned(dance, $event)" [attr.aria-pressed]="dance.isLearned" [attr.aria-label]="dance.isLearned ? 'Unmark ' + dance.name + ' as learned' : 'Mark ' + dance.name + ' as learned'">
-                    @if (dance.isLearned) { <i class="fa-solid fa-check"></i> } @else { <i class="fa-regular fa-circle"></i> }
+                  <button class="icon-btn" [class.active]="dance.isLearned" (click)="toggleLearned(dance, $event)" [attr.aria-pressed]="dance.isLearned"
+                          [title]="dance.isLearned ? 'Learned — click to unmark' : 'Mark as learned'"
+                          [attr.aria-label]="dance.isLearned ? 'Unmark ' + dance.name + ' as learned' : 'Mark ' + dance.name + ' as learned'">
+                    @if (dance.isLearned) { <i class="fa-solid fa-circle-check"></i> } @else { <i class="fa-regular fa-circle-check"></i> }
                   </button>
                 </div>
               }
@@ -395,12 +477,15 @@
             @if (dance.description) {
               <p class="dance-card__desc">{{ dance.description }}</p>
             }
+            @if (dance.instructors.length > 0) {
+              <p class="dance-card__instructor"><i class="fa-solid fa-chalkboard-user"></i> {{ dance.instructors.join(', ') }}</p>
+            }
             <div class="dance-card__meta">
               <div class="dance-card__styles">
                 @if (dance.difficulty !== 'None') {
                   <span class="badge badge--difficulty badge--difficulty-{{ dance.difficulty | lowercase }}">{{ dance.difficulty }}</span>
                 }
-                @for (style of dance.styles; track style) {
+                @for (style of styleBadges(dance); track style) {
                   <span class="badge">{{ style }}</span>
                 }
                 <!-- Music tags hidden for now.
