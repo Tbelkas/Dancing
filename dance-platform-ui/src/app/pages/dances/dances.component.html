@@ -451,7 +451,9 @@
               <span class="dance-card__media-fallback"><i class="fa-solid fa-music"></i></span>
             }
             @if (dance.videoCount > 0) {
-              <span class="dance-card__media-count"><i class="fa-solid fa-play"></i> {{ dance.videoCount }} video{{ dance.videoCount !== 1 ? 's' : '' }}</span>
+              <span class="dance-card__media-count">
+                <i class="fa-solid fa-play"></i> {{ dance.videoCount }} video{{ dance.videoCount !== 1 ? 's' : '' }}{{ durationLabel(dance) }}
+              </span>
             }
           </a>
           <div class="dance-card__body">

@@ -14,6 +14,9 @@ public class DanceDto
     public List<string> MusicalStyles { get; set; } = new();
     public List<string> Instructors { get; set; } = new();
     public int VideoCount { get; set; }
+
+    /// <summary>Total watchable seconds across this dance's visible videos (clip windows honoured); 0 when unknown.</summary>
+    public int TotalDurationSeconds { get; set; }
     public string? ThumbnailVideoId { get; set; }
     public string? ThumbnailPlatform { get; set; }
     public int FavoriteCount { get; set; }

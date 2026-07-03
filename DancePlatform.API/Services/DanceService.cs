@@ -420,6 +420,13 @@ public class DanceService : IDanceService
             // Count/thumbnail only from videos visible to this viewer (global + their own personal),
             // so another user's private additions never inflate the count or hijack the thumbnail.
             VideoCount = d.Videos.Count(v => v.OwnerUserId == null || v.OwnerUserId == uid),
+            // Watchable time: a clip window (EndTime set) counts its slice; otherwise the full
+            // source length minus any start offset. Unknown durations contribute 0.
+            TotalDurationSeconds = d.Videos
+                .Where(v => v.OwnerUserId == null || v.OwnerUserId == uid)
+                .Sum(v => v.EndTime != null
+                    ? v.EndTime.Value - (v.StartTime ?? 0)
+                    : (v.DurationSeconds ?? 0) == 0 ? 0 : v.DurationSeconds!.Value - (v.StartTime ?? 0)),
             ThumbnailVideoId = d.Videos.Where(v => v.OwnerUserId == null || v.OwnerUserId == uid).OrderBy(v => v.DateAdded).Select(v => v.VideoId).FirstOrDefault(),
             ThumbnailPlatform = d.Videos.Where(v => v.OwnerUserId == null || v.OwnerUserId == uid).OrderBy(v => v.DateAdded).Select(v => v.Platform).FirstOrDefault(),
             FavoriteCount = d.FavoriteCount,
@@ -445,6 +452,7 @@ public class DanceService : IDanceService
         MusicalStyles = r.MusicalStyles,
         Instructors = r.Instructors,
         VideoCount = r.VideoCount,
+        TotalDurationSeconds = Math.Max(0, r.TotalDurationSeconds),
         ThumbnailVideoId = r.ThumbnailVideoId,
         ThumbnailPlatform = r.ThumbnailPlatform,
         FavoriteCount = r.FavoriteCount,
@@ -470,6 +478,7 @@ public class DanceService : IDanceService
         public List<string> MusicalStyles { get; set; } = new();
         public List<string> Instructors { get; set; } = new();
         public int VideoCount { get; set; }
+        public int TotalDurationSeconds { get; set; }
         public string? ThumbnailVideoId { get; set; }
         public string? ThumbnailPlatform { get; set; }
         public int FavoriteCount { get; set; }

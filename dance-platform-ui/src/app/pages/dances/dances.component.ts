@@ -516,6 +516,14 @@ export class DancesComponent implements OnInit, OnDestroy {
     return dance.styles.filter(s => s.toLowerCase() !== dance.name.toLowerCase());
   }
 
+  /** " · 24 min" suffix for the media badge; empty when the duration is unknown. */
+  durationLabel(dance: Dance): string {
+    const s = dance.totalDurationSeconds ?? 0;
+    if (s < 60) return '';
+    const m = Math.round(s / 60);
+    return m < 60 ? ` · ${m} min` : ` · ${Math.floor(m / 60)} h ${m % 60 ? (m % 60) + ' min' : ''}`.trimEnd();
+  }
+
   onThumbError(danceId: number): void {
     this.thumbFailed.update(set => {
       const next = new Set(set);

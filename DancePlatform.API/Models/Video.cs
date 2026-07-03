@@ -14,6 +14,9 @@ public class Video
     public int? StartTime { get; set; }
     public int? EndTime { get; set; }
 
+    /// <summary>Full source-video length in seconds (from yt-dlp metadata); null when unknown.</summary>
+    public int? DurationSeconds { get; set; }
+
     public double AverageRating { get; set; }
     public int RatingCount { get; set; }
 

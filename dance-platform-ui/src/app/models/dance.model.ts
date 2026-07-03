@@ -11,6 +11,8 @@ export interface Dance {
   musicalStyles: string[];
   instructors: string[];
   videoCount: number;
+  /** Total watchable seconds across the dance's visible videos; 0 when unknown. */
+  totalDurationSeconds: number;
   thumbnailVideoId?: string;
   thumbnailPlatform?: string;
   favoriteCount: number;
