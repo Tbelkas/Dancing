@@ -50,6 +50,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   loopSegmentId = signal<number | null>(null);
   activeChapterId = signal<number | null>(null);
   chaptersExpanded = signal(false);
+  /** Flip the video horizontally so the instructor's left matches the viewer's left. */
+  mirrored = signal(false);
+  shortcutsOpen = signal(false);
+  /** Brief visual pulse each time the loop wraps back to its start. */
+  loopFlash = signal(false);
 
   /** Only worth showing the jump row when the source video holds more than one dance. */
   get hasChapters(): boolean { return this.chapters.length > 1; }
@@ -75,8 +80,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private readonly LOOP_PREF_KEY = 'dp_player_loop';
+  private readonly MIRROR_PREF_KEY = 'dp_player_mirror';
+
+  /** Keyboard shortcuts go to the player the user touched (or played) last, so
+   *  pages that render several players don't all react to one keypress. */
+  private static activeInstance: VideoPlayerComponent | null = null;
 
   private player: YT.Player | null = null;
+  private flashTimeout: ReturnType<typeof setTimeout> | null = null;
   private repeatInterval: ReturnType<typeof setInterval> | null = null;
   private durationPollInterval: ReturnType<typeof setInterval> | null = null;
   private tiktokCurrentTime = 0;
@@ -87,9 +98,105 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Emit play-state transitions only (parent dedupes anyway, but this keeps the stream clean). */
   private emitPlaying(playing: boolean): void {
+    if (playing) VideoPlayerComponent.activeInstance = this;
     if (playing === this.lastPlayingEmit) return;
     this.lastPlayingEmit = playing;
     this.playingChange.emit(playing);
+  }
+
+  private readonly keydownHandler = (e: KeyboardEvent) => {
+    if (VideoPlayerComponent.activeInstance !== this) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const target = e.target as HTMLElement | null;
+    const tag = target?.tagName ?? '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) return;
+
+    switch (e.key) {
+      case ' ':
+        // Let a focused button keep its native space behaviour.
+        if (tag === 'BUTTON') return;
+        if (!this.isYouTube) return;
+        e.preventDefault();
+        this.togglePlay();
+        break;
+      case 'ArrowLeft':
+        if (!this.isYouTube) return;
+        e.preventDefault();
+        this.seekBy(-5);
+        break;
+      case 'ArrowRight':
+        if (!this.isYouTube) return;
+        e.preventDefault();
+        this.seekBy(5);
+        break;
+      case '[':
+        this.setStartToCurrent();
+        break;
+      case ']':
+        this.setEndToCurrent();
+        break;
+      case 'l': case 'L':
+        this.toggleRepeat();
+        break;
+      case 'm': case 'M':
+        this.toggleMirror();
+        break;
+      case '?':
+        this.shortcutsOpen.set(!this.shortcutsOpen());
+        break;
+      default: {
+        const digit = parseInt(e.key, 10);
+        if (this.isYouTube && digit >= 1 && digit <= this.playbackRates.length) {
+          this.setRate(this.playbackRates[digit - 1]);
+        }
+      }
+    }
+  };
+
+  togglePlay(): void {
+    if (!this.player || !window.YT) return;
+    if (this.player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+      this.player.pauseVideo();
+    } else {
+      this.player.playVideo();
+    }
+  }
+
+  private seekBy(deltaSeconds: number): void {
+    if (!this.player) return;
+    const t = Math.max(0, (this.player.getCurrentTime() ?? 0) + deltaSeconds);
+    this.player.seekTo(t, true);
+  }
+
+  toggleMirror(): void {
+    VideoPlayerComponent.activeInstance = this;
+    this.mirrored.set(!this.mirrored());
+    localStorage.setItem(this.MIRROR_PREF_KEY, this.mirrored() ? '1' : '0');
+  }
+
+  /** Percent positions feeding the highlighted A→B region on the dual slider. */
+  loopStartPct(): number {
+    const d = this.videoDuration();
+    return d > 0 ? Math.min(100, (this.repeatStart / d) * 100) : 0;
+  }
+
+  loopWidthPct(): number {
+    const d = this.videoDuration();
+    if (d <= 0) return 0;
+    return Math.max(0, Math.min(100, ((this.repeatEnd - this.repeatStart) / d) * 100));
+  }
+
+  /** When both handles sit near the far end, the start handle must win the
+   *  pointer, or the region can never be reopened. */
+  startThumbOnTop(): boolean {
+    const d = this.videoDuration();
+    return d > 0 && this.repeatStart > d * 0.9;
+  }
+
+  private pulseLoopFlash(): void {
+    if (this.flashTimeout) clearTimeout(this.flashTimeout);
+    this.loopFlash.set(true);
+    this.flashTimeout = setTimeout(() => this.loopFlash.set(false), 700);
   }
 
   private readonly tiktokMessageHandler = (event: MessageEvent) => {
@@ -150,6 +257,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     // start collapsed so they don't bury the player controls.
     this.chaptersExpanded.set(this.chapters.length > 0 && this.chapters.length <= 6);
     this.repeating.set(localStorage.getItem(this.LOOP_PREF_KEY) === '1');
+    this.mirrored.set(localStorage.getItem(this.MIRROR_PREF_KEY) === '1');
+    VideoPlayerComponent.activeInstance = this;
+    document.addEventListener('keydown', this.keydownHandler);
     if (this.isTikTok) {
       const defaultDur = this.endTime ? this.endTime + 10 : 60;
       this.videoDuration.set(defaultDur);
@@ -178,6 +288,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.clearRepeat();
     this.clearDurationPoll();
     if (this.tiktokStallHandle) clearTimeout(this.tiktokStallHandle);
+    if (this.flashTimeout) clearTimeout(this.flashTimeout);
+    document.removeEventListener('keydown', this.keydownHandler);
+    if (VideoPlayerComponent.activeInstance === this) VideoPlayerComponent.activeInstance = null;
     this.emitPlaying(false);
     this.player?.destroy();
     window.removeEventListener('message', this.tiktokMessageHandler);
@@ -204,6 +317,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   jumpToSegment(segment: VideoSegment): void {
+    VideoPlayerComponent.activeInstance = this;
     this.activeSegmentId.set(segment.id);
     this.activePersonalLoopId.set(null);
     if (segment.endTime != null) {
@@ -222,6 +336,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setRate(rate: number): void {
+    VideoPlayerComponent.activeInstance = this;
     this.currentRate.set(rate);
     this.player?.setPlaybackRate(rate);
   }
@@ -399,6 +514,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
         if (current >= this.repeatEnd) {
           this.player?.seekTo(this.repeatStart, true);
           this.player?.playVideo();
+          this.pulseLoopFlash();
         }
       }, 250);
     } else if (this.isTikTok) {
@@ -415,6 +531,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
           this.tiktokCurrentTime = this.repeatStart;
           this.tiktokPost({ type: 'seekTo', value: this.repeatStart });
           this.tiktokPost({ type: 'play' });
+          this.pulseLoopFlash();
         }
       }, 200);
     }

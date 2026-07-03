@@ -199,6 +199,14 @@
       }
     </div>
 
+    <button class="filters-toggle" (click)="filtersOpen.set(!filtersOpen())" [attr.aria-expanded]="filtersOpen()">
+      <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+      Filters
+      @if (filterCount() > 0) { <span class="filters-toggle__count">{{ filterCount() }}</span> }
+      <i class="fa-solid" [class.fa-chevron-down]="!filtersOpen()" [class.fa-chevron-up]="filtersOpen()" aria-hidden="true"></i>
+    </button>
+
+    <div class="filters__body" [class.filters__body--open]="filtersOpen()">
     <div class="filter-row filter-row--searchable">
       <span class="filter-label">Style:</span>
       <div class="filter-row__body">
@@ -293,6 +301,7 @@
         <button class="active-filters__clear" (click)="clearFilters()">Clear all</button>
       </div>
     }
+    </div>
   </div>
 
   @if (!loading()) {
@@ -319,6 +328,16 @@
         @if (hasActiveFilters()) {
           <button class="btn btn--ghost btn--xs" (click)="clearFilters()"><i class="fa-solid fa-xmark"></i> Clear filters</button>
         }
+        <div class="view-toggle" role="group" aria-label="View density">
+          <button class="view-toggle__btn" [class.active]="viewMode() === 'grid'" (click)="setViewMode('grid')"
+                  title="Card view" aria-label="Card view" [attr.aria-pressed]="viewMode() === 'grid'">
+            <i class="fa-solid fa-table-cells-large"></i>
+          </button>
+          <button class="view-toggle__btn" [class.active]="viewMode() === 'list'" (click)="setViewMode('list')"
+                  title="Compact list view" aria-label="Compact list view" [attr.aria-pressed]="viewMode() === 'list'">
+            <i class="fa-solid fa-list"></i>
+          </button>
+        </div>
         <label class="sort-control">
           <span class="sort-control__label">Sort</span>
           <select [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)" aria-label="Sort dances"
@@ -439,6 +458,70 @@
         <p>There are no dances here yet.</p>
       }
     </div>
+  } @else if (viewMode() === 'list') {
+    <ul class="dance-rows">
+      @for (dance of searchResults(); track dance.id) {
+        <li class="dance-row-item">
+          <a class="dance-row-item__link" [routerLink]="dance.slug | dancePath:dance.styleSlug">
+            <span class="dance-row-item__thumb">
+              @if (thumbnailUrl(dance); as thumb) {
+                <img [src]="thumb" alt="" loading="lazy" (error)="onThumbError(dance.id)" />
+              } @else {
+                <span class="dance-row-item__thumb-fallback"><i class="fa-solid fa-music"></i></span>
+              }
+            </span>
+            <span class="dance-row-item__main">
+              <span class="dance-row-item__name">{{ dance.name }}</span>
+              <span class="dance-row-item__meta">
+                @if (dance.difficulty !== 'None') {
+                  <span class="badge badge--sm badge--difficulty badge--difficulty-{{ dance.difficulty | lowercase }}">{{ dance.difficulty }}</span>
+                }
+                @for (style of styleBadges(dance); track style) {
+                  <span class="badge badge--sm">{{ style }}</span>
+                }
+                @if (dance.videoCount > 0) {
+                  <span class="dance-row-item__videos"><i class="fa-solid fa-play"></i> {{ dance.videoCount }}</span>
+                }
+              </span>
+            </span>
+          </a>
+          @if (auth.isAuthenticated()) {
+            <span class="dance-row-item__actions">
+              <button class="icon-btn" [class.active]="dance.isFavorite" (click)="toggleFavorite(dance, $event)" [attr.aria-pressed]="dance.isFavorite"
+                      [title]="dance.isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+                      [attr.aria-label]="dance.isFavorite ? 'Remove ' + dance.name + ' from favorites' : 'Add ' + dance.name + ' to favorites'">
+                @if (dance.isFavorite) { <i class="fa-solid fa-star"></i> } @else { <i class="fa-regular fa-star"></i> }
+              </button>
+              <button class="icon-btn" [class.active]="dance.isLearned" (click)="toggleLearned(dance, $event)" [attr.aria-pressed]="dance.isLearned"
+                      [title]="dance.isLearned ? 'Learned — click to unmark' : 'Mark as learned'"
+                      [attr.aria-label]="dance.isLearned ? 'Unmark ' + dance.name + ' as learned' : 'Mark ' + dance.name + ' as learned'">
+                @if (dance.isLearned) { <i class="fa-solid fa-circle-check"></i> } @else { <i class="fa-regular fa-circle-check"></i> }
+              </button>
+            </span>
+          }
+        </li>
+      }
+    </ul>
+
+    @if (totalPages() > 1) {
+      <nav class="pagination" aria-label="Dance catalog pages">
+        <button class="pagination__btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)" aria-label="Previous page">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        @for (p of pageNumbers(); track $index) {
+          @if (p === null) {
+            <span class="pagination__ellipsis">…</span>
+          } @else {
+            <button class="pagination__btn" [class.pagination__btn--active]="p === currentPage()" (click)="goToPage(p)" [attr.aria-current]="p === currentPage() ? 'page' : null">
+              {{ p }}
+            </button>
+          }
+        }
+        <button class="pagination__btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)" aria-label="Next page">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </nav>
+    }
   } @else {
     <div class="grid grid--2">
       @for (dance of searchResults(); track dance.id) {

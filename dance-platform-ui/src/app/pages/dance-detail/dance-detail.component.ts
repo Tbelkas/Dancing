@@ -15,6 +15,8 @@ import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
 import { RecentDancesService } from '../../core/services/recent-dances.service';
 import { PracticeTimerService } from '../../core/services/practice-timer.service';
+import { ConfirmService } from '../../core/services/confirm.service';
+import { ToastService } from '../../core/services/toast.service';
 import { Dance } from '../../models/dance.model';
 import { Video, VideoChapter, VideoSegment, VideoType, viewCountBucket } from '../../models/video.model';
 import { Style } from '../../models/style.model';
@@ -52,6 +54,9 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   private personalLoops = signal<Map<number, VideoSegment[]>>(new Map());
   recommended = signal<Dance[]>([]);
   private recThumbFailed = signal<Set<number>>(new Set());
+  // Alphabetical neighbours within this dance's canonical style, for prev/next paging.
+  prevDance = signal<Dance | null>(null);
+  nextDance = signal<Dance | null>(null);
   readonly viewCountBucket = viewCountBucket;
 
   // Feedback
@@ -126,6 +131,8 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     private instructorService: InstructorService,
     private recentDances: RecentDancesService,
     private practiceTimer: PracticeTimerService,
+    private confirmSvc: ConfirmService,
+    private toast: ToastService,
     public auth: AuthService,
     public role: RoleService
   ) {}
@@ -216,6 +223,43 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.danceService.getRecommended(d.id).subscribe(r => {
       if (this.dance()?.id === d.id) this.recommended.set(r);
     });
+    this.loadNeighbors(d);
+  }
+
+  /** Finds this dance's alphabetical neighbours within its canonical style. */
+  private loadNeighbors(d: Dance): void {
+    this.prevDance.set(null);
+    this.nextDance.set(null);
+    if (!d.styleSlug) return;
+    const styles = this.allStyles();
+    if (styles.length === 0) {
+      this.styleService.getAll().subscribe(s => {
+        this.allStyles.set(s);
+        if (this.dance()?.id === d.id) this.findNeighbors(d, s);
+      });
+    } else {
+      this.findNeighbors(d, styles);
+    }
+  }
+
+  private findNeighbors(d: Dance, styles: Style[]): void {
+    const style = styles.find(s => this.slugify(s.name) === d.styleSlug);
+    if (!style) return;
+    this.danceService.searchDances({ styleId: style.id, sortBy: 'name', pageSize: 500 }).subscribe({
+      next: res => {
+        if (this.dance()?.id !== d.id) return;
+        const idx = res.items.findIndex(x => x.id === d.id);
+        if (idx === -1) return;
+        this.prevDance.set(idx > 0 ? res.items[idx - 1] : null);
+        this.nextDance.set(idx < res.items.length - 1 ? res.items[idx + 1] : null);
+      },
+      error: () => { /* pager simply doesn't render */ }
+    });
+  }
+
+  /** Client-side mirror of the server's style-slug format, for matching styleSlug to a Style. */
+  private slugify(name: string): string {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
 
   /** Canonical URL for a dance: /dances/{styleSlug}/{slug}, or /dances/{slug} if it has no style. */
@@ -286,11 +330,14 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   }
 
   /** A signed-in user removed one of their own saved loops. */
-  onDeletePersonalLoop(video: Video, loop: VideoSegment): void {
-    if (!confirm(`Delete your loop "${loop.label}"?`)) return;
+  async onDeletePersonalLoop(video: Video, loop: VideoSegment): Promise<void> {
+    if (!await this.confirmSvc.ask(`Delete your loop "${loop.label}"?`, { title: 'Delete loop' })) return;
     this.videoService.deleteMyLoop(video.id, loop.id).subscribe({
-      next: loops => this.setPersonalLoops(video.id, loops),
-      error: () => this.actionError.set('Failed to delete your loop. Please try again.')
+      next: loops => {
+        this.setPersonalLoops(video.id, loops);
+        this.toast.success('Loop deleted.');
+      },
+      error: () => this.toast.error('Failed to delete your loop. Please try again.')
     });
   }
 
@@ -585,14 +632,15 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   }
 
   /** Admin removed a saved loop/section from the player. */
-  onDeleteLoop(video: Video, segment: VideoSegment): void {
-    if (!confirm(`Delete section "${segment.label}"?`)) return;
+  async onDeleteLoop(video: Video, segment: VideoSegment): Promise<void> {
+    if (!await this.confirmSvc.ask(`Delete section "${segment.label}"? Everyone loses this section.`, { title: 'Delete section' })) return;
     this.videoService.deleteSegment(video.id, segment.id).subscribe({
       next: updated => {
         this.videos.update(list => list.map(v => v.id === updated.id ? updated : v));
         if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
+        this.toast.success('Section deleted.');
       },
-      error: () => this.actionError.set('Failed to delete section. Please try again.')
+      error: () => this.toast.error('Failed to delete section. Please try again.')
     });
   }
 
@@ -624,15 +672,16 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteVideo(video: Video): void {
-    if (!confirm(`Delete video "${video.title}"?`)) return;
+  async deleteVideo(video: Video): Promise<void> {
+    if (!await this.confirmSvc.ask(`Delete video "${video.title}"?`, { title: 'Delete video' })) return;
     this.videoService.delete(video.id).subscribe({
       next: () => {
         this.videos.update(list => list.filter(v => v.id !== video.id));
         this.dance.update(d => d ? { ...d, videoCount: d.videoCount - 1 } : d);
         if (this.selectedVideo()?.id === video.id) this.selectedVideo.set(null);
+        this.toast.success('Video deleted.');
       },
-      error: () => alert('Failed to delete video.')
+      error: () => this.toast.error('Failed to delete video.')
     });
   }
 
@@ -702,13 +751,21 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteDance(): void {
+  async deleteDance(): Promise<void> {
     const d = this.dance();
-    if (!d || !confirm(`Permanently delete "${d.name}"? This cannot be undone.`)) return;
+    if (!d) return;
+    const ok = await this.confirmSvc.ask(
+      `Permanently delete "${d.name}" and all of its videos? This cannot be undone.`,
+      { title: 'Delete dance', confirmLabel: 'Delete forever' }
+    );
+    if (!ok) return;
     this.deletingDance.set(true);
     this.danceService.delete(d.id).subscribe({
-      next: () => this.router.navigate(['/dances']),
-      error: () => { alert('Failed to delete dance.'); this.deletingDance.set(false); }
+      next: () => {
+        this.toast.success(`"${d.name}" deleted.`);
+        this.router.navigate(['/dances']);
+      },
+      error: () => { this.toast.error('Failed to delete dance.'); this.deletingDance.set(false); }
     });
   }
 }

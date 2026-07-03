@@ -149,7 +149,82 @@
           @if (ms.dances.length > 0) { <span class="tab-count">{{ ms.dances.length }}</span> }
         </button>
       }
+      <button
+        class="style-tab style-tab--fav"
+        [class.style-tab--active]="selectedStyleId() === FAVORITES_TAB"
+        (click)="selectFavorites()">
+        <i class="fa-solid fa-star" aria-hidden="true"></i> Favorites
+        @if (favoriteDances().length > 0) { <span class="tab-count">{{ favoriteDances().length }}</span> }
+      </button>
     </div>
+
+    @if (selectedStyleId() === FAVORITES_TAB) {
+      <div class="dances-view">
+        @if (loadingFavorites()) {
+          <div aria-busy="true" aria-label="Loading favorites" style="display: flex; flex-direction: column; gap: 10px;">
+            @for (i of [0,1,2,3]; track i) {
+              <div class="skeleton skeleton-line" style="height: 48px;"></div>
+            }
+          </div>
+        } @else if (favoriteDances().length === 0) {
+          <div class="card empty-style">
+            <p class="empty">No favorites yet.</p>
+            <p class="empty hint">Browse the catalog and tap the <i class="fa-regular fa-star"></i> star on any dance to save it here.</p>
+          </div>
+        } @else {
+          <div class="dance-section">
+            <h3 class="section-title">
+              <span class="section-icon fav-icon"><i class="fa-solid fa-star"></i></span>
+              Favorites
+              <span class="section-count">{{ favoriteDances().length }}</span>
+            </h3>
+            <div class="dance-list">
+              @for (dance of favoriteDances(); track dance.id) {
+                <div class="dance-row">
+                  <div class="dance-row__bar">
+                    <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="dance-item">
+                      <span class="dance-status dance-status--fav"><i class="fa-solid fa-star"></i></span>
+                      <span class="dance-name">{{ dance.name }}</span>
+                      @if (dance.styles.length > 0) {
+                        <span class="dance-fav-style">{{ dance.styles[0] }}</span>
+                      }
+                      <span class="dance-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                    </a>
+                    <button type="button" class="dance-expand"
+                      [class.dance-expand--open]="expandedDanceId() === dance.id"
+                      (click)="toggleExpand(dance.id, $event)"
+                      [attr.aria-expanded]="expandedDanceId() === dance.id"
+                      [attr.aria-label]="expandedDanceId() === dance.id ? 'Hide video for ' + dance.name : 'Show video for ' + dance.name">
+                      <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                  </div>
+                  @if (expandedDanceId() === dance.id) {
+                    <div class="dance-expanded">
+                      @if (loadingVideos()) {
+                        <p class="expanded-status">Loading video...</p>
+                      } @else if (expandedVideos().length === 0) {
+                        <p class="expanded-status">No videos linked to this dance yet.</p>
+                      } @else {
+                        @for (video of expandedVideos(); track video.id) {
+                          <div class="expanded-video">
+                            <span class="expanded-video__title">{{ video.title }}
+                              @if (video.ownerUserId) {
+                                <span class="badge badge--personal"><i class="fa-solid fa-lock"></i> Personal</span>
+                              }
+                            </span>
+                            <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="video.startTime" [endTime]="video.endTime" [segments]="video.segments" />
+                          </div>
+                        }
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
 
     @if (selectedStyle()) {
       <div class="dances-view">

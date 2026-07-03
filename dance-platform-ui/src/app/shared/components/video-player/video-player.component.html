@@ -42,7 +42,15 @@
   }
 
   @if (isYouTube) {
-    <div #playerContainer class="yt-player"></div>
+    <div class="player-media" [class.player-media--mirrored]="mirrored()">
+      <div #playerContainer class="yt-player"></div>
+      @if (loopFlash()) {
+        <div class="loop-flash" aria-hidden="true"><i class="fa-solid fa-rotate-left"></i></div>
+      }
+      @if (mirrored()) {
+        <span class="mirror-tag" aria-hidden="true"><i class="fa-solid fa-left-right"></i> Mirrored</span>
+      }
+    </div>
 
     <div class="controls">
       @if (hasChapters) {
@@ -72,67 +80,35 @@
             <button class="speed-btn" [class.active]="currentRate() === rate" (click)="setRate(rate)" [attr.aria-pressed]="currentRate() === rate" [attr.aria-label]="'Playback speed ' + rate + 'x'">{{ rate }}x</button>
           }
         </div>
-      </div>
-
-      <div class="control-row control-row--column loop-block">
-        <div class="repeat-header">
-          <label>Loop</label>
-          @if (videoDuration() > 0) {
-            <span class="repeat-times">{{ formatTime(repeatStart) }} → {{ formatTime(repeatEnd) }}</span>
-          }
-          <button class="btn btn--accent btn--sm" (click)="toggleRepeat()" [disabled]="videoDuration() === 0">
-            {{ repeating() ? 'Stop loop' : 'Loop this section' }}
+        <div class="control-row__end">
+          <button class="mirror-btn" [class.active]="mirrored()" (click)="toggleMirror()" [attr.aria-pressed]="mirrored()"
+                  title="Flip the video horizontally so the instructor matches your side">
+            <i class="fa-solid fa-left-right"></i> Mirror
+          </button>
+          <button class="kbd-btn" (click)="shortcutsOpen.set(!shortcutsOpen())" [attr.aria-expanded]="shortcutsOpen()"
+                  title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">
+            <i class="fa-regular fa-keyboard"></i>
           </button>
         </div>
-        @if (videoDuration() > 0) {
-          <div class="slider-group">
-            <div class="slider-row">
-              <span class="slider-label">Start</span>
-              <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatStart"
-                aria-label="Loop start time" [attr.aria-valuetext]="formatTime(repeatStart)"
-                (input)="onStartSliderChange(+$any($event.target).value)" />
-              <span class="slider-time">{{ formatTime(repeatStart) }}</span>
-              <button type="button" class="set-current-btn" (click)="setStartToCurrent()" title="Set start to current time" aria-label="Set loop start to current playback time">
-                <i class="fa-solid fa-crosshairs"></i>
-              </button>
-            </div>
-            <div class="slider-row">
-              <span class="slider-label">End</span>
-              <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatEnd"
-                aria-label="Loop end time" [attr.aria-valuetext]="formatTime(repeatEnd)"
-                (input)="onEndSliderChange(+$any($event.target).value)" />
-              <span class="slider-time">{{ formatTime(repeatEnd) }}</span>
-              <button type="button" class="set-current-btn" (click)="setEndToCurrent()" title="Set end to current time" aria-label="Set loop end to current playback time">
-                <i class="fa-solid fa-crosshairs"></i>
-              </button>
-            </div>
-          </div>
-          @if (canSaveLoops || canSavePersonal) {
-            <div class="save-loop-row">
-              <input type="text" class="save-loop-name" [(ngModel)]="loopName" maxlength="40"
-                placeholder="Name this loop" aria-label="Loop name"
-                (keyup.enter)="canSavePersonal ? emitSavePersonalLoop() : emitSaveLoop()" />
-              @if (canSavePersonal) {
-                <button class="btn btn--ghost btn--sm" (click)="emitSavePersonalLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
-                  <i class="fa-solid fa-bookmark"></i> Save for me
-                </button>
-              }
-              @if (canSaveLoops) {
-                <button class="btn btn--accent btn--sm" (click)="emitSaveLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
-                  <i class="fa-solid fa-users"></i> Save for everyone
-                </button>
-              }
-            </div>
-          }
-        } @else {
-          <p class="repeat-hint">Start the video, then drag to set your loop points.</p>
-        }
       </div>
+
+      @if (shortcutsOpen()) {
+        <div class="kbd-hint" role="note" aria-label="Keyboard shortcuts">
+          <span class="kbd-hint__item"><kbd>Space</kbd> Play / pause</span>
+          <span class="kbd-hint__item"><kbd>←</kbd><kbd>→</kbd> ±5 s</span>
+          <span class="kbd-hint__item"><kbd>[</kbd><kbd>]</kbd> Loop start / end</span>
+          <span class="kbd-hint__item"><kbd>L</kbd> Loop on/off</span>
+          <span class="kbd-hint__item"><kbd>M</kbd> Mirror</span>
+          <span class="kbd-hint__item"><kbd>1</kbd>–<kbd>7</kbd> Speed</span>
+        </div>
+      }
+
+      <ng-container [ngTemplateOutlet]="loopBlock"></ng-container>
     </div>
   }
 
   @if (isTikTok) {
-    <div class="embed-container embed-container--portrait">
+    <div class="embed-container embed-container--portrait player-media" [class.player-media--mirrored]="mirrored()">
       <iframe
         #tiktokFrame
         [src]="embedUrl | trustUrl"
@@ -142,6 +118,9 @@
         frameborder="0"
         scrolling="no">
       </iframe>
+      @if (loopFlash()) {
+        <div class="loop-flash" aria-hidden="true"><i class="fa-solid fa-rotate-left"></i></div>
+      }
     </div>
 
     <div class="controls">
@@ -165,35 +144,63 @@
         </div>
       }
 
-      <div class="control-row control-row--column loop-block">
-        <div class="repeat-header">
-          <label>Loop</label>
+      <div class="control-row">
+        <button class="mirror-btn" [class.active]="mirrored()" (click)="toggleMirror()" [attr.aria-pressed]="mirrored()"
+                title="Flip the video horizontally so the instructor matches your side">
+          <i class="fa-solid fa-left-right"></i> Mirror
+        </button>
+      </div>
+
+      <ng-container [ngTemplateOutlet]="loopBlock"></ng-container>
+    </div>
+  }
+
+  @if (isInstagram) {
+    <div class="embed-container embed-container--instagram">
+      <iframe
+        [src]="embedUrl | trustUrl"
+        class="embed-frame embed-frame--instagram"
+        allow="autoplay; fullscreen"
+        allowfullscreen
+        frameborder="0"
+        scrolling="no">
+      </iframe>
+    </div>
+  }
+
+  <!-- Loop controls shared by YouTube and TikTok: A→B region on one dual-handle slider. -->
+  <ng-template #loopBlock>
+    <div class="control-row control-row--column loop-block">
+      <div class="repeat-header">
+        <label>Loop</label>
+        @if (videoDuration() > 0) {
           <span class="repeat-times">{{ formatTime(repeatStart) }} → {{ formatTime(repeatEnd) }}</span>
-          <button class="btn btn--accent btn--sm" (click)="toggleRepeat()">
-            {{ repeating() ? 'Stop loop' : 'Loop this section' }}
+        }
+        <button class="btn btn--accent btn--sm" (click)="toggleRepeat()" [disabled]="videoDuration() === 0">
+          {{ repeating() ? 'Stop loop' : 'Loop this section' }}
+        </button>
+      </div>
+      @if (videoDuration() > 0) {
+        <div class="slider-row slider-row--dual">
+          <button type="button" class="set-current-btn" (click)="setStartToCurrent()" title="Set start to current time (or press [)" aria-label="Set loop start to current playback time">
+            <i class="fa-solid fa-crosshairs"></i>
           </button>
-        </div>
-        <div class="slider-group">
-          <div class="slider-row">
-            <span class="slider-label">Start</span>
-            <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatStart"
-              aria-label="Repeat region start time" [attr.aria-valuetext]="formatTime(repeatStart)"
+          <span class="slider-time">{{ formatTime(repeatStart) }}</span>
+          <div class="dual-range">
+            <div class="dual-range__track"></div>
+            <div class="dual-range__fill" [style.left.%]="loopStartPct()" [style.width.%]="loopWidthPct()"></div>
+            <input type="range" class="dual-range__input" [min]="0" [max]="videoDuration()" [value]="repeatStart"
+              [style.zIndex]="startThumbOnTop() ? 5 : 3"
+              aria-label="Loop start time" [attr.aria-valuetext]="formatTime(repeatStart)"
               (input)="onStartSliderChange(+$any($event.target).value)" />
-            <span class="slider-time">{{ formatTime(repeatStart) }}</span>
-            <button type="button" class="set-current-btn" (click)="setStartToCurrent()" title="Set start to current time" aria-label="Set loop start to current playback time">
-              <i class="fa-solid fa-crosshairs"></i>
-            </button>
-          </div>
-          <div class="slider-row">
-            <span class="slider-label">End</span>
-            <input type="range" class="range-slider" [min]="0" [max]="videoDuration()" [value]="repeatEnd"
-              aria-label="Repeat region end time" [attr.aria-valuetext]="formatTime(repeatEnd)"
+            <input type="range" class="dual-range__input" [min]="0" [max]="videoDuration()" [value]="repeatEnd"
+              aria-label="Loop end time" [attr.aria-valuetext]="formatTime(repeatEnd)"
               (input)="onEndSliderChange(+$any($event.target).value)" />
-            <span class="slider-time">{{ formatTime(repeatEnd) }}</span>
-            <button type="button" class="set-current-btn" (click)="setEndToCurrent()" title="Set end to current time" aria-label="Set loop end to current playback time">
-              <i class="fa-solid fa-crosshairs"></i>
-            </button>
           </div>
+          <span class="slider-time">{{ formatTime(repeatEnd) }}</span>
+          <button type="button" class="set-current-btn" (click)="setEndToCurrent()" title="Set end to current time (or press ])" aria-label="Set loop end to current playback time">
+            <i class="fa-solid fa-crosshairs"></i>
+          </button>
         </div>
         @if (canSaveLoops || canSavePersonal) {
           <div class="save-loop-row">
@@ -212,22 +219,13 @@
             }
           </div>
         }
+      } @else {
+        <p class="repeat-hint">Start the video, then drag to set your loop points.</p>
+      }
+      @if (isTikTok) {
         <p class="repeat-hint">Loop points update as the video plays. Speed control isn't available for TikTok.</p>
-      </div>
+      }
     </div>
-  }
-
-  @if (isInstagram) {
-    <div class="embed-container embed-container--instagram">
-      <iframe
-        [src]="embedUrl | trustUrl"
-        class="embed-frame embed-frame--instagram"
-        allow="autoplay; fullscreen"
-        allowfullscreen
-        frameborder="0"
-        scrolling="no">
-      </iframe>
-    </div>
-  }
+  </ng-template>
 
 </div>

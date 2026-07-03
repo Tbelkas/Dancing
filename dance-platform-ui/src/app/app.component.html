@@ -12,6 +12,10 @@
       </a>
     }
 
+    <div class="header__search">
+      <app-global-search />
+    </div>
+
     <button
       class="header__toggle"
       type="button"
@@ -28,7 +32,7 @@
       }
       <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Browse</a>
       @if (auth.isAuthenticated()) {
-        <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">My Videos</a>
+        <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Added Videos</a>
         <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Practice</a>
         <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Profile</a>
         @if (role.isAdmin()) {
@@ -41,6 +45,30 @@
     </nav>
   </div>
 </header>
-<main id="main-content" class="main">
+<main id="main-content" class="main" [class.main--tabbar]="auth.isAuthenticated()">
   <router-outlet />
 </main>
+<app-feedback />
+
+<!-- Mobile: primary destinations live in a fixed bottom tab bar; the hamburger
+     keeps only the secondary links (Added Videos, admin Add Video). -->
+@if (auth.isAuthenticated()) {
+  <nav class="tabbar" aria-label="Primary">
+    <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">
+      <i class="fa-solid fa-compact-disc" aria-hidden="true"></i>
+      <span>Browse</span>
+    </a>
+    <a routerLink="/my-dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">
+      <i class="fa-solid fa-shoe-prints" aria-hidden="true"></i>
+      <span>My Dances</span>
+    </a>
+    <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">
+      <i class="fa-solid fa-stopwatch" aria-hidden="true"></i>
+      <span>Practice</span>
+    </a>
+    <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">
+      <i class="fa-solid fa-user" aria-hidden="true"></i>
+      <span>Profile</span>
+    </a>
+  </nav>
+}

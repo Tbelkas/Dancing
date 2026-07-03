@@ -72,3 +72,59 @@
   display: flex;
   gap: 10px;
 }
+
+/* ---------- DANCE SUMMARY (details live in My Dances) ---------- */
+.dance-summary {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0 12px;
+}
+
+.dance-summary__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 14px 8px;
+  transition: border-color var(--transition);
+}
+
+.dance-summary__item:hover { border-color: var(--color-border-light); }
+
+.dance-summary__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  color: var(--color-text);
+}
+
+.dance-summary__value i { font-size: 0.85rem; }
+.dance-summary__value--progress i { color: var(--color-primary); }
+.dance-summary__value--learned i { color: var(--color-success); }
+.dance-summary__value--fav i { color: var(--color-primary); }
+
+.dance-summary__label {
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.dance-summary__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}

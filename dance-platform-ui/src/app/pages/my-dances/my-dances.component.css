@@ -703,3 +703,24 @@
   .continue-card { flex-basis: 150px; }
   .continue-card__dismiss { opacity: 1; }
 }
+
+/* ---------- FAVORITES TAB ---------- */
+.style-tab--fav i {
+  font-size: 0.78rem;
+  color: var(--color-primary);
+  margin-right: 4px;
+}
+
+.fav-icon { color: var(--color-primary); }
+
+.dance-status--fav { color: var(--color-primary); }
+
+.dance-fav-style {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-left: 10px;
+}

@@ -5,6 +5,8 @@ import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { VideoService } from '../../core/services/video.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
+import { ConfirmService } from '../../core/services/confirm.service';
+import { ToastService } from '../../core/services/toast.service';
 import { VideoLibraryItem } from '../../models/video.model';
 
 type LibraryScope = 'mine' | 'global';
@@ -25,6 +27,8 @@ export class LibraryComponent implements OnInit {
 
   constructor(
     private videoService: VideoService,
+    private confirmSvc: ConfirmService,
+    private toast: ToastService,
     public auth: AuthService,
     public role: RoleService
   ) {}
@@ -74,17 +78,21 @@ export class LibraryComponent implements OnInit {
     return this.role.isAdmin() || item.ownerUserId === this.auth.currentUserId();
   }
 
-  deleteVideo(item: VideoLibraryItem, event: Event): void {
+  async deleteVideo(item: VideoLibraryItem, event: Event): Promise<void> {
     event.stopPropagation();
     event.preventDefault();
-    if (!confirm(`Delete video "${item.title}"? This can't be undone.`)) return;
+    if (!await this.confirmSvc.ask(`Delete video "${item.title}"? This can't be undone.`, { title: 'Delete video' })) return;
     this.deletingId.set(item.id);
     this.videoService.delete(item.id).subscribe({
       next: () => {
         this.items.update(list => list.filter(v => v.id !== item.id));
         this.deletingId.set(null);
+        this.toast.success('Video deleted.');
       },
-      error: () => this.deletingId.set(null)
+      error: () => {
+        this.deletingId.set(null);
+        this.toast.error('Failed to delete video.');
+      }
     });
   }
 }

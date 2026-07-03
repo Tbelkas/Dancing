@@ -1,0 +1,55 @@
+<div class="gsearch" role="search">
+  <i class="fa-solid fa-magnifying-glass gsearch__icon" aria-hidden="true"></i>
+  <input
+    #searchInput
+    type="text"
+    class="gsearch__input"
+    [value]="query()"
+    (input)="onInput($any($event.target).value)"
+    (keydown)="onKeydown($event)"
+    (focus)="onFocus()"
+    placeholder="Search dances…"
+    aria-label="Search dances"
+    role="combobox"
+    [attr.aria-expanded]="open()"
+    aria-autocomplete="list" />
+  @if (query()) {
+    <button class="gsearch__clear" (click)="clear()" aria-label="Clear search"><i class="fa-solid fa-xmark"></i></button>
+  } @else {
+    <kbd class="gsearch__kbd" aria-hidden="true">/</kbd>
+  }
+
+  @if (open()) {
+    <div class="gsearch__panel" role="listbox" aria-label="Search results">
+      @if (loading() && results().length === 0) {
+        <div class="gsearch__status">Searching…</div>
+      } @else if (results().length === 0) {
+        <div class="gsearch__status">No dances match "{{ query() }}"</div>
+      } @else {
+        @for (dance of results(); track dance.id; let i = $index) {
+          <button class="gsearch__item" role="option" [class.is-active]="activeIndex() === i"
+                  [attr.aria-selected]="activeIndex() === i" (click)="pick(dance)" (mouseenter)="activeIndex.set(i)">
+            <span class="gsearch__thumb">
+              @if (thumbnailUrl(dance); as thumb) {
+                <img [src]="thumb" alt="" loading="lazy" />
+              } @else {
+                <i class="fa-solid fa-music" aria-hidden="true"></i>
+              }
+            </span>
+            <span class="gsearch__main">
+              <span class="gsearch__name">{{ dance.name }}</span>
+              @if (dance.styles.length > 0) {
+                <span class="gsearch__style">{{ dance.styles[0] }}</span>
+              }
+            </span>
+          </button>
+        }
+        @if (total() > results().length) {
+          <button class="gsearch__all" (click)="goToAll()">
+            See all {{ total() }} results <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        }
+      }
+    </div>
+  }
+</div>

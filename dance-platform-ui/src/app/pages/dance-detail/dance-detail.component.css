@@ -502,3 +502,56 @@
   overflow-y: auto;
   margin-top: 4px;
 }
+
+/* ---------- PREV/NEXT PAGER ---------- */
+.dance-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.dance-pager__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 46%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 10px 16px;
+  color: var(--color-text);
+  transition: border-color var(--transition);
+}
+
+.dance-pager__link:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.dance-pager__link i { color: var(--color-primary); font-size: 0.85rem; }
+
+.dance-pager__link--next { text-align: right; margin-left: auto; }
+
+.dance-pager__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dance-pager__dir {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+}
+
+.dance-pager__name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { skip } from 'rxjs/operators';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { DanceService, CreateDancePayload, ImportResult, DanceStatus } from '../../core/services/dance.service';
 import { StyleService } from '../../core/services/style.service';
@@ -80,6 +81,17 @@ export class DancesComponent implements OnInit, OnDestroy {
 
   styleQuery = signal('');
   musicQuery = signal('');
+
+  /** Mobile-only: the filter rows collapse behind a "Filters" toggle. */
+  filtersOpen = signal(false);
+
+  /** Card grid for discovery, compact rows for scanning; remembered across visits. */
+  viewMode = signal<'grid' | 'list'>('grid');
+  private readonly VIEW_MODE_KEY = 'dances.viewMode';
+
+  /** Active filters excluding the search text (which has its own always-visible box). */
+  readonly filterCount = computed(() =>
+    this.activeFilterChips().filter(c => c.key !== 'q').length);
 
   // Collapse the long pill lists to a single row by default so the catalog stays
   // near the fold; the user expands on demand or narrows via the search box.
@@ -199,6 +211,7 @@ export class DancesComponent implements OnInit, OnDestroy {
 
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
   private searchSub: Subscription | null = null;
+  private urlSub: Subscription | null = null;
 
   // Admin: add style form
   showAddStyle = signal(false);
@@ -261,8 +274,15 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.styleService.getAll().subscribe(s => this.styles.set(s));
     this.musicalStyleService.getAll().subscribe(ms => this.musicalStyles.set(ms));
     this.instructorService.getAll().subscribe(i => this.instructors.set(i));
+    const storedView = localStorage.getItem(this.VIEW_MODE_KEY);
+    if (storedView === 'list' || storedView === 'grid') this.viewMode.set(storedView);
     this.restoreFilters();
     this.runSearch();
+    // Follow later URL changes (e.g. the header search navigating to /dances?q=…
+    // while this page is already showing). The first emission is the snapshot
+    // restoreFilters() just consumed, and our own syncUrl() writes always match
+    // current state, so both no-op in applyUrlIfChanged.
+    this.urlSub = this.route.queryParamMap.pipe(skip(1)).subscribe(qp => this.applyUrlIfChanged(qp));
     if (this.auth.isAuthenticated()) {
       this.danceService.searchDances({ status: 'inprogress', sortBy: 'name', pageSize: 12 })
         .subscribe({ next: r => this.railDances.set(r.items), error: () => {} });
@@ -350,7 +370,44 @@ export class DancesComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.searchDebounce) clearTimeout(this.searchDebounce);
     this.searchSub?.unsubscribe();
+    this.urlSub?.unsubscribe();
     this.clearHoverTimer();
+  }
+
+  /** Adopt filters arriving via the URL (header search, back button) when they
+   *  differ from current state; identical params (our own syncUrl echoes) no-op. */
+  private applyUrlIfChanged(qp: ParamMap): void {
+    const q = qp.get('q') ?? '';
+    const styleRaw = Number(qp.get('style'));
+    const style = Number.isInteger(styleRaw) && styleRaw > 0 ? styleRaw : null;
+    const level = qp.get('level');
+    const status = qp.get('status') ?? 'all';
+    const fav = qp.get('fav') === '1';
+    const sort = qp.get('sort') ?? 'recommended';
+    const pageRaw = Number(qp.get('page'));
+    const page = Number.isInteger(pageRaw) && pageRaw >= 1 ? pageRaw : 1;
+
+    if (q === this.searchQuery().trim() &&
+        style === this.selectedStyleId() &&
+        level === this.selectedDifficulty() &&
+        status === this.selectedStatus() &&
+        fav === this.favoritesOnly() &&
+        sort === this.sortBy() &&
+        page === this.currentPage()) return;
+
+    this.searchQuery.set(q);
+    this.selectedStyleId.set(style);
+    this.selectedDifficulty.set(level);
+    this.selectedStatus.set(this.auth.isAuthenticated() ? status : 'all');
+    this.favoritesOnly.set(this.auth.isAuthenticated() ? fav : false);
+    this.sortBy.set(sort);
+    this.currentPage.set(page);
+    this.runSearch();
+  }
+
+  setViewMode(mode: 'grid' | 'list'): void {
+    this.viewMode.set(mode);
+    try { localStorage.setItem(this.VIEW_MODE_KEY, mode); } catch { /* non-fatal */ }
   }
 
   private runSearch(): void {

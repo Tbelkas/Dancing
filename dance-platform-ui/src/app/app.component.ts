@@ -5,11 +5,13 @@ import { AuthService } from './core/services/auth.service';
 import { RoleService } from './core/services/role.service';
 import { PracticeTimerService } from './core/services/practice-timer.service';
 import { formatClock } from './core/utils/video-url.utils';
+import { GlobalSearchComponent } from './shared/components/global-search/global-search.component';
+import { FeedbackComponent } from './shared/components/feedback/feedback.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, GlobalSearchComponent, FeedbackComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

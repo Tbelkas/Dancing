@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ElementRef, HostListener, ViewChild, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { switchMap, catchError, throwError } from 'rxjs';
 import { parseVideoUrl, parseTimeSecs } from '../../core/utils/video-url.utils';
@@ -14,6 +14,7 @@ import { RecentDancesService } from '../../core/services/recent-dances.service';
 import { MyStyleWithDances } from '../../models/user.model';
 import { Style } from '../../models/style.model';
 import { Video } from '../../models/video.model';
+import { Dance } from '../../models/dance.model';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
 
 @Component({
@@ -32,6 +33,12 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   selectedStyleId = signal<number | null>(null);
   loading = signal(true);
   showStylePicker = signal(false);
+
+  /** Sentinel tab id for the cross-style Favorites view. */
+  readonly FAVORITES_TAB = -1;
+  favoriteDances = signal<Dance[]>([]);
+  loadingFavorites = signal(false);
+  private favoritesLoaded = false;
 
   // Add style form
   showAddStyle = signal(false);
@@ -111,7 +118,8 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
     private styleService: StyleService,
     private danceService: DanceService,
     private videoService: VideoService,
-    private recentDances: RecentDancesService
+    private recentDances: RecentDancesService,
+    private route: ActivatedRoute
   ) {
     // The card list grows/shrinks as history loads or a card is dismissed — re-measure
     // the track after the DOM settles so the arrows reflect the new scrollable width.
@@ -170,8 +178,31 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    // Deep link from Profile: /my-dances?tab=favorites opens the Favorites view.
+    if (this.route.snapshot.queryParamMap.get('tab') === 'favorites') {
+      this.selectFavorites();
+    }
     this.load();
     this.styleService.getAll().subscribe(s => this.allStyles.set(s));
+  }
+
+  selectFavorites(): void {
+    this.setSelectedStyle(this.FAVORITES_TAB);
+    this.showAddDance.set(false);
+    this.expandedDanceId.set(null);
+    if (!this.favoritesLoaded) this.loadFavorites();
+  }
+
+  private loadFavorites(): void {
+    this.loadingFavorites.set(true);
+    this.danceService.searchDances({ favoritesOnly: true, sortBy: 'name', pageSize: 200 }).subscribe({
+      next: res => {
+        this.favoriteDances.set(res.items);
+        this.favoritesLoaded = true;
+        this.loadingFavorites.set(false);
+      },
+      error: () => this.loadingFavorites.set(false)
+    });
   }
 
   load(): void {
@@ -180,12 +211,17 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
       next: data => {
         this.myStyles.set(data);
         const exists = (id: number | null) => id != null && data.some(ms => ms.styleId === id);
-        if (!exists(this.selectedStyleId())) {
+        const current = this.selectedStyleId();
+        if (current !== this.FAVORITES_TAB && !exists(current)) {
           const stored = localStorage.getItem(this.SELECTED_STYLE_KEY);
           const storedId = stored ? Number(stored) : null;
-          this.setSelectedStyle(
-            exists(storedId) ? storedId : (data.length > 0 ? data[0].styleId : null)
-          );
+          if (storedId === this.FAVORITES_TAB) {
+            this.selectFavorites();
+          } else {
+            this.setSelectedStyle(
+              exists(storedId) ? storedId : (data.length > 0 ? data[0].styleId : null)
+            );
+          }
         }
         // Restore last expanded dance if it's in the current style's dances
         const storedExpanded = localStorage.getItem(this.EXPANDED_DANCE_KEY);

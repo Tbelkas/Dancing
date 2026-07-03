@@ -232,48 +232,7 @@
             }
           </div>
           @if (editingVideoId() === videos()[0].id) {
-            <div class="admin-form card admin-form--inline">
-              @if (editVideoTimeError()) { <div class="error-message">{{ editVideoTimeError() }}</div> }
-              <div class="admin-form__fields admin-form__fields--row">
-                <div class="form-group">
-                  <label>Start Time <span class="optional">(m:ss or seconds, blank to clear)</span></label>
-                  <input type="text" [(ngModel)]="editVideoStartTime" placeholder="e.g. 2:29" />
-                </div>
-                <div class="form-group">
-                  <label>End Time <span class="optional">(m:ss or seconds, blank to clear)</span></label>
-                  <input type="text" [(ngModel)]="editVideoEndTime" placeholder="e.g. 3:06" />
-                </div>
-                <div class="form-group">
-                  <label>Type</label>
-                  <select [(ngModel)]="editVideoType" (ngModelChange)="onEditVideoTypeChange()">
-                    <option value="steps">Steps</option>
-                    <option value="tutorial">Tutorial</option>
-                  </select>
-                </div>
-              </div>
-              @if (editVideoType === 'tutorial') {
-                <div class="form-group">
-                  <label>Sections <span class="optional">(start time as m:ss or seconds)</span></label>
-                  <div class="segment-rows">
-                    @for (row of editVideoSegments; track $index) {
-                      <div class="segment-row">
-                        <input type="text" [(ngModel)]="row.label" placeholder="Label" />
-                        <input type="text" class="segment-row__time" [(ngModel)]="row.start" placeholder="Start" />
-                        <input type="text" class="segment-row__time" [(ngModel)]="row.end" placeholder="End (opt.)" />
-                        <button class="btn btn--danger btn--xs" (click)="removeSegmentRow(editVideoSegments, $index)" title="Remove section"><i class="fa-solid fa-xmark"></i></button>
-                      </div>
-                    }
-                    <button class="btn btn--ghost btn--sm" (click)="addSegmentRow(editVideoSegments)"><i class="fa-solid fa-plus"></i> Add Section</button>
-                  </div>
-                </div>
-              }
-              <div class="admin-form__actions">
-                <button class="btn btn--primary btn--sm" (click)="submitEditVideoTime(videos()[0])" [disabled]="savingVideoTime()">
-                  {{ savingVideoTime() ? 'Saving...' : 'Save' }}
-                </button>
-                <button class="btn btn--ghost btn--sm" (click)="editingVideoId.set(null)">Cancel</button>
-              </div>
-            </div>
+            <ng-container [ngTemplateOutlet]="editVideoForm" [ngTemplateOutletContext]="{ $implicit: videos()[0] }"></ng-container>
           }
           @if (movingVideoId() === videos()[0].id) {
             <ng-container [ngTemplateOutlet]="moveVideoPanel" [ngTemplateOutletContext]="{ $implicit: videos()[0] }"></ng-container>
@@ -325,48 +284,7 @@
             @if (selectedVideo()?.id === video.id) {
               <div class="video-player-expanded">
                 @if (editingVideoId() === video.id) {
-                  <div class="admin-form card admin-form--inline">
-                    @if (editVideoTimeError()) { <div class="error-message">{{ editVideoTimeError() }}</div> }
-                    <div class="admin-form__fields admin-form__fields--row">
-                      <div class="form-group">
-                        <label>Start Time <span class="optional">(m:ss or seconds, blank to clear)</span></label>
-                        <input type="text" [(ngModel)]="editVideoStartTime" placeholder="e.g. 2:29" />
-                      </div>
-                      <div class="form-group">
-                        <label>End Time <span class="optional">(m:ss or seconds, blank to clear)</span></label>
-                        <input type="text" [(ngModel)]="editVideoEndTime" placeholder="e.g. 3:06" />
-                      </div>
-                      <div class="form-group">
-                        <label>Type</label>
-                        <select [(ngModel)]="editVideoType" (ngModelChange)="onEditVideoTypeChange()">
-                          <option value="steps">Steps</option>
-                          <option value="tutorial">Tutorial</option>
-                        </select>
-                      </div>
-                    </div>
-                    @if (editVideoType === 'tutorial') {
-                      <div class="form-group">
-                        <label>Sections <span class="optional">(start time as m:ss or seconds)</span></label>
-                        <div class="segment-rows">
-                          @for (row of editVideoSegments; track $index) {
-                            <div class="segment-row">
-                              <input type="text" [(ngModel)]="row.label" placeholder="Label" />
-                              <input type="text" class="segment-row__time" [(ngModel)]="row.start" placeholder="Start" />
-                              <input type="text" class="segment-row__time" [(ngModel)]="row.end" placeholder="End (opt.)" />
-                              <button class="btn btn--danger btn--xs" (click)="removeSegmentRow(editVideoSegments, $index)" title="Remove section"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                          }
-                          <button class="btn btn--ghost btn--sm" (click)="addSegmentRow(editVideoSegments)"><i class="fa-solid fa-plus"></i> Add Section</button>
-                        </div>
-                      </div>
-                    }
-                    <div class="admin-form__actions">
-                      <button class="btn btn--primary btn--sm" (click)="submitEditVideoTime(video)" [disabled]="savingVideoTime()">
-                        {{ savingVideoTime() ? 'Saving...' : 'Save' }}
-                      </button>
-                      <button class="btn btn--ghost btn--sm" (click)="editingVideoId.set(null)">Cancel</button>
-                    </div>
-                  </div>
+                  <ng-container [ngTemplateOutlet]="editVideoForm" [ngTemplateOutletContext]="{ $implicit: video }"></ng-container>
                 }
                 @if (video.description) {
                   <p class="video-desc">{{ video.description }}</p>
@@ -378,6 +296,52 @@
           }
         </div>
       }
+
+      <!-- Admin: shared edit form for a video's time bounds, type, and sections. -->
+      <ng-template #editVideoForm let-video>
+        <div class="admin-form card admin-form--inline">
+          @if (editVideoTimeError()) { <div class="error-message">{{ editVideoTimeError() }}</div> }
+          <div class="admin-form__fields admin-form__fields--row">
+            <div class="form-group">
+              <label>Start Time <span class="optional">(m:ss or seconds, blank to clear)</span></label>
+              <input type="text" [(ngModel)]="editVideoStartTime" placeholder="e.g. 2:29" />
+            </div>
+            <div class="form-group">
+              <label>End Time <span class="optional">(m:ss or seconds, blank to clear)</span></label>
+              <input type="text" [(ngModel)]="editVideoEndTime" placeholder="e.g. 3:06" />
+            </div>
+            <div class="form-group">
+              <label>Type</label>
+              <select [(ngModel)]="editVideoType" (ngModelChange)="onEditVideoTypeChange()">
+                <option value="steps">Steps</option>
+                <option value="tutorial">Tutorial</option>
+              </select>
+            </div>
+          </div>
+          @if (editVideoType === 'tutorial') {
+            <div class="form-group">
+              <label>Sections <span class="optional">(start time as m:ss or seconds)</span></label>
+              <div class="segment-rows">
+                @for (row of editVideoSegments; track $index) {
+                  <div class="segment-row">
+                    <input type="text" [(ngModel)]="row.label" placeholder="Label" />
+                    <input type="text" class="segment-row__time" [(ngModel)]="row.start" placeholder="Start" />
+                    <input type="text" class="segment-row__time" [(ngModel)]="row.end" placeholder="End (opt.)" />
+                    <button class="btn btn--danger btn--xs" (click)="removeSegmentRow(editVideoSegments, $index)" title="Remove section"><i class="fa-solid fa-xmark"></i></button>
+                  </div>
+                }
+                <button class="btn btn--ghost btn--sm" (click)="addSegmentRow(editVideoSegments)"><i class="fa-solid fa-plus"></i> Add Section</button>
+              </div>
+            </div>
+          }
+          <div class="admin-form__actions">
+            <button class="btn btn--primary btn--sm" (click)="submitEditVideoTime(video)" [disabled]="savingVideoTime()">
+              {{ savingVideoTime() ? 'Saving...' : 'Save' }}
+            </button>
+            <button class="btn btn--ghost btn--sm" (click)="editingVideoId.set(null)">Cancel</button>
+          </div>
+        </div>
+      </ng-template>
 
       <!-- Per-video star rating: signed-in users rate; everyone sees the community average. -->
       <ng-template #videoRating let-video>
@@ -432,6 +396,30 @@
         </div>
       </ng-template>
     </section>
+
+    <!-- Prev/next within this style (alphabetical) keeps a learning session flowing. -->
+    @if (prevDance() || nextDance()) {
+      <nav class="dance-pager" aria-label="More dances in this style">
+        @if (prevDance(); as p) {
+          <a class="dance-pager__link" [routerLink]="p.slug | dancePath:p.styleSlug">
+            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+            <span class="dance-pager__meta">
+              <span class="dance-pager__dir">Previous</span>
+              <span class="dance-pager__name">{{ p.name }}</span>
+            </span>
+          </a>
+        } @else { <span></span> }
+        @if (nextDance(); as n) {
+          <a class="dance-pager__link dance-pager__link--next" [routerLink]="n.slug | dancePath:n.styleSlug">
+            <span class="dance-pager__meta">
+              <span class="dance-pager__dir">Next</span>
+              <span class="dance-pager__name">{{ n.name }}</span>
+            </span>
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+          </a>
+        }
+      </nav>
+    }
 
     <!-- Recommended: more dances of the same style/type -->
     @if (recommended().length > 0) {
