@@ -121,13 +121,21 @@
       @if (danceBreakdown().length > 0) {
         <div class="card insight-card insight-card--breakdown">
           <h3 class="insight-card__title">
-            Time per dance
+            Time per {{ breakdownBy() }}
             <span class="insight-card__scope">{{ timeframe() === 'week' ? 'last 7 days' : timeframe() === 'month' ? 'last 30 days' : 'all time' }}</span>
+            <span class="breakdown-toggle" role="group" aria-label="Breakdown grouping">
+              <button class="filter-pill filter-pill--xs" [class.active]="breakdownBy() === 'dance'" (click)="breakdownBy.set('dance')">Dances</button>
+              <button class="filter-pill filter-pill--xs" [class.active]="breakdownBy() === 'style'" (click)="breakdownBy.set('style')">Styles</button>
+            </span>
           </h3>
           <ul class="breakdown-list">
-            @for (row of danceBreakdown(); track row.danceId) {
+            @for (row of displayedBreakdown(); track row.name) {
               <li class="breakdown-row">
-                <a [routerLink]="row.slug | dancePath:row.styleSlug" class="breakdown-row__name">{{ row.name }}</a>
+                @if (row.danceId > 0) {
+                  <a [routerLink]="row.slug | dancePath:row.styleSlug" class="breakdown-row__name">{{ row.name }}</a>
+                } @else {
+                  <span class="breakdown-row__name breakdown-row__name--static">{{ row.name }}</span>
+                }
                 <span class="breakdown-row__minutes">{{ formatDuration(row.minutes) }}</span>
                 <span class="breakdown-row__bar"><span class="breakdown-row__fill" [style.width.%]="row.pct"></span></span>
               </li>
@@ -240,6 +248,9 @@
                   @for (item of visibleItems(session); track item.danceId) {
                     <li class="session-item">
                       <a [routerLink]="item.danceSlug | dancePath:item.danceStyleSlug" class="session-dance-name">{{ item.danceName }}</a>
+                      @if (item.danceStyleName) {
+                        <span class="session-item__style">{{ item.danceStyleName }}</span>
+                      }
                       @if (item.seconds > 0) {
                         <span class="session-item__time">{{ formatItemTime(item.seconds) }}</span>
                       }

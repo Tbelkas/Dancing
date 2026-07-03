@@ -29,13 +29,14 @@ interface HeatmapWeek {
   days: HeatmapDay[];
 }
 
-interface DanceBreakdownRow {
+interface BreakdownRow {
+  /** Dance id for dance rows; 0 for style rows (not linkable). */
   danceId: number;
   name: string;
   slug: string;
   styleSlug: string;
   minutes: number;
-  /** Bar width relative to the top dance, 0–100. */
+  /** Bar width relative to the top row, 0–100. */
   pct: number;
 }
 
@@ -174,8 +175,11 @@ export class PracticeComponent implements OnInit, OnDestroy {
     return weeks;
   });
 
-  readonly danceBreakdown = computed<DanceBreakdownRow[]>(() => {
-    const byDance = new Map<number, DanceBreakdownRow & { seconds: number }>();
+  /** Whether the time breakdown aggregates per dance or per style. */
+  breakdownBy = signal<'dance' | 'style'>('dance');
+
+  readonly danceBreakdown = computed<BreakdownRow[]>(() => {
+    const byDance = new Map<number, BreakdownRow & { seconds: number }>();
     for (const s of this.scopedSessions()) {
       for (const item of s.items) {
         const row = byDance.get(item.danceId)
@@ -184,13 +188,34 @@ export class PracticeComponent implements OnInit, OnDestroy {
         byDance.set(item.danceId, row);
       }
     }
-    const rows = [...byDance.values()]
+    return this.toBreakdownRows([...byDance.values()]);
+  });
+
+  readonly styleBreakdown = computed<BreakdownRow[]>(() => {
+    const byStyle = new Map<string, BreakdownRow & { seconds: number }>();
+    for (const s of this.scopedSessions()) {
+      for (const item of s.items) {
+        const name = item.danceStyleName || 'Untagged';
+        const row = byStyle.get(name)
+          ?? { danceId: 0, name, slug: '', styleSlug: '', minutes: 0, pct: 0, seconds: 0 };
+        row.seconds += item.seconds;
+        byStyle.set(name, row);
+      }
+    }
+    return this.toBreakdownRows([...byStyle.values()]);
+  });
+
+  readonly displayedBreakdown = computed<BreakdownRow[]>(() =>
+    this.breakdownBy() === 'style' ? this.styleBreakdown() : this.danceBreakdown());
+
+  private toBreakdownRows(rows: (BreakdownRow & { seconds: number })[]): BreakdownRow[] {
+    const kept = rows
       .filter(r => r.seconds >= SLIVER_SECONDS)
       .sort((a, b) => b.seconds - a.seconds)
       .slice(0, 8);
-    const max = rows[0]?.seconds ?? 1;
-    return rows.map(r => ({ ...r, minutes: Math.round(r.seconds / 60), pct: Math.max(4, Math.round(r.seconds / max * 100)) }));
-  });
+    const max = kept[0]?.seconds ?? 1;
+    return kept.map(r => ({ ...r, minutes: Math.round(r.seconds / 60), pct: Math.max(4, Math.round(r.seconds / max * 100)) }));
+  }
 
   constructor(
     private practiceService: PracticeService,

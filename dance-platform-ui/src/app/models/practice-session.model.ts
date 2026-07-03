@@ -3,6 +3,8 @@ export interface PracticeSessionItem {
   danceName: string;
   danceSlug: string;
   danceStyleSlug: string;
+  /** Display name of the dance's canonical style; empty when untagged. */
+  danceStyleName: string;
   seconds: number;
   minutes: number;
   notes?: string;

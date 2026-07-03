@@ -140,6 +140,7 @@ public class PracticeService : IPracticeService
                 DanceName = i.Dance.Name,
                 DanceSlug = i.Dance.Slug,
                 DanceStyleSlug = SlugGenerator.StyleSlug(i.Dance),
+                DanceStyleName = i.Dance.DanceStyles.OrderBy(ds => ds.StyleId).Select(ds => ds.Style.Name).FirstOrDefault() ?? string.Empty,
                 Seconds = i.Seconds,
                 Minutes = (int)Math.Round(i.Seconds / 60.0),
                 Notes = i.Notes

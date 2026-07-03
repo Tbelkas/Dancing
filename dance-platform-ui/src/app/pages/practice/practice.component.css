@@ -309,6 +309,22 @@
   font-size: 0.72rem;
 }
 
+.breakdown-toggle {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.filter-pill--xs {
+  padding: 3px 9px;
+  font-size: 0.65rem;
+}
+
+.breakdown-row__name--static {
+  color: var(--color-text);
+  cursor: default;
+}
+
 .heatmap {
   display: flex;
   flex-direction: column;
@@ -606,6 +622,20 @@
   color: var(--color-text-muted);
   font-size: 0.8rem;
   opacity: 0.8;
+}
+
+/* Style tag on each practiced dance — same visual family as the browse-card badges. */
+.session-item__style {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  padding: 2px 7px;
+  white-space: nowrap;
 }
 
 .session-item--minor {
