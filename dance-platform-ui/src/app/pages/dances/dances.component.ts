@@ -64,11 +64,20 @@ export class DancesComponent implements OnInit, OnDestroy {
   currentPage = signal(1);
   /** "Continue learning" rail: the user's in-progress dances (fetched once, authed only). */
   railDances = signal<Dance[]>([]);
+  /** True while the in-progress fetch is in flight — holds the rail as a skeleton instead of
+   *  painting the recently-viewed fallback and then flipping it to "Continue learning". */
+  railPending = signal(false);
   surprising = signal(false);
   styles = signal<Style[]>([]);
   musicalStyles = signal<MusicalStyle[]>([]);
   instructors = signal<Instructor[]>([]);
   loading = signal(true);
+  /** False until the first search resolves; skeletons only show for that initial load —
+   *  re-searches keep the old grid (dimmed) so the page doesn't blank-flash on every filter. */
+  hasLoaded = signal(false);
+  /** Cards get their staggered entrance only on the first reveal; after that new cards
+   *  appear instantly instead of replaying the fade on every filter/page change. */
+  cardsReveal = signal(true);
 
   // Filters
   searchQuery = signal('');
@@ -284,8 +293,12 @@ export class DancesComponent implements OnInit, OnDestroy {
     // current state, so both no-op in applyUrlIfChanged.
     this.urlSub = this.route.queryParamMap.pipe(skip(1)).subscribe(qp => this.applyUrlIfChanged(qp));
     if (this.auth.isAuthenticated()) {
+      this.railPending.set(true);
       this.danceService.searchDances({ status: 'inprogress', sortBy: 'name', pageSize: 12 })
-        .subscribe({ next: r => this.railDances.set(r.items), error: () => {} });
+        .subscribe({
+          next: r => { this.railDances.set(r.items); this.railPending.set(false); },
+          error: () => this.railPending.set(false)
+        });
     }
   }
 
@@ -432,9 +445,17 @@ export class DancesComponent implements OnInit, OnDestroy {
         this.searchTotal.set(result.total);
         this.grandTotal.set(result.grandTotal ?? result.total);
         this.loading.set(false);
+        this.markLoaded();
       },
-      error: () => this.loading.set(false)
+      error: () => { this.loading.set(false); this.markLoaded(); }
     });
+  }
+
+  private markLoaded(): void {
+    if (this.hasLoaded()) return;
+    this.hasLoaded.set(true);
+    // Let the initial staggered entrance play out, then stop animating card insertions.
+    setTimeout(() => this.cardsReveal.set(false), 900);
   }
 
   onSearchInput(value: string): void {
@@ -622,11 +643,17 @@ export class DancesComponent implements OnInit, OnDestroy {
         ? { ...d, isLearned: willLearn, isInProgress: willLearn ? false : d.isInProgress }
         : d)
     );
+    // Keep the local recently-viewed trail in step so "Continue learning" rails don't
+    // briefly show a dance that the server then reports as learned (or vice versa).
+    this.recentDances.setLearned(dance.id, willLearn);
 
     this.danceService.setStatus(dance.id, status).subscribe({
-      error: () => this.searchResults.update(list =>
-        list.map(d => d.id === dance.id ? { ...d, ...snap } : d)
-      )
+      error: () => {
+        this.searchResults.update(list =>
+          list.map(d => d.id === dance.id ? { ...d, ...snap } : d)
+        );
+        this.recentDances.setLearned(dance.id, snap.isLearned);
+      }
     });
   }
 

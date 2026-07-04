@@ -115,6 +115,14 @@
   &:hover { color: var(--color-text); background: rgba(255, 255, 255, 0.06); }
 }
 
+/* Holds the count's line height while the first search is in flight. */
+.results-count__skeleton {
+  display: inline-block;
+  width: 90px;
+  height: 0.78rem;
+  border-radius: 4px;
+}
+
 .results-bar {
   display: flex;
   align-items: center;
@@ -299,7 +307,6 @@
   display: flex;
   flex-direction: column;
   transition: border-color var(--transition), background var(--transition), box-shadow var(--transition), transform var(--transition);
-  animation: pageReveal 0.4s ease both;
 
   &:hover {
     border-color: var(--color-border-light);
@@ -310,6 +317,12 @@
   &:has(.dance-card__title-link:focus-visible) {
     border-color: var(--color-primary);
   }
+}
+
+/* Staggered entrance only on the grid's first reveal — replaying it on every
+   filter/page change makes freshly inserted cards blink in late. */
+.grid--reveal .dance-card {
+  animation: pageReveal 0.4s ease both;
 
   &:nth-child(1) { animation-delay: 0.04s; }
   &:nth-child(2) { animation-delay: 0.08s; }
@@ -319,6 +332,14 @@
   &:nth-child(6) { animation-delay: 0.24s; }
   &:nth-child(7) { animation-delay: 0.28s; }
   &:nth-child(8) { animation-delay: 0.32s; }
+}
+
+/* Re-search in flight: keep the stale results visible but visibly "off" instead of
+   swapping the whole area to skeletons and back. */
+.results--refreshing {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
 }
 
 /* Card media / thumbnail */
@@ -821,6 +842,7 @@
 }
 
 .rail-card__thumb {
+  display: block;
   width: 150px;
   height: 84px;
   object-fit: cover;
@@ -852,6 +874,22 @@
 }
 
 .rail-card:hover .rail-card__name { color: var(--color-primary); }
+
+/* Skeleton rail shown while the continue-learning fetch is pending; mirrors the real
+   card metrics so the section doesn't jump when content lands. */
+.rail__title-skeleton {
+  display: inline-block;
+  width: 140px;
+  height: 0.72rem;
+  border-radius: 4px;
+}
+
+.rail-card__name-skeleton {
+  display: inline-block;
+  width: 100px;
+  height: 0.88rem;
+  border-radius: 4px;
+}
 
 /* ---------- FAVORITES TOGGLE + ACTIVE FILTER CHIPS ---------- */
 .filter-pill--fav i {

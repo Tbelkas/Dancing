@@ -454,6 +454,39 @@
   border-radius: 2px;
 }
 
+/* Loading placeholders sized to the stats chips and insight cards they stand in for. */
+.skeleton-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.skeleton-stat-chip {
+  width: 130px;
+  height: 72px;
+  border-radius: var(--radius-lg);
+}
+
+.skeleton-insights {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.skeleton-insight-card {
+  height: 180px;
+  border-radius: var(--radius-lg);
+
+  &:first-child { width: 320px; }
+}
+
+@media (max-width: 860px) {
+  .skeleton-insights { grid-template-columns: 1fr; }
+  .skeleton-insight-card:first-child { width: 100%; }
+}
+
 .sessions-list {
   display: flex;
   flex-direction: column;

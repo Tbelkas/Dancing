@@ -22,6 +22,8 @@
   }
 
   @if (loading()) {
+    <!-- Placeholder keeps the count line's slot so the list doesn't jump down when it lands. -->
+    <p class="results-count"><span class="skeleton results-count__skeleton"></span></p>
     <div class="video-list" aria-busy="true" aria-label="Loading videos">
       @for (i of [0,1,2,3,4]; track i) {
         <div class="video-row video-row--skeleton">

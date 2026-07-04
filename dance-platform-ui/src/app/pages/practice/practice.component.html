@@ -180,10 +180,23 @@
   }
 
   @if (loading()) {
-    <div aria-busy="true" aria-label="Loading sessions" style="display: flex; flex-direction: column; gap: 12px;">
-      @for (i of [0,1,2,3]; track i) {
-        <div class="skeleton skeleton-line" style="height: 86px; border-radius: var(--radius-lg);"></div>
-      }
+    <!-- Mirror the stats block + insight cards too — if the skeleton only covers the list,
+         the whole page shoves down when they land after loading. -->
+    <div aria-busy="true" aria-label="Loading sessions">
+      <div class="skeleton-stats">
+        @for (i of [0,1,2,3]; track i) {
+          <div class="skeleton skeleton-stat-chip"></div>
+        }
+      </div>
+      <div class="skeleton-insights">
+        <div class="skeleton skeleton-insight-card"></div>
+        <div class="skeleton skeleton-insight-card"></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        @for (i of [0,1,2,3]; track i) {
+          <div class="skeleton skeleton-line" style="height: 86px; border-radius: var(--radius-lg);"></div>
+        }
+      </div>
     </div>
   } @else if (visibleSessions().length === 0) {
     <div class="empty-state">

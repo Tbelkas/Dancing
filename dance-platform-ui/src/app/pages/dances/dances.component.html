@@ -155,8 +155,22 @@
     </div>
   }
 
-  <!-- Continue-learning rail: pick up where you left off before diving into the catalog. -->
-  @if (railDances().length > 0) {
+  <!-- Continue-learning rail: pick up where you left off before diving into the catalog.
+       While the in-progress fetch is pending we hold the slot with a skeleton — painting the
+       recently-viewed fallback first and then flipping it reads as a flicker. -->
+  @if (railPending()) {
+    <section class="rail" aria-hidden="true">
+      <h2 class="rail__title"><span class="skeleton rail__title-skeleton"></span></h2>
+      <div class="rail__scroller">
+        @for (i of [0, 1, 2]; track i) {
+          <span class="rail-card">
+            <span class="rail-card__thumb skeleton"></span>
+            <span class="skeleton rail-card__name-skeleton"></span>
+          </span>
+        }
+      </div>
+    </section>
+  } @else if (railDances().length > 0) {
     <section class="rail" aria-label="Continue learning">
       <h2 class="rail__title"><i class="fa-solid fa-person-running"></i> Continue learning</h2>
       <div class="rail__scroller">
@@ -304,10 +318,13 @@
     </div>
   </div>
 
-  @if (!loading()) {
-    <div class="results-bar">
+  <!-- Always mounted: popping it in after the first load (or unmounting it during
+       re-searches) shoves the whole grid up and down. -->
+  <div class="results-bar">
       <span class="results-count">
-        @if (hasActiveFilters() && searchTotal() < grandTotal()) {
+        @if (!hasLoaded()) {
+          <span class="skeleton results-count__skeleton"></span>
+        } @else if (hasActiveFilters() && searchTotal() < grandTotal()) {
           <strong>{{ searchTotal() }}</strong> of {{ grandTotal() }} dances
         } @else {
           {{ searchTotal() }} dance{{ searchTotal() !== 1 ? 's' : '' }}
@@ -351,8 +368,7 @@
           </select>
         </label>
       </div>
-    </div>
-  }
+  </div>
 
   <!-- Add Video (any signed-in user; non-admins create personal videos) -->
   @if (showAddVideo()) {
@@ -423,7 +439,9 @@
     </div>
   }
 
-  @if (loading()) {
+  <!-- Skeletons only cover the initial load; re-searches keep the old grid dimmed in place
+       instead of blank-flashing skeletons on every filter click. -->
+  @if (loading() && !hasLoaded()) {
     <div class="grid grid--2" aria-busy="true" aria-label="Loading dances">
       @for (i of skeletonCards; track i) {
         <div class="card dance-card dance-card--skeleton">
@@ -440,7 +458,7 @@
         </div>
       }
     </div>
-  } @else if (searchResults().length === 0) {
+  } @else if (!loading() && searchResults().length === 0) {
     <div class="empty-state card">
       <div class="empty-state__icon"><i class="fa-solid fa-magnifying-glass"></i></div>
       <h2>No dances found</h2>
@@ -459,7 +477,7 @@
       }
     </div>
   } @else if (viewMode() === 'list') {
-    <ul class="dance-rows">
+    <ul class="dance-rows" [class.results--refreshing]="loading()" [attr.aria-busy]="loading() || null">
       @for (dance of searchResults(); track dance.id) {
         <li class="dance-row-item">
           <a class="dance-row-item__link" [routerLink]="dance.slug | dancePath:dance.styleSlug">
@@ -523,7 +541,7 @@
       </nav>
     }
   } @else {
-    <div class="grid grid--2">
+    <div class="grid grid--2" [class.grid--reveal]="cardsReveal()" [class.results--refreshing]="loading()" [attr.aria-busy]="loading() || null">
       @for (dance of searchResults(); track dance.id) {
         <div class="card dance-card">
           <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="dance-card__media" tabindex="-1" aria-hidden="true"
