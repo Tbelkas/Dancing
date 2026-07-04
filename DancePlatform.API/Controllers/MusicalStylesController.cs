@@ -14,7 +14,9 @@ public class MusicalStylesController : ControllerBase
     public MusicalStylesController(IMusicalStyleService musicalStyleService) =>
         _musicalStyleService = musicalStyleService;
 
+    // Catalog-level data that only changes on seeding/admin edits — let browsers reuse it briefly.
     [HttpGet]
+    [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
     public async Task<IActionResult> GetAll() => Ok(await _musicalStyleService.GetAllAsync());
 
     [HttpGet("{id}")]

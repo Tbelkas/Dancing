@@ -18,7 +18,9 @@ public class StylesController : ControllerBase
     private int? CurrentUserId =>
         User.FindFirstValue(ClaimTypes.NameIdentifier) is string id ? int.Parse(id) : null;
 
+    // Catalog-level data that only changes on seeding/admin edits — let browsers reuse it briefly.
     [HttpGet]
+    [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
     public async Task<IActionResult> GetAll() => Ok(await _styleService.GetAllAsync());
 
     [HttpGet("{id}")]

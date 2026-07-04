@@ -14,7 +14,9 @@ public class DancesController : AppControllerBase
 
     public DancesController(IDanceService danceService) => _danceService = danceService;
 
+    // Catalog-level data that only changes on seeding/admin edits — let browsers reuse it briefly.
     [HttpGet("names")]
+    [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
     public async Task<IActionResult> GetNames() =>
         Ok(await _danceService.GetNamesAsync());
 

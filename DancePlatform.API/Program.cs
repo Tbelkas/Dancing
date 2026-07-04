@@ -2,12 +2,21 @@ using System.Text;
 using DancePlatform.API.Data;
 using DancePlatform.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+// Apache proxies to Kestrel over plain HTTP and passes upstream Content-Encoding through,
+// so compressing here is what the browser ends up receiving.
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddProblemDetails();
@@ -67,6 +76,8 @@ var app = builder.Build();
 
 // Unhandled exceptions become RFC-7807 ProblemDetails instead of leaking stack traces.
 app.UseExceptionHandler();
+
+app.UseResponseCompression();
 
 if (app.Environment.IsDevelopment())
 {
