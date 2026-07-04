@@ -119,18 +119,20 @@
       <button class="btn btn--primary" (click)="loadError.set(false); ngOnInit()">Retry</button>
     </div>
   } @else {
+    <!-- Two stats cards: the loaded column shows at most Practice + Your Dances,
+         so a third placeholder would make the page shrink when data lands. -->
     <div class="profile-layout" aria-busy="true" aria-label="Loading profile">
-      <div class="card">
-        <div class="skeleton" style="width: 72px; height: 72px; border-radius: 50%; margin-bottom: 16px;"></div>
-        <div class="skeleton skeleton-line skeleton-line--title" style="margin-bottom: 10px;"></div>
+      <div class="card skeleton-card">
+        <div class="skeleton skeleton-avatar"></div>
+        <div class="skeleton skeleton-line skeleton-line--title"></div>
         <div class="skeleton skeleton-line skeleton-line--short"></div>
       </div>
       <div class="stats-column">
-        @for (i of [0,1,2]; track i) {
-          <div class="card">
-            <div class="skeleton skeleton-line skeleton-line--title" style="margin-bottom: 16px;"></div>
-            <div class="skeleton skeleton-line" style="margin-bottom: 10px;"></div>
-            <div class="skeleton skeleton-line" style="width: 80%;"></div>
+        @for (i of [0, 1]; track i) {
+          <div class="card skeleton-card">
+            <div class="skeleton skeleton-line skeleton-line--title"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line skeleton-line--short"></div>
           </div>
         }
       </div>

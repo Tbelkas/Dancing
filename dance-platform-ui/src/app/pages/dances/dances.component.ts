@@ -54,6 +54,8 @@ export class DancesComponent implements OnInit, OnDestroy {
   readonly difficultyLevels = DIFFICULTY_LEVELS;
   readonly statusOptions = STATUS_OPTIONS;
   readonly skeletonCards = [0, 1, 2, 3, 4, 5];
+  /** Compact rows are much shorter than cards, so the list skeleton needs more of them. */
+  readonly skeletonRows = [0, 1, 2, 3, 4, 5, 6, 7];
   readonly PAGE_SIZE = 24;
 
   // Data

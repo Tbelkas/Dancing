@@ -187,14 +187,16 @@
         @for (i of [0,1,2,3]; track i) {
           <div class="skeleton skeleton-stat-chip"></div>
         }
+        <div class="skeleton skeleton-timeframe"></div>
       </div>
       <div class="skeleton-insights">
         <div class="skeleton skeleton-insight-card"></div>
         <div class="skeleton skeleton-insight-card"></div>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        @for (i of [0,1,2,3]; track i) {
-          <div class="skeleton skeleton-line" style="height: 86px; border-radius: var(--radius-lg);"></div>
+      <div class="skeleton-sessions">
+        <div class="skeleton skeleton-date-line"></div>
+        @for (i of [0,1,2]; track i) {
+          <div class="skeleton skeleton-session-card"></div>
         }
       </div>
     </div>

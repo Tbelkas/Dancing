@@ -440,24 +440,39 @@
   }
 
   <!-- Skeletons only cover the initial load; re-searches keep the old grid dimmed in place
-       instead of blank-flashing skeletons on every filter click. -->
+       instead of blank-flashing skeletons on every filter click. The skeleton follows the
+       saved view mode so a list-view user doesn't watch a card grid flip into rows. -->
   @if (loading() && !hasLoaded()) {
-    <div class="grid grid--2" aria-busy="true" aria-label="Loading dances">
-      @for (i of skeletonCards; track i) {
-        <div class="card dance-card dance-card--skeleton">
-          <div class="dance-card__media skeleton"></div>
-          <div class="dance-card__body">
-            <div class="skeleton skeleton-line skeleton-line--title"></div>
-            <div class="skeleton skeleton-line"></div>
-            <div class="skeleton skeleton-line skeleton-line--short"></div>
-            <div class="skeleton-badges">
-              <div class="skeleton skeleton-badge"></div>
-              <div class="skeleton skeleton-badge"></div>
+    @if (viewMode() === 'list') {
+      <ul class="dance-rows" aria-busy="true" aria-label="Loading dances">
+        @for (i of skeletonRows; track i) {
+          <li class="dance-row-item dance-row-item--skeleton">
+            <span class="dance-row-item__thumb skeleton"></span>
+            <span class="dance-row-item__main">
+              <span class="skeleton skeleton-line dance-row-item__name-skeleton"></span>
+              <span class="skeleton skeleton-line dance-row-item__meta-skeleton"></span>
+            </span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <div class="grid grid--2" aria-busy="true" aria-label="Loading dances">
+        @for (i of skeletonCards; track i) {
+          <div class="card dance-card dance-card--skeleton">
+            <div class="dance-card__media skeleton"></div>
+            <div class="dance-card__body">
+              <div class="skeleton skeleton-line skeleton-line--title"></div>
+              <div class="skeleton skeleton-line"></div>
+              <div class="skeleton skeleton-line skeleton-line--short"></div>
+              <div class="skeleton-badges">
+                <div class="skeleton skeleton-badge"></div>
+                <div class="skeleton skeleton-badge"></div>
+              </div>
             </div>
           </div>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    }
   } @else if (!loading() && searchResults().length === 0) {
     <div class="empty-state card">
       <div class="empty-state__icon"><i class="fa-solid fa-magnifying-glass"></i></div>

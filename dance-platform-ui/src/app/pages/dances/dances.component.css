@@ -1142,3 +1142,9 @@
 @media (max-width: 640px) {
   .dance-row-item__thumb { width: 64px; height: 40px; }
 }
+
+/* List-view loading rows reuse the real row shell (border, padding, thumb size)
+   so the first paint doesn't shift when results land. */
+.dance-row-item--skeleton { pointer-events: none; }
+.dance-row-item__name-skeleton { width: 150px; height: 0.98rem; }
+.dance-row-item__meta-skeleton { width: 220px; max-width: 60vw; height: 0.72rem; }

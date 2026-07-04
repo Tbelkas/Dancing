@@ -487,6 +487,33 @@
   .skeleton-insight-card:first-child { width: 100%; }
 }
 
+/* Timeframe pills sit at the right end of the stats block, like the real ones. */
+.skeleton-timeframe {
+  margin-left: auto;
+  align-self: center;
+  width: 200px;
+  height: 30px;
+  border-radius: 999px;
+}
+
+.skeleton-sessions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-date-line {
+  width: 150px;
+  height: 0.72rem;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+
+.skeleton-session-card {
+  height: 86px;
+  border-radius: var(--radius-lg);
+}
+
 .sessions-list {
   display: flex;
   flex-direction: column;

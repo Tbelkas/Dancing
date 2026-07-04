@@ -700,6 +700,10 @@ textarea:focus-visible,
 .skeleton-line--page-title { height: 2.6rem; width: 50%; }
 .skeleton-badge { height: 22px; width: 70px; border-radius: 2px; }
 .skeleton-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Card whose contents are all placeholders — the gap stands in for text rhythm.
+   Shared by /profile and /users/:username (the latter has no scoped stylesheet). */
+.skeleton-card { display: flex; flex-direction: column; gap: 12px; }
+.skeleton-avatar { width: 72px; height: 72px; border-radius: 50%; margin-bottom: 6px; }
 
 @keyframes shimmer {
   100% { transform: translateX(100%); }

@@ -470,8 +470,21 @@
   gap: 14px;
   max-width: 760px;
 }
+/* Mirrors the loaded page top-to-bottom: title, badges, social counts, description,
+   the "Videos" section heading, then the player — so nothing shoves when data lands. */
+.detail-skeleton__counts {
+  height: 0.78rem;
+  width: 250px;
+  max-width: 70%;
+}
+.detail-skeleton__section-title {
+  height: 1.2rem;
+  width: 90px;
+  /* detail-header's 52px bottom margin, minus the skeleton column's own 14px gap */
+  margin-top: 38px;
+}
 .detail-skeleton__video {
-  margin-top: 18px;
+  margin-top: 8px;
   width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: var(--radius-lg);

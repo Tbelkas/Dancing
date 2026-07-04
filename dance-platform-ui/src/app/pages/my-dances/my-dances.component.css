@@ -453,6 +453,50 @@
   color: var(--color-primary);
 }
 
+/* Loading placeholders sized to the real progress block, style tabs, section
+   title, and bordered dance list they stand in for. */
+.skeleton-progress { margin-bottom: 18px; }
+
+.skeleton-progress__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.skeleton-progress__legend { width: 190px; max-width: 60%; height: 12px; border-radius: 4px; }
+.skeleton-progress__pct { width: 36px; height: 12px; border-radius: 4px; }
+.skeleton-progress__track { height: 6px; border-radius: 999px; }
+
+.skeleton-tabs {
+  display: flex;
+  gap: 24px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 28px;
+}
+
+.skeleton-tab { width: 84px; height: 16px; border-radius: 4px; }
+
+.skeleton-section-title {
+  width: 160px;
+  height: 1.1rem;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.skeleton-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.skeleton-rows__item { height: 45px; border-radius: 0; }
+
 /* Empty / Loading */
 .empty-state {
   text-align: center;

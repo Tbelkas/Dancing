@@ -92,15 +92,25 @@
   }
 
   @if (loading()) {
+    <!-- Mirrors the loaded order — progress bar, style tabs, section title, bordered
+         dance list — so nothing shoves when the data lands. -->
     <div aria-busy="true" aria-label="Loading your dances">
-      <div class="skeleton-badges" style="margin-bottom: 28px;">
-        @for (i of [0,1,2,3]; track i) {
-          <div class="skeleton skeleton-badge" style="width: 96px; height: 36px;"></div>
+      <div class="skeleton-progress">
+        <div class="skeleton-progress__head">
+          <div class="skeleton skeleton-progress__legend"></div>
+          <div class="skeleton skeleton-progress__pct"></div>
+        </div>
+        <div class="skeleton skeleton-progress__track"></div>
+      </div>
+      <div class="skeleton-tabs">
+        @for (i of [0, 1, 2, 3]; track i) {
+          <div class="skeleton skeleton-tab"></div>
         }
       </div>
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        @for (i of [0,1,2,3,4]; track i) {
-          <div class="skeleton skeleton-line" style="height: 48px;"></div>
+      <div class="skeleton skeleton-section-title"></div>
+      <div class="skeleton-rows">
+        @for (i of [0, 1, 2, 3, 4]; track i) {
+          <div class="skeleton skeleton-rows__item"></div>
         }
       </div>
     </div>
@@ -161,9 +171,9 @@
     @if (selectedStyleId() === FAVORITES_TAB) {
       <div class="dances-view">
         @if (loadingFavorites()) {
-          <div aria-busy="true" aria-label="Loading favorites" style="display: flex; flex-direction: column; gap: 10px;">
-            @for (i of [0,1,2,3]; track i) {
-              <div class="skeleton skeleton-line" style="height: 48px;"></div>
+          <div class="skeleton-rows" aria-busy="true" aria-label="Loading favorites">
+            @for (i of [0, 1, 2, 3]; track i) {
+              <div class="skeleton skeleton-rows__item"></div>
             }
           </div>
         } @else if (favoriteDances().length === 0) {
