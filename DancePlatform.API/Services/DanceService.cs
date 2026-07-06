@@ -301,6 +301,13 @@ public class DanceService : IDanceService
             ? await GetAffinityStyleIdsAsync(userId.Value)
             : new List<int>();
 
+        // Cold-start tiebreak for "recommended": most of the catalog has zero ratings/favorites, so
+        // ranking must not fall through to Name (the page reads as alphabetical). After on-site
+        // signals, source-video YouTube view count is the "does anyone care" proxy, and remaining
+        // ties rotate daily via a deterministic id shuffle (multiply by a date-derived seed mod a
+        // prime) instead of parking A-names at the top forever.
+        var dailySeed = DateOnly.FromDateTime(DateTime.UtcNow).DayNumber % 9972 + 1;
+
         IQueryable<Dance> orderedQ = sortBy switch
         {
             "recommended" when affinityStyleIds.Count > 0 => entityQ
@@ -309,13 +316,17 @@ public class DanceService : IDanceService
                 .ThenByDescending(d => d.DanceStyles.Any(ds => affinityStyleIds.Contains(ds.StyleId)))
                 .ThenByDescending(d => d.AverageRating)
                 .ThenByDescending(d => d.FavoriteCount)
-                .ThenBy(d => d.Name),
+                .ThenByDescending(d => d.LearnedCount)
+                .ThenByDescending(d => d.Videos.Max(v => (long?)v.ViewCount) ?? 0)
+                .ThenBy(d => d.Id * dailySeed % 9973),
             "recommended" => entityQ
                 .OrderByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial" && v.StartTime == null))
                 .ThenByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial"))
                 .ThenByDescending(d => d.AverageRating)
                 .ThenByDescending(d => d.FavoriteCount)
-                .ThenBy(d => d.Name),
+                .ThenByDescending(d => d.LearnedCount)
+                .ThenByDescending(d => d.Videos.Max(v => (long?)v.ViewCount) ?? 0)
+                .ThenBy(d => d.Id * dailySeed % 9973),
             "tutorials" => entityQ
                 .OrderByDescending(d => d.Videos.Count(v => v.VideoType == "tutorial" && v.StartTime == null))
                 .ThenByDescending(d => d.Videos.Count(v => v.VideoType == "tutorial"))
