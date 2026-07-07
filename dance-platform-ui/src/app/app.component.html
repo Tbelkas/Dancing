@@ -33,6 +33,7 @@
       <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Browse</a>
       @if (auth.isAuthenticated()) {
         <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Added Videos</a>
+        <a routerLink="/choreos" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">My Choreos</a>
         <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Practice</a>
         <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Profile</a>
         @if (role.isAdmin()) {

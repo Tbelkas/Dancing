@@ -1,0 +1,16 @@
+/* Native <video> for a locally picked file. Sizing mirrors the YouTube iframe:
+   fill the wrapper's width and keep the file's own aspect, capped so portrait
+   phone recordings don't take over the page. */
+.local-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 72vh;
+  background: #000;
+}
+
+/* Mirror flips only the video surface, matching the embedded players. The native
+   controls flip with it — same accepted quirk as the YouTube/TikTok mirror. */
+.player-media--mirrored .local-video {
+  transform: scaleX(-1);
+}

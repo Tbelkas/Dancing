@@ -14,6 +14,8 @@ public class AppDbContext : DbContext
     public DbSet<Video> Videos => Set<Video>();
     public DbSet<VideoSegment> VideoSegments => Set<VideoSegment>();
     public DbSet<UserVideoLoop> UserVideoLoops => Set<UserVideoLoop>();
+    public DbSet<UserChoreo> UserChoreos => Set<UserChoreo>();
+    public DbSet<UserChoreoLoop> UserChoreoLoops => Set<UserChoreoLoop>();
     public DbSet<DanceStyle> DanceStyles => Set<DanceStyle>();
     public DbSet<DanceMusicalStyle> DanceMusicalStyles => Set<DanceMusicalStyle>();
     public DbSet<UserFavoriteDance> UserFavoriteDances => Set<UserFavoriteDance>();
@@ -68,6 +70,23 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<UserVideoLoop>()
             .HasIndex(l => new { l.UserId, l.VideoId });
+
+        // Local choreos: the video file stays on the user's machine; these rows hold only
+        // its file name and the user's saved time slots. Everything dies with the account.
+        modelBuilder.Entity<UserChoreo>()
+            .HasOne(c => c.User)
+            .WithMany()
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserChoreo>()
+            .HasIndex(c => c.UserId);
+
+        modelBuilder.Entity<UserChoreoLoop>()
+            .HasOne(l => l.Choreo)
+            .WithMany(c => c.Loops)
+            .HasForeignKey(l => l.UserChoreoId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<DanceStyle>()
             .HasKey(ds => new { ds.DanceId, ds.StyleId });

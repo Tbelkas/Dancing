@@ -33,6 +33,7 @@ builder.Services.AddScoped<IStyleService, StyleService>();
 builder.Services.AddScoped<IMusicalStyleService, MusicalStyleService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 builder.Services.AddScoped<IUserVideoLoopService, UserVideoLoopService>();
+builder.Services.AddScoped<IChoreoService, ChoreoService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPracticeService, PracticeService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();

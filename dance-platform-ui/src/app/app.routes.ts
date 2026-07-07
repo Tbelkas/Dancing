@@ -12,6 +12,7 @@ export const routes: Routes = [
   { path: 'profile', title: 'My Profile · Dance Platform', loadComponent: () => import('./pages/profile/profile.component').then(m => m.ProfileComponent), canActivate: [authGuard] },
   { path: 'my-dances', title: 'My Dances · Dance Platform', loadComponent: () => import('./pages/my-dances/my-dances.component').then(m => m.MyDancesComponent), canActivate: [authGuard] },
   { path: 'library', title: 'Added Videos · Dance Platform', loadComponent: () => import('./pages/library/library.component').then(m => m.LibraryComponent), canActivate: [authGuard] },
+  { path: 'choreos', title: 'My Choreos · Dance Platform', loadComponent: () => import('./pages/my-choreos/my-choreos.component').then(m => m.MyChoreosComponent), canActivate: [authGuard] },
   { path: 'practice', title: 'Practice Log · Dance Platform', loadComponent: () => import('./pages/practice/practice.component').then(m => m.PracticeComponent), canActivate: [authGuard] },
   { path: 'admin/add-video', title: 'Add Video · Dance Platform', loadComponent: () => import('./pages/admin-add-video/admin-add-video.component').then(m => m.AdminAddVideoComponent), canActivate: [adminGuard] },
   { path: 'users/:username', loadComponent: () => import('./pages/user-profile/user-profile.component').then(m => m.UserProfileComponent) },

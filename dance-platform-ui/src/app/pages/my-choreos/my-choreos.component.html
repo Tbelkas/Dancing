@@ -1,0 +1,103 @@
+<div class="container">
+  <input #fileInput type="file" accept="video/*" class="file-input" (change)="onFilePicked($event)" aria-hidden="true" tabindex="-1" />
+
+  @if (selected(); as choreo) {
+
+    <div class="player-page">
+      <div class="player-page__head">
+        <button class="btn btn--ghost btn--sm" (click)="closePlayer()">
+          <i class="fa-solid fa-arrow-left"></i> My choreos
+        </button>
+      </div>
+
+      <div class="page-header">
+        <h1 class="page-title">{{ choreo.name }}</h1>
+        <p class="page-subtitle">
+          <i class="fa-solid fa-file-video"></i> {{ choreo.fileName }}
+          <span class="privacy-note"><i class="fa-solid fa-lock"></i> Plays from your device</span>
+        </p>
+      </div>
+
+      @if (fileMismatch(); as warning) {
+        <div class="mismatch-note" role="alert">
+          <i class="fa-solid fa-triangle-exclamation"></i> {{ warning }}
+        </div>
+      }
+
+      @if (videoUrl(); as url) {
+        <app-local-video-player
+          [src]="url"
+          [loops]="choreo.loops"
+          (saveLoop)="saveLoop($event)"
+          (deleteLoop)="deleteLoop($event)"
+          (durationDetected)="onDurationDetected($event)" />
+      }
+    </div>
+
+  } @else {
+
+    <div class="page-header">
+      <h1 class="page-title">My Choreos</h1>
+      <p class="page-subtitle">
+        Practice your own videos. They stay on your device — only the file name and your saved loops are stored.
+      </p>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn btn--primary" (click)="pickNewFile()">
+        <i class="fa-solid fa-plus"></i> Add choreo
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="choreo-list" aria-busy="true" aria-label="Loading choreos">
+        @for (i of [0,1,2]; track i) {
+          <div class="choreo-row choreo-row--skeleton">
+            <div class="choreo-row__icon skeleton"></div>
+            <div class="choreo-row__main">
+              <div class="skeleton skeleton-line skeleton-line--title"></div>
+              <div class="skeleton skeleton-line skeleton-line--short"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (choreos().length === 0) {
+      <div class="empty-state card">
+        <div class="empty-state__icon"><i class="fa-solid fa-clapperboard"></i></div>
+        <h2>No choreos yet</h2>
+        <p>Add a video from your computer to practice it with loops. The file is never uploaded — we remember only its name and your time slots.</p>
+        <button class="btn btn--primary btn--sm" (click)="pickNewFile()"><i class="fa-solid fa-plus"></i> Add your first choreo</button>
+      </div>
+    } @else {
+      <ul class="choreo-list">
+        @for (choreo of choreos(); track choreo.id) {
+          <li class="choreo-row">
+            <button class="choreo-row__open" (click)="openChoreo(choreo)" [attr.aria-label]="'Open ' + choreo.name">
+              <span class="choreo-row__icon"><i class="fa-solid fa-clapperboard"></i></span>
+              <span class="choreo-row__main">
+                <span class="choreo-row__title">{{ choreo.name }}</span>
+                <span class="choreo-row__meta">
+                  <span class="choreo-row__file"><i class="fa-solid fa-file-video"></i> {{ choreo.fileName }}</span>
+                  @if (durationLabel(choreo); as dur) {
+                    <span class="badge badge--sm">{{ dur }}</span>
+                  }
+                  <span class="badge badge--sm badge--private">
+                    {{ choreo.loops.length }} loop{{ choreo.loops.length === 1 ? '' : 's' }}
+                  </span>
+                </span>
+              </span>
+            </button>
+            <button class="choreo-row__delete" (click)="deleteChoreo(choreo, $event)" [disabled]="deletingId() === choreo.id" title="Remove choreo" aria-label="Remove choreo">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </li>
+        }
+      </ul>
+      <p class="reselect-hint">
+        <i class="fa-solid fa-circle-info"></i>
+        Opening a choreo asks for its file again — your browser can't reopen local files by itself.
+      </p>
+    }
+
+  }
+</div>
