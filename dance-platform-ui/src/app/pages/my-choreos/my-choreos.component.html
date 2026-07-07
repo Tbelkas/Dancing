@@ -20,7 +20,11 @@
 
       @if (fileMismatch(); as warning) {
         <div class="mismatch-note" role="alert">
-          <i class="fa-solid fa-triangle-exclamation"></i> {{ warning }}
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span class="mismatch-note__text">{{ warning }}</span>
+          <button class="btn btn--ghost btn--sm" (click)="adoptPickedFileName()">
+            Use this file name from now on
+          </button>
         </div>
       }
 
@@ -28,9 +32,11 @@
         <app-local-video-player
           [src]="url"
           [loops]="choreo.loops"
+          [rotation]="choreo.rotationDegrees"
           (saveLoop)="saveLoop($event)"
           (deleteLoop)="deleteLoop($event)"
-          (durationDetected)="onDurationDetected($event)" />
+          (durationDetected)="onDurationDetected($event)"
+          (rotationChange)="onRotationChange($event)" />
       }
     </div>
 
@@ -72,20 +78,34 @@
       <ul class="choreo-list">
         @for (choreo of choreos(); track choreo.id) {
           <li class="choreo-row">
-            <button class="choreo-row__open" (click)="openChoreo(choreo)" [attr.aria-label]="'Open ' + choreo.name">
-              <span class="choreo-row__icon"><i class="fa-solid fa-clapperboard"></i></span>
-              <span class="choreo-row__main">
-                <span class="choreo-row__title">{{ choreo.name }}</span>
-                <span class="choreo-row__meta">
-                  <span class="choreo-row__file"><i class="fa-solid fa-file-video"></i> {{ choreo.fileName }}</span>
-                  @if (durationLabel(choreo); as dur) {
-                    <span class="badge badge--sm">{{ dur }}</span>
-                  }
-                  <span class="badge badge--sm badge--private">
-                    {{ choreo.loops.length }} loop{{ choreo.loops.length === 1 ? '' : 's' }}
+            @if (renamingId() === choreo.id) {
+              <div class="choreo-row__open">
+                <span class="choreo-row__icon"><i class="fa-solid fa-clapperboard"></i></span>
+                <input #renameInput type="text" class="rename-input" maxlength="200"
+                  [(ngModel)]="renameValue" aria-label="Choreo name"
+                  (keyup.enter)="commitRename(choreo)"
+                  (keyup.escape)="cancelRename()"
+                  (blur)="commitRename(choreo)" />
+              </div>
+            } @else {
+              <button class="choreo-row__open" (click)="openChoreo(choreo)" [attr.aria-label]="'Open ' + choreo.name">
+                <span class="choreo-row__icon"><i class="fa-solid fa-clapperboard"></i></span>
+                <span class="choreo-row__main">
+                  <span class="choreo-row__title">{{ choreo.name }}</span>
+                  <span class="choreo-row__meta">
+                    <span class="choreo-row__file"><i class="fa-solid fa-file-video"></i> {{ choreo.fileName }}</span>
+                    @if (durationLabel(choreo); as dur) {
+                      <span class="badge badge--sm">{{ dur }}</span>
+                    }
+                    <span class="badge badge--sm badge--private">
+                      {{ choreo.loops.length }} loop{{ choreo.loops.length === 1 ? '' : 's' }}
+                    </span>
                   </span>
                 </span>
-              </span>
+              </button>
+            }
+            <button class="choreo-row__edit" (click)="startRename(choreo, $event)" title="Rename choreo" aria-label="Rename choreo">
+              <i class="fa-solid fa-pen"></i>
             </button>
             <button class="choreo-row__delete" (click)="deleteChoreo(choreo, $event)" [disabled]="deletingId() === choreo.id" title="Remove choreo" aria-label="Remove choreo">
               <i class="fa-solid fa-trash"></i>

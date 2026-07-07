@@ -15,6 +15,7 @@ export interface UpdateChoreoPayload {
   name?: string;
   fileName?: string;
   durationSeconds?: number;
+  rotationDegrees?: number;
 }
 
 @Injectable({ providedIn: 'root' })

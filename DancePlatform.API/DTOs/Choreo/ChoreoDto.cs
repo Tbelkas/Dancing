@@ -8,6 +8,7 @@ public class ChoreoDto
     public string Name { get; set; } = string.Empty;
     public string FileName { get; set; } = string.Empty;
     public int? DurationSeconds { get; set; }
+    public int RotationDegrees { get; set; }
     public DateTime DateAdded { get; set; }
     public List<VideoSegmentDto> Loops { get; set; } = new();
 }

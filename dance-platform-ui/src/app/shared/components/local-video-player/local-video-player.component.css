@@ -1,6 +1,9 @@
 /* Native <video> for a locally picked file. Sizing mirrors the YouTube iframe:
    fill the wrapper's width and keep the file's own aspect, capped so portrait
-   phone recordings don't take over the page. */
+   phone recordings don't take over the page.
+   Mirror and rotation are one inline transform bound from the component — the
+   native controls flip/turn with the picture, same accepted quirk as the
+   YouTube/TikTok mirror. */
 .local-video {
   display: block;
   width: 100%;
@@ -9,8 +12,48 @@
   background: #000;
 }
 
-/* Mirror flips only the video surface, matching the embedded players. The native
-   controls flip with it — same accepted quirk as the YouTube/TikTok mirror. */
-.player-media--mirrored .local-video {
-  transform: scaleX(-1);
+/* Sideways rotation (90/270): the picture's width and height swap, so the frame
+   takes the rotated aspect (bound inline) and the video is sized in container
+   units with the axes swapped, then centered and rotated into place. */
+.player-media--sideways {
+  container-type: size;
+  max-height: 72vh;
+}
+
+.player-media--sideways .local-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100cqh;
+  height: 100cqw;
+  max-height: none;
+}
+
+/* Rotation radio group, visually in line with the speed pills. */
+.rotate-options {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.rotate-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: color var(--transition);
+
+  input {
+    accent-color: var(--color-primary);
+    cursor: pointer;
+    margin: 0;
+  }
+
+  &:hover { color: var(--color-text); }
+  &:has(input:checked) { color: var(--color-primary); }
 }

@@ -8,4 +8,5 @@ public class UpdateChoreoRequest
     /// <summary>Set when the user re-links a differently named file so future visits ask for the right one.</summary>
     [MaxLength(300)] public string? FileName { get; set; }
     public int? DurationSeconds { get; set; }
+    public int? RotationDegrees { get; set; }
 }

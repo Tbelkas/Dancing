@@ -19,10 +19,14 @@
     </div>
   }
 
-  <div class="player-media" [class.player-media--mirrored]="mirrored()">
+  <div class="player-media"
+       [class.player-media--mirrored]="mirrored()"
+       [class.player-media--sideways]="sideways()"
+       [style.aspectRatio]="sidewaysAspect()">
     <video #videoEl
       class="local-video"
       [src]="src"
+      [style.transform]="videoTransform()"
       controls
       playsinline
       preload="metadata"
@@ -55,6 +59,18 @@
                 title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">
           <i class="fa-regular fa-keyboard"></i>
         </button>
+      </div>
+    </div>
+
+    <div class="control-row">
+      <label id="rotate-label">Rotate</label>
+      <div class="rotate-options" role="radiogroup" aria-labelledby="rotate-label">
+        @for (deg of rotationOptions; track deg) {
+          <label class="rotate-option">
+            <input type="radio" name="rotation" [value]="deg" [checked]="rotationDeg() === deg" (change)="setRotation(deg)" />
+            <span>{{ deg }}&deg;</span>
+          </label>
+        }
       </div>
     </div>
 

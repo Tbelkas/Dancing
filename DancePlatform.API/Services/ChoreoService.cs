@@ -47,6 +47,7 @@ public class ChoreoService : IChoreoService
         if (!string.IsNullOrWhiteSpace(request.Name)) choreo.Name = request.Name.Trim();
         if (!string.IsNullOrWhiteSpace(request.FileName)) choreo.FileName = request.FileName.Trim();
         if (request.DurationSeconds is not null) choreo.DurationSeconds = Sanitize(request.DurationSeconds);
+        if (request.RotationDegrees is 0 or 90 or 180 or 270) choreo.RotationDegrees = request.RotationDegrees.Value;
 
         await _db.SaveChangesAsync();
         return await GetByIdAsync(userId, choreoId);
@@ -105,6 +106,7 @@ public class ChoreoService : IChoreoService
                 Name = c.Name,
                 FileName = c.FileName,
                 DurationSeconds = c.DurationSeconds,
+                RotationDegrees = c.RotationDegrees,
                 DateAdded = c.DateAdded,
                 Loops = c.Loops
                     .OrderBy(l => l.StartTime)

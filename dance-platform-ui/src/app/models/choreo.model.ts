@@ -7,6 +7,8 @@ export interface Choreo {
   name: string;
   fileName: string;
   durationSeconds?: number;
+  /** Clockwise playback rotation (0 | 90 | 180 | 270) for sideways phone recordings. */
+  rotationDegrees: number;
   dateAdded: string;
   loops: VideoSegment[];
 }

@@ -144,6 +144,7 @@
   font-size: 0.66rem;
 }
 
+.choreo-row__edit,
 .choreo-row__delete {
   flex-shrink: 0;
   background: transparent;
@@ -155,12 +156,33 @@
   font-size: 0.95rem;
   transition: color var(--transition), background var(--transition);
 
-  &:hover {
-    color: #fff;
-    background: var(--color-accent);
-  }
-
   &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+.choreo-row__edit:hover {
+  color: var(--color-primary);
+  background: var(--color-surface-2);
+}
+
+.choreo-row__delete:hover {
+  color: #fff;
+  background: var(--color-accent);
+}
+
+/* Inline rename: swaps in for the title inside the row. */
+.rename-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 8px 12px;
+
+  &:focus { outline: none; }
 }
 
 .reselect-hint {
@@ -206,6 +228,7 @@
 .mismatch-note {
   display: flex;
   align-items: flex-start;
+  flex-wrap: wrap;
   gap: 10px;
   background: color-mix(in srgb, var(--color-accent) 12%, transparent);
   border: 1px solid var(--color-accent);
@@ -216,6 +239,11 @@
   margin-bottom: 18px;
 
   i { color: var(--color-accent); margin-top: 2px; }
+}
+
+.mismatch-note__text {
+  flex: 1;
+  min-width: 24ch;
 }
 
 @media (max-width: 560px) {

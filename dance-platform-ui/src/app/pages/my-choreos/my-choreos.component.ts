@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ChoreoService } from '../../core/services/choreo.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -18,7 +19,7 @@ import { formatTimeSecs } from '../../core/utils/video-url.utils';
 @Component({
   selector: 'app-my-choreos',
   standalone: true,
-  imports: [CommonModule, LocalVideoPlayerComponent],
+  imports: [CommonModule, FormsModule, LocalVideoPlayerComponent],
   templateUrl: './my-choreos.component.html',
   styleUrls: ['./my-choreos.component.css']
 })
@@ -30,8 +31,12 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
   /** Set when the re-picked file's name differs from the one saved for the choreo. */
   fileMismatch = signal<string | null>(null);
   deletingId = signal<number | null>(null);
+  /** Choreo whose title is currently an inline rename input. */
+  renamingId = signal<number | null>(null);
+  renameValue = '';
 
   @ViewChild('fileInput', { static: true }) fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('renameInput') renameInput?: ElementRef<HTMLInputElement>;
 
   /** What the next file-pick is for: a brand-new choreo, or re-linking an existing one. */
   private pickTarget: Choreo | 'new' = 'new';
@@ -93,6 +98,53 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
     this.choreoService.update(choreo.id, { durationSeconds: duration }).subscribe({
       next: updated => this.applyUpdate(updated),
       error: () => {} // display-only metadata; not worth surfacing a failure
+    });
+  }
+
+  /** Persist the rotation the user picked in the player. */
+  onRotationChange(degrees: number): void {
+    const choreo = this.selected();
+    if (!choreo || choreo.rotationDegrees === degrees) return;
+    this.choreoService.update(choreo.id, { rotationDegrees: degrees }).subscribe({
+      next: updated => this.applyUpdate(updated),
+      error: () => this.toast.error('Failed to save rotation.')
+    });
+  }
+
+  startRename(choreo: Choreo, event: Event): void {
+    event.stopPropagation();
+    this.renameValue = choreo.name;
+    this.renamingId.set(choreo.id);
+    setTimeout(() => this.renameInput?.nativeElement.select());
+  }
+
+  cancelRename(): void {
+    this.renamingId.set(null);
+  }
+
+  commitRename(choreo: Choreo): void {
+    if (this.renamingId() !== choreo.id) return; // Enter already committed; ignore the blur
+    this.renamingId.set(null);
+    const name = this.renameValue.trim();
+    if (!name || name === choreo.name) return;
+    this.choreoService.update(choreo.id, { name }).subscribe({
+      next: updated => this.applyUpdate(updated),
+      error: () => this.toast.error('Failed to rename choreo.')
+    });
+  }
+
+  /** The re-picked file has a different name; make it the saved one going forward. */
+  adoptPickedFileName(): void {
+    const choreo = this.selected();
+    const file = choreo ? this.choreoService.recallFile(choreo.id) : undefined;
+    if (!choreo || !file) return;
+    this.choreoService.update(choreo.id, { fileName: file.name }).subscribe({
+      next: updated => {
+        this.applyUpdate(updated);
+        this.fileMismatch.set(null);
+        this.toast.success('File name updated.');
+      },
+      error: () => this.toast.error('Failed to update file name.')
     });
   }
 
