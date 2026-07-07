@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
 import { DanceService } from '../../core/services/dance.service';
 import { VideoService, CreateVideoPayload, SegmentPayload } from '../../core/services/video.service';
 import { VideoType } from '../../models/video.model';
-import { parseVideoUrl, parseTimeSecs } from '../../core/utils/video-url.utils';
+import { parseVideoUrl, parseTimeSecs, fetchVideoTitle } from '../../core/utils/video-url.utils';
 
 const DEFAULT_SEGMENT_LABELS = ['Theory', 'Steps', 'Practice'];
 
@@ -42,6 +42,12 @@ export class AdminAddVideoComponent implements OnInit {
   description = '';
   videoType: VideoType = 'steps';
   segments: SegmentRow[] = [];
+
+  // Title autofill from the pasted URL (oEmbed). Tracks the last fetched video so we
+  // don't refetch on every keystroke, and the last auto-set title so we never clobber
+  // a title the user typed or edited themselves.
+  private lastTitleFetchKey = '';
+  private autoTitle = '';
 
   submitting = signal(false);
   error = signal('');
@@ -86,6 +92,22 @@ export class AdminAddVideoComponent implements OnInit {
         this.creatingDance.set(false);
       },
       error: () => { this.error.set('Failed to create dance. Please try again.'); this.creatingDance.set(false); }
+    });
+  }
+
+  onUrlChange(value: string): void {
+    this.url = value;
+    const parsed = parseVideoUrl(value);
+    if (!parsed) return;
+    const key = `${parsed.platform}:${parsed.videoId}`;
+    if (key === this.lastTitleFetchKey) return;
+    this.lastTitleFetchKey = key;
+    fetchVideoTitle(value).then(title => {
+      if (!title || key !== this.lastTitleFetchKey) return;
+      if (!this.title.trim() || this.title === this.autoTitle) {
+        this.title = title;
+        this.autoTitle = title;
+      }
     });
   }
 
@@ -149,6 +171,8 @@ export class AdminAddVideoComponent implements OnInit {
         // Reset for adding another, keeping the chosen dance for convenience.
         this.title = '';
         this.url = '';
+        this.lastTitleFetchKey = '';
+        this.autoTitle = '';
         this.description = '';
         this.videoType = 'steps';
         this.segments = [];

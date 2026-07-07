@@ -25,6 +25,32 @@ export function parseVideoUrl(input: string): { platform: string; videoId: strin
   return null;
 }
 
+/**
+ * Fetches the video's title from the platform's public oEmbed endpoint. YouTube and
+ * TikTok allow anonymous CORS requests; Instagram's oEmbed needs an access token, so
+ * Instagram links resolve to null. Returns null on any failure — callers treat the
+ * fetched title as a best-effort convenience, never a requirement.
+ */
+export async function fetchVideoTitle(input: string): Promise<string | null> {
+  const parsed = parseVideoUrl(input);
+  if (!parsed) return null;
+  let endpoint: string;
+  if (parsed.platform === 'youtube')
+    endpoint = `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${parsed.videoId}`)}`;
+  else if (parsed.platform === 'tiktok')
+    endpoint = `https://www.tiktok.com/oembed?url=${encodeURIComponent(input.trim())}`;
+  else
+    return null;
+  try {
+    const res = await fetch(endpoint);
+    if (!res.ok) return null;
+    const title = (await res.json())?.title;
+    return typeof title === 'string' && title.trim() ? title.trim() : null;
+  } catch {
+    return null;
+  }
+}
+
 export function parseTimeSecs(input: string): number | undefined {
   const s = input.trim();
   if (!s) return undefined;

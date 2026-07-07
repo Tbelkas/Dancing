@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { DanceService } from '../../../core/services/dance.service';
 import { VideoService, CreateVideoPayload, SegmentPayload } from '../../../core/services/video.service';
 import { RoleService } from '../../../core/services/role.service';
-import { parseVideoUrl, parseTimeSecs } from '../../../core/utils/video-url.utils';
+import { parseVideoUrl, parseTimeSecs, fetchVideoTitle } from '../../../core/utils/video-url.utils';
 import { Dance } from '../../../models/dance.model';
 import { Video, VideoType } from '../../../models/video.model';
 
@@ -52,6 +52,12 @@ export class AddVideoFormComponent implements OnInit {
   scope: 'global' | 'local' = 'global';
   saving = signal(false);
   error = signal('');
+
+  // Title autofill from the pasted URL (oEmbed). Tracks the last fetched video so we
+  // don't refetch on every keystroke, and the last auto-set title so we never clobber
+  // a title the user typed or edited themselves.
+  private lastTitleFetchKey = '';
+  private autoTitle = '';
 
   // Detail-only inputs (admin: type + segments; everyone: description)
   description = '';
@@ -111,6 +117,22 @@ export class AddVideoFormComponent implements OnInit {
         this.danceCreated.emit(dance);
       },
       error: () => { this.error.set('Failed to create dance. Please try again.'); this.creatingDance.set(false); }
+    });
+  }
+
+  onUrlChange(value: string): void {
+    this.url = value;
+    const parsed = parseVideoUrl(value);
+    if (!parsed) return;
+    const key = `${parsed.platform}:${parsed.videoId}`;
+    if (key === this.lastTitleFetchKey) return;
+    this.lastTitleFetchKey = key;
+    fetchVideoTitle(value).then(title => {
+      if (!title || key !== this.lastTitleFetchKey) return;
+      if (!this.title.trim() || this.title === this.autoTitle) {
+        this.title = title;
+        this.autoTitle = title;
+      }
     });
   }
 
@@ -182,6 +204,8 @@ export class AddVideoFormComponent implements OnInit {
           this.lastCreated.set({ danceId: video.danceId, danceName: video.danceName, title: video.title });
           this.title = '';
           this.url = '';
+          this.lastTitleFetchKey = '';
+          this.autoTitle = '';
         }
         this.created.emit(video);
       },

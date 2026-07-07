@@ -27,14 +27,14 @@
 
   <div class="admin-form__fields">
     @if (fixedDance) {
-      <!-- Detail layout: Title, URL, Description, (admin) Type, (admin) Scope -->
-      <div class="form-group">
-        <label for="av-title">Title <span class="optional">(optional)</span></label>
-        <input id="av-title" type="text" [(ngModel)]="title" placeholder="Defaults to the dance name" />
-      </div>
+      <!-- Detail layout: URL, Title, Description, (admin) Type, (admin) Scope -->
       <div class="form-group">
         <label for="av-url">Video URL</label>
-        <input id="av-url" type="text" [(ngModel)]="url" placeholder="YouTube, TikTok, or Instagram URL" />
+        <input id="av-url" type="text" [ngModel]="url" (ngModelChange)="onUrlChange($event)" placeholder="YouTube, TikTok, or Instagram URL" />
+      </div>
+      <div class="form-group">
+        <label for="av-title">Title <span class="optional">(optional)</span></label>
+        <input id="av-title" type="text" [(ngModel)]="title" placeholder="Auto-filled from the URL" />
       </div>
       <div class="form-group">
         <label for="av-desc">Description <span class="optional">(optional)</span></label>
@@ -85,7 +85,7 @@
       </div>
       <div class="form-group">
         <label for="av-url-b">Video URL</label>
-        <input id="av-url-b" type="text" [(ngModel)]="url" placeholder="YouTube, TikTok, or Instagram URL" />
+        <input id="av-url-b" type="text" [ngModel]="url" (ngModelChange)="onUrlChange($event)" placeholder="YouTube, TikTok, or Instagram URL" />
       </div>
       <div class="form-group">
         <label for="av-title-b">Title <span class="optional">(optional)</span></label>
