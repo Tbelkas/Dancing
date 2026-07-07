@@ -76,6 +76,16 @@ export class DanceService {
     return this.http.get<Dance[]>(`${this.base}/${id}/recommended`);
   }
 
+  /**
+   * Alphabetical prev/next neighbours within this dance's canonical style, for the
+   * detail-page pager. The server does the style-matching and ordering, so the client
+   * no longer needs to fetch the whole style and locate the current dance. Either side is
+   * null at a list end, or both are null when the dance has no style.
+   */
+  getNeighbors(id: number): Observable<{ prev: Dance | null; next: Dance | null }> {
+    return this.http.get<{ prev: Dance | null; next: Dance | null }>(`${this.base}/${id}/neighbors`);
+  }
+
   searchDances(p: SearchDancesParams): Observable<SearchDancesResult> {
     return this.http.get<SearchDancesResult>(`${environment.apiUrl}/search/dances`, { params: this.searchParams(p) });
   }

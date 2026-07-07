@@ -94,3 +94,6 @@ desktop.ini
 
 # video-fixup scratch (downloads, montages)
 _proto/
+
+# Playwright-MCP page/transcript scratch (browser-audit session dumps)
+.playwright-mcp/

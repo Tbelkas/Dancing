@@ -20,6 +20,9 @@ builder.Services.AddResponseCompression(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddProblemDetails();
+// Backs the short-lived catalog-size cache in DanceService (see the "dances:grandTotal" key) so
+// the "N of M dances" figure isn't a full COUNT(*) on every keystroke.
+builder.Services.AddMemoryCache();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));

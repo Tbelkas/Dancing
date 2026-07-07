@@ -1,13 +1,12 @@
-import { Component, OnInit, OnDestroy, computed, signal, WritableSignal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Title } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EMPTY, Observable } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
-import { DanceService, UpdateDancePayload, DanceStatus } from '../../core/services/dance.service';
-import { VideoService, CreateVideoPayload, SegmentPayload } from '../../core/services/video.service';
+import { DanceService, DanceStatus } from '../../core/services/dance.service';
+import { VideoService, SegmentPayload } from '../../core/services/video.service';
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
 import { InstructorService } from '../../core/services/instructor.service';
@@ -18,25 +17,25 @@ import { PracticeTimerService } from '../../core/services/practice-timer.service
 import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Dance } from '../../models/dance.model';
-import { Video, VideoChapter, VideoSegment, VideoType, viewCountBucket } from '../../models/video.model';
+import { Video, VideoChapter, VideoSegment, viewCountBucket } from '../../models/video.model';
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
+import { AddVideoFormComponent } from '../../shared/components/add-video-form/add-video-form.component';
+import { EditDanceFormComponent } from '../../shared/components/edit-dance-form/edit-dance-form.component';
+import { EditVideoFormComponent } from '../../shared/components/edit-video-form/edit-video-form.component';
+import { MoveVideoPickerComponent } from '../../shared/components/move-video-picker/move-video-picker.component';
 import { DIFFICULTY_LEVELS } from '../../core/constants/dance.constants';
-import { parseVideoUrl, parseTimeSecs, formatTimeSecs } from '../../core/utils/video-url.utils';
-const DEFAULT_SEGMENT_LABELS = ['Theory', 'Steps', 'Practice'];
-
-interface SegmentRow {
-  label: string;
-  start: string;
-  end: string;
-}
+import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 
 @Component({
   selector: 'app-dance-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, VideoPlayerComponent, DancePathPipe],
+  // The admin/authoring forms are used only inside @defer blocks below, so Angular
+  // code-splits them out of the eager bundle.
+  imports: [CommonModule, RouterLink, VideoPlayerComponent, DancePathPipe,
+    AddVideoFormComponent, EditDanceFormComponent, EditVideoFormComponent, MoveVideoPickerComponent],
   templateUrl: './dance-detail.component.html',
   styleUrls: ['./dance-detail.component.css']
 })
@@ -62,55 +61,18 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   // Feedback
   actionError = signal('');
 
-  // Admin: add video form
+  // Open-state for the extracted authoring forms. Each is a @defer-loaded child that owns
+  // its own field/submit state; the parent only toggles visibility and applies the child's
+  // success events to its own signals (see the on*Updated / on*Moved / onVideoAdded handlers).
   showAddVideo = signal(false);
-  newVideoTitle = '';
-  newVideoUrl = '';
-  newVideoDesc = '';
-  newVideoType: VideoType = 'steps';
-  newVideoSegments: SegmentRow[] = [];
-  newVideoScope: 'global' | 'local' = 'global';
-  addingVideo = signal(false);
-  addVideoError = signal('');
-
-  // Admin: edit dance form
   showEditDance = signal(false);
-  editName = '';
-  editDescription = '';
-  editDifficulty = 'None';
-  editStyleIds: number[] = [];
-  editMusicalStyleIds: number[] = [];
-  editInstructorIds: number[] = [];
+  // Catalogs the edit-dance form needs (loaded once for admins in ngOnInit).
   allStyles = signal<Style[]>([]);
   allMusicalStyles = signal<MusicalStyle[]>([]);
   allInstructors = signal<Instructor[]>([]);
-  savingDance = signal(false);
-  editDanceError = signal('');
-
-  // Admin: edit video time/type/segments
+  // Which video's inline edit / move panel is open (null = none).
   editingVideoId = signal<number | null>(null);
-  editVideoStartTime = '';
-  editVideoEndTime = '';
-  editVideoType: VideoType = 'steps';
-  editVideoSegments: SegmentRow[] = [];
-  savingVideoTime = signal(false);
-  editVideoTimeError = signal('');
-
-  // Admin: move video to a different dance (the video inherits that dance's style)
   movingVideoId = signal<number | null>(null);
-  moveQuery = signal('');
-  private danceNames = signal<{ id: number; name: string }[]>([]);
-  movingVideo = signal(false);
-  moveError = signal('');
-  // Dances matching the search box, excluding the current one; capped for a tidy list.
-  moveMatches = computed(() => {
-    const q = this.moveQuery().trim().toLowerCase();
-    if (!q) return [];
-    const currentId = this.dance()?.id;
-    return this.danceNames()
-      .filter(d => d.id !== currentId && d.name.toLowerCase().includes(q))
-      .slice(0, 20);
-  });
 
   // Admin: delete dance
   deletingDance = signal(false);
@@ -160,10 +122,11 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
       switchMap(pm => this.load(pm.get('style'), pm.get('slug') ?? ''))
     ).subscribe(d => this.onDanceLoaded(d));
     if (this.role.isAdmin()) {
+      // Catalogs for the edit-dance form. (The move-video picker loads its own dance-name
+      // list on demand, inside its child component.)
       this.styleService.getAll().subscribe(s => this.allStyles.set(s));
       this.musicalStyleService.getAll().subscribe(s => this.allMusicalStyles.set(s));
       this.instructorService.getAll().subscribe(i => this.allInstructors.set(i));
-      this.danceService.getNames().subscribe(n => this.danceNames.set(n));
     }
   }
 
@@ -226,40 +189,23 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.loadNeighbors(d);
   }
 
-  /** Finds this dance's alphabetical neighbours within its canonical style. */
+  /**
+   * Loads this dance's alphabetical prev/next neighbours within its canonical style for the
+   * pager. The server resolves them directly (a dedicated /neighbors endpoint), replacing the
+   * old approach of fetching up to 500 dances client-side and locating this one. The stale
+   * guard drops a response that lands after the user has already navigated to another dance.
+   */
   private loadNeighbors(d: Dance): void {
     this.prevDance.set(null);
     this.nextDance.set(null);
-    if (!d.styleSlug) return;
-    const styles = this.allStyles();
-    if (styles.length === 0) {
-      this.styleService.getAll().subscribe(s => {
-        this.allStyles.set(s);
-        if (this.dance()?.id === d.id) this.findNeighbors(d, s);
-      });
-    } else {
-      this.findNeighbors(d, styles);
-    }
-  }
-
-  private findNeighbors(d: Dance, styles: Style[]): void {
-    const style = styles.find(s => this.slugify(s.name) === d.styleSlug);
-    if (!style) return;
-    this.danceService.searchDances({ styleId: style.id, sortBy: 'name', pageSize: 500 }).subscribe({
-      next: res => {
+    this.danceService.getNeighbors(d.id).subscribe({
+      next: n => {
         if (this.dance()?.id !== d.id) return;
-        const idx = res.items.findIndex(x => x.id === d.id);
-        if (idx === -1) return;
-        this.prevDance.set(idx > 0 ? res.items[idx - 1] : null);
-        this.nextDance.set(idx < res.items.length - 1 ? res.items[idx + 1] : null);
+        this.prevDance.set(n.prev);
+        this.nextDance.set(n.next);
       },
       error: () => { /* pager simply doesn't render */ }
     });
-  }
-
-  /** Client-side mirror of the server's style-slug format, for matching styleSlug to a Style. */
-  private slugify(name: string): string {
-    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
 
   /** Canonical URL for a dance: /dances/{styleSlug}/{slug}, or /dances/{slug} if it has no style. */
@@ -270,10 +216,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   /** YouTube thumbnail for a recommended dance, or null if missing/failed to load. */
   recThumbnailUrl(dance: Dance): string | null {
     if (this.recThumbFailed().has(dance.id)) return null;
-    if (dance.thumbnailVideoId && dance.thumbnailPlatform === 'youtube') {
-      return `https://i.ytimg.com/vi/${dance.thumbnailVideoId}/hqdefault.jpg`;
-    }
-    return null;
+    return youtubeThumbUrl(dance.thumbnailVideoId, dance.thumbnailPlatform);
   }
 
   onRecThumbError(danceId: number): void {
@@ -468,13 +411,19 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   // Add video (any authenticated user; non-admins always create personal videos)
   toggleAddVideo(): void {
     this.showAddVideo.update(v => !v);
-    this.addVideoError.set('');
-    this.newVideoTitle = '';
-    this.newVideoUrl = '';
-    this.newVideoDesc = '';
-    this.newVideoType = 'steps';
-    this.newVideoSegments = [];
-    this.newVideoScope = 'global';
+  }
+
+  /** AddVideoFormComponent created a video for this dance — append it and reflect the counts. */
+  onVideoAdded(video: Video): void {
+    this.videos.update(list => [...list, video]);
+    // Adding a personal video auto-tracks the dance server-side; reflect it now.
+    const nowTracked = this.isPersonalVideo(video);
+    this.dance.update(d => d ? {
+      ...d,
+      videoCount: d.videoCount + 1,
+      isInProgress: d.isInProgress || (nowTracked && !d.isLearned)
+    } : d);
+    this.showAddVideo.set(false);
   }
 
   /** A personal (private) video is visible only to its owner. */
@@ -487,137 +436,17 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     return this.role.isAdmin() || (video.ownerUserId != null && video.ownerUserId === this.auth.currentUserId());
   }
 
-  private defaultSegmentRows(): SegmentRow[] {
-    return DEFAULT_SEGMENT_LABELS.map(label => ({ label, start: '', end: '' }));
-  }
-
-  onNewVideoTypeChange(): void {
-    if (this.newVideoType === 'tutorial' && this.newVideoSegments.length === 0)
-      this.newVideoSegments = this.defaultSegmentRows();
-  }
-
-  onEditVideoTypeChange(): void {
-    if (this.editVideoType === 'tutorial' && this.editVideoSegments.length === 0)
-      this.editVideoSegments = this.defaultSegmentRows();
-  }
-
-  addSegmentRow(rows: SegmentRow[]): void {
-    rows.push({ label: '', start: '', end: '' });
-  }
-
-  removeSegmentRow(rows: SegmentRow[], index: number): void {
-    rows.splice(index, 1);
-  }
-
-  /** Converts editor rows to API payload; returns null (and sets the given error) on invalid input. */
-  private buildSegments(videoType: VideoType, rows: SegmentRow[], error: WritableSignal<string>): SegmentPayload[] | null {
-    if (videoType !== 'tutorial') return [];
-    const segments: SegmentPayload[] = [];
-    for (const row of rows) {
-      if (!row.label.trim() && !row.start.trim()) continue; // skip empty rows
-      const startTime = parseTimeSecs(row.start);
-      if (!row.label.trim() || startTime === undefined) {
-        error.set('Each section needs a label and a start time (m:ss or seconds).');
-        return null;
-      }
-      segments.push({ label: row.label.trim(), startTime, endTime: parseTimeSecs(row.end) });
-    }
-    return segments;
-  }
-
-
-  submitAddVideo(): void {
-    const danceId = this.dance()?.id;
-    if (!danceId) return;
-    if (!this.newVideoTitle.trim()) { this.addVideoError.set('Title is required.'); return; }
-    if (!this.newVideoUrl.trim()) { this.addVideoError.set('Video URL or ID is required.'); return; }
-
-    const parsed = parseVideoUrl(this.newVideoUrl);
-    if (!parsed) { this.addVideoError.set('Unrecognized URL. Paste a YouTube, TikTok, or Instagram link.'); return; }
-
-    const segments = this.buildSegments(this.newVideoType, this.newVideoSegments, this.addVideoError);
-    if (segments === null) return;
-
-    const payload: CreateVideoPayload = {
-      title: this.newVideoTitle.trim(),
-      videoId: parsed.videoId,
-      platform: parsed.platform,
-      videoType: this.newVideoType,
-      description: this.newVideoDesc.trim() || undefined,
-      danceId,
-      // Scope only matters for admins; the server forces personal for everyone else.
-      ...(this.role.isAdmin() ? { scope: this.newVideoScope } : {}),
-      segments
-    };
-
-    this.addingVideo.set(true);
-    this.addVideoError.set('');
-    this.videoService.create(payload).subscribe({
-      next: video => {
-        this.videos.update(list => [...list, video]);
-        // Adding a personal video auto-tracks the dance server-side; reflect it now.
-        const nowTracked = this.isPersonalVideo(video);
-        this.dance.update(d => d ? {
-          ...d,
-          videoCount: d.videoCount + 1,
-          isInProgress: d.isInProgress || (nowTracked && !d.isLearned)
-        } : d);
-        this.showAddVideo.set(false);
-        this.addingVideo.set(false);
-        this.newVideoTitle = '';
-        this.newVideoUrl = '';
-        this.newVideoDesc = '';
-        this.newVideoType = 'steps';
-        this.newVideoSegments = [];
-      },
-      error: () => { this.addVideoError.set('Failed to add video.'); this.addingVideo.set(false); }
-    });
-  }
-
-  // Admin: edit video time/type/segments
+  // Admin: edit video time/type/segments — toggling just opens/closes the inline editor;
+  // the EditVideoFormComponent seeds itself from the video and owns the save.
   toggleEditVideoTime(video: Video): void {
-    if (this.editingVideoId() === video.id) {
-      this.editingVideoId.set(null);
-      return;
-    }
-    this.editVideoStartTime = video.startTime != null ? formatTimeSecs(video.startTime) : '';
-    this.editVideoEndTime = video.endTime != null ? formatTimeSecs(video.endTime) : '';
-    this.editVideoType = video.videoType === 'tutorial' ? 'tutorial' : 'steps';
-    this.editVideoSegments = video.segments.map(s => ({
-      label: s.label,
-      start: formatTimeSecs(s.startTime),
-      end: s.endTime != null ? formatTimeSecs(s.endTime) : ''
-    }));
-    this.editVideoTimeError.set('');
-    this.editingVideoId.set(video.id);
+    this.editingVideoId.update(id => id === video.id ? null : video.id);
   }
 
-  submitEditVideoTime(video: Video): void {
-    const startTime = parseTimeSecs(this.editVideoStartTime);
-    const endTime = parseTimeSecs(this.editVideoEndTime);
-    const segments = this.buildSegments(this.editVideoType, this.editVideoSegments, this.editVideoTimeError);
-    if (segments === null) return;
-    // The form only edits sections for tutorials; for other types leave segments
-    // untouched so admin-saved loops aren't wiped when just changing the time.
-    const updateSegments = this.editVideoType === 'tutorial';
-    this.savingVideoTime.set(true);
-    this.editVideoTimeError.set('');
-    this.videoService.update(video.id, {
-      updateTimes: true,
-      startTime,
-      endTime,
-      videoType: this.editVideoType,
-      updateSegments,
-      segments
-    }).subscribe({
-      next: updated => {
-        this.videos.update(list => list.map(v => v.id === updated.id ? updated : v));
-        if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
-        this.editingVideoId.set(null);
-        this.savingVideoTime.set(false);
-      },
-      error: () => { this.editVideoTimeError.set('Failed to save. Please try again.'); this.savingVideoTime.set(false); }
-    });
+  /** EditVideoFormComponent saved changes — replace the video in the list and open player. */
+  onVideoUpdated(updated: Video): void {
+    this.videos.update(list => list.map(v => v.id === updated.id ? updated : v));
+    if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
+    this.editingVideoId.set(null);
   }
 
   /** Admin saved a named loop region in the player — persist it as a section. */
@@ -644,32 +473,19 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Admin: move video to a different dance
+  // Admin: move video to a different dance — toggling just opens/closes the picker panel;
+  // MoveVideoPickerComponent owns the search and the move call.
   toggleMoveVideo(video: Video): void {
-    if (this.movingVideoId() === video.id) {
-      this.movingVideoId.set(null);
-      return;
-    }
-    this.moveQuery.set('');
-    this.moveError.set('');
-    this.movingVideoId.set(video.id);
+    this.movingVideoId.update(id => id === video.id ? null : video.id);
   }
 
-  submitMoveVideo(video: Video, target: { id: number; name: string }): void {
-    this.movingVideo.set(true);
-    this.moveError.set('');
-    this.videoService.moveToDance(video.id, target.id).subscribe({
-      next: () => {
-        // The video now lives under another dance — drop it from this page.
-        this.videos.update(list => list.filter(v => v.id !== video.id));
-        this.dance.update(d => d ? { ...d, videoCount: Math.max(0, d.videoCount - 1) } : d);
-        if (this.selectedVideo()?.id === video.id) this.selectedVideo.set(null);
-        this.movingVideoId.set(null);
-        this.movingVideo.set(false);
-        this.actionError.set('');
-      },
-      error: () => { this.moveError.set('Failed to move video. Please try again.'); this.movingVideo.set(false); }
-    });
+  /** MoveVideoPickerComponent moved the video onto another dance — drop it from this page. */
+  onVideoMoved(video: Video): void {
+    this.videos.update(list => list.filter(v => v.id !== video.id));
+    this.dance.update(d => d ? { ...d, videoCount: Math.max(0, d.videoCount - 1) } : d);
+    if (this.selectedVideo()?.id === video.id) this.selectedVideo.set(null);
+    this.movingVideoId.set(null);
+    this.actionError.set('');
   }
 
   async deleteVideo(video: Video): Promise<void> {
@@ -685,70 +501,33 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Admin: edit dance
+  // Admin: edit dance — toggling just opens/closes the form; EditDanceFormComponent seeds
+  // itself from the current dance and the catalogs, and owns the save.
   toggleEditDance(): void {
-    const d = this.dance();
-    if (!d) return;
-    if (this.showEditDance()) {
-      this.showEditDance.set(false);
-      return;
-    }
-    this.editName = d.name;
-    this.editDescription = d.description ?? '';
-    this.editDifficulty = d.difficulty;
-    this.editStyleIds = this.allStyles()
-      .filter(s => d.styles.includes(s.name))
-      .map(s => s.id);
-    this.editMusicalStyleIds = this.allMusicalStyles()
-      .filter(s => d.musicalStyles.includes(s.name))
-      .map(s => s.id);
-    this.editInstructorIds = this.allInstructors()
-      .filter(i => d.instructors.includes(i.name))
-      .map(i => i.id);
-    this.editDanceError.set('');
-    this.showEditDance.set(true);
+    if (!this.dance()) return;
+    this.showEditDance.update(v => !v);
   }
 
-  private toggleId(arr: number[], id: number): number[] {
-    return arr.includes(id) ? arr.filter(x => x !== id) : [...arr, id];
-  }
-
-  toggleEditStyleId(id: number): void { this.editStyleIds = this.toggleId(this.editStyleIds, id); }
-  toggleEditMusicalStyleId(id: number): void { this.editMusicalStyleIds = this.toggleId(this.editMusicalStyleIds, id); }
-  toggleEditInstructorId(id: number): void { this.editInstructorIds = this.toggleId(this.editInstructorIds, id); }
-
-  submitEditDance(): void {
-    if (!this.editName.trim()) { this.editDanceError.set('Name is required.'); return; }
+  /**
+   * EditDanceFormComponent saved changes. The server returns a fresh Dance without the
+   * viewer-specific flags, so reconcile it with the ones we already hold (favorite / learned /
+   * counts), fix the URL if the slug changed, then close.
+   */
+  onDanceUpdated(updated: Dance): void {
     const d = this.dance();
     if (!d) return;
-    const payload: UpdateDancePayload = {
-      name: this.editName.trim(),
-      description: this.editDescription.trim() || undefined,
-      difficulty: this.editDifficulty,
-      styleIds: this.editStyleIds,
-      musicalStyleIds: this.editMusicalStyleIds,
-      instructorIds: this.editInstructorIds
-    };
-    this.savingDance.set(true);
-    this.editDanceError.set('');
-    this.danceService.update(d.id, payload).subscribe({
-      next: updated => {
-        this.dance.set({
-          ...updated,
-          isFavorite: d.isFavorite,
-          isLearned: d.isLearned,
-          isInProgress: d.isInProgress,
-          favoriteCount: d.favoriteCount,
-          learnedCount: d.learnedCount
-        });
-        if (updated.slug !== d.slug || updated.styleSlug !== d.styleSlug) {
-          this.location.replaceState(this.canonicalPath(updated));
-        }
-        this.showEditDance.set(false);
-        this.savingDance.set(false);
-      },
-      error: () => { this.editDanceError.set('Failed to save changes.'); this.savingDance.set(false); }
+    this.dance.set({
+      ...updated,
+      isFavorite: d.isFavorite,
+      isLearned: d.isLearned,
+      isInProgress: d.isInProgress,
+      favoriteCount: d.favoriteCount,
+      learnedCount: d.learnedCount
     });
+    if (updated.slug !== d.slug || updated.styleSlug !== d.styleSlug) {
+      this.location.replaceState(this.canonicalPath(updated));
+    }
+    this.showEditDance.set(false);
   }
 
   async deleteDance(): Promise<void> {

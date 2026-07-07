@@ -5,21 +5,23 @@ import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
-import { DanceService, CreateDancePayload, ImportResult, DanceStatus } from '../../core/services/dance.service';
+import { DanceService, ImportResult, DanceStatus } from '../../core/services/dance.service';
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
 import { InstructorService } from '../../core/services/instructor.service';
-import { VideoService, CreateVideoPayload } from '../../core/services/video.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
 import { RecentDancesService } from '../../core/services/recent-dances.service';
-import { parseVideoUrl } from '../../core/utils/video-url.utils';
 import { Dance } from '../../models/dance.model';
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
 import { DIFFICULTY_FILTER_OPTIONS, DIFFICULTY_LEVELS } from '../../core/constants/dance.constants';
-import { toggleSet } from '../../core/utils/set.utils';
+import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
+import { AddStyleFormComponent } from '../../shared/components/add-style-form/add-style-form.component';
+import { AddDanceFormComponent } from '../../shared/components/add-dance-form/add-dance-form.component';
+import { BulkImportFormComponent } from '../../shared/components/bulk-import-form/bulk-import-form.component';
+import { AddVideoFormComponent } from '../../shared/components/add-video-form/add-video-form.component';
 
 // Favorited is intentionally not here: it's orthogonal to learning progress and
 // rendered as an independent heart toggle instead.
@@ -45,7 +47,10 @@ function clampWithSelected<T extends { id: number }>(list: T[], selectedId: numb
 @Component({
   selector: 'app-dances',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DancePathPipe],
+  // The admin/authoring forms are referenced only inside @defer blocks below, so Angular
+  // code-splits them into a lazy chunk — anonymous visitors never download that markup.
+  imports: [CommonModule, FormsModule, RouterLink, DancePathPipe,
+    AddStyleFormComponent, AddDanceFormComponent, BulkImportFormComponent, AddVideoFormComponent],
   templateUrl: './dances.component.html',
   styleUrls: ['./dances.component.css']
 })
@@ -224,56 +229,20 @@ export class DancesComponent implements OnInit, OnDestroy {
   private searchSub: Subscription | null = null;
   private urlSub: Subscription | null = null;
 
-  // Admin: add style form
+  // Open-state for the extracted authoring forms. Each form is a @defer-loaded child that
+  // owns its own field/submit state; the parent only toggles visibility and reacts to the
+  // child's success events (see the on*Created / onImported handlers below).
   showAddStyle = signal(false);
-  newStyleName = '';
-  newStyleDesc = '';
-  addingStyle = signal(false);
-  addStyleError = signal('');
-
-  // Admin: bulk import form
   showImport = signal(false);
-  importText = '';
-  importing = signal(false);
-  importResult = signal<ImportResult | null>(null);
-  importError = signal('');
-
   // Add Video (any authenticated user; admins also choose Global vs Local scope)
   showAddVideo = signal(false);
-  private addVideoDanceNames = signal<{ id: number; name: string }[]>([]);
-  addVideoDanceQuery = signal('');
-  selectedAddVideoDance = signal<{ id: number; name: string } | null>(null);
-  addVideoDanceMatches = computed(() => {
-    const q = this.addVideoDanceQuery().trim().toLowerCase();
-    if (!q) return [];
-    return this.addVideoDanceNames()
-      .filter(d => d.name.toLowerCase().includes(q))
-      .slice(0, 20);
-  });
-  newVideoTitle = '';
-  newVideoUrl = '';
-  newVideoScope: 'global' | 'local' = 'global';
-  addingVideo = signal(false);
-  addVideoError = signal('');
-  addVideoCreated = signal<{ danceId: number; danceName: string; title: string } | null>(null);
-
-  // Admin: add dance form
   showAddDance = signal(false);
-  newDanceName = '';
-  newDanceDesc = '';
-  newDanceDifficulty = 'None';
-  newDanceStyleIds = signal<Set<number>>(new Set());
-  newDanceMusicalStyleIds = signal<Set<number>>(new Set());
-  newDanceInstructorIds = signal<Set<number>>(new Set());
-  addingDance = signal(false);
-  addDanceError = signal('');
 
   constructor(
     private danceService: DanceService,
     private styleService: StyleService,
     private musicalStyleService: MusicalStyleService,
     private instructorService: InstructorService,
-    private videoService: VideoService,
     public auth: AuthService,
     public role: RoleService,
     private recentDances: RecentDancesService,
@@ -582,13 +551,9 @@ export class DancesComponent implements OnInit, OnDestroy {
 
   thumbnailUrl(dance: Dance): string | null {
     if (this.thumbFailed().has(dance.id)) return null;
-    if (dance.thumbnailVideoId && dance.thumbnailPlatform === 'youtube') {
-      if (this.hoverDanceId() === dance.id && this.hoverFrame() > 0) {
-        return `https://i.ytimg.com/vi/${dance.thumbnailVideoId}/mq${this.hoverFrame()}.jpg`;
-      }
-      return `https://i.ytimg.com/vi/${dance.thumbnailVideoId}/hqdefault.jpg`;
-    }
-    return null;
+    // Hovering this card cycles storyboard frames (mq1–mq3); otherwise the static poster.
+    const frame = this.hoverDanceId() === dance.id ? this.hoverFrame() : 0;
+    return youtubeThumbUrl(dance.thumbnailVideoId, dance.thumbnailPlatform, frame);
   }
 
   /** Style badges minus any that just repeat the dance's own name (pure noise on the card). */
@@ -662,184 +627,45 @@ export class DancesComponent implements OnInit, OnDestroy {
   // --- Admin: Bulk Import ---
   toggleImport(): void {
     this.showImport.update(v => !v);
-    this.importText = '';
-    this.importResult.set(null);
-    this.importError.set('');
   }
 
-  submitImport(): void {
-    if (!this.importText.trim()) { this.importError.set('Paste some text to import.'); return; }
-    this.importing.set(true);
-    this.importError.set('');
-    this.importResult.set(null);
-    this.danceService.importDances(this.importText).subscribe({
-      next: result => {
-        this.importResult.set(result);
-        this.importing.set(false);
-        if (result.created.length > 0) {
-          this.searchResults.update(list => [...result.created, ...list]);
-          this.searchTotal.update(t => t + result.created.length);
-          this.importText = '';
-        }
-      },
-      error: () => { this.importError.set('Import failed. Make sure you are logged in as admin.'); this.importing.set(false); }
-    });
+  /** BulkImportFormComponent finished an import — splice the created dances into the grid. */
+  onImported(result: ImportResult): void {
+    this.searchResults.update(list => [...result.created, ...list]);
+    this.searchTotal.update(t => t + result.created.length);
   }
 
   // --- Admin: Add Style ---
   toggleAddStyle(): void {
     this.showAddStyle.update(v => !v);
-    this.addStyleError.set('');
-    this.newStyleName = '';
-    this.newStyleDesc = '';
   }
 
-  submitAddStyle(): void {
-    if (!this.newStyleName.trim()) { this.addStyleError.set('Name is required.'); return; }
-    this.addingStyle.set(true);
-    this.addStyleError.set('');
-    this.styleService.create(this.newStyleName.trim(), this.newStyleDesc.trim() || undefined).subscribe({
-      next: style => {
-        this.styles.update(list => [...list, style]);
-        this.showAddStyle.set(false);
-        this.addingStyle.set(false);
-        this.newStyleName = '';
-        this.newStyleDesc = '';
-      },
-      error: () => { this.addStyleError.set('Failed to create style.'); this.addingStyle.set(false); }
-    });
+  /** AddStyleFormComponent created a style — add it to the list and close the form. */
+  onStyleCreated(style: Style): void {
+    this.styles.update(list => [...list, style]);
+    this.showAddStyle.set(false);
   }
 
   // --- Add Video ---
   toggleAddVideo(): void {
-    const open = !this.showAddVideo();
-    this.showAddVideo.set(open);
-    this.addVideoError.set('');
-    this.addVideoCreated.set(null);
-    this.addVideoDanceQuery.set('');
-    this.selectedAddVideoDance.set(null);
-    this.newVideoTitle = '';
-    this.newVideoUrl = '';
-    this.newVideoScope = 'global';
-    // Lazy-load the dance name list the picker searches over, once.
-    if (open && this.addVideoDanceNames().length === 0) {
-      this.danceService.getNames().subscribe(n => this.addVideoDanceNames.set(n));
-    }
+    this.showAddVideo.update(v => !v);
   }
 
-  pickAddVideoDance(d: { id: number; name: string }): void {
-    this.selectedAddVideoDance.set(d);
-    this.addVideoDanceQuery.set('');
-  }
-
-  clearAddVideoDance(): void {
-    this.selectedAddVideoDance.set(null);
-  }
-
-  // Inline dance creation: when the search finds no dance, create one (name only) and select it.
-  creatingAddVideoDance = signal(false);
-
-  createAddVideoDanceFromQuery(): void {
-    const name = this.addVideoDanceQuery().trim();
-    if (!name || this.creatingAddVideoDance()) return;
-    this.creatingAddVideoDance.set(true);
-    this.addVideoError.set('');
-    this.danceService.create({ name, styleIds: [], musicalStyleIds: [] }).subscribe({
-      next: dance => {
-        const created = { id: dance.id, name: dance.name };
-        this.addVideoDanceNames.update(list => [...list, created]);
-        this.selectedAddVideoDance.set(created);
-        this.addVideoDanceQuery.set('');
-        this.creatingAddVideoDance.set(false);
-        // Surface the new dance in the catalog list too.
-        this.searchResults.update(list => [dance, ...list]);
-        this.searchTotal.update(t => t + 1);
-      },
-      error: () => { this.addVideoError.set('Failed to create dance. Please try again.'); this.creatingAddVideoDance.set(false); }
-    });
-  }
-
-  submitAddVideo(): void {
-    const dance = this.selectedAddVideoDance();
-    if (!dance) { this.addVideoError.set('Pick a dance to attach this video to.'); return; }
-    if (!this.newVideoUrl.trim()) { this.addVideoError.set('Video URL or ID is required.'); return; }
-
-    const parsed = parseVideoUrl(this.newVideoUrl);
-    if (!parsed) { this.addVideoError.set('Unrecognized URL. Paste a YouTube, TikTok, or Instagram link.'); return; }
-
-    const payload: CreateVideoPayload = {
-      title: this.newVideoTitle.trim() || dance.name,
-      videoId: parsed.videoId,
-      platform: parsed.platform,
-      danceId: dance.id,
-      // Scope only matters for admins; the server ignores it for everyone else (always personal).
-      ...(this.role.isAdmin() ? { scope: this.newVideoScope } : {})
-    };
-
-    this.addingVideo.set(true);
-    this.addVideoError.set('');
-    this.videoService.create(payload).subscribe({
-      next: video => {
-        this.addVideoCreated.set({ danceId: video.danceId, danceName: video.danceName, title: video.title });
-        this.addingVideo.set(false);
-        // Keep the dance selected for adding another; clear the per-video inputs.
-        this.newVideoTitle = '';
-        this.newVideoUrl = '';
-      },
-      error: () => { this.addVideoError.set('Failed to add video. Please try again.'); this.addingVideo.set(false); }
-    });
+  /** AddVideoFormComponent created a dance inline (from its picker) — surface it in the grid. */
+  onVideoDanceCreated(dance: Dance): void {
+    this.searchResults.update(list => [dance, ...list]);
+    this.searchTotal.update(t => t + 1);
   }
 
   // --- Admin: Add Dance ---
   toggleAddDance(): void {
     this.showAddDance.update(v => !v);
-    this.addDanceError.set('');
-    this.newDanceName = '';
-    this.newDanceDesc = '';
-    this.newDanceDifficulty = 'None';
-    this.newDanceStyleIds.set(new Set());
-    this.newDanceMusicalStyleIds.set(new Set());
-    this.newDanceInstructorIds.set(new Set());
   }
 
-  toggleDanceStyle(id: number): void {
-    this.newDanceStyleIds.update(s => toggleSet(s, id));
-  }
-
-  toggleDanceMusicalStyle(id: number): void {
-    this.newDanceMusicalStyleIds.update(s => toggleSet(s, id));
-  }
-
-  toggleDanceInstructor(id: number): void {
-    this.newDanceInstructorIds.update(s => toggleSet(s, id));
-  }
-
-  submitAddDance(): void {
-    if (!this.newDanceName.trim()) { this.addDanceError.set('Name is required.'); return; }
-    const payload: CreateDancePayload = {
-      name: this.newDanceName.trim(),
-      description: this.newDanceDesc.trim() || undefined,
-      difficulty: this.newDanceDifficulty,
-      styleIds: [...this.newDanceStyleIds()],
-      musicalStyleIds: [...this.newDanceMusicalStyleIds()],
-      instructorIds: [...this.newDanceInstructorIds()]
-    };
-    this.addingDance.set(true);
-    this.addDanceError.set('');
-    this.danceService.create(payload).subscribe({
-      next: dance => {
-        this.searchResults.update(list => [dance, ...list]);
-        this.searchTotal.update(t => t + 1);
-        this.showAddDance.set(false);
-        this.addingDance.set(false);
-        this.newDanceName = '';
-        this.newDanceDesc = '';
-        this.newDanceDifficulty = 'None';
-        this.newDanceStyleIds.set(new Set());
-        this.newDanceMusicalStyleIds.set(new Set());
-        this.newDanceInstructorIds.set(new Set());
-      },
-      error: () => { this.addDanceError.set('Failed to create dance.'); this.addingDance.set(false); }
-    });
+  /** AddDanceFormComponent created a dance — prepend it and close the form. */
+  onDanceCreated(dance: Dance): void {
+    this.searchResults.update(list => [dance, ...list]);
+    this.searchTotal.update(t => t + 1);
+    this.showAddDance.set(false);
   }
 }

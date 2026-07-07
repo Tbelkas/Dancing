@@ -73,72 +73,17 @@
       </section>
     }
 
-    <!-- Admin: Edit Dance Form -->
-    @if (showEditDance()) {
-      <div class="admin-form card">
-        <h3 class="admin-form__title">Edit Dance</h3>
-        @if (editDanceError()) { <div class="error-message">{{ editDanceError() }}</div> }
-        <div class="admin-form__fields">
-          <div class="form-group">
-            <label for="edit-dance-name">Name</label>
-            <input id="edit-dance-name" type="text" [(ngModel)]="editName" placeholder="Dance name" />
-          </div>
-          <div class="form-group">
-            <label for="edit-dance-desc">Description <span class="optional">(optional)</span></label>
-            <input id="edit-dance-desc" type="text" [(ngModel)]="editDescription" placeholder="Short description" />
-          </div>
-          <div class="form-group">
-            <label for="edit-dance-difficulty">Difficulty</label>
-            <select id="edit-dance-difficulty" [(ngModel)]="editDifficulty">
-              @for (d of difficulties; track d) {
-                <option [value]="d">{{ d === 'None' ? 'Not specified' : d }}</option>
-              }
-            </select>
-          </div>
-        </div>
-        @if (allStyles().length > 0) {
-          <div class="form-group">
-            <label>Styles</label>
-            <div class="checkbox-grid">
-              @for (style of allStyles(); track style.id) {
-                <label class="checkbox-item" [class.checked]="editStyleIds.includes(style.id)" (click)="toggleEditStyleId(style.id)">
-                  <input type="checkbox" [checked]="editStyleIds.includes(style.id)" />
-                  {{ style.name }}
-                </label>
-              }
-            </div>
-          </div>
-        }
-        @if (allMusicalStyles().length > 0) {
-          <div class="form-group">
-            <label>Musical Styles</label>
-            <div class="checkbox-grid">
-              @for (ms of allMusicalStyles(); track ms.id) {
-                <label class="checkbox-item" [class.checked]="editMusicalStyleIds.includes(ms.id)" (click)="toggleEditMusicalStyleId(ms.id)">
-                  <input type="checkbox" [checked]="editMusicalStyleIds.includes(ms.id)" />
-                  <i class="fa-solid fa-music"></i> {{ ms.name }}
-                </label>
-              }
-            </div>
-          </div>
-        }
-        @if (allInstructors().length > 0) {
-          <div class="form-group">
-            <label>Instructors <span class="optional">(optional)</span></label>
-            <div class="checkbox-grid">
-              @for (inst of allInstructors(); track inst.id) {
-                <label class="checkbox-item" [class.checked]="editInstructorIds.includes(inst.id)" (click)="toggleEditInstructorId(inst.id)">
-                  <input type="checkbox" [checked]="editInstructorIds.includes(inst.id)" />
-                  {{ inst.name }}
-                </label>
-              }
-            </div>
-          </div>
-        }
-        <button class="btn btn--primary btn--sm" (click)="submitEditDance()" [disabled]="savingDance()">
-          {{ savingDance() ? 'Saving...' : 'Save Changes' }}
-        </button>
-      </div>
+    <!-- Admin: Edit Dance Form — @defer-loaded child; inner @if drives show/hide. -->
+    @defer (when showEditDance()) {
+      @if (showEditDance()) {
+        <app-edit-dance-form
+          [dance]="dance()!"
+          [allStyles]="allStyles()"
+          [allMusicalStyles]="allMusicalStyles()"
+          [allInstructors]="allInstructors()"
+          [difficulties]="difficulties"
+          (updated)="onDanceUpdated($event)" />
+      }
     }
 
     <section class="videos-section">
@@ -151,64 +96,14 @@
         }
       </div>
 
-      <!-- Add Video Form (any signed-in user; non-admins create personal videos) -->
-      @if (showAddVideo()) {
-        <div class="admin-form card">
-          <h3 class="admin-form__title">Add Video</h3>
-          @if (!role.isAdmin()) {
-            <p class="admin-form__hint">This video is <strong>private to you</strong> — only you'll see it on this dance, and the dance will be added to My Dances.</p>
-          }
-          @if (addVideoError()) { <div class="error-message">{{ addVideoError() }}</div> }
-          <div class="admin-form__fields">
-            <div class="form-group">
-              <label for="new-video-title">Title <span class="optional">(optional)</span></label>
-              <input id="new-video-title" type="text" [(ngModel)]="newVideoTitle" placeholder="Defaults to the dance name" />
-            </div>
-            <div class="form-group">
-              <label for="new-video-url">Video URL</label>
-              <input id="new-video-url" type="text" [(ngModel)]="newVideoUrl" placeholder="YouTube, TikTok, or Instagram URL" />
-            </div>
-            <div class="form-group">
-              <label for="new-video-desc">Description <span class="optional">(optional)</span></label>
-              <input id="new-video-desc" type="text" [(ngModel)]="newVideoDesc" placeholder="Brief description" />
-            </div>
-            @if (role.isAdmin()) {
-              <div class="form-group">
-                <label for="new-video-type">Type</label>
-                <select id="new-video-type" [(ngModel)]="newVideoType" (ngModelChange)="onNewVideoTypeChange()">
-                  <option value="steps">Steps</option>
-                  <option value="tutorial">Tutorial</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Scope</label>
-                <div class="style-filters">
-                  <button class="filter-pill" [class.active]="newVideoScope === 'global'" (click)="newVideoScope = 'global'">Global</button>
-                  <button class="filter-pill" [class.active]="newVideoScope === 'local'" (click)="newVideoScope = 'local'">Local (just me)</button>
-                </div>
-              </div>
-            }
-          </div>
-          @if (role.isAdmin() && newVideoType === 'tutorial') {
-            <div class="form-group">
-              <label>Sections <span class="optional">(e.g. Theory, Steps, Practice — start time as m:ss or seconds)</span></label>
-              <div class="segment-rows">
-                @for (row of newVideoSegments; track $index) {
-                  <div class="segment-row">
-                    <input type="text" [(ngModel)]="row.label" placeholder="Label" />
-                    <input type="text" class="segment-row__time" [(ngModel)]="row.start" placeholder="Start" />
-                    <input type="text" class="segment-row__time" [(ngModel)]="row.end" placeholder="End (opt.)" />
-                    <button class="btn btn--danger btn--xs" (click)="removeSegmentRow(newVideoSegments, $index)" title="Remove section"><i class="fa-solid fa-xmark"></i></button>
-                  </div>
-                }
-                <button class="btn btn--ghost btn--sm" (click)="addSegmentRow(newVideoSegments)"><i class="fa-solid fa-plus"></i> Add Section</button>
-              </div>
-            </div>
-          }
-          <button class="btn btn--primary btn--sm" (click)="submitAddVideo()" [disabled]="addingVideo()">
-            {{ addingVideo() ? 'Adding...' : 'Add Video' }}
-          </button>
-        </div>
+      <!-- Add Video Form (any signed-in user; non-admins create personal videos) — shared
+           @defer-loaded child with the dance fixed to this page. -->
+      @defer (when showAddVideo()) {
+        @if (showAddVideo()) {
+          <app-add-video-form
+            [fixedDance]="{ id: dance()!.id, name: dance()!.name }"
+            (created)="onVideoAdded($event)" />
+        }
       }
 
       @if (videos().length === 0) {
@@ -231,11 +126,15 @@
               <button class="btn btn--danger btn--sm" (click)="deleteVideo(videos()[0])"><i class="fa-solid fa-trash"></i> Delete</button>
             }
           </div>
-          @if (editingVideoId() === videos()[0].id) {
-            <ng-container [ngTemplateOutlet]="editVideoForm" [ngTemplateOutletContext]="{ $implicit: videos()[0] }"></ng-container>
+          @defer (when editingVideoId() === videos()[0].id) {
+            @if (editingVideoId() === videos()[0].id) {
+              <app-edit-video-form [video]="videos()[0]" (updated)="onVideoUpdated($event)" (cancelled)="editingVideoId.set(null)" />
+            }
           }
-          @if (movingVideoId() === videos()[0].id) {
-            <ng-container [ngTemplateOutlet]="moveVideoPanel" [ngTemplateOutletContext]="{ $implicit: videos()[0] }"></ng-container>
+          @defer (when movingVideoId() === videos()[0].id) {
+            @if (movingVideoId() === videos()[0].id) {
+              <app-move-video-picker [video]="videos()[0]" [excludeDanceId]="dance()!.id" (moved)="onVideoMoved($event)" (cancelled)="movingVideoId.set(null)" />
+            }
           }
           @if (videos()[0].description) {
             <p class="video-desc">{{ videos()[0].description }}</p>
@@ -278,13 +177,17 @@
                 @if (selectedVideo()?.id === video.id) { <span class="video-list-item__toggle"><i class="fa-solid fa-chevron-up"></i></span> } @else { <span class="video-list-item__toggle"><i class="fa-solid fa-chevron-down"></i></span> }
               </div>
             </div>
-            @if (movingVideoId() === video.id) {
-              <ng-container [ngTemplateOutlet]="moveVideoPanel" [ngTemplateOutletContext]="{ $implicit: video }"></ng-container>
+            @defer (when movingVideoId() === video.id) {
+              @if (movingVideoId() === video.id) {
+                <app-move-video-picker [video]="video" [excludeDanceId]="dance()!.id" (moved)="onVideoMoved($event)" (cancelled)="movingVideoId.set(null)" />
+              }
             }
             @if (selectedVideo()?.id === video.id) {
               <div class="video-player-expanded">
-                @if (editingVideoId() === video.id) {
-                  <ng-container [ngTemplateOutlet]="editVideoForm" [ngTemplateOutletContext]="{ $implicit: video }"></ng-container>
+                @defer (when editingVideoId() === video.id) {
+                  @if (editingVideoId() === video.id) {
+                    <app-edit-video-form [video]="video" (updated)="onVideoUpdated($event)" (cancelled)="editingVideoId.set(null)" />
+                  }
                 }
                 @if (video.description) {
                   <p class="video-desc">{{ video.description }}</p>
@@ -296,52 +199,6 @@
           }
         </div>
       }
-
-      <!-- Admin: shared edit form for a video's time bounds, type, and sections. -->
-      <ng-template #editVideoForm let-video>
-        <div class="admin-form card admin-form--inline">
-          @if (editVideoTimeError()) { <div class="error-message">{{ editVideoTimeError() }}</div> }
-          <div class="admin-form__fields admin-form__fields--row">
-            <div class="form-group">
-              <label>Start Time <span class="optional">(m:ss or seconds, blank to clear)</span></label>
-              <input type="text" [(ngModel)]="editVideoStartTime" placeholder="e.g. 2:29" />
-            </div>
-            <div class="form-group">
-              <label>End Time <span class="optional">(m:ss or seconds, blank to clear)</span></label>
-              <input type="text" [(ngModel)]="editVideoEndTime" placeholder="e.g. 3:06" />
-            </div>
-            <div class="form-group">
-              <label>Type</label>
-              <select [(ngModel)]="editVideoType" (ngModelChange)="onEditVideoTypeChange()">
-                <option value="steps">Steps</option>
-                <option value="tutorial">Tutorial</option>
-              </select>
-            </div>
-          </div>
-          @if (editVideoType === 'tutorial') {
-            <div class="form-group">
-              <label>Sections <span class="optional">(start time as m:ss or seconds)</span></label>
-              <div class="segment-rows">
-                @for (row of editVideoSegments; track $index) {
-                  <div class="segment-row">
-                    <input type="text" [(ngModel)]="row.label" placeholder="Label" />
-                    <input type="text" class="segment-row__time" [(ngModel)]="row.start" placeholder="Start" />
-                    <input type="text" class="segment-row__time" [(ngModel)]="row.end" placeholder="End (opt.)" />
-                    <button class="btn btn--danger btn--xs" (click)="removeSegmentRow(editVideoSegments, $index)" title="Remove section"><i class="fa-solid fa-xmark"></i></button>
-                  </div>
-                }
-                <button class="btn btn--ghost btn--sm" (click)="addSegmentRow(editVideoSegments)"><i class="fa-solid fa-plus"></i> Add Section</button>
-              </div>
-            </div>
-          }
-          <div class="admin-form__actions">
-            <button class="btn btn--primary btn--sm" (click)="submitEditVideoTime(video)" [disabled]="savingVideoTime()">
-              {{ savingVideoTime() ? 'Saving...' : 'Save' }}
-            </button>
-            <button class="btn btn--ghost btn--sm" (click)="editingVideoId.set(null)">Cancel</button>
-          </div>
-        </div>
-      </ng-template>
 
       <!-- Per-video star rating: signed-in users rate; everyone sees the community average. -->
       <ng-template #videoRating let-video>
@@ -373,28 +230,6 @@
         }
       </ng-template>
 
-      <!-- Admin: reassign a video to a different dance — it inherits that dance's style/category. -->
-      <ng-template #moveVideoPanel let-video>
-        <div class="admin-form card admin-form--inline">
-          @if (moveError()) { <div class="error-message">{{ moveError() }}</div> }
-          <div class="form-group">
-            <label>Move to dance <span class="optional">(search by name; the video takes on that dance's style)</span></label>
-            <input type="text" [ngModel]="moveQuery()" (ngModelChange)="moveQuery.set($event)" placeholder="Type a dance name..." />
-          </div>
-          @if (moveMatches().length > 0) {
-            <div class="move-matches">
-              @for (m of moveMatches(); track m.id) {
-                <button class="btn btn--ghost btn--sm" (click)="submitMoveVideo(video, m)" [disabled]="movingVideo()">{{ m.name }}</button>
-              }
-            </div>
-          } @else if (moveQuery().trim()) {
-            <p class="empty">No matching dances.</p>
-          }
-          <div class="admin-form__actions">
-            <button class="btn btn--ghost btn--sm" (click)="movingVideoId.set(null)" [disabled]="movingVideo()">Cancel</button>
-          </div>
-        </div>
-      </ng-template>
     </section>
 
     <!-- Prev/next within this style (alphabetical) keeps a learning session flowing. -->

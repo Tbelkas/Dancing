@@ -1,0 +1,127 @@
+<div class="admin-form card">
+  <h3 class="admin-form__title">{{ fixedDance ? 'Add Video' : 'Add a Video' }}</h3>
+
+  <!-- Hint copy differs by context: the Browse picker explains scope/privacy up front;
+       the detail form only needs the privacy note for non-admins. -->
+  @if (!fixedDance) {
+    <p class="admin-form__hint">
+      @if (role.isAdmin()) {
+        Attach a YouTube, TikTok, or Instagram clip to a dance. Choose <strong>Global</strong> to show it to everyone, or <strong>Local</strong> to keep it to yourself.
+      } @else {
+        Attach a YouTube, TikTok, or Instagram clip to a dance. It's <strong>private to you</strong> and the dance will show up in My Dances.
+      }
+    </p>
+  } @else if (!role.isAdmin()) {
+    <p class="admin-form__hint">This video is <strong>private to you</strong> — only you'll see it on this dance, and the dance will be added to My Dances.</p>
+  }
+
+  @if (error()) { <div class="error-message">{{ error() }}</div> }
+
+  @if (!fixedDance && lastCreated(); as c) {
+    <div class="import-result">
+      <p class="import-result__success">Added <strong>{{ c.title }}</strong> to <strong>{{ c.danceName }}</strong>.
+        <a [routerLink]="['/dances', c.danceId]">View dance</a>
+      </p>
+    </div>
+  }
+
+  <div class="admin-form__fields">
+    @if (fixedDance) {
+      <!-- Detail layout: Title, URL, Description, (admin) Type, (admin) Scope -->
+      <div class="form-group">
+        <label for="av-title">Title <span class="optional">(optional)</span></label>
+        <input id="av-title" type="text" [(ngModel)]="title" placeholder="Defaults to the dance name" />
+      </div>
+      <div class="form-group">
+        <label for="av-url">Video URL</label>
+        <input id="av-url" type="text" [(ngModel)]="url" placeholder="YouTube, TikTok, or Instagram URL" />
+      </div>
+      <div class="form-group">
+        <label for="av-desc">Description <span class="optional">(optional)</span></label>
+        <input id="av-desc" type="text" [(ngModel)]="description" placeholder="Brief description" />
+      </div>
+      @if (role.isAdmin()) {
+        <div class="form-group">
+          <label for="av-type">Type</label>
+          <select id="av-type" [(ngModel)]="videoType" (ngModelChange)="onTypeChange()">
+            <option value="steps">Steps</option>
+            <option value="tutorial">Tutorial</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Scope</label>
+          <div class="style-filters">
+            <button class="filter-pill" [class.active]="scope === 'global'" (click)="scope = 'global'">Global</button>
+            <button class="filter-pill" [class.active]="scope === 'local'" (click)="scope = 'local'">Local (just me)</button>
+          </div>
+        </div>
+      }
+    } @else {
+      <!-- Browse layout: Dance picker, URL, Title, (admin) Scope -->
+      <div class="form-group">
+        <label>Dance</label>
+        @if (selectedDance(); as d) {
+          <div class="picked-dance">
+            <span class="picked-dance__name">{{ d.name }}</span>
+            <button class="btn btn--ghost btn--xs" (click)="clearDance()" title="Change dance"><i class="fa-solid fa-xmark"></i> Change</button>
+          </div>
+        } @else {
+          <input type="text" [ngModel]="danceQuery()" (ngModelChange)="danceQuery.set($event)" placeholder="Search a dance by name..." />
+          @if (danceMatches().length > 0) {
+            <div class="dance-matches">
+              @for (m of danceMatches(); track m.id) {
+                <button class="btn btn--ghost btn--sm" (click)="pickDance(m)">{{ m.name }}</button>
+              }
+            </div>
+          } @else if (danceQuery().trim()) {
+            <p class="optional">No matching dances.</p>
+          }
+          @if (danceQuery().trim()) {
+            <button class="btn btn--ghost btn--sm create-dance" (click)="createDanceFromQuery()" [disabled]="creatingDance()">
+              <i class="fa-solid fa-plus"></i> {{ creatingDance() ? 'Creating...' : 'Create "' + danceQuery().trim() + '"' }}
+            </button>
+          }
+        }
+      </div>
+      <div class="form-group">
+        <label for="av-url-b">Video URL</label>
+        <input id="av-url-b" type="text" [(ngModel)]="url" placeholder="YouTube, TikTok, or Instagram URL" />
+      </div>
+      <div class="form-group">
+        <label for="av-title-b">Title <span class="optional">(optional)</span></label>
+        <input id="av-title-b" type="text" [(ngModel)]="title" placeholder="Defaults to the dance name" />
+      </div>
+      @if (role.isAdmin()) {
+        <div class="form-group">
+          <label>Scope</label>
+          <div class="style-filters">
+            <button class="filter-pill" [class.active]="scope === 'global'" (click)="scope = 'global'">Global</button>
+            <button class="filter-pill" [class.active]="scope === 'local'" (click)="scope = 'local'">Local (just me)</button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Tutorial section editor (detail, admin, tutorial type only) — sits below the field grid. -->
+  @if (fixedDance && role.isAdmin() && videoType === 'tutorial') {
+    <div class="form-group">
+      <label>Sections <span class="optional">(e.g. Theory, Steps, Practice — start time as m:ss or seconds)</span></label>
+      <div class="segment-rows">
+        @for (row of segments; track $index) {
+          <div class="segment-row">
+            <input type="text" [(ngModel)]="row.label" placeholder="Label" />
+            <input type="text" class="segment-row__time" [(ngModel)]="row.start" placeholder="Start" />
+            <input type="text" class="segment-row__time" [(ngModel)]="row.end" placeholder="End (opt.)" />
+            <button class="btn btn--danger btn--xs" (click)="removeSegmentRow($index)" title="Remove section"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        }
+        <button class="btn btn--ghost btn--sm" (click)="addSegmentRow()"><i class="fa-solid fa-plus"></i> Add Section</button>
+      </div>
+    </div>
+  }
+
+  <button class="btn btn--primary btn--sm" (click)="submit()" [disabled]="saving()">
+    {{ saving() ? 'Adding...' : 'Add Video' }}
+  </button>
+</div>

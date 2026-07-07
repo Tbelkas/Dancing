@@ -1,0 +1,131 @@
+.admin-form { margin-bottom: 28px; animation: slideDown 0.18s ease both; }
+
+.admin-form__title {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-form__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0 24px;
+}
+
+.admin-form__hint {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* Scope selector reuses the browse filter-pill look. Kept here (not global) so the
+   detail-page scope buttons pick up the same styling as the browse ones. */
+.style-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.filter-pill {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 15px;
+  transition: all var(--transition);
+
+  &:hover {
+    border-color: var(--color-border-light);
+    color: var(--color-text);
+  }
+
+  &.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #07070D;
+  }
+}
+
+/* Tutorial section editor (detail admin) */
+.segment-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.segment-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  max-width: 520px;
+}
+
+.segment-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.segment-row .segment-row__time {
+  flex: 0 0 110px;
+}
+
+/* Add-Video dance picker (mirrors the admin add-video page) */
+.picked-dance {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.picked-dance__name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.dance-matches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Inline "create this dance" affordance under the search field. */
+.create-dance {
+  margin-top: 10px;
+}
+
+.import-result {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.82rem;
+}
+
+.import-result__success {
+  color: var(--color-text);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+@media (max-width: 640px) {
+  .admin-form__fields { grid-template-columns: 1fr; }
+}

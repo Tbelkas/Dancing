@@ -186,71 +186,8 @@
   margin-bottom: 0;
 }
 
-/* Admin forms */
-.admin-form {
-  margin-bottom: 24px;
-  animation: slideDown 0.18s ease both;
-}
-
-.admin-form__title {
-  font-family: var(--font-ui);
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-text-muted);
-  margin-bottom: 18px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.admin-form__fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0 24px;
-}
-
-.admin-form--inline {
-  margin-bottom: 0;
-  padding: 14px 16px;
-}
-
-.admin-form__fields--row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 24px;
-}
-
-.admin-form__actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-/* Tutorial section editor */
-.segment-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-start;
-}
-
-.segment-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-  max-width: 520px;
-}
-
-.segment-row input {
-  flex: 1;
-  min-width: 0;
-}
-
-.segment-row .segment-row__time {
-  flex: 0 0 110px;
-}
+/* Admin authoring forms (edit-dance / add-video / edit-video / move-video) live in their
+   own @defer-loaded child components now; their styles moved into those components. */
 
 .video-item {
   display: flex;
@@ -505,16 +442,6 @@
 .recommended-card .dance-card__body { display: flex; flex-direction: column; gap: .5rem; }
 .recommended-card .dance-card__name { margin: 0; }
 .recommended-card .styles-row { display: flex; flex-wrap: wrap; gap: .35rem; }
-
-/* Admin: "move video to another dance" search results */
-.move-matches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  max-height: 220px;
-  overflow-y: auto;
-  margin-top: 4px;
-}
 
 /* ---------- PREV/NEXT PAGER ---------- */
 .dance-pager {

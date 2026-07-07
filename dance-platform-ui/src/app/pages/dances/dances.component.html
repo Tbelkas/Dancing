@@ -27,132 +27,31 @@
     </div>
   </div>
 
-  <!-- Admin: Bulk Import Form -->
-  @if (showImport()) {
-    <div class="admin-form card">
-      <h3 class="admin-form__title">Import Dances from YouTube</h3>
-      <p class="admin-form__hint">Paste text containing a YouTube URL and dance entries in the format <code>Dance Name [MM:SS]</code>. One Dance + Video will be created per entry.</p>
-      @if (importError()) { <div class="error-message">{{ importError() }}</div> }
-      <div class="admin-form__fields">
-        <div class="form-group">
-          <label for="import-text">Paste text</label>
-          <textarea id="import-text" [(ngModel)]="importText" rows="8" placeholder="Paste the YouTube description or timestamps here...&#10;&#10;Example:&#10;The Wu-Tang [00:29]&#10;The Roger Rabbit [01:26]"></textarea>
-        </div>
-      </div>
-      <button class="btn btn--primary btn--sm" (click)="submitImport()" [disabled]="importing()">
-        {{ importing() ? 'Importing...' : 'Import' }}
-      </button>
-
-      @if (importResult()) {
-        <div class="import-result">
-          @if (importResult()!.videoId) {
-            <p class="import-result__video">Linked to YouTube video: <code>{{ importResult()!.videoId }}</code></p>
-          }
-          @if (importResult()!.created.length > 0) {
-            <p class="import-result__success">Created {{ importResult()!.created.length }} dance{{ importResult()!.created.length !== 1 ? 's' : '' }}:</p>
-            <ul class="import-result__list">
-              @for (d of importResult()!.created; track d.id) {
-                <li>{{ d.name }}</li>
-              }
-            </ul>
-          }
-          @if (importResult()!.errors.length > 0) {
-            <p class="import-result__errors-label">Errors:</p>
-            <ul class="import-result__list import-result__list--error">
-              @for (e of importResult()!.errors; track e) {
-                <li>{{ e }}</li>
-              }
-            </ul>
-          }
-        </div>
-      }
-    </div>
+  <!-- Admin authoring forms — each is a @defer-loaded standalone child that owns its own
+       state; the parent only toggles visibility and reacts to the child's success events.
+       The inner @if drives show/hide (a @defer's `when` trigger loads the chunk but doesn't
+       revert once loaded), so cancelling re-hides the form and reopening gives a fresh one. -->
+  @defer (when showImport()) {
+    @if (showImport()) {
+      <app-bulk-import-form (imported)="onImported($event)" />
+    }
   }
 
-  <!-- Admin: Add Style Form -->
-  @if (showAddStyle()) {
-    <div class="admin-form card">
-      <h3 class="admin-form__title">New Dance Style</h3>
-      @if (addStyleError()) { <div class="error-message">{{ addStyleError() }}</div> }
-      <div class="admin-form__fields">
-        <div class="form-group">
-          <label for="style-name">Name</label>
-          <input id="style-name" type="text" [(ngModel)]="newStyleName" placeholder="e.g. Salsa" />
-        </div>
-        <div class="form-group">
-          <label for="style-desc">Description <span class="optional">(optional)</span></label>
-          <input id="style-desc" type="text" [(ngModel)]="newStyleDesc" placeholder="Brief description" />
-        </div>
-      </div>
-      <button class="btn btn--primary btn--sm" (click)="submitAddStyle()" [disabled]="addingStyle()">
-        {{ addingStyle() ? 'Creating...' : 'Create Style' }}
-      </button>
-    </div>
+  @defer (when showAddStyle()) {
+    @if (showAddStyle()) {
+      <app-add-style-form (created)="onStyleCreated($event)" />
+    }
   }
 
-  <!-- Admin: Add Dance Form -->
-  @if (showAddDance()) {
-    <div class="admin-form card">
-      <h3 class="admin-form__title">New Dance</h3>
-      @if (addDanceError()) { <div class="error-message">{{ addDanceError() }}</div> }
-      <div class="admin-form__fields">
-        <div class="form-group">
-          <label for="dance-name">Name</label>
-          <input id="dance-name" type="text" [(ngModel)]="newDanceName" placeholder="e.g. Bachata" />
-        </div>
-        <div class="form-group">
-          <label for="dance-desc">Description <span class="optional">(optional)</span></label>
-          <textarea id="dance-desc" [(ngModel)]="newDanceDesc" rows="2" placeholder="Short description"></textarea>
-        </div>
-        <div class="form-group">
-          <label for="dance-difficulty">Difficulty</label>
-          <select id="dance-difficulty" [(ngModel)]="newDanceDifficulty">
-            <option value="None">Not specified</option>
-            @for (d of difficulties; track d) {
-              <option [value]="d">{{ d }}</option>
-            }
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Dance Styles</label>
-          <div class="checkbox-grid">
-            @for (style of styles(); track style.id) {
-              <label class="checkbox-item" [class.checked]="newDanceStyleIds().has(style.id)">
-                <input type="checkbox" [checked]="newDanceStyleIds().has(style.id)" (change)="toggleDanceStyle(style.id)" />
-                {{ style.name }}
-              </label>
-            }
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Musical Styles</label>
-          <div class="checkbox-grid">
-            @for (ms of musicalStyles(); track ms.id) {
-              <label class="checkbox-item" [class.checked]="newDanceMusicalStyleIds().has(ms.id)">
-                <input type="checkbox" [checked]="newDanceMusicalStyleIds().has(ms.id)" (change)="toggleDanceMusicalStyle(ms.id)" />
-                {{ ms.name }}
-              </label>
-            }
-          </div>
-        </div>
-        @if (instructors().length > 0) {
-          <div class="form-group">
-            <label>Instructors <span class="optional">(optional)</span></label>
-            <div class="checkbox-grid">
-              @for (inst of instructors(); track inst.id) {
-                <label class="checkbox-item" [class.checked]="newDanceInstructorIds().has(inst.id)">
-                  <input type="checkbox" [checked]="newDanceInstructorIds().has(inst.id)" (change)="toggleDanceInstructor(inst.id)" />
-                  {{ inst.name }}
-                </label>
-              }
-            </div>
-          </div>
-        }
-      </div>
-      <button class="btn btn--primary btn--sm" (click)="submitAddDance()" [disabled]="addingDance()">
-        {{ addingDance() ? 'Creating...' : 'Create Dance' }}
-      </button>
-    </div>
+  @defer (when showAddDance()) {
+    @if (showAddDance()) {
+      <app-add-dance-form
+        [styles]="styles()"
+        [musicalStyles]="musicalStyles()"
+        [instructors]="instructors()"
+        [difficulties]="difficulties"
+        (created)="onDanceCreated($event)" />
+    }
   }
 
   <!-- Continue-learning rail: pick up where you left off before diving into the catalog.
@@ -370,73 +269,12 @@
       </div>
   </div>
 
-  <!-- Add Video (any signed-in user; non-admins create personal videos) -->
-  @if (showAddVideo()) {
-    <div class="admin-form card">
-      <h3 class="admin-form__title">Add a Video</h3>
-      <p class="admin-form__hint">
-        @if (role.isAdmin()) {
-          Attach a YouTube, TikTok, or Instagram clip to a dance. Choose <strong>Global</strong> to show it to everyone, or <strong>Local</strong> to keep it to yourself.
-        } @else {
-          Attach a YouTube, TikTok, or Instagram clip to a dance. It's <strong>private to you</strong> and the dance will show up in My Dances.
-        }
-      </p>
-      @if (addVideoError()) { <div class="error-message">{{ addVideoError() }}</div> }
-      @if (addVideoCreated(); as c) {
-        <div class="import-result">
-          <p class="import-result__success">Added <strong>{{ c.title }}</strong> to <strong>{{ c.danceName }}</strong>.
-            <a [routerLink]="['/dances', c.danceId]">View dance</a>
-          </p>
-        </div>
-      }
-      <div class="admin-form__fields">
-        <div class="form-group">
-          <label>Dance</label>
-          @if (selectedAddVideoDance(); as d) {
-            <div class="picked-dance">
-              <span class="picked-dance__name">{{ d.name }}</span>
-              <button class="btn btn--ghost btn--xs" (click)="clearAddVideoDance()" title="Change dance"><i class="fa-solid fa-xmark"></i> Change</button>
-            </div>
-          } @else {
-            <input type="text" [ngModel]="addVideoDanceQuery()" (ngModelChange)="addVideoDanceQuery.set($event)" placeholder="Search a dance by name..." />
-            @if (addVideoDanceMatches().length > 0) {
-              <div class="dance-matches">
-                @for (m of addVideoDanceMatches(); track m.id) {
-                  <button class="btn btn--ghost btn--sm" (click)="pickAddVideoDance(m)">{{ m.name }}</button>
-                }
-              </div>
-            } @else if (addVideoDanceQuery().trim()) {
-              <p class="optional">No matching dances.</p>
-            }
-            @if (addVideoDanceQuery().trim()) {
-              <button class="btn btn--ghost btn--sm create-dance" (click)="createAddVideoDanceFromQuery()" [disabled]="creatingAddVideoDance()">
-                <i class="fa-solid fa-plus"></i> {{ creatingAddVideoDance() ? 'Creating...' : 'Create "' + addVideoDanceQuery().trim() + '"' }}
-              </button>
-            }
-          }
-        </div>
-        <div class="form-group">
-          <label for="av-url">Video URL</label>
-          <input id="av-url" type="text" [(ngModel)]="newVideoUrl" placeholder="YouTube, TikTok, or Instagram URL" />
-        </div>
-        <div class="form-group">
-          <label for="av-title">Title <span class="optional">(optional)</span></label>
-          <input id="av-title" type="text" [(ngModel)]="newVideoTitle" placeholder="Defaults to the dance name" />
-        </div>
-        @if (role.isAdmin()) {
-          <div class="form-group">
-            <label>Scope</label>
-            <div class="style-filters">
-              <button class="filter-pill" [class.active]="newVideoScope === 'global'" (click)="newVideoScope = 'global'">Global</button>
-              <button class="filter-pill" [class.active]="newVideoScope === 'local'" (click)="newVideoScope = 'local'">Local (just me)</button>
-            </div>
-          </div>
-        }
-      </div>
-      <button class="btn btn--primary btn--sm" (click)="submitAddVideo()" [disabled]="addingVideo()">
-        {{ addingVideo() ? 'Adding...' : 'Add Video' }}
-      </button>
-    </div>
+  <!-- Add Video (any signed-in user; non-admins create personal videos) — lazy child with a
+       searchable dance picker; its inline "create dance" path surfaces the dance in the grid. -->
+  @defer (when showAddVideo()) {
+    @if (showAddVideo()) {
+      <app-add-video-form (danceCreated)="onVideoDanceCreated($event)" />
+    }
   }
 
   <!-- Skeletons only cover the initial load; re-searches keep the old grid dimmed in place

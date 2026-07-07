@@ -2,14 +2,22 @@ using DancePlatform.API.Data;
 using DancePlatform.API.DTOs.Dance;
 using DancePlatform.API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DancePlatform.API.Services;
 
 public class DanceService : IDanceService
 {
-    private readonly AppDbContext _db;
+    private const string GrandTotalCacheKey = "dances:grandTotal";
 
-    public DanceService(AppDbContext db) => _db = db;
+    private readonly AppDbContext _db;
+    private readonly IMemoryCache _cache;
+
+    public DanceService(AppDbContext db, IMemoryCache cache)
+    {
+        _db = db;
+        _cache = cache;
+    }
 
     public async Task<List<DanceNameDto>> GetNamesAsync() =>
         await _db.Dances.OrderBy(d => d.Name).Select(d => new DanceNameDto { Id = d.Id, Name = d.Name }).ToListAsync();
@@ -75,6 +83,51 @@ public class DanceService : IDanceService
 
         var rows = await ProjectRows(ranked, userId).ToListAsync();
         return rows.Select(ToDto).ToList();
+    }
+
+    /// <summary>
+    /// Alphabetical prev/next within the dance's canonical (lowest-StyleId) style. We load only the
+    /// ordered id list for that style (id-only, cheap) to find the dance's position, then run the
+    /// full per-user projection on just the two neighbour ids — so a prev/next pager never
+    /// materialises every dance's DTO the way the old client-side 500-row fetch did.
+    /// </summary>
+    public async Task<DanceNeighborsDto> GetNeighborsAsync(int id, int? userId)
+    {
+        var styleId = await _db.DanceStyles
+            .Where(ds => ds.DanceId == id)
+            .OrderBy(ds => ds.StyleId)
+            .Select(ds => (int?)ds.StyleId)
+            .FirstOrDefaultAsync();
+        // No style (or the dance doesn't exist) → no neighbours by contract.
+        if (styleId is null) return new DanceNeighborsDto();
+
+        // ThenBy(Id) makes the order total (stable) so IndexOf lands on a well-defined position even
+        // when two dances in the style share a name — Name alone leaves ties non-deterministic in SQL.
+        var orderedIds = await _db.Dances
+            .Where(d => d.DanceStyles.Any(ds => ds.StyleId == styleId.Value))
+            .OrderBy(d => d.Name).ThenBy(d => d.Id)
+            .Select(d => d.Id)
+            .ToListAsync();
+
+        var index = orderedIds.IndexOf(id);
+        if (index < 0) return new DanceNeighborsDto();
+
+        var prevId = index > 0 ? orderedIds[index - 1] : (int?)null;
+        var nextId = index < orderedIds.Count - 1 ? orderedIds[index + 1] : (int?)null;
+
+        return new DanceNeighborsDto
+        {
+            Prev = await ProjectNeighborAsync(prevId, userId),
+            Next = await ProjectNeighborAsync(nextId, userId)
+        };
+    }
+
+    /// <summary>Runs the standard per-user projection for a single neighbour id, or null at a style edge.</summary>
+    private async Task<DanceDto?> ProjectNeighborAsync(int? id, int? userId)
+    {
+        if (id is null) return null;
+        var row = await ProjectRows(_db.Dances.Where(d => d.Id == id.Value), userId).FirstOrDefaultAsync();
+        return row is null ? null : ToDto(row);
     }
 
     /// <summary>
@@ -310,23 +363,11 @@ public class DanceService : IDanceService
 
         IQueryable<Dance> orderedQ = sortBy switch
         {
-            "recommended" when affinityStyleIds.Count > 0 => entityQ
-                .OrderByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial" && v.StartTime == null))
-                .ThenByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial"))
-                .ThenByDescending(d => d.DanceStyles.Any(ds => affinityStyleIds.Contains(ds.StyleId)))
-                .ThenByDescending(d => d.AverageRating)
-                .ThenByDescending(d => d.FavoriteCount)
-                .ThenByDescending(d => d.LearnedCount)
-                .ThenByDescending(d => d.Videos.Max(v => (long?)v.ViewCount) ?? 0)
-                .ThenBy(d => d.Id * dailySeed % 9973),
-            "recommended" => entityQ
-                .OrderByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial" && v.StartTime == null))
-                .ThenByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial"))
-                .ThenByDescending(d => d.AverageRating)
-                .ThenByDescending(d => d.FavoriteCount)
-                .ThenByDescending(d => d.LearnedCount)
-                .ThenByDescending(d => d.Videos.Max(v => (long?)v.ViewCount) ?? 0)
-                .ThenBy(d => d.Id * dailySeed % 9973),
+            // Both "recommended" variants share the same ranking; the only difference is that a
+            // signed-in user with style affinity gets one extra tiebreak (their favored styles float
+            // up) slotted right after the tutorial-shape ordering. Build it step by step and insert
+            // that clause conditionally so the two paths can't drift out of sync.
+            "recommended" => RankRecommended(entityQ, affinityStyleIds, dailySeed),
             "tutorials" => entityQ
                 .OrderByDescending(d => d.Videos.Count(v => v.VideoType == "tutorial" && v.StartTime == null))
                 .ThenByDescending(d => d.Videos.Count(v => v.VideoType == "tutorial"))
@@ -339,7 +380,7 @@ public class DanceService : IDanceService
         };
 
         var total = await entityQ.CountAsync();
-        var grandTotal = await _db.Dances.CountAsync();
+        var grandTotal = await GetGrandTotalAsync();
         var rows = await ProjectRows(orderedQ.Skip((clampedPage - 1) * pageSize).Take(pageSize), userId).ToListAsync();
 
         return new SearchDancesResult { Items = rows.Select(ToDto).ToList(), Total = total, GrandTotal = grandTotal, Page = clampedPage, PageSize = pageSize };
@@ -397,6 +438,43 @@ public class DanceService : IDanceService
         }
 
         return entityQ;
+    }
+
+    /// <summary>
+    /// The shared "recommended" ordering. Ranked: full-length tutorials first, then any tutorial,
+    /// then — for signed-in users with style affinity — dances in a style they favor/practice, then
+    /// on-site signals (rating, favorites, learned), then source-video YouTube views, then the daily
+    /// rotation tiebreak. The affinity clause is inserted only when there are affinity styles, so an
+    /// anonymous/no-affinity request produces exactly the same order as before.
+    /// </summary>
+    private static IQueryable<Dance> RankRecommended(IQueryable<Dance> source, List<int> affinityStyleIds, int dailySeed)
+    {
+        var ordered = source
+            .OrderByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial" && v.StartTime == null))
+            .ThenByDescending(d => d.Videos.Any(v => v.VideoType == "tutorial"));
+
+        if (affinityStyleIds.Count > 0)
+            ordered = ordered.ThenByDescending(d => d.DanceStyles.Any(ds => affinityStyleIds.Contains(ds.StyleId)));
+
+        return ordered
+            .ThenByDescending(d => d.AverageRating)
+            .ThenByDescending(d => d.FavoriteCount)
+            .ThenByDescending(d => d.LearnedCount)
+            .ThenByDescending(d => d.Videos.Max(v => (long?)v.ViewCount) ?? 0)
+            .ThenBy(d => d.Id * dailySeed % 9973);
+    }
+
+    /// <summary>
+    /// The whole-catalog size shown as the "N of M dances" figure. It only moves on seeding/admin
+    /// create/delete, so a 30s absolute-expiration cache spares every keystroke a COUNT(*) over the
+    /// full table; no active invalidation is worth the coupling — 30s of staleness is invisible here.
+    /// </summary>
+    private async Task<int> GetGrandTotalAsync()
+    {
+        if (_cache.TryGetValue(GrandTotalCacheKey, out int cached)) return cached;
+        var grandTotal = await _db.Dances.CountAsync();
+        _cache.Set(GrandTotalCacheKey, grandTotal, TimeSpan.FromSeconds(30));
+        return grandTotal;
     }
 
     /// <summary>Styles the user has signalled interest in: favorited, in-progress, or actually practiced dances.</summary>

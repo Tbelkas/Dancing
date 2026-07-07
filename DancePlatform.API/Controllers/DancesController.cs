@@ -40,6 +40,13 @@ public class DancesController : AppControllerBase
     public async Task<IActionResult> GetRecommended(int id) =>
         Ok(await _danceService.GetRecommendedAsync(id, CurrentUserId));
 
+    // Server-side prev/next pager for the dance-detail page — replaces the client fetching up to
+    // 500 dances just to locate two neighbours. Anonymous, like GetRecommended; the viewer's flags
+    // still populate via CurrentUserId. Always 200 with {prev, next} (either may be null at an edge).
+    [HttpGet("{id:int}/neighbors")]
+    public async Task<IActionResult> GetNeighbors(int id) =>
+        Ok(await _danceService.GetNeighborsAsync(id, CurrentUserId));
+
     /// <summary>One-time maintenance: recompute slugs under the per-style uniqueness rule.</summary>
     [RequireAdmin]
     [HttpPost("reslug")]

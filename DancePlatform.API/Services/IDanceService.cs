@@ -10,6 +10,9 @@ public interface IDanceService
     Task<DanceDto?> GetByStyleAndSlugAsync(string styleSlug, string danceSlug, int? userId);
     Task<int> ReslugAllAsync();
     Task<List<DanceDto>> GetRecommendedAsync(int id, int? userId, int limit = 8);
+
+    /// <summary>The alphabetical prev/next dances within the given dance's canonical style (see <see cref="DanceNeighborsDto"/>).</summary>
+    Task<DanceNeighborsDto> GetNeighborsAsync(int id, int? userId);
     Task<DanceDto> CreateAsync(CreateDanceRequest request);
     Task<DanceDto?> UpdateAsync(int id, UpdateDanceRequest request);
     Task<bool> DeleteAsync(int id);
