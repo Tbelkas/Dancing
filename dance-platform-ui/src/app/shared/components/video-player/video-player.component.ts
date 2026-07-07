@@ -93,6 +93,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   private tiktokCurrentTime = 0;
   private hasRealDuration = false;
   private regionInitialised = false;
+  /** Guards the deferred iframe-API callback from creating a player after ngOnDestroy. */
+  private destroyed = false;
   private lastPlayingEmit = false;
   private tiktokStallHandle: ReturnType<typeof setTimeout> | null = null;
 
@@ -280,11 +282,18 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
         tag.src = 'https://www.youtube.com/iframe_api';
         document.body.appendChild(tag);
       }
-      (window as any).onYouTubeIframeAPIReady = () => this.createPlayer();
+      // Chain rather than overwrite: if several players mount before the API script
+      // loads, each previous callback still runs, so every player gets created.
+      const prev = (window as any).onYouTubeIframeAPIReady as (() => void) | undefined;
+      (window as any).onYouTubeIframeAPIReady = () => {
+        prev?.();
+        this.createPlayer();
+      };
     }
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.clearRepeat();
     this.clearDurationPoll();
     if (this.tiktokStallHandle) clearTimeout(this.tiktokStallHandle);
@@ -432,7 +441,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private createPlayer(): void {
-    if (!this.playerContainer) return;
+    if (this.destroyed || !this.playerContainer) return;
     const playerVars: YT.PlayerVars = { rel: 0, modestbranding: 1 };
     if (this.startTime != null) playerVars['start'] = this.startTime;
     // With multiple dances in one video the player must stay seekable past this

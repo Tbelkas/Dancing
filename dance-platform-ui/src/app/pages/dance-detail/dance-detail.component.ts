@@ -493,7 +493,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.videoService.delete(video.id).subscribe({
       next: () => {
         this.videos.update(list => list.filter(v => v.id !== video.id));
-        this.dance.update(d => d ? { ...d, videoCount: d.videoCount - 1 } : d);
+        this.dance.update(d => d ? { ...d, videoCount: Math.max(0, d.videoCount - 1) } : d);
         if (this.selectedVideo()?.id === video.id) this.selectedVideo.set(null);
         this.toast.success('Video deleted.');
       },

@@ -193,6 +193,11 @@ export class DancesComponent implements OnInit, OnDestroy {
       const style = this.styles().find(s => s.id === styleId);
       chips.push({ key: 'style', label: style?.name ?? 'Style' });
     }
+    const musicId = this.selectedMusicalStyleId();
+    if (musicId !== null) {
+      const ms = this.musicalStyles().find(m => m.id === musicId);
+      chips.push({ key: 'music', label: ms?.name ?? 'Music' });
+    }
     const diff = this.selectedDifficulty();
     if (diff) chips.push({ key: 'level', label: diff });
     const status = this.selectedStatus();
@@ -279,11 +284,13 @@ export class DancesComponent implements OnInit, OnDestroy {
    */
   private restoreFilters(): void {
     const qp = this.route.snapshot.queryParamMap;
-    const urlHasFilters = ['q', 'style', 'level', 'status', 'fav', 'sort', 'page'].some(k => qp.has(k));
+    const urlHasFilters = ['q', 'style', 'music', 'level', 'status', 'fav', 'sort', 'page'].some(k => qp.has(k));
     if (urlHasFilters) {
       this.searchQuery.set(qp.get('q') ?? '');
       const style = Number(qp.get('style'));
       this.selectedStyleId.set(Number.isInteger(style) && style > 0 ? style : null);
+      const music = Number(qp.get('music'));
+      this.selectedMusicalStyleId.set(Number.isInteger(music) && music > 0 ? music : null);
       this.selectedDifficulty.set(qp.get('level'));
       this.selectedStatus.set(qp.get('status') ?? 'all');
       this.favoritesOnly.set(qp.get('fav') === '1');
@@ -342,6 +349,7 @@ export class DancesComponent implements OnInit, OnDestroy {
       queryParams: {
         q: this.searchQuery().trim() || null,
         style: this.selectedStyleId(),
+        music: this.selectedMusicalStyleId(),
         level: this.selectedDifficulty(),
         status: this.selectedStatus() !== 'all' ? this.selectedStatus() : null,
         fav: this.favoritesOnly() ? '1' : null,
@@ -364,6 +372,8 @@ export class DancesComponent implements OnInit, OnDestroy {
     const q = qp.get('q') ?? '';
     const styleRaw = Number(qp.get('style'));
     const style = Number.isInteger(styleRaw) && styleRaw > 0 ? styleRaw : null;
+    const musicRaw = Number(qp.get('music'));
+    const music = Number.isInteger(musicRaw) && musicRaw > 0 ? musicRaw : null;
     const level = qp.get('level');
     const status = qp.get('status') ?? 'all';
     const fav = qp.get('fav') === '1';
@@ -373,6 +383,7 @@ export class DancesComponent implements OnInit, OnDestroy {
 
     if (q === this.searchQuery().trim() &&
         style === this.selectedStyleId() &&
+        music === this.selectedMusicalStyleId() &&
         level === this.selectedDifficulty() &&
         status === this.selectedStatus() &&
         fav === this.favoritesOnly() &&
@@ -381,6 +392,7 @@ export class DancesComponent implements OnInit, OnDestroy {
 
     this.searchQuery.set(q);
     this.selectedStyleId.set(style);
+    this.selectedMusicalStyleId.set(music);
     this.selectedDifficulty.set(level);
     this.selectedStatus.set(this.auth.isAuthenticated() ? status : 'all');
     this.favoritesOnly.set(this.auth.isAuthenticated() ? fav : false);
@@ -471,6 +483,7 @@ export class DancesComponent implements OnInit, OnDestroy {
     switch (key) {
       case 'q': this.searchQuery.set(''); break;
       case 'style': this.selectedStyleId.set(null); break;
+      case 'music': this.selectedMusicalStyleId.set(null); break;
       case 'level': this.selectedDifficulty.set(null); break;
       case 'status': this.selectedStatus.set('all'); break;
       case 'favorites': this.favoritesOnly.set(false); break;
