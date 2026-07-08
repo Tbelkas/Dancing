@@ -14,6 +14,9 @@
         <h1 class="page-title">{{ choreo.name }}</h1>
         <p class="page-subtitle">
           <i class="fa-solid fa-file-video"></i> {{ choreo.fileName }}
+          <button class="change-video-btn" (click)="changeVideo(choreo)" title="Play a different file for this choreo">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i> Change video
+          </button>
           <span class="privacy-note"><i class="fa-solid fa-lock"></i> Plays from your device</span>
         </p>
       </div>

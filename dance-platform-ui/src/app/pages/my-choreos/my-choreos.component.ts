@@ -65,6 +65,13 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
     this.fileInput.nativeElement.click();
   }
 
+  /** Re-pick the file for an open choreo — swaps what's playing (and the session
+   *  cache) even when a cached file exists, e.g. after re-exporting the video. */
+  changeVideo(choreo: Choreo): void {
+    this.pickTarget = choreo;
+    this.fileInput.nativeElement.click();
+  }
+
   openChoreo(choreo: Choreo): void {
     const cached = this.choreoService.recallFile(choreo.id);
     if (cached) {
