@@ -10,10 +10,25 @@
   margin-bottom: 28px;
 }
 
+/* Same header layout as Browse/My Dances: actions sit top-right of the title
+   on desktop and drop below with real spacing when the row wraps — without
+   this the buttons block-stack flush against the subtitle. */
+.page-header__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
 .page-header__actions {
   display: flex;
   gap: 10px;
   align-items: center;
+}
+
+@media (max-width: 640px) {
+  .page-header__top { flex-direction: column; gap: 18px; }
 }
 
 /* ---------- Streak-at-risk nudge ---------- */
