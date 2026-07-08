@@ -38,6 +38,7 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
 
   readonly playbackRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
   readonly rotationOptions = [0, 90, 180, 270];
+  readonly zoomOptions = [1, 1.5, 2, 3];
   readonly minRate = 0.25;
   readonly maxRate = 2;
   currentRate = signal(1);
@@ -53,10 +54,19 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
   muted = signal(false);
   volume = signal(1);
   fullscreen = signal(false);
+  zoom = signal(1);
+  /** Pan of the zoomed picture, screen pixels from center; 0,0 when not zoomed. */
+  panX = signal(0);
+  panY = signal(0);
 
   repeatStart = 0;
   repeatEnd = 0;
   loopName = '';
+
+  private dragging = false;
+  private dragMoved = false;
+  private dragStartX = 0;
+  private dragStartY = 0;
 
   /** Native pixel size of the file, read from metadata; drives the sideways layout. */
   private naturalWidth = signal(0);
@@ -142,14 +152,19 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     return r === 90 || r === 270;
   }
 
-  /** Mirror and rotation combined into one transform: rotate the picture first, then
-   *  flip it across the screen's horizontal axis so "mirror" always reads left↔right. */
+  /** Mirror, rotation, and zoom combined into one transform: rotate the picture first,
+   *  then flip it across the screen's horizontal axis so "mirror" always reads
+   *  left↔right. Zoom scales innermost (uniform, so it commutes with both) and pans
+   *  outermost in screen pixels, so drag deltas apply 1:1 whatever the rotation. */
   videoTransform(): string | null {
     const parts: string[] = [];
+    const z = this.zoom();
+    if (z > 1) parts.push(`translate(${this.panX()}px, ${this.panY()}px)`);
     if (this.sideways()) parts.push('translate(-50%, -50%)');
     if (this.mirrored()) parts.push('scaleX(-1)');
     const r = this.rotationDeg();
     if (r !== 0) parts.push(`rotate(${r}deg)`);
+    if (z > 1) parts.push(`scale(${z})`);
     return parts.length ? parts.join(' ') : null;
   }
 
@@ -161,14 +176,53 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     return w > 0 && h > 0 ? `${h} / ${w}` : '9 / 16';
   }
 
-  /** Any rotation turns the native control bar with the picture (vertical seek bar,
-   *  sideways time), so rotated playback swaps in our own horizontal controls. */
+  /** Rotation turns the native control bar with the picture (vertical seek bar,
+   *  sideways time) and zoom would magnify it, so both swap in our own controls. */
   customControls(): boolean {
-    return this.rotationDeg() !== 0;
+    return this.rotationDeg() !== 0 || this.zoom() > 1;
   }
 
-  /** With native controls hidden, clicking the picture still toggles playback. */
+  setZoom(level: number): void {
+    this.zoom.set(level);
+    if (level <= 1) {
+      this.panX.set(0);
+      this.panY.set(0);
+    } else {
+      this.clampPan();
+    }
+  }
+
+  /** Drag the zoomed picture to choose the visible area. */
+  onVideoPointerDown(event: PointerEvent): void {
+    if (this.zoom() <= 1) return;
+    this.dragging = true;
+    this.dragMoved = false;
+    this.dragStartX = event.clientX - this.panX();
+    this.dragStartY = event.clientY - this.panY();
+    this.video.setPointerCapture(event.pointerId);
+  }
+
+  onVideoPointerMove(event: PointerEvent): void {
+    if (!this.dragging) return;
+    const x = event.clientX - this.dragStartX;
+    const y = event.clientY - this.dragStartY;
+    if (Math.abs(x - this.panX()) + Math.abs(y - this.panY()) > 3) this.dragMoved = true;
+    this.panX.set(x);
+    this.panY.set(y);
+    this.clampPan();
+  }
+
+  onVideoPointerUp(): void {
+    this.dragging = false;
+  }
+
+  /** With native controls hidden, clicking the picture still toggles playback —
+   *  unless the click was really the tail end of a pan drag. */
   onVideoClick(): void {
+    if (this.dragMoved) {
+      this.dragMoved = false;
+      return;
+    }
     if (this.customControls()) this.togglePlay();
   }
 
@@ -285,6 +339,16 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     this.video.currentTime = Math.max(0, this.video.currentTime + deltaSeconds);
   }
 
+  /** The zoomed picture fills the frame ×zoom, so panning past (zoom−1)/2 of the
+   *  frame in any direction would drag its edge into view — clamp there. */
+  private clampPan(): void {
+    const frame = this.mediaEl.nativeElement;
+    const maxX = ((this.zoom() - 1) / 2) * frame.clientWidth;
+    const maxY = ((this.zoom() - 1) / 2) * frame.clientHeight;
+    this.panX.update(v => Math.max(-maxX, Math.min(maxX, v)));
+    this.panY.update(v => Math.max(-maxY, Math.min(maxY, v)));
+  }
+
   private pulseLoopFlash(): void {
     if (this.flashTimeout) clearTimeout(this.flashTimeout);
     this.loopFlash.set(true);
@@ -329,6 +393,11 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
       case 'm': case 'M':
         this.toggleMirror();
         break;
+      case 'z': case 'Z': {
+        const next = (this.zoomOptions.indexOf(this.zoom()) + 1) % this.zoomOptions.length;
+        this.setZoom(this.zoomOptions[next]);
+        break;
+      }
       case '?':
         this.shortcutsOpen.set(!this.shortcutsOpen());
         break;

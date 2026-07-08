@@ -210,6 +210,28 @@
   border-color: var(--color-border-light);
 }
 
+/* Zoom: the scaled picture is clipped by its frame; dragging picks the visible
+   area. touch-action off so touch drags pan instead of scrolling the page. */
+.player-media--zoomed {
+  overflow: hidden;
+}
+
+.player-media--zoomed .local-video {
+  cursor: grab;
+  touch-action: none;
+}
+
+.player-media--zoomed .local-video:active {
+  cursor: grabbing;
+}
+
+.zoom-hint {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+
+  i { margin-right: 4px; }
+}
+
 /* Rotation radio group, visually in line with the speed pills. */
 .rotate-options {
   display: flex;

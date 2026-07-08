@@ -22,6 +22,7 @@
   <div #mediaEl class="player-media"
        [class.player-media--mirrored]="mirrored()"
        [class.player-media--sideways]="sideways()"
+       [class.player-media--zoomed]="zoom() > 1"
        [style.aspectRatio]="sidewaysAspect()">
     <video #videoEl
       class="local-video"
@@ -35,6 +36,10 @@
       (play)="playing.set(true)"
       (pause)="playing.set(false)"
       (volumechange)="onVolumeChange()"
+      (pointerdown)="onVideoPointerDown($event)"
+      (pointermove)="onVideoPointerMove($event)"
+      (pointerup)="onVideoPointerUp()"
+      (pointercancel)="onVideoPointerUp()"
       (click)="onVideoClick()"
       (ended)="onEnded()">
     </video>
@@ -103,6 +108,18 @@
       </div>
     </div>
 
+    <div class="control-row">
+      <label id="zoom-label">Zoom</label>
+      <div class="speed-buttons" role="group" aria-labelledby="zoom-label">
+        @for (z of zoomOptions; track z) {
+          <button class="speed-btn" [class.active]="zoom() === z" (click)="setZoom(z)" [attr.aria-pressed]="zoom() === z" [attr.aria-label]="'Zoom ' + z + 'x'">{{ z }}x</button>
+        }
+      </div>
+      @if (zoom() > 1) {
+        <span class="zoom-hint"><i class="fa-solid fa-hand"></i> Drag the video to choose the area</span>
+      }
+    </div>
+
     @if (shortcutsOpen()) {
       <div class="kbd-hint" role="note" aria-label="Keyboard shortcuts">
         <span class="kbd-hint__item"><kbd>Space</kbd> Play / pause</span>
@@ -110,6 +127,7 @@
         <span class="kbd-hint__item"><kbd>[</kbd><kbd>]</kbd> Loop start / end</span>
         <span class="kbd-hint__item"><kbd>L</kbd> Loop on/off</span>
         <span class="kbd-hint__item"><kbd>M</kbd> Mirror</span>
+        <span class="kbd-hint__item"><kbd>Z</kbd> Zoom</span>
         <span class="kbd-hint__item"><kbd>1</kbd>–<kbd>7</kbd> Speed</span>
       </div>
     }
