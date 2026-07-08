@@ -176,6 +176,32 @@
         </div>
       </div>
 
+      @if (danceBreakdown().length > 0) {
+        <div class="card insight-card insight-card--breakdown">
+          <h3 class="insight-card__title">
+            Time per {{ breakdownBy() }}
+            <span class="insight-card__scope">{{ timeframe() === 'week' ? 'last 7 days' : timeframe() === 'month' ? 'last 30 days' : 'all time' }}</span>
+            <span class="breakdown-toggle" role="group" aria-label="Breakdown grouping">
+              <button class="filter-pill filter-pill--xs" [class.active]="breakdownBy() === 'dance'" (click)="breakdownBy.set('dance')">Dances</button>
+              <button class="filter-pill filter-pill--xs" [class.active]="breakdownBy() === 'style'" (click)="breakdownBy.set('style')">Styles</button>
+            </span>
+          </h3>
+          <ul class="breakdown-list">
+            @for (row of displayedBreakdown(); track row.name) {
+              <li class="breakdown-row">
+                @if (row.danceId > 0) {
+                  <a [routerLink]="row.slug | dancePath:row.styleSlug" class="breakdown-row__name">{{ row.name }}</a>
+                } @else {
+                  <span class="breakdown-row__name breakdown-row__name--static">{{ row.name }}</span>
+                }
+                <span class="breakdown-row__minutes">{{ formatDuration(row.minutes) }}</span>
+                <span class="breakdown-row__bar"><span class="breakdown-row__fill" [style.width.%]="row.pct"></span></span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
       @if (trendHasData()) {
         <div class="card insight-card insight-card--trend">
           <h3 class="insight-card__title">Weekly minutes <span class="insight-card__scope">last 12 weeks</span></h3>
@@ -207,32 +233,6 @@
               }
             </div>
           </div>
-        </div>
-      }
-
-      @if (danceBreakdown().length > 0) {
-        <div class="card insight-card insight-card--breakdown">
-          <h3 class="insight-card__title">
-            Time per {{ breakdownBy() }}
-            <span class="insight-card__scope">{{ timeframe() === 'week' ? 'last 7 days' : timeframe() === 'month' ? 'last 30 days' : 'all time' }}</span>
-            <span class="breakdown-toggle" role="group" aria-label="Breakdown grouping">
-              <button class="filter-pill filter-pill--xs" [class.active]="breakdownBy() === 'dance'" (click)="breakdownBy.set('dance')">Dances</button>
-              <button class="filter-pill filter-pill--xs" [class.active]="breakdownBy() === 'style'" (click)="breakdownBy.set('style')">Styles</button>
-            </span>
-          </h3>
-          <ul class="breakdown-list">
-            @for (row of displayedBreakdown(); track row.name) {
-              <li class="breakdown-row">
-                @if (row.danceId > 0) {
-                  <a [routerLink]="row.slug | dancePath:row.styleSlug" class="breakdown-row__name">{{ row.name }}</a>
-                } @else {
-                  <span class="breakdown-row__name breakdown-row__name--static">{{ row.name }}</span>
-                }
-                <span class="breakdown-row__minutes">{{ formatDuration(row.minutes) }}</span>
-                <span class="breakdown-row__bar"><span class="breakdown-row__fill" [style.width.%]="row.pct"></span></span>
-              </li>
-            }
-          </ul>
         </div>
       }
     </div>
