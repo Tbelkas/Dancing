@@ -49,9 +49,15 @@
           [style.--fill.%]="videoDuration() > 0 ? (currentTime() / videoDuration()) * 100 : 0"
           (input)="seekTo(+$any($event.target).value)" />
         <span class="rc__time">{{ formatTime(videoDuration()) }}</span>
-        <button class="rc__btn" (click)="toggleMute()" [attr.aria-label]="muted() ? 'Unmute' : 'Mute'">
-          <i class="fa-solid" [class.fa-volume-high]="!muted()" [class.fa-volume-xmark]="muted()"></i>
-        </button>
+        <div class="rc__volume">
+          <button class="rc__btn" (click)="toggleMute()" [attr.aria-label]="muted() ? 'Unmute' : 'Mute'">
+            <i [class]="'fa-solid ' + volumeIcon()"></i>
+          </button>
+          <input type="range" class="rc__vol" min="0" max="1" step="0.05"
+            [value]="muted() ? 0 : volume()" [style.--fill.%]="volumePct()"
+            aria-label="Volume" [attr.aria-valuetext]="volumePct() + '%'"
+            (input)="setVolume(+$any($event.target).value)" />
+        </div>
         <button class="rc__btn" (click)="toggleFullscreen()" [attr.aria-label]="fullscreen() ? 'Exit fullscreen' : 'Fullscreen'">
           <i class="fa-solid" [class.fa-expand]="!fullscreen()" [class.fa-compress]="fullscreen()"></i>
         </button>

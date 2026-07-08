@@ -51,6 +51,7 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
   playing = signal(false);
   currentTime = signal(0);
   muted = signal(false);
+  volume = signal(1);
   fullscreen = signal(false);
 
   repeatStart = 0;
@@ -87,6 +88,8 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
   onLoadedMetadata(): void {
     this.naturalWidth.set(this.video.videoWidth);
     this.naturalHeight.set(this.video.videoHeight);
+    this.muted.set(this.video.muted);
+    this.volume.set(this.video.volume);
     const dur = Math.floor(this.video.duration);
     if (!isFinite(dur) || dur <= 0) return;
     this.videoDuration.set(dur);
@@ -171,6 +174,23 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
 
   onVolumeChange(): void {
     this.muted.set(this.video.muted);
+    this.volume.set(this.video.volume);
+  }
+
+  /** Dragging to 0 mutes; dragging up from 0 unmutes — matches native player behavior. */
+  setVolume(level: number): void {
+    this.video.volume = level;
+    this.video.muted = level === 0;
+  }
+
+  volumeIcon(): string {
+    if (this.muted() || this.volume() === 0) return 'fa-volume-xmark';
+    return this.volume() < 0.5 ? 'fa-volume-low' : 'fa-volume-high';
+  }
+
+  /** Displayed volume: 0 while muted so the slider reads as silent. */
+  volumePct(): number {
+    return Math.round((this.muted() ? 0 : this.volume()) * 100);
   }
 
   seekTo(seconds: number): void {

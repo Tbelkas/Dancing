@@ -90,9 +90,30 @@
   min-width: 0;
 }
 
-/* Single-thumb sliders (seek + speed): thin track whose fill tracks --fill,
-   thumb matching the dual-range loop slider. */
+/* Volume: the slider stays collapsed behind the speaker icon and slides out on
+   hover or keyboard focus, so the narrow sideways bar isn't crowded. */
+.rc__volume {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.rc__vol {
+  width: 0;
+  opacity: 0;
+  transition: width var(--transition), opacity var(--transition);
+}
+
+.rc__volume:hover .rc__vol,
+.rc__volume:focus-within .rc__vol {
+  width: 74px;
+  opacity: 1;
+}
+
+/* Single-thumb sliders (seek + volume + speed): thin track whose fill tracks
+   --fill, thumb matching the dual-range loop slider. */
 .rc__seek,
+.rc__vol,
 .speed-slider {
   -webkit-appearance: none;
   appearance: none;
