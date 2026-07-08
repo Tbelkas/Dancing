@@ -215,10 +215,14 @@ textarea:focus-visible,
   color: var(--color-primary);
   border: 1px solid rgba(245, 200, 66, 0.22);
 
+  /* Music tag is secondary metadata — keep it quiet next to the style badge. */
   &--music {
-    background: rgba(98, 196, 176, 0.1);
-    color: var(--color-music);
-    border-color: rgba(98, 196, 176, 0.22);
+    background: transparent;
+    color: var(--color-text-muted);
+    border-color: var(--color-border-light);
+    font-weight: 600;
+
+    .fa-music { opacity: 0.6; }
   }
 
   &--tutorial {

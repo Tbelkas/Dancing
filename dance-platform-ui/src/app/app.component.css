@@ -42,21 +42,51 @@
   font-weight: 900;
   color: var(--color-primary);
   letter-spacing: -0.01em;
-  margin-right: auto; /* pushes search + nav + avatar to the right edge */
   transition: opacity var(--transition);
   &:hover { opacity: 0.85; color: var(--color-primary); }
 }
 
-/* Live practice clock — rides inside the Practice nav link while a session runs. */
-.nav-clock {
+/* Logo + live clock; pushes search + nav + avatar to the right edge. */
+.header__left {
+  display: flex;
+  align-items: center;
+  margin-right: auto;
+  min-width: 0;
+}
+
+/* Live practice clock — sits beside the logo while a session is running. */
+.practice-clock {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-left: 8px;
-  color: var(--color-primary);
-  font-size: 0.82rem;
+  gap: 8px;
+  margin-left: 16px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  transition: border-color var(--transition), background var(--transition);
 }
+.practice-clock:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+.practice-clock .fa-stopwatch { color: var(--color-primary); font-size: 0.9rem; }
+.practice-clock__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 60%, transparent);
+  animation: practice-pulse 1.6s ease-in-out infinite;
+}
+.practice-clock__time { min-width: 3.2ch; }
+
 .nav-clock__dot {
   width: 7px;
   height: 7px;
@@ -71,7 +101,7 @@
   50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-primary) 0%, transparent); opacity: 0.6; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .nav-clock__dot { animation: none; }
+  .nav-clock__dot, .practice-clock__dot { animation: none; }
 }
 
 /* Collapsed-to-an-icon search resting just left of the nav (see global-search css). */
@@ -250,6 +280,9 @@
 
   /* Desktop-only chrome: the avatar menu (hamburger + tabbar cover it here). */
   .header__user { display: none; }
+
+  /* The tabbar's Practice tab shows the live clock on mobile. */
+  .practice-clock { display: none; }
 
   .header__search {
     flex: 1;

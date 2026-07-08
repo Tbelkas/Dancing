@@ -1,7 +1,17 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 <header class="header">
   <div class="container header__inner">
-    <a routerLink="/dances" class="header__logo" (click)="closeMenu()">Dance Platform</a>
+    <div class="header__left">
+      <a routerLink="/dances" class="header__logo" (click)="closeMenu()">Dance Platform</a>
+      @if (auth.isAuthenticated() && practiceTimer.active()) {
+        <a routerLink="/practice" class="practice-clock" (click)="closeMenu()"
+           title="Practice session in progress — view log" aria-label="Practice session time, view practice log">
+          <span class="practice-clock__dot" aria-hidden="true"></span>
+          <i class="fa-solid fa-stopwatch" aria-hidden="true"></i>
+          <span class="practice-clock__time">{{ formatClock(practiceTimer.liveSeconds()) }}</span>
+        </a>
+      }
+    </div>
 
     <div class="header__search">
       <app-global-search />
@@ -26,14 +36,7 @@
         <!-- Mobile-menu only; on desktop these live in the avatar dropdown. -->
         <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__nav-mobile" (click)="closeMenu()">Added Videos</a>
         <a routerLink="/choreos" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">My Choreos</a>
-        <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">
-          Practice
-          @if (practiceTimer.active()) {
-            <span class="nav-clock" title="Practice session in progress">
-              <span class="nav-clock__dot" aria-hidden="true"></span>{{ formatClock(practiceTimer.liveSeconds()) }}
-            </span>
-          }
-        </a>
+        <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Practice</a>
         <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__nav-mobile" (click)="closeMenu()">Profile</a>
         @if (role.isAdmin()) {
           <a routerLink="/admin/add-video" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__admin-link"
