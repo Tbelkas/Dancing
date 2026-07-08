@@ -282,6 +282,14 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** The loop sliders live below the video and vanish in fullscreen, so the bar
+   *  carries its own way back to the armed region's start. */
+  jumpToLoopStart(): void {
+    this.video.currentTime = this.repeatStart;
+    this.currentTime.set(this.repeatStart);
+    void this.video.play();
+  }
+
   jumpToLoop(loop: VideoSegment): void {
     this.activeLoopId.set(loop.id);
     this.repeatStart = loop.startTime;

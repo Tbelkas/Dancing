@@ -602,6 +602,13 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.currentTime.set(seconds);
   }
 
+  /** The loop sliders live below the video and vanish in fullscreen, so the bar
+   *  carries its own way back to the armed region's start. */
+  jumpToLoopStart(): void {
+    this.seekToTime(this.repeatStart);
+    this.player?.playVideo();
+  }
+
   toggleMute(): void {
     if (!this.player) return;
     if (this.player.isMuted()) {
