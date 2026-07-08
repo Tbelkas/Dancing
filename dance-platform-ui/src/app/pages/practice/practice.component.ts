@@ -6,8 +6,10 @@ import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { PracticeService, CreatePracticePayload } from '../../core/services/practice.service';
 import { DanceService } from '../../core/services/dance.service';
 import { PracticeSession, PracticeSessionItem } from '../../models/practice-session.model';
+import { ReviewDance } from '../../models/review-dance.model';
 import { toLocalDateString, toPracticeDateString, formatClock } from '../../core/utils/video-url.utils';
 import { computeStreak, computeLongestStreak } from '../../core/utils/practice.utils';
+import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 
 type Timeframe = 'week' | 'month' | 'all';
 
@@ -52,6 +54,11 @@ export class PracticeComponent implements OnInit, OnDestroy {
   dances = signal<{ id: number; name: string }[]>([]);
   loading = signal(true);
 
+  // Review queue: learned dances gone unpracticed for 3+ weeks (server decides the threshold).
+  reviewQueue = signal<ReviewDance[]>([]);
+  reviewExpanded = signal(false);
+  private readonly failedReviewThumbs = signal<Set<number>>(new Set());
+
   showAddForm = signal(false);
   newDanceId: number | null = null;
   newDate = '';
@@ -82,6 +89,14 @@ export class PracticeComponent implements OnInit, OnDestroy {
 
   /** Only surface sessions that lasted more than a minute — sub-minute blips (stray watches) are noise. */
   readonly visibleSessions = computed(() => this.sessions().filter(s => s.totalSeconds > 60));
+
+  /** How many review cards show before the queue collapses behind "show all". */
+  private readonly REVIEW_PREVIEW = 6;
+
+  readonly visibleReview = computed(() =>
+    this.reviewExpanded() ? this.reviewQueue() : this.reviewQueue().slice(0, this.REVIEW_PREVIEW));
+
+  readonly hiddenReviewCount = computed(() => this.reviewQueue().length - this.visibleReview().length);
 
   readonly streak = computed(() => computeStreak(this.visibleSessions()));
   readonly longestStreak = computed(() => computeLongestStreak(this.visibleSessions()));
@@ -230,6 +245,11 @@ export class PracticeComponent implements OnInit, OnDestroy {
     this.practiceService.getAll().subscribe({
       next: s => { this.sessions.set(s); this.loading.set(false); },
       error: () => this.loading.set(false)
+    });
+    // The queue is a bonus panel — if it fails, the page just renders without it.
+    this.practiceService.getReviewQueue().subscribe({
+      next: q => this.reviewQueue.set(q),
+      error: () => {}
     });
   }
 
@@ -411,6 +431,36 @@ export class PracticeComponent implements OnInit, OnDestroy {
 
   private sorted(list: PracticeSession[]): PracticeSession[] {
     return [...list].sort((a, b) => b.date.localeCompare(a.date) || b.startedAt.localeCompare(a.startedAt));
+  }
+
+  // --- Review queue ---
+
+  reviewThumbUrl(dance: ReviewDance): string | null {
+    if (this.failedReviewThumbs().has(dance.danceId)) return null;
+    return youtubeThumbUrl(dance.thumbnailVideoId, dance.thumbnailPlatform);
+  }
+
+  onReviewThumbError(danceId: number): void {
+    this.failedReviewThumbs.update(set => new Set(set).add(danceId));
+  }
+
+  /** "5 weeks" / "3 months" since the dance was last touched. */
+  reviewAgeLabel(dance: ReviewDance): string {
+    const days = dance.daysSince;
+    if (days < 14) return `${days} days`;
+    if (days < 61) return `${Math.floor(days / 7)} weeks`;
+    const months = Math.floor(days / 30.4);
+    return months === 1 ? '1 month' : `${months} months`;
+  }
+
+  /** Learned but no session ever recorded — the age counts from when it was marked learned. */
+  neverPracticed(dance: ReviewDance): boolean {
+    return dance.lastPracticedOn === null;
+  }
+
+  /** Six-plus weeks untouched gets the hotter accent. */
+  reviewIsOverdue(dance: ReviewDance): boolean {
+    return dance.daysSince >= 42;
   }
 
   // --- Display helpers ---

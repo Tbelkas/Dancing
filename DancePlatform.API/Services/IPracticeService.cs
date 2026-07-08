@@ -16,5 +16,11 @@ public interface IPracticeService
     /// <summary>Edits a session's date/notes (and duration when it holds a single dance). Null when not found.</summary>
     Task<PracticeSessionDto?> UpdateAsync(int userId, int id, UpdatePracticeSessionRequest request);
 
+    /// <summary>
+    /// Learned dances the user hasn't practiced recently, stalest first — the spaced-repetition
+    /// review queue. A dance falls off the queue as soon as it's practiced again.
+    /// </summary>
+    Task<List<ReviewDanceDto>> GetReviewQueueAsync(int userId);
+
     Task<bool> DeleteAsync(int userId, int id);
 }

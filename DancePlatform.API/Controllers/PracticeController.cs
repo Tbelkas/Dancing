@@ -18,6 +18,10 @@ public class PracticeController : AppControllerBase
     public async Task<IActionResult> GetAll() =>
         Ok(await _practiceService.GetAsync(CurrentUserId!.Value));
 
+    [HttpGet("review")]
+    public async Task<IActionResult> ReviewQueue() =>
+        Ok(await _practiceService.GetReviewQueueAsync(CurrentUserId!.Value));
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePracticeSessionRequest request)
     {

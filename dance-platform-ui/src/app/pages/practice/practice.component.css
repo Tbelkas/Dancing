@@ -52,6 +52,157 @@
   animation: flame-flicker 1.8s ease-in-out infinite;
 }
 
+/* ---------- Review queue ---------- */
+.review-panel {
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.review-panel__head {
+  margin-bottom: 14px;
+}
+
+.review-panel__title {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #B7B2D4;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.review-panel__title i {
+  color: var(--color-primary);
+}
+
+.review-panel__count {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #07070D;
+  background: var(--color-primary);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.review-panel__sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.review-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 8px 12px 8px 8px;
+  text-decoration: none;
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.review-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.review-card__media {
+  flex: 0 0 64px;
+  height: 44px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.review-card__thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.review-card__media-fallback {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.review-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.review-card__name {
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.review-card__style {
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.review-card__age {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.review-card__age small {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+/* 6+ weeks untouched: shift the badge to the alarm red. */
+.review-card--overdue .review-card__age {
+  color: var(--color-accent);
+}
+
+.review-panel__more {
+  margin-top: 12px;
+}
+
+@media (max-width: 640px) {
+  .review-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .stats-block {
   display: flex;
   flex-wrap: wrap;

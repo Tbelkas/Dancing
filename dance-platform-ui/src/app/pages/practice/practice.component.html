@@ -25,6 +25,52 @@
     </div>
   }
 
+  @if (reviewQueue().length > 0) {
+    <section class="card review-panel" aria-labelledby="review-title">
+      <div class="review-panel__head">
+        <h2 id="review-title" class="review-panel__title">
+          <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+          Due for review
+          <span class="review-panel__count">{{ reviewQueue().length }}</span>
+        </h2>
+        <p class="review-panel__sub">Learned dances fade without practice — these haven't been touched in 3+ weeks</p>
+      </div>
+      <div class="review-grid">
+        @for (dance of visibleReview(); track dance.danceId) {
+          <a class="review-card" [routerLink]="dance.slug | dancePath:dance.styleSlug"
+             [class.review-card--overdue]="reviewIsOverdue(dance)">
+            <span class="review-card__media">
+              @if (reviewThumbUrl(dance); as thumb) {
+                <img [src]="thumb" alt="" loading="lazy" class="review-card__thumb" (error)="onReviewThumbError(dance.danceId)" />
+              } @else {
+                <span class="review-card__media-fallback"><i class="fa-solid fa-music"></i></span>
+              }
+            </span>
+            <span class="review-card__body">
+              <span class="review-card__name">{{ dance.name }}</span>
+              @if (dance.styleName) {
+                <span class="review-card__style">{{ dance.styleName }}</span>
+              }
+            </span>
+            <span class="review-card__age" [title]="neverPracticed(dance) ? 'No practice logged since you marked it learned' : 'Since your last practice'">
+              {{ reviewAgeLabel(dance) }}
+              <small>{{ neverPracticed(dance) ? 'since learned' : 'ago' }}</small>
+            </span>
+          </a>
+        }
+      </div>
+      @if (hiddenReviewCount() > 0) {
+        <button class="btn btn--ghost btn--xs review-panel__more" (click)="reviewExpanded.set(true)">
+          Show {{ hiddenReviewCount() }} more
+        </button>
+      } @else if (reviewExpanded() && reviewQueue().length > 6) {
+        <button class="btn btn--ghost btn--xs review-panel__more" (click)="reviewExpanded.set(false)">
+          Show fewer
+        </button>
+      }
+    </section>
+  }
+
   @if (visibleSessions().length > 0) {
     <div class="stats-block">
       <div class="stats-row">

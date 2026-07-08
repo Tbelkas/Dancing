@@ -10,6 +10,15 @@ public class PracticeService : IPracticeService
     /// <summary>A watch landing within this window of the last activity continues the same session.</summary>
     private static readonly TimeSpan ContinuationBuffer = TimeSpan.FromMinutes(10);
 
+    /// <summary>A learned dance untouched for this many days becomes due for review.</summary>
+    private const int DueAfterDays = 21;
+
+    /// <summary>
+    /// Items below this don't count as "practiced" for review purposes — a stray autoplay
+    /// shouldn't reset the review clock (mirrors the UI's 30-second sliver threshold).
+    /// </summary>
+    private const int MeaningfulItemSeconds = 30;
+
     private readonly AppDbContext _db;
 
     public PracticeService(AppDbContext db) => _db = db;
@@ -133,6 +142,65 @@ public class PracticeService : IPracticeService
 
         await _db.SaveChangesAsync();
         return await GetByIdAsync(session.Id);
+    }
+
+    public async Task<List<ReviewDanceDto>> GetReviewQueueAsync(int userId)
+    {
+        var learned = await _db.UserLearnedDances
+            .Where(l => l.UserId == userId)
+            .Select(l => new
+            {
+                l.DanceId,
+                LearnedAt = l.DateAdded,
+                l.Dance.Name,
+                l.Dance.Slug,
+                StyleName = l.Dance.DanceStyles.OrderBy(ds => ds.StyleId).Select(ds => ds.Style.Name).FirstOrDefault(),
+                // Same viewer-scoped thumbnail choice as DanceService.ProjectRows.
+                ThumbnailVideoId = l.Dance.Videos.Where(v => v.OwnerUserId == null || v.OwnerUserId == userId)
+                    .OrderBy(v => v.DateAdded).Select(v => v.VideoId).FirstOrDefault(),
+                ThumbnailPlatform = l.Dance.Videos.Where(v => v.OwnerUserId == null || v.OwnerUserId == userId)
+                    .OrderBy(v => v.DateAdded).Select(v => v.Platform).FirstOrDefault()
+            })
+            .ToListAsync();
+        if (learned.Count == 0) return new();
+
+        var danceIds = learned.Select(x => x.DanceId).ToList();
+        // Manual log entries without a duration store 0 seconds — they're still an explicit
+        // "I practiced this", so they count alongside real >=30s watch time.
+        var lastPracticed = await _db.PracticeSessionItems
+            .Where(i => i.Session.UserId == userId && i.DanceId != null && danceIds.Contains(i.DanceId.Value)
+                        && (i.Seconds >= MeaningfulItemSeconds || i.Seconds == 0))
+            .GroupBy(i => i.DanceId!.Value)
+            .Select(g => new { DanceId = g.Key, LastOn = g.Max(i => i.Session.Date) })
+            .ToDictionaryAsync(x => x.DanceId, x => x.LastOn);
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var due = new List<ReviewDanceDto>();
+        foreach (var d in learned)
+        {
+            DateOnly? lastOn = lastPracticed.TryGetValue(d.DanceId, out var lo) ? lo : null;
+            // Marking a dance learned counts as touching it — practice history can predate the
+            // Learned flag, and a freshly-learned dance shouldn't be instantly "due".
+            var learnedOn = DateOnly.FromDateTime(d.LearnedAt);
+            var baseline = lastOn is { } last && last > learnedOn ? last : learnedOn;
+            var daysSince = today.DayNumber - baseline.DayNumber;
+            if (daysSince < DueAfterDays) continue;
+
+            due.Add(new ReviewDanceDto
+            {
+                DanceId = d.DanceId,
+                Name = d.Name,
+                Slug = d.Slug,
+                StyleSlug = d.StyleName is null ? string.Empty : SlugGenerator.Slugify(d.StyleName),
+                StyleName = d.StyleName ?? string.Empty,
+                ThumbnailVideoId = d.ThumbnailVideoId,
+                ThumbnailPlatform = d.ThumbnailPlatform,
+                LastPracticedOn = lastOn,
+                DaysSince = daysSince
+            });
+        }
+
+        return due.OrderByDescending(r => r.DaysSince).ThenBy(r => r.Name).ToList();
     }
 
     public async Task<bool> DeleteAsync(int userId, int id)

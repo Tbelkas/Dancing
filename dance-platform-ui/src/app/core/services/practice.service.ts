@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PracticeSession } from '../../models/practice-session.model';
+import { ReviewDance } from '../../models/review-dance.model';
 import { environment } from '../../../environments/environment';
 
 export interface CreatePracticePayload {
@@ -37,6 +38,11 @@ export class PracticeService {
 
   getAll(): Observable<PracticeSession[]> {
     return this.http.get<PracticeSession[]>(this.base);
+  }
+
+  /** Learned dances gone unpracticed for 3+ weeks, stalest first. */
+  getReviewQueue(): Observable<ReviewDance[]> {
+    return this.http.get<ReviewDance[]>(`${this.base}/review`);
   }
 
   create(payload: CreatePracticePayload): Observable<PracticeSession> {
