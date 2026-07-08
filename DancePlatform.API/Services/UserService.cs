@@ -35,7 +35,7 @@ public class UserService : IUserService
         // Scalar profile fields only — no dance graph pulled onto the tracked User.
         var user = await _db.Users.AsNoTracking()
             .Where(u => u.Id == userId)
-            .Select(u => new { u.Id, u.Username, u.Name, u.Nickname, u.AvatarUrl, u.Visibility, u.DateAdded })
+            .Select(u => new { u.Id, u.Username, u.Name, u.Nickname, u.AvatarUrl, u.Visibility, u.UseBetaViewer, u.DateAdded })
             .FirstOrDefaultAsync();
         if (user is null) return null;
 
@@ -53,6 +53,7 @@ public class UserService : IUserService
             Nickname = user.Nickname,
             AvatarUrl = user.AvatarUrl,
             Visibility = user.Visibility.ToString(),
+            UseBetaViewer = user.UseBetaViewer,
             DateAdded = user.DateAdded,
             FavoriteDances = favorites.Select(ToRef).ToList(),
             LearnedDances = learned.Select(ToRef).ToList(),
@@ -71,6 +72,7 @@ public class UserService : IUserService
         if (request.Visibility is not null &&
             Enum.TryParse<ProfileVisibility>(request.Visibility, out var vis))
             user.Visibility = vis;
+        if (request.UseBetaViewer is not null) user.UseBetaViewer = request.UseBetaViewer.Value;
 
         await _db.SaveChangesAsync();
         return await GetProfileAsync(userId);

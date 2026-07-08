@@ -10,6 +10,8 @@ public class User
     public bool IsAdmin { get; set; } = false;
     public string? AvatarUrl { get; set; }
     public ProfileVisibility Visibility { get; set; } = ProfileVisibility.Private;
+    /// Prefer the platform's own player controls (beta) over the embed's native ones where the embed allows it.
+    public bool UseBetaViewer { get; set; } = false;
     public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
     public ICollection<UserFavoriteDance> FavoriteDances { get; set; } = new List<UserFavoriteDance>();

@@ -10,6 +10,7 @@ public class UserProfileDto
     public string Nickname { get; set; } = string.Empty;
     public string? AvatarUrl { get; set; }
     public string Visibility { get; set; } = string.Empty;
+    public bool UseBetaViewer { get; set; }
     public DateTime DateAdded { get; set; }
     public List<DanceRef> FavoriteDances { get; set; } = new();
     public List<DanceRef> LearnedDances { get; set; } = new();

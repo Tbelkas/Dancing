@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TrustUrlPipe } from '../../pipes/trust-url.pipe';
 import { VideoSegment, VideoChapter } from '../../../models/video.model';
 import { formatTimeSecs } from '../../../core/utils/video-url.utils';
+import { ViewerPrefsService } from '../../../core/services/viewer-prefs.service';
 
 @Component({
   selector: 'app-video-player',
@@ -40,6 +41,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() playingChange = new EventEmitter<boolean>();
   @ViewChild('playerContainer', { static: false }) playerContainer?: ElementRef;
   @ViewChild('tiktokFrame', { static: false }) tiktokFrame?: ElementRef<HTMLIFrameElement>;
+  @ViewChild('mediaEl', { static: false }) mediaEl?: ElementRef<HTMLElement>;
+
+  constructor(private viewerPrefs: ViewerPrefsService) {}
 
   readonly playbackRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
   currentRate = signal(1);
@@ -55,6 +59,17 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   shortcutsOpen = signal(false);
   /** Brief visual pulse each time the loop wraps back to its start. */
   loopFlash = signal(false);
+
+  /** "Dance Platform video viewer (beta)": hide YouTube's controls and drive the
+   *  embed through our own bar. Read once at init — the pref is set on the profile
+   *  page, so a player never flips chrome mid-life. YouTube only: TikTok/Instagram
+   *  embeds can't hand over their controls. */
+  betaChrome = false;
+  playing = signal(false);
+  currentTime = signal(0);
+  muted = signal(false);
+  volume = signal(1);
+  fullscreen = signal(false);
 
   /** Only worth showing the jump row when the source video holds more than one dance. */
   get hasChapters(): boolean { return this.chapters.length > 1; }
@@ -89,6 +104,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   private player: YT.Player | null = null;
   private flashTimeout: ReturnType<typeof setTimeout> | null = null;
   private repeatInterval: ReturnType<typeof setInterval> | null = null;
+  /** Drives the beta chrome's seek bar — the iframe API has no timeupdate event. */
+  private chromeTickInterval: ReturnType<typeof setInterval> | null = null;
   private durationPollInterval: ReturnType<typeof setInterval> | null = null;
   private tiktokCurrentTime = 0;
   private hasRealDuration = false;
@@ -101,6 +118,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Emit play-state transitions only (parent dedupes anyway, but this keeps the stream clean). */
   private emitPlaying(playing: boolean): void {
     if (playing) VideoPlayerComponent.activeInstance = this;
+    this.playing.set(playing);
     if (playing === this.lastPlayingEmit) return;
     this.lastPlayingEmit = playing;
     this.playingChange.emit(playing);
@@ -254,6 +272,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   ngOnInit(): void {
+    this.betaChrome = this.isYouTube && this.viewerPrefs.betaViewer();
+    if (this.betaChrome) document.addEventListener('fullscreenchange', this.fullscreenHandler);
     this.activeChapterId.set(this.activeVideoId ?? null);
     // Short lists open by default; long ones (some videos hold dozens of dances)
     // start collapsed so they don't bury the player controls.
@@ -296,6 +316,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.destroyed = true;
     this.clearRepeat();
     this.clearDurationPoll();
+    if (this.chromeTickInterval) clearInterval(this.chromeTickInterval);
+    document.removeEventListener('fullscreenchange', this.fullscreenHandler);
     if (this.tiktokStallHandle) clearTimeout(this.tiktokStallHandle);
     if (this.flashTimeout) clearTimeout(this.flashTimeout);
     document.removeEventListener('keydown', this.keydownHandler);
@@ -443,6 +465,15 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   private createPlayer(): void {
     if (this.destroyed || !this.playerContainer) return;
     const playerVars: YT.PlayerVars = { rel: 0, modestbranding: 1 };
+    if (this.betaChrome) {
+      // Our bar takes over: no native controls, no double keyboard handling
+      // (the document-level shortcuts stay), no annotations, no native fullscreen.
+      playerVars['controls'] = 0;
+      playerVars['disablekb'] = 1;
+      playerVars['fs'] = 0;
+      playerVars['iv_load_policy'] = 3;
+      playerVars['playsinline'] = 1;
+    }
     if (this.startTime != null) playerVars['start'] = this.startTime;
     // With multiple dances in one video the player must stay seekable past this
     // dance's end, so don't hard-bound it — the loop region handles section limits.
@@ -454,6 +485,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       events: {
         onReady: () => {
           this.player?.setPlaybackRate(this.currentRate());
+          if (this.betaChrome) this.initChrome();
           this.pollForDuration();
         },
         onStateChange: (e: YT.OnStateChangeEvent) => {
@@ -552,4 +584,69 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
       this.repeatInterval = null;
     }
   }
+
+  // --- Beta chrome: the platform's own bar over a controls-less YouTube embed. ---
+
+  /** Volume mirrored from the player once; afterwards only our bar changes it. */
+  private initChrome(): void {
+    this.volume.set((this.player?.getVolume() ?? 100) / 100);
+    this.muted.set(this.player?.isMuted() ?? false);
+    this.chromeTickInterval = setInterval(() => {
+      this.currentTime.set(this.player?.getCurrentTime() ?? 0);
+    }, 250);
+  }
+
+  seekToTime(seconds: number): void {
+    VideoPlayerComponent.activeInstance = this;
+    this.player?.seekTo(seconds, true);
+    this.currentTime.set(seconds);
+  }
+
+  toggleMute(): void {
+    if (!this.player) return;
+    if (this.player.isMuted()) {
+      this.player.unMute();
+      this.muted.set(false);
+    } else {
+      this.player.mute();
+      this.muted.set(true);
+    }
+  }
+
+  /** Dragging to 0 mutes; dragging up from 0 unmutes — matches the local player. */
+  setVolume(level: number): void {
+    if (!this.player) return;
+    this.player.setVolume(Math.round(level * 100));
+    if (level === 0) {
+      this.player.mute();
+      this.muted.set(true);
+    } else if (this.muted()) {
+      this.player.unMute();
+      this.muted.set(false);
+    }
+    this.volume.set(level);
+  }
+
+  volumeIcon(): string {
+    if (this.muted() || this.volume() === 0) return 'fa-volume-xmark';
+    return this.volume() < 0.5 ? 'fa-volume-low' : 'fa-volume-high';
+  }
+
+  /** Displayed volume: 0 while muted so the slider reads as silent. */
+  volumePct(): number {
+    return Math.round((this.muted() ? 0 : this.volume()) * 100);
+  }
+
+  /** Fullscreens the media frame (not the iframe) so our bar rides along. */
+  toggleFullscreen(): void {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen();
+    } else {
+      void this.mediaEl?.nativeElement.requestFullscreen();
+    }
+  }
+
+  private readonly fullscreenHandler = () => {
+    this.fullscreen.set(document.fullscreenElement != null);
+  };
 }

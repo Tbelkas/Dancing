@@ -26,6 +26,7 @@ export interface UserProfile {
   nickname: string;
   avatarUrl?: string;
   visibility: 'Public' | 'Private';
+  useBetaViewer: boolean;
   dateAdded: string;
   favoriteDances: DanceRef[];
   learnedDances: DanceRef[];

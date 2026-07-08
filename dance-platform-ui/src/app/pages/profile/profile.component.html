@@ -111,6 +111,25 @@
           </div>
           <a routerLink="/my-dances" class="dance-summary__open">Open My Dances <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
         </div>
+
+        <!-- Player settings -->
+        <div class="card">
+          <h3>Settings</h3>
+          <div class="setting-row">
+            <div class="setting-text">
+              <span class="setting-label">Use Dance Platform video viewer (beta) where possible</span>
+              <span class="setting-desc">Replaces YouTube's built-in controls with the platform's own player bar — seek, volume and fullscreen in the site's style. TikTok and Instagram embeds don't allow external controls yet.</span>
+            </div>
+            <div class="setting-choice" role="group" aria-label="Use Dance Platform video viewer (beta) where possible">
+              <button type="button" class="choice-btn" [class.active]="profile()!.useBetaViewer"
+                      [disabled]="savingViewerPref()" (click)="setBetaViewer(true)"
+                      [attr.aria-pressed]="profile()!.useBetaViewer">Yes</button>
+              <button type="button" class="choice-btn" [class.active]="!profile()!.useBetaViewer"
+                      [disabled]="savingViewerPref()" (click)="setBetaViewer(false)"
+                      [attr.aria-pressed]="!profile()!.useBetaViewer">No</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   } @else if (loadError()) {

@@ -6,4 +6,5 @@ public class UpdateProfileRequest
     public string? Nickname { get; set; }
     public string? AvatarUrl { get; set; }
     public string? Visibility { get; set; }
+    public bool? UseBetaViewer { get; set; }
 }

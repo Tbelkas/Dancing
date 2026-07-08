@@ -24,6 +24,7 @@ export class ProfileComponent implements OnInit {
   sessions = signal<PracticeSession[]>([]);
   loadError = signal(false);
   editing = signal(false);
+  savingViewerPref = signal(false);
   editName = '';
   editNickname = '';
   editAvatarUrl = '';
@@ -82,6 +83,20 @@ export class ProfileComponent implements OnInit {
     }).subscribe(p => {
       this.profile.set(p);
       this.editing.set(false);
+    });
+  }
+
+  /** Saved on click rather than through the edit form — it's a player preference, not identity. */
+  setBetaViewer(value: boolean): void {
+    const p = this.profile();
+    if (!p || p.useBetaViewer === value || this.savingViewerPref()) return;
+    this.savingViewerPref.set(true);
+    this.profileService.updateProfile({ useBetaViewer: value }).subscribe({
+      next: updated => {
+        this.profile.set(updated);
+        this.savingViewerPref.set(false);
+      },
+      error: () => this.savingViewerPref.set(false)
     });
   }
 }
