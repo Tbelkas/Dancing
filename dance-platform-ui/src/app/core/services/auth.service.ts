@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { AuthResponse } from '../../models/user.model';
 import { environment } from '../../../environments/environment';
 import { RoleService } from './role.service';
+import { ProfileService } from './profile.service';
 import { isTokenExpired } from '../utils/jwt.utils';
 
 @Injectable({ providedIn: 'root' })
@@ -32,19 +33,32 @@ export class AuthService {
     }
   }
 
-  constructor(private http: HttpClient, private router: Router, private roleService: RoleService) {
-    // If already authenticated on app start, resolve admin from the stored token's claim.
-    if (this._token()) this.roleService.loadFromToken(this._token());
+  constructor(private http: HttpClient, private router: Router, private roleService: RoleService,
+              private profileService: ProfileService) {
+    // If already authenticated on app start, resolve admin from the stored token's claim
+    // and pull account preferences (viewer chrome) onto this device. Deferred a tick:
+    // an HTTP call here would re-enter DI for this half-constructed service via the
+    // auth interceptor.
+    if (this._token()) {
+      this.roleService.loadFromToken(this._token());
+      queueMicrotask(() => this.syncAccountPrefs());
+    }
   }
 
   login(username: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, { username, password })
-      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); }));
+      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); this.syncAccountPrefs(); }));
   }
 
   register(data: { username: string; password: string; name: string; nickname: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, data)
-      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); }));
+      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); this.syncAccountPrefs(); }));
+  }
+
+  /** Best-effort profile fetch purely for its side effect: ProfileService mirrors
+   *  account preferences (beta viewer) into localStorage for the video players. */
+  private syncAccountPrefs(): void {
+    this.profileService.getProfile().subscribe({ error: () => {} });
   }
 
   logout(): void {
