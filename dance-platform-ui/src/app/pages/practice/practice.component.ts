@@ -31,6 +31,21 @@ interface HeatmapWeek {
   days: HeatmapDay[];
 }
 
+interface TrendBar {
+  /** Monday of the week, YYYY-MM-DD — the bar's identity. */
+  key: string;
+  /** Month label under the bar when the week starts a new month; null otherwise. */
+  monthLabel: string | null;
+  minutes: number;
+  /** Bar height relative to the axis max, 0–100. */
+  heightPct: number;
+  /** The in-progress current week renders hollow — its number isn't final. */
+  current: boolean;
+  /** Direct label only on the peak and current week; the rest live in the tooltip. */
+  labeled: boolean;
+  title: string;
+}
+
 interface BreakdownRow {
   /** Dance id for dance rows; 0 for style rows (not linkable). */
   danceId: number;
@@ -188,6 +203,105 @@ export class PracticeComponent implements OnInit, OnDestroy {
       prevMonth = month;
     }
     return weeks;
+  });
+
+  /** Minutes per Monday-start week for the last 12 weeks — the same window the heatmap shows. */
+  readonly weeklyTrend = computed<TrendBar[]>(() => {
+    const minutesByWeek = new Map<string, number>();
+    const thisMonday = this.mondayOfCurrentWeek();
+    const thisMondayStr = toLocalDateString(thisMonday);
+    for (const s of this.visibleSessions()) {
+      const monday = this.mondayOfDate(s.date);
+      minutesByWeek.set(monday, (minutesByWeek.get(monday) ?? 0) + (s.durationMinutes ?? 0));
+    }
+
+    const WEEKS = 12;
+    const raw: { key: string; monthLabel: string | null; minutes: number; current: boolean }[] = [];
+    let prevMonth = -1;
+    for (let w = WEEKS - 1; w >= 0; w--) {
+      const monday = new Date(thisMonday);
+      monday.setDate(thisMonday.getDate() - w * 7);
+      const key = toLocalDateString(monday);
+      const month = monday.getMonth();
+      raw.push({
+        key,
+        monthLabel: month !== prevMonth ? monday.toLocaleDateString('en-US', { month: 'short' }) : null,
+        minutes: minutesByWeek.get(key) ?? 0,
+        current: key === thisMondayStr
+      });
+      prevMonth = month;
+    }
+
+    const axisMax = this.trendAxisMax();
+    const peak = Math.max(...raw.map(r => r.minutes));
+    return raw.map(r => ({
+      ...r,
+      heightPct: axisMax > 0 ? Math.round(r.minutes / axisMax * 100) : 0,
+      labeled: r.minutes > 0 && (r.current || r.minutes === peak),
+      title: `Week of ${new Date(r.key + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${
+        r.minutes > 0 ? this.formatDuration(r.minutes) : 'no practice'}${r.current ? ' (this week so far)' : ''}`
+    }));
+  });
+
+  /** Top of the y-axis: the peak week rounded up to a clean step, so ticks land on round numbers. */
+  readonly trendAxisMax = computed<number>(() => {
+    const thisMonday = this.mondayOfCurrentWeek();
+    const cutoff = new Date(thisMonday);
+    cutoff.setDate(thisMonday.getDate() - 11 * 7);
+    const cutoffStr = toLocalDateString(cutoff);
+    const minutesByWeek = new Map<string, number>();
+    for (const s of this.visibleSessions()) {
+      if (s.date < cutoffStr) continue;
+      const monday = this.mondayOfDate(s.date);
+      minutesByWeek.set(monday, (minutesByWeek.get(monday) ?? 0) + (s.durationMinutes ?? 0));
+    }
+    const peak = Math.max(0, ...minutesByWeek.values());
+    const step = this.trendStep(peak);
+    return Math.max(step, Math.ceil(peak / step) * step);
+  });
+
+  /** Gridline values from the axis top down to (not including) zero. */
+  readonly trendTicks = computed<number[]>(() => {
+    const max = this.trendAxisMax();
+    const step = this.trendStep(max);
+    const ticks: number[] = [];
+    for (let v = step; v <= max; v += step) ticks.push(v);
+    return ticks.reverse();
+  });
+
+  readonly trendHasData = computed(() => this.weeklyTrend().some(b => b.minutes > 0));
+
+  /** Clean tick step sized so the axis carries at most ~4 gridlines. */
+  private trendStep(max: number): number {
+    for (const s of [10, 15, 30, 60, 120, 180, 240, 360, 480]) {
+      if (max / s <= 4) return s;
+    }
+    return 600;
+  }
+
+  private mondayOfDate(dateStr: string): string {
+    const d = new Date(dateStr + 'T00:00:00');
+    const dow = (d.getDay() + 6) % 7; // 0 = Monday
+    d.setDate(d.getDate() - dow);
+    return toLocalDateString(d);
+  }
+
+  /** Mean session length within the current timeframe. */
+  readonly avgSessionMinutes = computed(() => {
+    const sessions = this.scopedSessions();
+    if (sessions.length === 0) return 0;
+    return Math.round(this.scopedTotalMinutes() / sessions.length);
+  });
+
+  /** Distinct dances (and local choreos) practiced within the current timeframe. */
+  readonly scopedDanceCount = computed(() => {
+    const keys = new Set<string>();
+    for (const s of this.scopedSessions()) {
+      for (const item of s.items) {
+        if (item.seconds >= SLIVER_SECONDS) keys.add(this.itemKey(item));
+      }
+    }
+    return keys.size;
   });
 
   /** Whether the time breakdown aggregates per dance or per style. */

@@ -97,6 +97,18 @@
             <span class="stat-chip__value">{{ formatDuration(scopedTotalMinutes()) }}</span>
           </div>
         }
+        @if (scopedSessions().length > 1 && avgSessionMinutes() > 0) {
+          <div class="stat-chip">
+            <span class="stat-chip__label">Avg session</span>
+            <span class="stat-chip__value">{{ avgSessionMinutes() }} <span class="stat-chip__unit">min</span></span>
+          </div>
+        }
+        @if (scopedDanceCount() > 0) {
+          <div class="stat-chip">
+            <span class="stat-chip__label">Dances practiced</span>
+            <span class="stat-chip__value">{{ scopedDanceCount() }}</span>
+          </div>
+        }
         <div class="stat-chip stat-chip--goal">
           @if (editingGoal()) {
             <span class="stat-chip__label">Weekly goal (min)</span>
@@ -163,6 +175,40 @@
           </div>
         </div>
       </div>
+
+      @if (trendHasData()) {
+        <div class="card insight-card insight-card--trend">
+          <h3 class="insight-card__title">Weekly minutes <span class="insight-card__scope">last 12 weeks</span></h3>
+          <div class="trend">
+            <div class="trend__plot">
+              <div class="trend__grid" aria-hidden="true">
+                @for (tick of trendTicks(); track tick) {
+                  <div class="trend__gridline" [style.bottom.%]="tick / trendAxisMax() * 100">
+                    <span class="trend__tick">{{ tick }}</span>
+                  </div>
+                }
+                <div class="trend__gridline trend__gridline--base" [style.bottom.%]="0"></div>
+              </div>
+              <div class="trend__bars" role="img" aria-label="Minutes practiced per week over the last 12 weeks">
+                @for (bar of weeklyTrend(); track bar.key) {
+                  <div class="trend__slot" [title]="bar.title">
+                    @if (bar.labeled) {
+                      <span class="trend__value" [style.bottom.%]="bar.heightPct">{{ bar.minutes }}</span>
+                    }
+                    <div class="trend__bar" [class.trend__bar--current]="bar.current"
+                         [style.height.%]="bar.heightPct" [class.trend__bar--empty]="bar.minutes === 0"></div>
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="trend__xlabels" aria-hidden="true">
+              @for (bar of weeklyTrend(); track bar.key) {
+                <span class="trend__xlabel">{{ bar.monthLabel ?? ' ' }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      }
 
       @if (danceBreakdown().length > 0) {
         <div class="card insight-card insight-card--breakdown">

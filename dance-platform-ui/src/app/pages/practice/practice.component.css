@@ -456,6 +456,119 @@
   padding: 18px 20px;
 }
 
+/* ---------- Weekly trend ---------- */
+.insight-card--trend {
+  grid-column: 1 / -1;
+}
+
+.trend {
+  max-width: 680px;
+}
+
+.trend__plot {
+  position: relative;
+  height: 150px;
+}
+
+.trend__grid {
+  position: absolute;
+  inset: 0;
+}
+
+.trend__gridline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid rgba(183, 178, 212, 0.12);
+}
+
+.trend__gridline--base {
+  border-top-color: var(--color-border);
+}
+
+.trend__tick {
+  position: absolute;
+  left: 0;
+  top: -0.65em;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.trend__bars {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding-left: 38px;
+}
+
+.trend__slot {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* Validated against the dark surface (OKLCH band + contrast) — deliberately a
+   deeper step than the brand gold, which is too light for a filled mark. */
+.trend__bar {
+  width: 100%;
+  max-width: 22px;
+  min-height: 2px;
+  background: #B8890A;
+  border-radius: 4px 4px 0 0; /* rounded data-end, square baseline */
+  transition: filter var(--transition);
+}
+
+.trend__bar--empty {
+  display: none;
+}
+
+/* This week isn't over — hollow marks the number as still growing. */
+.trend__bar--current {
+  background: rgba(184, 137, 10, 0.25);
+  border: 1px solid #B8890A;
+  border-bottom: none;
+}
+
+.trend__slot:hover .trend__bar {
+  filter: brightness(1.35);
+}
+
+.trend__value {
+  position: absolute;
+  transform: translateY(-3px);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.trend__xlabels {
+  display: flex;
+  gap: 6px;
+  padding-left: 38px;
+  margin-top: 6px;
+}
+
+.trend__xlabel {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  white-space: pre;
+}
+
 .insight-card__title {
   font-family: var(--font-ui);
   font-size: 0.72rem;
