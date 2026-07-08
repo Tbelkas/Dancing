@@ -32,7 +32,6 @@
 .header__inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   height: 64px;
 }
 
@@ -43,62 +42,41 @@
   font-weight: 900;
   color: var(--color-primary);
   letter-spacing: -0.01em;
+  margin-right: auto; /* pushes search + nav + avatar to the right edge */
   transition: opacity var(--transition);
   &:hover { opacity: 0.85; color: var(--color-primary); }
 }
 
-/* Live practice clock — sits beside the logo while a session is running. */
-.practice-clock {
+/* Live practice clock — rides inside the Practice nav link while a session runs. */
+.nav-clock {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 16px;
-  margin-right: auto;
-  padding: 6px 12px;
-  border: 1px solid var(--color-border-light);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-  color: var(--color-text);
-  font-family: var(--font-ui);
-  font-size: 0.85rem;
-  font-weight: 700;
+  gap: 6px;
+  margin-left: 8px;
+  color: var(--color-primary);
+  font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  transition: border-color var(--transition), background var(--transition);
 }
-.practice-clock:hover {
-  border-color: var(--color-primary);
-  color: var(--color-text);
-}
-.practice-clock .fa-stopwatch { color: var(--color-primary); font-size: 0.9rem; }
-.practice-clock__dot {
-  width: 8px;
-  height: 8px;
+.nav-clock__dot {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--color-primary);
   box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 60%, transparent);
   animation: practice-pulse 1.6s ease-in-out infinite;
 }
-.practice-clock__time { min-width: 3.2ch; }
 
 @keyframes practice-pulse {
   0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 55%, transparent); opacity: 1; }
   50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-primary) 0%, transparent); opacity: 0.6; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .practice-clock__dot { animation: none; }
+  .nav-clock__dot { animation: none; }
 }
 
-.practice-clock:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-/* Global search sits between the logo/clock and the nav, soaking up slack width. */
+/* Collapsed-to-an-icon search resting just left of the nav (see global-search css). */
 .header__search {
-  flex: 1;
-  max-width: 300px;
-  margin: 0 18px;
+  margin: 0 8px 0 18px;
   min-width: 0;
 }
 
@@ -154,6 +132,103 @@
   animation: tempo-wipe 0.22s ease both;
 }
 
+/* Added Videos + Profile only appear in the mobile hamburger; the avatar menu
+   covers them on desktop. The admin link shrinks to a bare "+" on desktop. */
+.header__nav-mobile { display: none; }
+.header__nav .header__admin-link { font-size: 1.05rem; }
+.header__nav-mobile-label { display: none; }
+
+/* Avatar + account dropdown, far right. */
+.header__user {
+  position: relative;
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.header__avatar {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 70% 70% at 30% 25%, rgba(255, 255, 255, 0.28), transparent 60%),
+    linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #07070D;
+  cursor: pointer;
+  transition: box-shadow var(--transition);
+}
+.header__avatar:hover,
+.header__avatar[aria-expanded="true"] {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+.header__avatar:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.user-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 190px;
+  background: var(--color-surface-solid);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 6px;
+  z-index: 120;
+  animation: slideDown 0.16s ease both;
+}
+
+.user-menu__name {
+  padding: 7px 12px 9px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.user-menu a,
+.user-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.user-menu a:hover,
+.user-menu button:hover { background: rgba(255, 255, 255, 0.06); }
+.user-menu a:focus-visible,
+.user-menu button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+.user-menu i {
+  width: 16px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
 .main {
   padding: 52px 0;
   min-height: calc(100vh - 64px);
@@ -173,10 +248,18 @@
 @media (max-width: 720px) {
   .header__toggle { display: inline-flex; }
 
+  /* Desktop-only chrome: the avatar menu (hamburger + tabbar cover it here). */
+  .header__user { display: none; }
+
   .header__search {
+    flex: 1;
     margin: 0 10px;
     max-width: none;
   }
+
+  .header__nav-mobile { display: block; }
+  .header__nav .header__admin-link { font-size: inherit; }
+  .header__nav-mobile-label { display: inline; margin-left: 8px; }
 
   .tabbar {
     position: fixed;
@@ -211,6 +294,16 @@
   .tabbar a i { font-size: 1.05rem; }
   .tabbar a.is-active { color: var(--color-primary); }
   .tabbar a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+
+  /* Running practice session: pulsing dot on the stopwatch, time replaces the label. */
+  .tabbar__icon { position: relative; display: inline-flex; }
+  .tabbar__icon .nav-clock__dot {
+    position: absolute;
+    top: -2px;
+    right: -8px;
+  }
+  .tabbar a.is-live { color: var(--color-primary); }
+  .tabbar a.is-live span:last-child { font-variant-numeric: tabular-nums; text-transform: none; }
 
   /* Keep page content clear of the fixed tab bar. */
   .main--tabbar { padding-bottom: 84px; }

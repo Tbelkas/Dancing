@@ -7,10 +7,25 @@
 
 .gsearch__icon {
   position: absolute;
-  left: 12px;
+  left: 1px;
+  top: 1px;
+  bottom: 1px;
+  width: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 999px;
   font-size: 0.8rem;
   color: var(--color-text-muted);
-  pointer-events: none;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+.gsearch__icon:hover { color: var(--color-text); }
+.gsearch__icon:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .gsearch__input {
@@ -23,7 +38,25 @@
   font-size: 0.9rem;
   padding: 8px 34px 8px 34px;
   outline: none;
-  transition: border-color var(--transition), background var(--transition);
+  transition: width var(--transition), border-color var(--transition), background var(--transition);
+}
+
+/* Desktop resting state: just the magnifier in a 36px pill; the input is
+   present but zero-width so shortcut focus + the width transition still work.
+   Mobile (≤720px) never collapses — the bar stays full-width there. */
+@media (min-width: 721px) {
+  .gsearch__input { width: 240px; }
+
+  .gsearch--collapsed .gsearch__input {
+    width: 36px;
+    padding-left: 0;
+    padding-right: 0;
+    color: transparent;
+    pointer-events: none;
+  }
+  .gsearch--collapsed .gsearch__input::placeholder { color: transparent; }
+  .gsearch--collapsed .gsearch__kbd,
+  .gsearch--collapsed .gsearch__clear { display: none; }
 }
 
 .gsearch__input::placeholder { color: var(--color-text-muted); }

@@ -1,5 +1,8 @@
-<div class="gsearch" role="search">
-  <i class="fa-solid fa-magnifying-glass gsearch__icon" aria-hidden="true"></i>
+<div class="gsearch" [class.gsearch--collapsed]="!expanded()" role="search">
+  <button type="button" class="gsearch__icon" (click)="onIconClick()"
+          aria-label="Search dances" title="Search ( / )">
+    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+  </button>
   <input
     #searchInput
     type="text"
@@ -12,6 +15,7 @@
     aria-label="Search dances"
     role="combobox"
     [attr.aria-expanded]="open()"
+    [attr.tabindex]="expanded() ? null : -1"
     aria-autocomplete="list" />
   @if (query()) {
     <button class="gsearch__clear" (click)="clear()" aria-label="Clear search"><i class="fa-solid fa-xmark"></i></button>

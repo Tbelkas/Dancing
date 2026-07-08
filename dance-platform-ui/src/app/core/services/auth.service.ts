@@ -15,15 +15,17 @@ export class AuthService {
 
   private _token = signal<string | null>(localStorage.getItem(this.TOKEN_KEY));
   readonly isAuthenticated = computed(() => !!this._token() && !isTokenExpired(this._token()));
-  readonly currentUserId = signal<number | null>(this.readStoredUserId());
+  readonly currentUserId = signal<number | null>(this.readStoredUser()?.userId ?? null);
+  readonly currentUsername = signal<string | null>(this.readStoredUser()?.username ?? null);
 
-  /** Reads the stored user id defensively — a corrupt dp_user must not throw during DI construction
+  /** Reads the stored user defensively — a corrupt dp_user must not throw during DI construction
    *  (this service is injected app-wide; a throw here white-screens the whole app at bootstrap). */
-  private readStoredUserId(): number | null {
+  private readStoredUser(): { userId: number | null; username: string | null } | null {
     const stored = localStorage.getItem(this.USER_KEY);
     if (!stored) return null;
     try {
-      return JSON.parse(stored).userId ?? null;
+      const parsed = JSON.parse(stored);
+      return { userId: parsed.userId ?? null, username: parsed.username ?? null };
     } catch {
       localStorage.removeItem(this.USER_KEY);
       return null;
@@ -50,6 +52,7 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     this._token.set(null);
     this.currentUserId.set(null);
+    this.currentUsername.set(null);
     this.roleService.clearRole();
     this.router.navigate(['/login']);
   }
@@ -61,5 +64,6 @@ export class AuthService {
     localStorage.setItem(this.USER_KEY, JSON.stringify({ userId: res.userId, username: res.username }));
     this._token.set(res.token);
     this.currentUserId.set(res.userId);
+    this.currentUsername.set(res.username);
   }
 }

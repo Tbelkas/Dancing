@@ -3,15 +3,6 @@
   <div class="container header__inner">
     <a routerLink="/dances" class="header__logo" (click)="closeMenu()">Dance Platform</a>
 
-    @if (auth.isAuthenticated() && practiceTimer.active()) {
-      <a routerLink="/practice" class="practice-clock" (click)="closeMenu()"
-         title="Practice session in progress — view log" aria-label="Practice session time, view practice log">
-        <span class="practice-clock__dot" aria-hidden="true"></span>
-        <i class="fa-solid fa-stopwatch" aria-hidden="true"></i>
-        <span class="practice-clock__time">{{ formatClock(practiceTimer.liveSeconds()) }}</span>
-      </a>
-    }
-
     <div class="header__search">
       <app-global-search />
     </div>
@@ -32,18 +23,59 @@
       }
       <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Browse</a>
       @if (auth.isAuthenticated()) {
-        <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Added Videos</a>
+        <!-- Mobile-menu only; on desktop these live in the avatar dropdown. -->
+        <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__nav-mobile" (click)="closeMenu()">Added Videos</a>
         <a routerLink="/choreos" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">My Choreos</a>
-        <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Practice</a>
-        <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Profile</a>
+        <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">
+          Practice
+          @if (practiceTimer.active()) {
+            <span class="nav-clock" title="Practice session in progress">
+              <span class="nav-clock__dot" aria-hidden="true"></span>{{ formatClock(practiceTimer.liveSeconds()) }}
+            </span>
+          }
+        </a>
+        <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__nav-mobile" (click)="closeMenu()">Profile</a>
         @if (role.isAdmin()) {
-          <a routerLink="/admin/add-video" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__admin-link" (click)="closeMenu()"><i class="fa-solid fa-plus"></i> Add Video</a>
+          <a routerLink="/admin/add-video" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__admin-link"
+             aria-label="Add video" title="Add video" (click)="closeMenu()">
+            <i class="fa-solid fa-plus"></i><span class="header__nav-mobile-label">Add Video</span>
+          </a>
         }
       } @else {
         <a routerLink="/register" class="btn btn--ghost" (click)="closeMenu()">Sign up</a>
         <a routerLink="/login" class="btn btn--primary" (click)="closeMenu()">Sign in</a>
       }
     </nav>
+
+    @if (auth.isAuthenticated()) {
+      <div class="header__user">
+        <button
+          type="button"
+          class="header__avatar"
+          (click)="toggleUserMenu()"
+          [attr.aria-expanded]="userMenuOpen()"
+          aria-haspopup="menu"
+          aria-label="Account menu">
+          {{ userInitial() }}
+        </button>
+        @if (userMenuOpen()) {
+          <div class="user-menu" role="menu" aria-label="Account">
+            @if (auth.currentUsername(); as username) {
+              <div class="user-menu__name">&#64;{{ username }}</div>
+            }
+            <a routerLink="/profile" role="menuitem" (click)="closeUserMenu()">
+              <i class="fa-solid fa-user" aria-hidden="true"></i>Profile
+            </a>
+            <a routerLink="/library" role="menuitem" (click)="closeUserMenu()">
+              <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>Added Videos
+            </a>
+            <button type="button" role="menuitem" class="user-menu__signout" (click)="signOut()">
+              <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>Sign out
+            </button>
+          </div>
+        }
+      </div>
+    }
   </div>
 </header>
 <main id="main-content" class="main" [class.main--tabbar]="auth.isAuthenticated()">
@@ -52,7 +84,7 @@
 <app-feedback />
 
 <!-- Mobile: primary destinations live in a fixed bottom tab bar; the hamburger
-     keeps only the secondary links (Added Videos, admin Add Video). -->
+     keeps the rest (Added Videos, My Choreos, Profile, admin Add Video). -->
 @if (auth.isAuthenticated()) {
   <nav class="tabbar" aria-label="Primary">
     <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">
@@ -63,9 +95,12 @@
       <i class="fa-solid fa-shoe-prints" aria-hidden="true"></i>
       <span>My Dances</span>
     </a>
-    <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">
-      <i class="fa-solid fa-stopwatch" aria-hidden="true"></i>
-      <span>Practice</span>
+    <a routerLink="/practice" routerLinkActive="is-active" ariaCurrentWhenActive="page" [class.is-live]="practiceTimer.active()" (click)="closeMenu()">
+      <span class="tabbar__icon">
+        <i class="fa-solid fa-stopwatch" aria-hidden="true"></i>
+        @if (practiceTimer.active()) { <span class="nav-clock__dot" aria-hidden="true"></span> }
+      </span>
+      <span>{{ practiceTimer.active() ? formatClock(practiceTimer.liveSeconds()) : 'Practice' }}</span>
     </a>
     <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">
       <i class="fa-solid fa-user" aria-hidden="true"></i>

@@ -7,6 +7,8 @@ import { Dance } from '../../../models/dance.model';
 /**
  * Header-wide dance search with typeahead. Ctrl+K or "/" focuses it from
  * anywhere; Enter on "See all" hands the query off to the Browse page.
+ * On desktop it rests as an icon button and expands on click/shortcut;
+ * on mobile (≤720px) CSS keeps it permanently expanded.
  */
 @Component({
   selector: 'app-global-search',
@@ -22,6 +24,8 @@ export class GlobalSearchComponent {
   open = signal(false);
   loading = signal(false);
   activeIndex = signal(-1);
+  /** Desktop-only: false renders the search as a lone icon button (CSS ignores this on mobile). */
+  expanded = signal(false);
 
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
@@ -69,7 +73,22 @@ export class GlobalSearchComponent {
     });
   }
 
+  onIconClick(): void {
+    this.expanded.set(true);
+    this.searchInput?.nativeElement.focus();
+  }
+
+  private collapseIfIdle(): void {
+    if (!this.query().trim()) this.expanded.set(false);
+  }
+
   onKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      this.close();
+      this.searchInput?.nativeElement.blur();
+      this.collapseIfIdle();
+      return;
+    }
     if (!this.open()) {
       if (event.key === 'Enter') this.goToAll();
       return;
@@ -90,10 +109,6 @@ export class GlobalSearchComponent {
         else this.goToAll();
         break;
       }
-      case 'Escape':
-        this.close();
-        this.searchInput?.nativeElement.blur();
-        break;
     }
   }
 
@@ -105,6 +120,7 @@ export class GlobalSearchComponent {
     this.close();
     this.query.set('');
     this.results.set([]);
+    this.expanded.set(false);
     const path = dance.styleSlug ? ['/dances', dance.styleSlug, dance.slug] : ['/dances', dance.slug];
     this.router.navigate(path);
   }
@@ -113,6 +129,10 @@ export class GlobalSearchComponent {
     const q = this.query().trim();
     if (!q) return;
     this.close();
+    // Browse takes over the query; clear so the collapsed icon doesn't hide stale text.
+    this.query.set('');
+    this.results.set([]);
+    this.expanded.set(false);
     this.router.navigate(['/dances'], { queryParams: { q } });
   }
 
@@ -138,7 +158,10 @@ export class GlobalSearchComponent {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.host.nativeElement.contains(event.target as Node)) this.close();
+    if (!this.host.nativeElement.contains(event.target as Node)) {
+      this.close();
+      this.collapseIfIdle();
+    }
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -148,9 +171,11 @@ export class GlobalSearchComponent {
     const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable;
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
+      this.expanded.set(true);
       this.searchInput?.nativeElement.focus();
     } else if (event.key === '/' && !typing) {
       event.preventDefault();
+      this.expanded.set(true);
       this.searchInput?.nativeElement.focus();
     }
   }
