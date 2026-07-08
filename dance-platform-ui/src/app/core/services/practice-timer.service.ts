@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, NgZone, signal, computed } from '@angular/core';
 import { PracticeService } from './practice.service';
 import { AuthService } from './auth.service';
 import { toPracticeDateString } from '../utils/video-url.utils';
@@ -27,10 +27,12 @@ export class PracticeTimerService {
 
   /** Live session total in seconds (server-confirmed + not-yet-flushed), for the clock. */
   readonly liveSeconds = signal(0);
+  /** True while the video is playing, so the clock appears on play rather than after the first tick. */
+  private readonly watching = signal(false);
   /** Whether a session is live and the clock should be shown. */
-  readonly active = computed(() => this.liveSeconds() > 0);
+  readonly active = computed(() => this.watching() || this.liveSeconds() > 0);
 
-  constructor(private practice: PracticeService, private auth: AuthService) {
+  constructor(private practice: PracticeService, private auth: AuthService, private zone: NgZone) {
     if (typeof document !== 'undefined') {
       // Best-effort flush when the tab is backgrounded or closed.
       document.addEventListener('visibilitychange', () => {
@@ -46,19 +48,25 @@ export class PracticeTimerService {
     this.activeDanceId = danceId;
   }
 
-  /** Player play/pause state. Counting only runs while playing. */
+  /** Player play/pause state. Counting only runs while playing.
+   *  Runs inside NgZone: callers include YouTube iframe API callbacks, which fire outside the
+   *  Angular zone — without re-entering it, the clock's signal updates never trigger a render. */
   setPlaying(playing: boolean): void {
-    if (playing === this.playing) return;
-    this.playing = playing;
-    if (playing) {
-      if (!this.auth.isAuthenticated()) return;
-      this.cancelExpiry();
-      this.startTicking();
-    } else {
-      this.stopTicking();
-      this.flush();
-      this.scheduleExpiry();
-    }
+    this.zone.run(() => {
+      if (playing === this.playing) return;
+      this.playing = playing;
+      if (playing) {
+        if (!this.auth.isAuthenticated()) return;
+        this.watching.set(true);
+        this.cancelExpiry();
+        this.startTicking();
+      } else {
+        this.watching.set(false);
+        this.stopTicking();
+        this.flush();
+        this.scheduleExpiry();
+      }
+    });
   }
 
   /** Stop watching entirely (e.g. leaving the page): flush and let the buffer expire the clock. */
@@ -126,6 +134,7 @@ export class PracticeTimerService {
     this.serverTotalSeconds = 0;
     this.activeDanceId = null;
     this.playing = false;
+    this.watching.set(false);
     this.liveSeconds.set(0);
   }
 }
