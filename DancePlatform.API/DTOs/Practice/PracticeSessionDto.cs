@@ -17,7 +17,12 @@ public class PracticeSessionDto
 
 public class PracticeSessionItemDto
 {
+    /// <summary>0 for local-choreo items — they have no dance to link to.</summary>
     public int DanceId { get; set; }
+
+    /// <summary>Set when the time came from one of the user's local choreos.</summary>
+    public int? ChoreoId { get; set; }
+
     public string DanceName { get; set; } = string.Empty;
     public string DanceSlug { get; set; } = string.Empty;
     public string DanceStyleSlug { get; set; } = string.Empty;

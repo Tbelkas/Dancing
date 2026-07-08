@@ -19,9 +19,12 @@ export interface UpdatePracticePayload {
 }
 
 export interface PracticeHeartbeatPayload {
-  danceId: number;
+  /** Exactly one of danceId / choreoId identifies what is being practiced. */
+  danceId?: number | null;
   /** Video generating the watch time, so history can follow a video moved to another dance. */
   videoId?: number | null;
+  /** Local choreo ("My choreos") generating the watch time. */
+  choreoId?: number | null;
   seconds: number;
   localDate: string;
 }

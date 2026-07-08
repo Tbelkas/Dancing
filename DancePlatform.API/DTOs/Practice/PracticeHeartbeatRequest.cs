@@ -5,14 +5,19 @@ namespace DancePlatform.API.DTOs.Practice;
 /// <summary>
 /// Sent periodically by the player while a video is playing. <see cref="Seconds"/> is the watch
 /// time accumulated since the last beat; the server folds it into the live session (or starts a
-/// new one once the continuation buffer has lapsed).
+/// new one once the continuation buffer has lapsed). Exactly one of <see cref="DanceId"/> and
+/// <see cref="ChoreoId"/> identifies what is being practiced.
 /// </summary>
 public class PracticeHeartbeatRequest
 {
-    [Required] public int DanceId { get; set; }
+    /// <summary>The dance being practiced; null when the beat is for a local choreo.</summary>
+    public int? DanceId { get; set; }
 
     /// <summary>The video being watched; lets history follow a video if it moves to another dance.</summary>
     public int? VideoId { get; set; }
+
+    /// <summary>The user's local choreo being practiced; null when the beat is for a dance.</summary>
+    public int? ChoreoId { get; set; }
 
     /// <summary>Watch seconds since the previous heartbeat.</summary>
     [Range(1, 600)] public int Seconds { get; set; }

@@ -260,9 +260,14 @@
                 </div>
               } @else {
                 <ul class="session-items">
-                  @for (item of visibleItems(session); track item.danceId) {
+                  @for (item of visibleItems(session); track itemKey(item)) {
                     <li class="session-item">
-                      <a [routerLink]="item.danceSlug | dancePath:item.danceStyleSlug" class="session-dance-name">{{ item.danceName }}</a>
+                      @if (item.danceId > 0) {
+                        <a [routerLink]="item.danceSlug | dancePath:item.danceStyleSlug" class="session-dance-name">{{ item.danceName }}</a>
+                      } @else {
+                        <!-- Local choreos have no dance page to link to. -->
+                        <span class="session-dance-name">{{ item.danceName }}</span>
+                      }
                       @if (item.danceStyleName) {
                         <span class="session-item__style">{{ item.danceStyleName }}</span>
                       }

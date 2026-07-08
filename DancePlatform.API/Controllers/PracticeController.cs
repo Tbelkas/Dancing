@@ -29,7 +29,7 @@ public class PracticeController : AppControllerBase
     public async Task<IActionResult> Heartbeat([FromBody] PracticeHeartbeatRequest request)
     {
         var session = await _practiceService.HeartbeatAsync(CurrentUserId!.Value, request);
-        return session is null ? BadRequest(new { message = "Dance not found." }) : Ok(session);
+        return session is null ? BadRequest(new { message = "Unknown dance or choreo." }) : Ok(session);
     }
 
     [HttpPut("{id}")]

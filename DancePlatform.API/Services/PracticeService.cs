@@ -54,8 +54,14 @@ public class PracticeService : IPracticeService
 
     public async Task<PracticeSessionDto?> HeartbeatAsync(int userId, PracticeHeartbeatRequest request)
     {
-        var danceExists = await _db.Dances.AnyAsync(d => d.Id == request.DanceId);
-        if (!danceExists) return null;
+        // A beat practices exactly one thing: a catalog dance or one of the user's local choreos.
+        if (request.DanceId.HasValue == request.ChoreoId.HasValue) return null;
+
+        if (request.DanceId.HasValue && !await _db.Dances.AnyAsync(d => d.Id == request.DanceId.Value))
+            return null;
+        // Choreos are personal — a beat for someone else's choreo id is rejected, not recorded.
+        if (request.ChoreoId.HasValue && !await _db.UserChoreos.AnyAsync(c => c.Id == request.ChoreoId.Value && c.UserId == userId))
+            return null;
 
         // A stale/unknown video id shouldn't reject the beat — record the time unattributed.
         var videoId = request.VideoId;
@@ -84,11 +90,12 @@ public class PracticeService : IPracticeService
         }
 
         // Items are keyed per (dance, video) so history can follow a video that later moves to
-        // another dance; the DTO regroups them per dance for display.
-        var item = session.Items.FirstOrDefault(i => i.DanceId == request.DanceId && i.VideoId == videoId);
+        // another dance; choreo items are keyed per choreo. The DTO regroups per dance for display.
+        var item = session.Items.FirstOrDefault(i =>
+            i.DanceId == request.DanceId && i.VideoId == videoId && i.UserChoreoId == request.ChoreoId);
         if (item is null)
         {
-            item = new PracticeSessionItem { DanceId = request.DanceId, VideoId = videoId };
+            item = new PracticeSessionItem { DanceId = request.DanceId, VideoId = videoId, UserChoreoId = request.ChoreoId };
             session.Items.Add(item);
         }
         item.Seconds += request.Seconds;
@@ -108,11 +115,11 @@ public class PracticeService : IPracticeService
         session.Date = request.Date;
         session.Notes = string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes.Trim();
 
-        // Duration edits only make sense when there's one dance to attribute the time to;
+        // Duration edits only make sense when there's one dance/choreo to attribute the time to;
         // multi-dance (tracked) sessions keep their per-dance split untouched. A single dance may
         // span several per-video items — the override collapses them onto one (attribution is
         // meaningless for a hand-edited total anyway).
-        if (request.DurationMinutes.HasValue && session.Items.Select(i => i.DanceId).Distinct().Count() == 1)
+        if (request.DurationMinutes.HasValue && session.Items.Select(i => (i.DanceId, i.UserChoreoId)).Distinct().Count() == 1)
         {
             var keeper = session.Items.First();
             keeper.Seconds = Math.Max(0, request.DurationMinutes.Value) * 60;
@@ -146,24 +153,31 @@ public class PracticeService : IPracticeService
     private IQueryable<PracticeSession> SessionQuery() =>
         _db.PracticeSessions
             .Include(ps => ps.Items).ThenInclude(i => i.Dance)
-                .ThenInclude(d => d.DanceStyles).ThenInclude(ds => ds.Style);
+                .ThenInclude(d => d!.DanceStyles).ThenInclude(ds => ds.Style)
+            .Include(ps => ps.Items).ThenInclude(i => i.Choreo);
 
     private static PracticeSessionDto MapToDto(PracticeSession ps)
     {
-        // Items are stored per (dance, video); the UI thinks in dances, so fold the videos back together.
+        // Items are stored per (dance, video); the UI thinks in dances, so fold the videos back
+        // together. Choreo items group per choreo and surface the choreo's name instead.
         var items = ps.Items
-            .GroupBy(i => i.DanceId)
+            .GroupBy(i => (i.DanceId, i.UserChoreoId))
             .Select(g =>
             {
-                var dance = g.First().Dance;
+                var first = g.First();
+                var dance = first.Dance;
                 var seconds = g.Sum(i => i.Seconds);
                 return new PracticeSessionItemDto
                 {
-                    DanceId = g.Key,
-                    DanceName = dance.Name,
-                    DanceSlug = dance.Slug,
-                    DanceStyleSlug = SlugGenerator.StyleSlug(dance),
-                    DanceStyleName = dance.DanceStyles.OrderBy(ds => ds.StyleId).Select(ds => ds.Style.Name).FirstOrDefault() ?? string.Empty,
+                    DanceId = g.Key.DanceId ?? 0,
+                    ChoreoId = g.Key.UserChoreoId,
+                    // A choreo item whose choreo was since removed keeps its time under a tombstone name.
+                    DanceName = dance?.Name ?? first.Choreo?.Name ?? "Removed choreo",
+                    DanceSlug = dance?.Slug ?? string.Empty,
+                    DanceStyleSlug = dance is null ? string.Empty : SlugGenerator.StyleSlug(dance),
+                    DanceStyleName = dance is null
+                        ? "My choreos"
+                        : dance.DanceStyles.OrderBy(ds => ds.StyleId).Select(ds => ds.Style.Name).FirstOrDefault() ?? string.Empty,
                     Seconds = seconds,
                     Minutes = (int)Math.Round(seconds / 60.0),
                     Notes = g.Select(i => i.Notes).FirstOrDefault(n => n is not null)

@@ -483,8 +483,8 @@ public class DanceService : IDanceService
             .SelectMany(f => f.Dance.DanceStyles).Select(ds => ds.StyleId)
         .Union(_db.UserInProgressDances.Where(ip => ip.UserId == userId)
             .SelectMany(ip => ip.Dance.DanceStyles).Select(ds => ds.StyleId))
-        .Union(_db.PracticeSessionItems.Where(i => i.Session.UserId == userId)
-            .SelectMany(i => i.Dance.DanceStyles).Select(ds => ds.StyleId))
+        .Union(_db.PracticeSessionItems.Where(i => i.Session.UserId == userId && i.Dance != null)
+            .SelectMany(i => i.Dance!.DanceStyles).Select(ds => ds.StyleId))
         .ToListAsync();
 
     // Projects to a lean row entirely in SQL: scalar columns, correlated name lists, and EXISTS

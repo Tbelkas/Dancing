@@ -25,13 +25,18 @@ public class PracticeServiceTests : IDisposable
 
         using var ctx = new AppDbContext(_options);
         ctx.Database.EnsureCreated();
-        ctx.Users.Add(new User { Id = 1, Username = "u", PasswordHash = "x", Name = "U", Nickname = "" });
+        ctx.Users.AddRange(
+            new User { Id = 1, Username = "u", PasswordHash = "x", Name = "U", Nickname = "" },
+            new User { Id = 2, Username = "v", PasswordHash = "x", Name = "V", Nickname = "" });
         ctx.Dances.AddRange(
             new Dance { Id = 1, Name = "A", Slug = "a" },
             new Dance { Id = 2, Name = "B", Slug = "b" });
         ctx.Videos.AddRange(
             new Video { Id = 11, DanceId = 1, VideoId = "yt-a1" },
             new Video { Id = 12, DanceId = 1, VideoId = "yt-a2" });
+        ctx.UserChoreos.AddRange(
+            new UserChoreo { Id = 21, UserId = 1, Name = "Recital piece", FileName = "recital.mp4" },
+            new UserChoreo { Id = 22, UserId = 2, Name = "Someone else's", FileName = "other.mp4" });
         ctx.SaveChanges();
     }
 
@@ -39,6 +44,9 @@ public class PracticeServiceTests : IDisposable
 
     private static PracticeHeartbeatRequest Beat(int danceId, int seconds, int? videoId = null) =>
         new() { DanceId = danceId, Seconds = seconds, VideoId = videoId, LocalDate = DateOnly.FromDateTime(DateTime.UtcNow) };
+
+    private static PracticeHeartbeatRequest ChoreoBeat(int choreoId, int seconds) =>
+        new() { ChoreoId = choreoId, Seconds = seconds, LocalDate = DateOnly.FromDateTime(DateTime.UtcNow) };
 
     [Fact]
     public async Task Heartbeat_WithinWindow_MergesIntoOneSession_ThenNewSessionAfterWindow()
@@ -111,6 +119,56 @@ public class PracticeServiceTests : IDisposable
         var item = Assert.Single(dto!.Items);
         Assert.Equal(1, item.DanceId);
         Assert.Equal(100, item.Seconds);
+    }
+
+    [Fact]
+    public async Task Heartbeat_ForChoreo_JoinsSessionAlongsideDances()
+    {
+        // A dance beat and a choreo beat inside the window land on the same session.
+        await using (var ctx = NewCtx())
+            await new PracticeService(ctx).HeartbeatAsync(1, Beat(1, 60));
+        await using (var ctx = NewCtx())
+            await new PracticeService(ctx).HeartbeatAsync(1, ChoreoBeat(21, 40));
+        PracticeSessionDto? dto;
+        await using (var ctx = NewCtx())
+            dto = await new PracticeService(ctx).HeartbeatAsync(1, ChoreoBeat(21, 20));
+
+        await using (var ctx = NewCtx())
+        {
+            var session = await ctx.PracticeSessions.Include(s => s.Items).SingleAsync();
+            Assert.Equal(2, session.Items.Count);
+            var choreoItem = session.Items.Single(i => i.UserChoreoId == 21);
+            Assert.Null(choreoItem.DanceId);
+            Assert.Equal(60, choreoItem.Seconds);
+        }
+
+        Assert.NotNull(dto);
+        var item = dto!.Items.Single(i => i.ChoreoId == 21);
+        Assert.Equal(0, item.DanceId);
+        Assert.Equal("Recital piece", item.DanceName);
+        Assert.Equal("My choreos", item.DanceStyleName);
+        Assert.Equal(60, item.Seconds);
+    }
+
+    [Fact]
+    public async Task Heartbeat_RejectsForeignChoreo_AndMalformedTargets()
+    {
+        await using (var ctx = NewCtx())
+        {
+            var svc = new PracticeService(ctx);
+            // Someone else's choreo, an unknown choreo, both targets, and neither target — all rejected.
+            Assert.Null(await svc.HeartbeatAsync(1, ChoreoBeat(22, 30)));
+            Assert.Null(await svc.HeartbeatAsync(1, ChoreoBeat(999, 30)));
+            Assert.Null(await svc.HeartbeatAsync(1, new PracticeHeartbeatRequest
+            {
+                DanceId = 1, ChoreoId = 21, Seconds = 30, LocalDate = DateOnly.FromDateTime(DateTime.UtcNow)
+            }));
+            Assert.Null(await svc.HeartbeatAsync(1, new PracticeHeartbeatRequest
+            {
+                Seconds = 30, LocalDate = DateOnly.FromDateTime(DateTime.UtcNow)
+            }));
+            Assert.Equal(0, await ctx.PracticeSessions.CountAsync());
+        }
     }
 
     public void Dispose()

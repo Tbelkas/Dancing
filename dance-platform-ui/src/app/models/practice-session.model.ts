@@ -1,5 +1,8 @@
 export interface PracticeSessionItem {
+  /** 0 for local-choreo items — they have no dance to link to. */
   danceId: number;
+  /** Set when the time came from one of the user's local choreos ("My choreos"). */
+  choreoId?: number | null;
   danceName: string;
   danceSlug: string;
   danceStyleSlug: string;

@@ -179,13 +179,15 @@ export class PracticeComponent implements OnInit, OnDestroy {
   breakdownBy = signal<'dance' | 'style'>('dance');
 
   readonly danceBreakdown = computed<BreakdownRow[]>(() => {
-    const byDance = new Map<number, BreakdownRow & { seconds: number }>();
+    // Choreo items all carry danceId 0, so the key must tell them apart per choreo.
+    const byDance = new Map<string, BreakdownRow & { seconds: number }>();
     for (const s of this.scopedSessions()) {
       for (const item of s.items) {
-        const row = byDance.get(item.danceId)
+        const key = this.itemKey(item);
+        const row = byDance.get(key)
           ?? { danceId: item.danceId, name: item.danceName, slug: item.danceSlug, styleSlug: item.danceStyleSlug, minutes: 0, pct: 0, seconds: 0 };
         row.seconds += item.seconds;
-        byDance.set(item.danceId, row);
+        byDance.set(key, row);
       }
     }
     return this.toBreakdownRows([...byDance.values()]);
@@ -441,6 +443,11 @@ export class PracticeComponent implements OnInit, OnDestroy {
       return `${session.durationMinutes} min of practice across a ${spanMinutes}-minute window — pauses don't count`;
     }
     return `${session.durationMinutes} min of practice`;
+  }
+
+  /** Unique key per item: dances by id, local choreos (all danceId 0) by choreo id. */
+  itemKey(item: PracticeSessionItem): string {
+    return item.choreoId ? `choreo-${item.choreoId}` : `dance-${item.danceId}`;
   }
 
   /** Sub-30s items are noise in a multi-dance session; fold them into a "+n more" line. */

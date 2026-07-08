@@ -33,6 +33,8 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
   @Output() deleteLoop = new EventEmitter<VideoSegment>();
   /** Emits the video duration once metadata loads, so the parent can persist it. */
   @Output() durationDetected = new EventEmitter<number>();
+  /** Emits play/pause transitions, so the parent can track practice time. */
+  @Output() playingChange = new EventEmitter<boolean>();
   @ViewChild('videoEl', { static: true }) videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild('mediaEl', { static: true }) mediaEl!: ElementRef<HTMLElement>;
 
@@ -93,6 +95,13 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     document.removeEventListener('keydown', this.keydownHandler);
     document.removeEventListener('fullscreenchange', this.fullscreenHandler);
     if (this.flashTimeout) clearTimeout(this.flashTimeout);
+    // The <video> is torn down without firing pause — tell the parent playback ended.
+    if (this.playing()) this.playingChange.emit(false);
+  }
+
+  onPlayStateChange(playing: boolean): void {
+    this.playing.set(playing);
+    this.playingChange.emit(playing);
   }
 
   onLoadedMetadata(): void {

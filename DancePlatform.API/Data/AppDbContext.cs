@@ -220,6 +220,13 @@ public class AppDbContext : DbContext
             .HasForeignKey(pi => pi.VideoId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // Same for local choreos: removing one keeps its practice time, shown as "Removed choreo".
+        modelBuilder.Entity<PracticeSessionItem>()
+            .HasOne(pi => pi.Choreo)
+            .WithMany()
+            .HasForeignKey(pi => pi.UserChoreoId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         modelBuilder.Entity<DanceInstructor>()
             .HasKey(di => new { di.DanceId, di.InstructorId });
 

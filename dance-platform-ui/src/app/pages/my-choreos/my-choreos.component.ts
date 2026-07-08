@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChoreoService } from '../../core/services/choreo.service';
 import { ConfirmService } from '../../core/services/confirm.service';
+import { PracticeTimerService } from '../../core/services/practice-timer.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Choreo } from '../../models/choreo.model';
 import { VideoSegment } from '../../models/video.model';
@@ -46,7 +47,8 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
   constructor(
     private choreoService: ChoreoService,
     private confirmSvc: ConfirmService,
-    private toast: ToastService
+    private toast: ToastService,
+    private practiceTimer: PracticeTimerService
   ) {}
 
   ngOnInit(): void {
@@ -58,6 +60,15 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.releaseVideoUrl();
+    // Flush any accrued practice time; the session buffer decides whether it stays live.
+    this.practiceTimer.stop();
+  }
+
+  /** Choreo playback counts as practice, same as watching a dance video. */
+  onPlayingChange(playing: boolean): void {
+    const choreo = this.selected();
+    if (playing && choreo) this.practiceTimer.setActiveChoreo(choreo.id);
+    this.practiceTimer.setPlaying(playing);
   }
 
   pickNewFile(): void {
@@ -224,6 +235,9 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
   }
 
   private playFile(choreo: Choreo, file: File): void {
+    // Swapping src doesn't reliably fire pause — stop the practice clock explicitly;
+    // it resumes (on the new choreo) when the user presses play.
+    this.practiceTimer.setPlaying(false);
     this.choreoService.rememberFile(choreo.id, file);
     this.releaseVideoUrl();
     this.fileMismatch.set(null);

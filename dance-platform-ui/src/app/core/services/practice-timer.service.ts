@@ -18,6 +18,7 @@ export class PracticeTimerService {
 
   private activeDanceId: number | null = null;
   private activeVideoId: number | null = null;
+  private activeChoreoId: number | null = null;
   private playing = false;
   private pendingSeconds = 0;
   private serverTotalSeconds = 0;
@@ -44,10 +45,20 @@ export class PracticeTimerService {
 
   /** Marks the given dance/video as the one being watched. Flushes the previous one first. */
   setActiveDance(danceId: number, videoId: number | null = null): void {
-    if (this.activeDanceId === danceId && this.activeVideoId === videoId) return;
+    if (this.activeDanceId === danceId && this.activeVideoId === videoId && this.activeChoreoId === null) return;
     this.flush();
     this.activeDanceId = danceId;
     this.activeVideoId = videoId;
+    this.activeChoreoId = null;
+  }
+
+  /** Marks one of the user's local choreos ("My choreos") as the one being practiced. */
+  setActiveChoreo(choreoId: number): void {
+    if (this.activeChoreoId === choreoId) return;
+    this.flush();
+    this.activeDanceId = null;
+    this.activeVideoId = null;
+    this.activeChoreoId = choreoId;
   }
 
   /** Player play/pause state. Counting only runs while playing.
@@ -76,6 +87,7 @@ export class PracticeTimerService {
     this.setPlaying(false);
     this.activeDanceId = null;
     this.activeVideoId = null;
+    this.activeChoreoId = null;
   }
 
   private startTicking(): void {
@@ -95,15 +107,16 @@ export class PracticeTimerService {
   }
 
   private flush(): void {
-    if (this.flushing || this.pendingSeconds <= 0 || this.activeDanceId == null) return;
+    if (this.flushing || this.pendingSeconds <= 0 || (this.activeDanceId == null && this.activeChoreoId == null)) return;
     if (!this.auth.isAuthenticated()) return;
 
     // Cap per beat to the server's accepted range; the remainder drains on the next flush.
     const sent = Math.min(this.pendingSeconds, 600);
     const danceId = this.activeDanceId;
     const videoId = this.activeVideoId;
+    const choreoId = this.activeChoreoId;
     this.flushing = true;
-    this.practice.heartbeat({ danceId, videoId, seconds: sent, localDate: toPracticeDateString(new Date()) }).subscribe({
+    this.practice.heartbeat({ danceId, videoId, choreoId, seconds: sent, localDate: toPracticeDateString(new Date()) }).subscribe({
       next: session => {
         this.serverTotalSeconds = session.totalSeconds;
         // Keep any seconds that accrued while the request was in flight.
@@ -138,6 +151,7 @@ export class PracticeTimerService {
     this.serverTotalSeconds = 0;
     this.activeDanceId = null;
     this.activeVideoId = null;
+    this.activeChoreoId = null;
     this.playing = false;
     this.watching.set(false);
     this.liveSeconds.set(0);
