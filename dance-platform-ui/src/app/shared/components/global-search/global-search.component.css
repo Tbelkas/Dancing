@@ -79,6 +79,12 @@
 }
 .gsearch__clear:hover { color: var(--color-text); }
 
+/* Keyboard hint is meaningless on touch layouts and overlaps the truncated
+   placeholder in the narrow header input. */
+@media (max-width: 720px) {
+  .gsearch__kbd { display: none; }
+}
+
 .gsearch__kbd {
   position: absolute;
   right: 12px;

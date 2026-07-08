@@ -801,6 +801,12 @@
 }
 
 @media (max-width: 640px) {
-  .stats-row { gap: 8px; }
-  .stat-chip { flex: 1; min-width: 0; }
+  /* Four chips in one row leaves ~80px per card: values wrap mid-number
+     ("30 / min") and the goal label needs three lines. 2×2 breathes. */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-chip { min-width: 0; }
 }
