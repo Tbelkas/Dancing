@@ -108,7 +108,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   onPlayerPlaying(playing: boolean): void {
     const d = this.dance();
     if (!d || !this.auth.isAuthenticated()) return;
-    this.practiceTimer.setActiveDance(d.id);
+    this.practiceTimer.setActiveDance(d.id, this.selectedVideo()?.id ?? null);
     this.practiceTimer.setPlaying(playing);
   }
 

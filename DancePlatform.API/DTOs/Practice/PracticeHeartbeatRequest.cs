@@ -11,6 +11,9 @@ public class PracticeHeartbeatRequest
 {
     [Required] public int DanceId { get; set; }
 
+    /// <summary>The video being watched; lets history follow a video if it moves to another dance.</summary>
+    public int? VideoId { get; set; }
+
     /// <summary>Watch seconds since the previous heartbeat.</summary>
     [Range(1, 600)] public int Seconds { get; set; }
 

@@ -57,6 +57,11 @@ public class PracticeService : IPracticeService
         var danceExists = await _db.Dances.AnyAsync(d => d.Id == request.DanceId);
         if (!danceExists) return null;
 
+        // A stale/unknown video id shouldn't reject the beat — record the time unattributed.
+        var videoId = request.VideoId;
+        if (videoId.HasValue && !await _db.Videos.AnyAsync(v => v.Id == videoId.Value))
+            videoId = null;
+
         var now = DateTime.UtcNow;
         var cutoff = now - ContinuationBuffer;
 
@@ -78,10 +83,12 @@ public class PracticeService : IPracticeService
             _db.PracticeSessions.Add(session);
         }
 
-        var item = session.Items.FirstOrDefault(i => i.DanceId == request.DanceId);
+        // Items are keyed per (dance, video) so history can follow a video that later moves to
+        // another dance; the DTO regroups them per dance for display.
+        var item = session.Items.FirstOrDefault(i => i.DanceId == request.DanceId && i.VideoId == videoId);
         if (item is null)
         {
-            item = new PracticeSessionItem { DanceId = request.DanceId };
+            item = new PracticeSessionItem { DanceId = request.DanceId, VideoId = videoId };
             session.Items.Add(item);
         }
         item.Seconds += request.Seconds;
@@ -102,9 +109,20 @@ public class PracticeService : IPracticeService
         session.Notes = string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes.Trim();
 
         // Duration edits only make sense when there's one dance to attribute the time to;
-        // multi-dance (tracked) sessions keep their per-dance split untouched.
-        if (request.DurationMinutes.HasValue && session.Items.Count == 1)
-            session.Items.First().Seconds = Math.Max(0, request.DurationMinutes.Value) * 60;
+        // multi-dance (tracked) sessions keep their per-dance split untouched. A single dance may
+        // span several per-video items — the override collapses them onto one (attribution is
+        // meaningless for a hand-edited total anyway).
+        if (request.DurationMinutes.HasValue && session.Items.Select(i => i.DanceId).Distinct().Count() == 1)
+        {
+            var keeper = session.Items.First();
+            keeper.Seconds = Math.Max(0, request.DurationMinutes.Value) * 60;
+            keeper.VideoId = null;
+            foreach (var extra in session.Items.Skip(1).ToList())
+            {
+                session.Items.Remove(extra);
+                _db.PracticeSessionItems.Remove(extra);
+            }
+        }
 
         await _db.SaveChangesAsync();
         return await GetByIdAsync(session.Id);
@@ -132,19 +150,26 @@ public class PracticeService : IPracticeService
 
     private static PracticeSessionDto MapToDto(PracticeSession ps)
     {
+        // Items are stored per (dance, video); the UI thinks in dances, so fold the videos back together.
         var items = ps.Items
-            .OrderByDescending(i => i.Seconds)
-            .Select(i => new PracticeSessionItemDto
+            .GroupBy(i => i.DanceId)
+            .Select(g =>
             {
-                DanceId = i.DanceId,
-                DanceName = i.Dance.Name,
-                DanceSlug = i.Dance.Slug,
-                DanceStyleSlug = SlugGenerator.StyleSlug(i.Dance),
-                DanceStyleName = i.Dance.DanceStyles.OrderBy(ds => ds.StyleId).Select(ds => ds.Style.Name).FirstOrDefault() ?? string.Empty,
-                Seconds = i.Seconds,
-                Minutes = (int)Math.Round(i.Seconds / 60.0),
-                Notes = i.Notes
+                var dance = g.First().Dance;
+                var seconds = g.Sum(i => i.Seconds);
+                return new PracticeSessionItemDto
+                {
+                    DanceId = g.Key,
+                    DanceName = dance.Name,
+                    DanceSlug = dance.Slug,
+                    DanceStyleSlug = SlugGenerator.StyleSlug(dance),
+                    DanceStyleName = dance.DanceStyles.OrderBy(ds => ds.StyleId).Select(ds => ds.Style.Name).FirstOrDefault() ?? string.Empty,
+                    Seconds = seconds,
+                    Minutes = (int)Math.Round(seconds / 60.0),
+                    Notes = g.Select(i => i.Notes).FirstOrDefault(n => n is not null)
+                };
             })
+            .OrderByDescending(i => i.Seconds)
             .ToList();
 
         var totalSeconds = items.Sum(i => i.Seconds);

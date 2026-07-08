@@ -17,6 +17,7 @@ export class PracticeTimerService {
   private readonly BUFFER_MS = 10 * 60 * 1000;
 
   private activeDanceId: number | null = null;
+  private activeVideoId: number | null = null;
   private playing = false;
   private pendingSeconds = 0;
   private serverTotalSeconds = 0;
@@ -41,11 +42,12 @@ export class PracticeTimerService {
     }
   }
 
-  /** Marks the given dance as the one being watched. Flushes the previous dance first. */
-  setActiveDance(danceId: number): void {
-    if (this.activeDanceId === danceId) return;
+  /** Marks the given dance/video as the one being watched. Flushes the previous one first. */
+  setActiveDance(danceId: number, videoId: number | null = null): void {
+    if (this.activeDanceId === danceId && this.activeVideoId === videoId) return;
     this.flush();
     this.activeDanceId = danceId;
+    this.activeVideoId = videoId;
   }
 
   /** Player play/pause state. Counting only runs while playing.
@@ -73,6 +75,7 @@ export class PracticeTimerService {
   stop(): void {
     this.setPlaying(false);
     this.activeDanceId = null;
+    this.activeVideoId = null;
   }
 
   private startTicking(): void {
@@ -98,8 +101,9 @@ export class PracticeTimerService {
     // Cap per beat to the server's accepted range; the remainder drains on the next flush.
     const sent = Math.min(this.pendingSeconds, 600);
     const danceId = this.activeDanceId;
+    const videoId = this.activeVideoId;
     this.flushing = true;
-    this.practice.heartbeat({ danceId, seconds: sent, localDate: toPracticeDateString(new Date()) }).subscribe({
+    this.practice.heartbeat({ danceId, videoId, seconds: sent, localDate: toPracticeDateString(new Date()) }).subscribe({
       next: session => {
         this.serverTotalSeconds = session.totalSeconds;
         // Keep any seconds that accrued while the request was in flight.
@@ -133,6 +137,7 @@ export class PracticeTimerService {
     this.pendingSeconds = 0;
     this.serverTotalSeconds = 0;
     this.activeDanceId = null;
+    this.activeVideoId = null;
     this.playing = false;
     this.watching.set(false);
     this.liveSeconds.set(0);

@@ -29,13 +29,16 @@ public class PracticeServiceTests : IDisposable
         ctx.Dances.AddRange(
             new Dance { Id = 1, Name = "A", Slug = "a" },
             new Dance { Id = 2, Name = "B", Slug = "b" });
+        ctx.Videos.AddRange(
+            new Video { Id = 11, DanceId = 1, VideoId = "yt-a1" },
+            new Video { Id = 12, DanceId = 1, VideoId = "yt-a2" });
         ctx.SaveChanges();
     }
 
     private AppDbContext NewCtx() => new(_options);
 
-    private static PracticeHeartbeatRequest Beat(int danceId, int seconds) =>
-        new() { DanceId = danceId, Seconds = seconds, LocalDate = DateOnly.FromDateTime(DateTime.UtcNow) };
+    private static PracticeHeartbeatRequest Beat(int danceId, int seconds, int? videoId = null) =>
+        new() { DanceId = danceId, Seconds = seconds, VideoId = videoId, LocalDate = DateOnly.FromDateTime(DateTime.UtcNow) };
 
     [Fact]
     public async Task Heartbeat_WithinWindow_MergesIntoOneSession_ThenNewSessionAfterWindow()
@@ -79,6 +82,35 @@ public class PracticeServiceTests : IDisposable
 
         await using (var ctx = NewCtx())
             Assert.Equal(2, await ctx.PracticeSessions.CountAsync());
+    }
+
+    [Fact]
+    public async Task Heartbeat_TracksItemsPerVideo_ButDtoGroupsByDance()
+    {
+        // Same dance via two different videos, plus one beat with an unknown video id
+        // (recorded unattributed rather than rejected).
+        await using (var ctx = NewCtx())
+            await new PracticeService(ctx).HeartbeatAsync(1, Beat(1, 60, videoId: 11));
+        await using (var ctx = NewCtx())
+            await new PracticeService(ctx).HeartbeatAsync(1, Beat(1, 30, videoId: 12));
+        PracticeSessionDto? dto;
+        await using (var ctx = NewCtx())
+            dto = await new PracticeService(ctx).HeartbeatAsync(1, Beat(1, 10, videoId: 999));
+
+        await using (var ctx = NewCtx())
+        {
+            var session = await ctx.PracticeSessions.Include(s => s.Items).SingleAsync();
+            Assert.Equal(3, session.Items.Count); // one per video + one unattributed
+            Assert.Equal(60, session.Items.Single(i => i.VideoId == 11).Seconds);
+            Assert.Equal(30, session.Items.Single(i => i.VideoId == 12).Seconds);
+            Assert.Equal(10, session.Items.Single(i => i.VideoId == null).Seconds);
+        }
+
+        // The UI still sees one row per dance with the summed time.
+        Assert.NotNull(dto);
+        var item = Assert.Single(dto!.Items);
+        Assert.Equal(1, item.DanceId);
+        Assert.Equal(100, item.Seconds);
     }
 
     public void Dispose()

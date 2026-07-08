@@ -20,6 +20,8 @@ export interface UpdatePracticePayload {
 
 export interface PracticeHeartbeatPayload {
   danceId: number;
+  /** Video generating the watch time, so history can follow a video moved to another dance. */
+  videoId?: number | null;
   seconds: number;
   localDate: string;
 }

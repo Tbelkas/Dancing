@@ -213,6 +213,13 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<PracticeSessionItem>()
             .HasIndex(pi => new { pi.PracticeSessionId, pi.DanceId });
 
+        // Deleting a video must not erase the practice time it generated — just drop the attribution.
+        modelBuilder.Entity<PracticeSessionItem>()
+            .HasOne(pi => pi.Video)
+            .WithMany()
+            .HasForeignKey(pi => pi.VideoId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         modelBuilder.Entity<DanceInstructor>()
             .HasKey(di => new { di.DanceId, di.InstructorId });
 
