@@ -146,6 +146,13 @@
   &:hover { color: var(--color-text); }
 }
 
+/* The logged-out "Sign in" is a gold .btn--primary: it must keep dark text
+   (white/lavender on gold fails contrast), not inherit the nav link colour. */
+.header__nav a.btn--primary,
+.header__nav a.btn--primary:hover {
+  color: #07070D;
+}
+
 /* Active page indicator: a gold beat-line wipes in beneath the link. */
 .header__nav a.is-active:not(.btn) {
   color: var(--color-primary);

@@ -125,6 +125,7 @@
 .results-bar__controls {
   display: flex;
   align-items: center;
+  flex-wrap: wrap; /* on narrow screens the sort control drops to its own row instead of pushing off-screen */
   gap: 12px;
 }
 
@@ -1034,6 +1035,8 @@
 
 @media (max-width: 640px) {
   .dance-row-item__thumb { width: 64px; height: 40px; }
+  /* Comfortable thumb-size tap targets for the grid/list switch on touch screens */
+  .view-toggle__btn { width: 40px; height: 36px; }
 }
 
 /* List-view loading rows reuse the real row shell (border, padding, thumb size)

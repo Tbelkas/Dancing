@@ -142,7 +142,7 @@ textarea:focus-visible,
   }
 
   &--sm { padding: 8px 16px; font-size: 0.8rem; }
-  &--xs { padding: 5px 12px; font-size: 0.75rem; }
+  &--xs { padding: 7px 12px; font-size: 0.75rem; }
 
   &:disabled { opacity: 0.38; cursor: not-allowed; filter: none !important; }
 }
@@ -344,7 +344,7 @@ textarea:focus-visible,
 .optional {
   font-weight: 400;
   color: var(--color-text-muted);
-  font-size: 0.75em;
+  font-size: 0.85em;
   text-transform: none;
   letter-spacing: 0;
   font-style: italic;
@@ -423,6 +423,9 @@ textarea:focus-visible,
 .profile-public-link {
   font-size: 0.85rem;
   margin-left: 0.75rem;
+  display: inline-block;
+  padding: 10px 4px;
+  margin-block: -10px; /* grow the tap target without shifting layout */
 }
 
 /* Avatar — shared by /profile and the public /users/:username page (the latter

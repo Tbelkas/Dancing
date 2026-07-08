@@ -154,7 +154,7 @@
 
 .tab-count {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 400;
   background: transparent;
   color: var(--color-text-muted);
@@ -368,8 +368,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
   background: transparent;
   border: 1px solid var(--color-border);
@@ -550,7 +550,7 @@
 }
 
 @media (max-width: 640px) {
-  .style-tab { padding: 8px 12px; font-size: 0.68rem; }
+  .style-tab { padding: 10px 14px; font-size: 0.7rem; }
   .page-header__top { flex-direction: column; }
 }
 
@@ -689,7 +689,7 @@
   background: var(--color-primary);
   color: #07070D;
   font-family: var(--font-ui);
-  font-size: 0.64rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -709,7 +709,7 @@
   display: block;
   margin-top: 4px;
   font-family: var(--font-ui);
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -720,8 +720,8 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
