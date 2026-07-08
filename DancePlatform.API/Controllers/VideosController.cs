@@ -12,11 +12,13 @@ public class VideosController : AppControllerBase
 {
     private readonly IVideoService _videoService;
     private readonly IUserVideoLoopService _loopService;
+    private readonly IVideoNoteService _noteService;
 
-    public VideosController(IVideoService videoService, IUserVideoLoopService loopService)
+    public VideosController(IVideoService videoService, IUserVideoLoopService loopService, IVideoNoteService noteService)
     {
         _videoService = videoService;
         _loopService = loopService;
+        _noteService = noteService;
     }
 
     [HttpGet("dance/{danceId}")]
@@ -142,5 +144,36 @@ public class VideosController : AppControllerBase
     {
         var loops = await _loopService.DeleteAsync(CurrentUserId!.Value, id, loopId);
         return loops is null ? NotFound() : Ok(loops);
+    }
+
+    // --- Personal notes: timestamped, private to the authenticated user ---
+
+    [Authorize]
+    [HttpGet("{id}/notes")]
+    public async Task<IActionResult> GetMyNotes(int id) =>
+        Ok(await _noteService.GetForVideoAsync(CurrentUserId!.Value, id));
+
+    [Authorize]
+    [HttpPost("{id}/notes")]
+    public async Task<IActionResult> AddMyNote(int id, [FromBody] SaveVideoNoteRequest note)
+    {
+        var notes = await _noteService.AddAsync(CurrentUserId!.Value, id, note);
+        return notes is null ? BadRequest(new { message = "Invalid note or video not found." }) : Ok(notes);
+    }
+
+    [Authorize]
+    [HttpPut("{id}/notes/{noteId}")]
+    public async Task<IActionResult> UpdateMyNote(int id, int noteId, [FromBody] SaveVideoNoteRequest note)
+    {
+        var notes = await _noteService.UpdateAsync(CurrentUserId!.Value, id, noteId, note);
+        return notes is null ? NotFound() : Ok(notes);
+    }
+
+    [Authorize]
+    [HttpDelete("{id}/notes/{noteId}")]
+    public async Task<IActionResult> DeleteMyNote(int id, int noteId)
+    {
+        var notes = await _noteService.DeleteAsync(CurrentUserId!.Value, id, noteId);
+        return notes is null ? NotFound() : Ok(notes);
     }
 }

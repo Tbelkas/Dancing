@@ -55,10 +55,21 @@
             </button>
           }
           <span class="rc__time">{{ formatTime(currentTime()) }}</span>
-          <input type="range" class="rc__seek" [min]="0" [max]="videoDuration()" step="0.1" [value]="currentTime()"
-            aria-label="Seek" [attr.aria-valuetext]="formatTime(currentTime())"
-            [style.--fill.%]="videoDuration() > 0 ? (currentTime() / videoDuration()) * 100 : 0"
-            (input)="seekToTime(+$any($event.target).value)" />
+          <div class="rc__seekwrap">
+            <input type="range" class="rc__seek" [min]="0" [max]="videoDuration()" step="0.1" [value]="currentTime()"
+              aria-label="Seek" [attr.aria-valuetext]="formatTime(currentTime())"
+              [style.--fill.%]="videoDuration() > 0 ? (currentTime() / videoDuration()) * 100 : 0"
+              (input)="seekToTime(+$any($event.target).value)" />
+            @if (videoDuration() > 0) {
+              @for (note of personalNotes; track note.id) {
+                <button type="button" class="rc__note" [style.left.%]="noteMarkerPct(note)"
+                  (click)="jumpToNote(note)"
+                  [attr.aria-label]="'Note at ' + formatTime(note.timeSeconds) + ': ' + note.text">
+                  <span class="rc__note-tip">{{ formatTime(note.timeSeconds) }} — {{ note.text }}</span>
+                </button>
+              }
+            }
+          </div>
           <span class="rc__time">{{ formatTime(videoDuration()) }}</span>
           <div class="rc__volume">
             <button class="rc__btn" (click)="toggleMute()" [attr.aria-label]="muted() ? 'Unmute' : 'Mute'">
@@ -134,6 +145,7 @@
       }
 
       <ng-container [ngTemplateOutlet]="loopBlock"></ng-container>
+      <ng-container [ngTemplateOutlet]="notesBlock"></ng-container>
     </div>
   }
 
@@ -182,6 +194,7 @@
       </div>
 
       <ng-container [ngTemplateOutlet]="loopBlock"></ng-container>
+      <ng-container [ngTemplateOutlet]="notesBlock"></ng-container>
     </div>
   }
 
@@ -256,6 +269,69 @@
         <p class="repeat-hint">Loop points update as the video plays. Speed control isn't available for TikTok.</p>
       }
     </div>
+  </ng-template>
+
+  <!-- Personal notes: timestamped and private. The time pin freezes when typing starts,
+       so the note lands on the moment that prompted it, not where playback drifted to. -->
+  <ng-template #notesBlock>
+    @if (canTakeNotes || personalNotes.length > 0) {
+      <div class="control-row control-row--column notes-block">
+        <div class="notes-header">
+          <label><i class="fa-regular fa-note-sticky"></i> My notes</label>
+          @if (personalNotes.length > 0) {
+            <span class="notes-count">{{ personalNotes.length }}</span>
+          }
+        </div>
+        @if (personalNotes.length > 0) {
+          <ul class="note-list">
+            @for (note of personalNotes; track note.id) {
+              <li class="note-item">
+                @if (editingNoteId() === note.id) {
+                  <button type="button" class="note-time note-time--stamp" (click)="stampEditNoteTime()"
+                    title="Move this note to the current playback time">
+                    <i class="fa-solid fa-crosshairs"></i> {{ formatTime(editNoteTime) }}
+                  </button>
+                  <input type="text" class="note-input" [(ngModel)]="editNoteText" maxlength="500"
+                    aria-label="Edit note" (keyup.enter)="emitUpdateNote()" (keyup.escape)="cancelEditNote()" />
+                  <button class="btn btn--accent btn--sm" (click)="emitUpdateNote()" [disabled]="!editNoteText.trim()">Save</button>
+                  <button class="btn btn--ghost btn--sm" (click)="cancelEditNote()">Cancel</button>
+                } @else {
+                  <button type="button" class="note-time" (click)="jumpToNote(note)" [title]="'Jump to ' + formatTime(note.timeSeconds)">
+                    {{ formatTime(note.timeSeconds) }}
+                  </button>
+                  <span class="note-text">{{ note.text }}</span>
+                  @if (canTakeNotes) {
+                    <span class="note-actions">
+                      <button class="note-action" (click)="startEditNote(note)" title="Edit note" aria-label="Edit note">
+                        <i class="fa-solid fa-pen"></i>
+                      </button>
+                      <button class="note-action note-action--danger" (click)="emitDeleteNote($event, note)" title="Delete note" aria-label="Delete note">
+                        <i class="fa-solid fa-xmark"></i>
+                      </button>
+                    </span>
+                  }
+                }
+              </li>
+            }
+          </ul>
+        }
+        @if (canTakeNotes) {
+          <div class="note-add">
+            <button type="button" class="note-time note-time--stamp" (click)="stampNoteTime()"
+              title="Pin the note to the current playback time" aria-label="Pin note to current playback time">
+              <i class="fa-solid fa-crosshairs"></i>
+              @if (noteDraftTime() !== null) { {{ formatTime(noteDraftTime()!) }} } @else { Now }
+            </button>
+            <input type="text" class="note-input" [(ngModel)]="noteDraftText" maxlength="500"
+              placeholder="Note this moment — e.g. weight stays on the left foot"
+              aria-label="New note" (focus)="onNoteInputFocus()" (keyup.enter)="emitSaveNote()" />
+            <button class="btn btn--ghost btn--sm" (click)="emitSaveNote()" [disabled]="!noteDraftText.trim()">
+              <i class="fa-regular fa-note-sticky"></i> Add
+            </button>
+          </div>
+        }
+      </div>
+    }
   </ng-template>
 
 </div>

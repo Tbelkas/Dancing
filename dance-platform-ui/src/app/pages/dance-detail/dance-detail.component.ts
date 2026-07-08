@@ -6,7 +6,7 @@ import { EMPTY, Observable } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { DanceService, DanceStatus } from '../../core/services/dance.service';
-import { VideoService, SegmentPayload } from '../../core/services/video.service';
+import { VideoService, SegmentPayload, NotePayload } from '../../core/services/video.service';
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
 import { InstructorService } from '../../core/services/instructor.service';
@@ -17,7 +17,7 @@ import { PracticeTimerService } from '../../core/services/practice-timer.service
 import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Dance } from '../../models/dance.model';
-import { Video, VideoChapter, VideoSegment, viewCountBucket } from '../../models/video.model';
+import { Video, VideoChapter, VideoNote, VideoSegment, viewCountBucket } from '../../models/video.model';
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
@@ -51,6 +51,8 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   chapters = signal<VideoChapter[]>([]);
   // The signed-in user's private loops, keyed by video id.
   private personalLoops = signal<Map<number, VideoSegment[]>>(new Map());
+  // The signed-in user's timestamped notes, keyed by video id.
+  private personalNotes = signal<Map<number, VideoNote[]>>(new Map());
   recommended = signal<Dance[]>([]);
   private recThumbFailed = signal<Set<number>>(new Set());
   // Alphabetical neighbours within this dance's canonical style, for prev/next paging.
@@ -143,6 +145,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.selectedVideo.set(null);
     this.chapters.set([]);
     this.personalLoops.set(new Map());
+    this.personalNotes.set(new Map());
     this.recommended.set([]);
     this.showEditDance.set(false);
     this.movingVideoId.set(null);
@@ -241,6 +244,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.selectedVideo.set(null);
     this.chapters.set([]);
     this.loadPersonalLoops(video.id);
+    this.loadPersonalNotes(video.id);
     this.videoService.getRelated(video.id).subscribe({
       next: ch => { this.chapters.set(ch); this.selectedVideo.set(video); },
       error: () => this.selectedVideo.set(video)
@@ -281,6 +285,51 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
         this.toast.success('Loop deleted.');
       },
       error: () => this.toast.error('Failed to delete your loop. Please try again.')
+    });
+  }
+
+  /** Timestamped notes the signed-in user pinned to a given video (empty if none/anon). */
+  personalNotesFor(videoId: number): VideoNote[] {
+    return this.personalNotes().get(videoId) ?? [];
+  }
+
+  private setPersonalNotes(videoId: number, notes: VideoNote[]): void {
+    this.personalNotes.update(m => new Map(m).set(videoId, notes));
+  }
+
+  private loadPersonalNotes(videoId: number): void {
+    if (!this.auth.isAuthenticated()) return;
+    this.videoService.getMyNotes(videoId).subscribe({
+      next: notes => this.setPersonalNotes(videoId, notes),
+      error: () => { /* notes are a nicety; ignore fetch failures */ }
+    });
+  }
+
+  /** A signed-in user pinned a note to a moment in the video. */
+  onSaveNote(video: Video, payload: NotePayload): void {
+    this.videoService.addMyNote(video.id, payload).subscribe({
+      next: notes => this.setPersonalNotes(video.id, notes),
+      error: () => this.actionError.set('Failed to save your note. Please try again.')
+    });
+  }
+
+  /** A signed-in user rewrote one of their own notes. */
+  onUpdateNote(video: Video, payload: { id: number } & NotePayload): void {
+    this.videoService.updateMyNote(video.id, payload.id, { timeSeconds: payload.timeSeconds, text: payload.text }).subscribe({
+      next: notes => this.setPersonalNotes(video.id, notes),
+      error: () => this.toast.error('Failed to update your note. Please try again.')
+    });
+  }
+
+  /** A signed-in user removed one of their own notes. */
+  async onDeleteNote(video: Video, note: VideoNote): Promise<void> {
+    if (!await this.confirmSvc.ask('Delete this note?', { title: 'Delete note' })) return;
+    this.videoService.deleteMyNote(video.id, note.id).subscribe({
+      next: notes => {
+        this.setPersonalNotes(video.id, notes);
+        this.toast.success('Note deleted.');
+      },
+      error: () => this.toast.error('Failed to delete your note. Please try again.')
     });
   }
 

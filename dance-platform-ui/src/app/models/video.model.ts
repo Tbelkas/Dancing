@@ -7,6 +7,15 @@ export interface VideoSegment {
   endTime?: number;
 }
 
+/** A timestamped personal note pinned to a moment in a video — private to the
+ *  signed-in user, shown as markers on the beta viewer's seek bar. */
+export interface VideoNote {
+  id: number;
+  videoId: number;
+  timeSeconds: number;
+  text: string;
+}
+
 /** One dance that lives inside a shared source video — used to jump the player
  *  between the dances cut from the same YouTube upload. */
 export interface VideoChapter {

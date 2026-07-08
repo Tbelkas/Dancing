@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<Video> Videos => Set<Video>();
     public DbSet<VideoSegment> VideoSegments => Set<VideoSegment>();
     public DbSet<UserVideoLoop> UserVideoLoops => Set<UserVideoLoop>();
+    public DbSet<VideoNote> VideoNotes => Set<VideoNote>();
     public DbSet<UserChoreo> UserChoreos => Set<UserChoreo>();
     public DbSet<UserChoreoLoop> UserChoreoLoops => Set<UserChoreoLoop>();
     public DbSet<DanceStyle> DanceStyles => Set<DanceStyle>();
@@ -70,6 +71,23 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<UserVideoLoop>()
             .HasIndex(l => new { l.UserId, l.VideoId });
+
+        // Personal timestamped notes: same lifecycle as loops — gone when the
+        // owning user or the video goes.
+        modelBuilder.Entity<VideoNote>()
+            .HasOne(n => n.User)
+            .WithMany()
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<VideoNote>()
+            .HasOne(n => n.Video)
+            .WithMany()
+            .HasForeignKey(n => n.VideoId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<VideoNote>()
+            .HasIndex(n => new { n.UserId, n.VideoId });
 
         // Local choreos: the video file stays on the user's machine; these rows hold only
         // its file name and the user's saved time slots. Everything dies with the account.

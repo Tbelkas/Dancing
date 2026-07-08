@@ -1,13 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Video, VideoChapter, VideoLibraryItem, VideoSegment, VideoType } from '../../models/video.model';
+import { Video, VideoChapter, VideoLibraryItem, VideoNote, VideoSegment, VideoType } from '../../models/video.model';
 import { environment } from '../../../environments/environment';
 
 export interface SegmentPayload {
   label: string;
   startTime: number;
   endTime?: number;
+}
+
+export interface NotePayload {
+  timeSeconds: number;
+  text: string;
 }
 
 export interface CreateVideoPayload {
@@ -112,5 +117,27 @@ export class VideoService {
   /** Delete one of the user's own loops; resolves to the updated loop list. */
   deleteMyLoop(videoId: number, loopId: number): Observable<VideoSegment[]> {
     return this.http.delete<VideoSegment[]>(`${this.base}/${videoId}/loops/${loopId}`);
+  }
+
+  // --- Personal notes: timestamped, private to the current user ---
+
+  /** The signed-in user's notes for this video, earliest first. */
+  getMyNotes(videoId: number): Observable<VideoNote[]> {
+    return this.http.get<VideoNote[]>(`${this.base}/${videoId}/notes`);
+  }
+
+  /** Pin a note to a moment; resolves to the user's updated note list for the video. */
+  addMyNote(videoId: number, payload: NotePayload): Observable<VideoNote[]> {
+    return this.http.post<VideoNote[]>(`${this.base}/${videoId}/notes`, payload);
+  }
+
+  /** Rewrite one of the user's own notes; resolves to the updated note list. */
+  updateMyNote(videoId: number, noteId: number, payload: NotePayload): Observable<VideoNote[]> {
+    return this.http.put<VideoNote[]>(`${this.base}/${videoId}/notes/${noteId}`, payload);
+  }
+
+  /** Delete one of the user's own notes; resolves to the updated note list. */
+  deleteMyNote(videoId: number, noteId: number): Observable<VideoNote[]> {
+    return this.http.delete<VideoNote[]>(`${this.base}/${videoId}/notes/${noteId}`);
   }
 }

@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, AfterViewInit, OnDestro
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TrustUrlPipe } from '../../pipes/trust-url.pipe';
-import { VideoSegment, VideoChapter } from '../../../models/video.model';
+import { VideoSegment, VideoChapter, VideoNote } from '../../../models/video.model';
 import { formatTimeSecs } from '../../../core/utils/video-url.utils';
 import { ViewerPrefsService } from '../../../core/services/viewer-prefs.service';
 
@@ -29,6 +29,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() personalLoops: VideoSegment[] = [];
   /** Any signed-in user can save the current region as a personal (private) loop. */
   @Input() canSavePersonal = false;
+  /** This user's timestamped notes on the video; markers on the beta seek bar + a list below. */
+  @Input() personalNotes: VideoNote[] = [];
+  /** Any signed-in user can pin notes to moments in the video. */
+  @Input() canTakeNotes = false;
   /** Emits the current loop region when an admin saves it globally; the parent persists it. */
   @Output() saveLoop = new EventEmitter<{ label: string; startTime: number; endTime: number }>();
   /** Emits a global section an admin wants removed; the parent deletes it. */
@@ -37,6 +41,12 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() savePersonalLoop = new EventEmitter<{ label: string; startTime: number; endTime: number }>();
   /** Emits a personal loop the user wants removed; the parent deletes it. */
   @Output() deletePersonalLoop = new EventEmitter<VideoSegment>();
+  /** Emits a new timestamped note; the parent persists it. */
+  @Output() saveNote = new EventEmitter<{ timeSeconds: number; text: string }>();
+  /** Emits a rewritten note (id + new time/text); the parent persists it. */
+  @Output() updateNote = new EventEmitter<{ id: number; timeSeconds: number; text: string }>();
+  /** Emits a note the user wants removed; the parent deletes it. */
+  @Output() deleteNote = new EventEmitter<VideoNote>();
   /** Emits true when the video starts playing, false when it pauses/ends — drives practice timing. */
   @Output() playingChange = new EventEmitter<boolean>();
   @ViewChild('playerContainer', { static: false }) playerContainer?: ElementRef;
@@ -77,6 +87,15 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   repeatStart = 0;
   repeatEnd = 0;
   loopName = '';
+
+  // --- Personal notes: draft state for the add row and the inline editor. ---
+  noteDraftText = '';
+  /** Timestamp frozen when the user starts writing, so the note pins the moment
+   *  they reacted to, not wherever playback has drifted to by the time they save. */
+  noteDraftTime = signal<number | null>(null);
+  editingNoteId = signal<number | null>(null);
+  editNoteText = '';
+  editNoteTime = 0;
 
   get loopableSegments(): VideoSegment[] {
     return this.segments.filter(s => s.endTime != null);
@@ -428,6 +447,73 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   emitDeletePersonalLoop(event: Event, loop: VideoSegment): void {
     event.stopPropagation();
     this.deletePersonalLoop.emit(loop);
+  }
+
+  // --- Personal notes ---
+
+  /** First focus on an empty draft pins the current playback time. */
+  onNoteInputFocus(): void {
+    if (this.noteDraftTime() === null) this.noteDraftTime.set(this.currentPlaybackTime());
+  }
+
+  /** Re-pin the draft note to wherever playback is now. */
+  stampNoteTime(): void {
+    this.noteDraftTime.set(this.currentPlaybackTime());
+  }
+
+  emitSaveNote(): void {
+    const text = this.noteDraftText.trim();
+    if (!text) return;
+    this.saveNote.emit({ timeSeconds: this.noteDraftTime() ?? this.currentPlaybackTime(), text });
+    this.noteDraftText = '';
+    this.noteDraftTime.set(null);
+  }
+
+  jumpToNote(note: VideoNote): void {
+    VideoPlayerComponent.activeInstance = this;
+    if (this.isYouTube) {
+      this.player?.seekTo(note.timeSeconds, true);
+      this.currentTime.set(note.timeSeconds);
+      this.player?.playVideo();
+    } else if (this.isTikTok) {
+      this.tiktokCurrentTime = note.timeSeconds;
+      this.tiktokPost({ type: 'seekTo', value: note.timeSeconds });
+      this.tiktokPost({ type: 'play' });
+    }
+  }
+
+  startEditNote(note: VideoNote): void {
+    this.editingNoteId.set(note.id);
+    this.editNoteText = note.text;
+    this.editNoteTime = note.timeSeconds;
+  }
+
+  cancelEditNote(): void {
+    this.editingNoteId.set(null);
+  }
+
+  /** Move the note being edited to the current playback position. */
+  stampEditNoteTime(): void {
+    this.editNoteTime = this.currentPlaybackTime();
+  }
+
+  emitUpdateNote(): void {
+    const id = this.editingNoteId();
+    const text = this.editNoteText.trim();
+    if (id === null || !text) return;
+    this.updateNote.emit({ id, timeSeconds: this.editNoteTime, text });
+    this.editingNoteId.set(null);
+  }
+
+  emitDeleteNote(event: Event, note: VideoNote): void {
+    event.stopPropagation();
+    this.deleteNote.emit(note);
+  }
+
+  /** Marker position on the beta seek bar, as a percentage of the video. */
+  noteMarkerPct(note: VideoNote): number {
+    const d = this.videoDuration();
+    return d > 0 ? Math.max(0, Math.min(100, (note.timeSeconds / d) * 100)) : 0;
   }
 
   formatTime = formatTimeSecs;

@@ -777,3 +777,222 @@
   height: 100%;
   aspect-ratio: auto;
 }
+
+/* --- Personal note markers on the beta seek bar --------------------------- */
+
+/* Takes over the seek input's flex slot so markers can sit on the same track. */
+.rc__seekwrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.rc__seekwrap .rc__seek {
+  width: 100%;
+}
+
+.rc__note {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  transform: translateY(-50%);
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* The visible dot is smaller than the hit target. */
+.rc__note::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  box-shadow: 0 0 0 1.5px rgba(7, 7, 13, 0.85);
+  transition: transform var(--transition);
+}
+
+.rc__note:hover::before,
+.rc__note:focus-visible::before {
+  transform: scale(1.5);
+}
+
+.rc__note-tip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 260px;
+  width: max-content;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(7, 7, 13, 0.92);
+  border: 1px solid var(--color-border);
+  color: #fff;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.rc__note:hover .rc__note-tip,
+.rc__note:focus-visible .rc__note-tip {
+  opacity: 1;
+}
+
+/* --- Personal notes block below the player -------------------------------- */
+
+.notes-block {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.notes-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notes-header label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.notes-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.note-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.note-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+}
+
+.note-time {
+  flex-shrink: 0;
+  background: rgba(245, 200, 66, 0.12);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--color-primary);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.note-time:hover {
+  background: rgba(245, 200, 66, 0.22);
+}
+
+.note-time--stamp {
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-border);
+}
+
+.note-time--stamp:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text);
+}
+
+.note-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.note-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity var(--transition);
+}
+
+.note-item:hover .note-actions,
+.note-actions:focus-within {
+  opacity: 1;
+}
+
+.note-action {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color var(--transition), background var(--transition);
+}
+
+.note-action:hover {
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.note-action--danger:hover {
+  color: var(--color-accent);
+}
+
+.note-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.note-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.note-input:focus {
+  border-color: var(--color-primary);
+}
+
+.note-add .btn,
+.note-item .btn {
+  flex-shrink: 0;
+}
