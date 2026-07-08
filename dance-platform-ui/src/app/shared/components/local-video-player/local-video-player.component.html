@@ -19,7 +19,7 @@
     </div>
   }
 
-  <div class="player-media"
+  <div #mediaEl class="player-media"
        [class.player-media--mirrored]="mirrored()"
        [class.player-media--sideways]="sideways()"
        [style.aspectRatio]="sidewaysAspect()">
@@ -27,13 +27,36 @@
       class="local-video"
       [src]="src"
       [style.transform]="videoTransform()"
-      controls
+      [controls]="!customControls()"
       playsinline
       preload="metadata"
       (loadedmetadata)="onLoadedMetadata()"
       (timeupdate)="onTimeUpdate()"
+      (play)="playing.set(true)"
+      (pause)="playing.set(false)"
+      (volumechange)="onVolumeChange()"
+      (click)="onVideoClick()"
       (ended)="onEnded()">
     </video>
+    @if (customControls()) {
+      <div class="rc" [class.rc--fade]="playing()">
+        <button class="rc__btn" (click)="togglePlay()" [attr.aria-label]="playing() ? 'Pause' : 'Play'">
+          <i class="fa-solid" [class.fa-play]="!playing()" [class.fa-pause]="playing()"></i>
+        </button>
+        <span class="rc__time">{{ formatTime(currentTime()) }}</span>
+        <input type="range" class="rc__seek" [min]="0" [max]="videoDuration()" step="0.1" [value]="currentTime()"
+          aria-label="Seek" [attr.aria-valuetext]="formatTime(currentTime())"
+          [style.--fill.%]="videoDuration() > 0 ? (currentTime() / videoDuration()) * 100 : 0"
+          (input)="seekTo(+$any($event.target).value)" />
+        <span class="rc__time">{{ formatTime(videoDuration()) }}</span>
+        <button class="rc__btn" (click)="toggleMute()" [attr.aria-label]="muted() ? 'Unmute' : 'Mute'">
+          <i class="fa-solid" [class.fa-volume-high]="!muted()" [class.fa-volume-xmark]="muted()"></i>
+        </button>
+        <button class="rc__btn" (click)="toggleFullscreen()" [attr.aria-label]="fullscreen() ? 'Exit fullscreen' : 'Fullscreen'">
+          <i class="fa-solid" [class.fa-expand]="!fullscreen()" [class.fa-compress]="fullscreen()"></i>
+        </button>
+      </div>
+    }
     @if (loopFlash()) {
       <div class="loop-flash" aria-hidden="true"><i class="fa-solid fa-rotate-left"></i></div>
     }
@@ -45,11 +68,11 @@
   <div class="controls">
     <div class="control-row">
       <label id="speed-label">Speed</label>
-      <div class="speed-buttons" role="group" aria-labelledby="speed-label">
-        @for (rate of playbackRates; track rate) {
-          <button class="speed-btn" [class.active]="currentRate() === rate" (click)="setRate(rate)" [attr.aria-pressed]="currentRate() === rate" [attr.aria-label]="'Playback speed ' + rate + 'x'">{{ rate }}x</button>
-        }
-      </div>
+      <input type="range" class="speed-slider" [min]="minRate" [max]="maxRate" step="0.05"
+        [value]="currentRate()" [style.--fill.%]="ratePct()"
+        aria-labelledby="speed-label" [attr.aria-valuetext]="currentRate() + 'x'"
+        (input)="setRate(+$any($event.target).value)" />
+      <button class="speed-value" (click)="setRate(1)" title="Reset to 1x">{{ currentRate() }}x</button>
       <div class="control-row__end">
         <button class="mirror-btn" [class.active]="mirrored()" (click)="toggleMirror()" [attr.aria-pressed]="mirrored()"
                 title="Flip the video horizontally so the dancer matches your side">

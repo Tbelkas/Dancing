@@ -14,10 +14,13 @@
 
 /* Sideways rotation (90/270): the picture's width and height swap, so the frame
    takes the rotated aspect (bound inline) and the video is sized in container
-   units with the axes swapped, then centered and rotated into place. */
+   units with the axes swapped, then centered and rotated into place.
+   The 72vh cap transfers through the aspect ratio into a narrow width, so the
+   frame must center itself inside the full-width card. */
 .player-media--sideways {
   container-type: size;
   max-height: 72vh;
+  margin-inline: auto;
 }
 
 .player-media--sideways .local-video {
@@ -27,6 +30,163 @@
   width: 100cqh;
   height: 100cqw;
   max-height: none;
+}
+
+/* Rotated playback: the native control bar turns with the picture (vertical seek
+   bar, sideways time), so it's disabled and this horizontal strip stands in.
+   Fades while playing; hover or focus brings it back. */
+.rc {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 10px 8px;
+  background: linear-gradient(transparent, rgba(7, 7, 13, 0.82));
+  transition: opacity var(--transition);
+}
+
+.rc--fade {
+  opacity: 0;
+}
+
+.player-media:hover .rc,
+.rc:focus-within {
+  opacity: 1;
+}
+
+.rc__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity var(--transition);
+}
+
+.rc__btn:hover {
+  opacity: 1;
+}
+
+.rc__time {
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.rc__seek {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Single-thumb sliders (seek + speed): thin track whose fill tracks --fill,
+   thumb matching the dual-range loop slider. */
+.rc__seek,
+.speed-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+
+  &::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 4px;
+    background: linear-gradient(to right,
+      var(--color-primary) var(--fill, 0%),
+      rgba(255, 255, 255, 0.22) var(--fill, 0%));
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    margin-top: -5px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    box-shadow: 0 0 6px var(--color-primary-glow);
+    transition: transform var(--transition);
+  }
+
+  &::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  &::-moz-range-track {
+    height: 4px;
+    border-radius: 4px;
+    background: linear-gradient(to right,
+      var(--color-primary) var(--fill, 0%),
+      rgba(255, 255, 255, 0.22) var(--fill, 0%));
+  }
+
+  &::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: none;
+    border-radius: 50%;
+    background: var(--color-primary);
+    box-shadow: 0 0 6px var(--color-primary-glow);
+  }
+
+  &:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* Continuous speed slider — native playbackRate takes any value, so no preset
+   pills here (the YouTube player keeps them; its API only accepts presets). */
+.speed-slider {
+  flex: 1;
+  min-width: 120px;
+  max-width: 300px;
+}
+
+/* Kept as two rules: an unrecognized vendor pseudo-element voids a whole selector list. */
+.speed-slider::-webkit-slider-runnable-track {
+  background: linear-gradient(to right,
+    var(--color-primary) var(--fill, 0%),
+    var(--color-surface-2) var(--fill, 0%));
+}
+
+.speed-slider::-moz-range-track {
+  background: linear-gradient(to right,
+    var(--color-primary) var(--fill, 0%),
+    var(--color-surface-2) var(--fill, 0%));
+}
+
+.speed-value {
+  min-width: 56px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.speed-value:hover {
+  border-color: var(--color-border-light);
 }
 
 /* Rotation radio group, visually in line with the speed pills. */

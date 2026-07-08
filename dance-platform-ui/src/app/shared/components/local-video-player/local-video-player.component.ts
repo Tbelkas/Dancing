@@ -34,9 +34,12 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
   /** Emits the video duration once metadata loads, so the parent can persist it. */
   @Output() durationDetected = new EventEmitter<number>();
   @ViewChild('videoEl', { static: true }) videoEl!: ElementRef<HTMLVideoElement>;
+  @ViewChild('mediaEl', { static: true }) mediaEl!: ElementRef<HTMLElement>;
 
   readonly playbackRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
   readonly rotationOptions = [0, 90, 180, 270];
+  readonly minRate = 0.25;
+  readonly maxRate = 2;
   currentRate = signal(1);
   rotationDeg = signal(0);
   repeating = signal(false);
@@ -45,6 +48,10 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
   mirrored = signal(false);
   shortcutsOpen = signal(false);
   loopFlash = signal(false);
+  playing = signal(false);
+  currentTime = signal(0);
+  muted = signal(false);
+  fullscreen = signal(false);
 
   repeatStart = 0;
   repeatEnd = 0;
@@ -68,10 +75,12 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     this.repeating.set(localStorage.getItem(this.LOOP_PREF_KEY) === '1');
     this.mirrored.set(localStorage.getItem(this.MIRROR_PREF_KEY) === '1');
     document.addEventListener('keydown', this.keydownHandler);
+    document.addEventListener('fullscreenchange', this.fullscreenHandler);
   }
 
   ngOnDestroy(): void {
     document.removeEventListener('keydown', this.keydownHandler);
+    document.removeEventListener('fullscreenchange', this.fullscreenHandler);
     if (this.flashTimeout) clearTimeout(this.flashTimeout);
   }
 
@@ -86,8 +95,9 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     this.durationDetected.emit(dur);
   }
 
-  /** Native timeupdate fires ~4×/s — plenty to wrap an A→B loop. */
+  /** Native timeupdate fires ~4×/s — plenty to wrap an A→B loop and drive the seek bar. */
   onTimeUpdate(): void {
+    this.currentTime.set(this.video.currentTime);
     if (!this.repeating() || this.repeatEnd <= this.repeatStart) return;
     if (this.video.currentTime >= this.repeatEnd) {
       this.video.currentTime = this.repeatStart;
@@ -104,9 +114,17 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** The native element takes any playbackRate, so speed is a continuous slider
+   *  here (unlike the YouTube player, whose API only accepts its preset rates). */
   setRate(rate: number): void {
-    this.currentRate.set(rate);
-    this.video.playbackRate = rate;
+    const clamped = Math.round(Math.min(this.maxRate, Math.max(this.minRate, rate)) * 100) / 100;
+    this.currentRate.set(clamped);
+    this.video.playbackRate = clamped;
+  }
+
+  /** Fill percentage for the speed slider's track, 0.25x→0%, 2x→100%. */
+  ratePct(): number {
+    return ((this.currentRate() - this.minRate) / (this.maxRate - this.minRate)) * 100;
   }
 
   setRotation(deg: number): void {
@@ -138,6 +156,39 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     const w = this.naturalWidth();
     const h = this.naturalHeight();
     return w > 0 && h > 0 ? `${h} / ${w}` : '9 / 16';
+  }
+
+  /** Any rotation turns the native control bar with the picture (vertical seek bar,
+   *  sideways time), so rotated playback swaps in our own horizontal controls. */
+  customControls(): boolean {
+    return this.rotationDeg() !== 0;
+  }
+
+  /** With native controls hidden, clicking the picture still toggles playback. */
+  onVideoClick(): void {
+    if (this.customControls()) this.togglePlay();
+  }
+
+  onVolumeChange(): void {
+    this.muted.set(this.video.muted);
+  }
+
+  seekTo(seconds: number): void {
+    this.video.currentTime = seconds;
+    this.currentTime.set(seconds);
+  }
+
+  toggleMute(): void {
+    this.video.muted = !this.video.muted;
+  }
+
+  /** Fullscreens the media frame (not the <video>) so the rotation layout carries over. */
+  toggleFullscreen(): void {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen();
+    } else {
+      void this.mediaEl.nativeElement.requestFullscreen();
+    }
   }
 
   toggleMirror(): void {
@@ -219,6 +270,10 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     this.loopFlash.set(true);
     this.flashTimeout = setTimeout(() => this.loopFlash.set(false), 700);
   }
+
+  private readonly fullscreenHandler = () => {
+    this.fullscreen.set(document.fullscreenElement != null);
+  };
 
   private readonly keydownHandler = (e: KeyboardEvent) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
