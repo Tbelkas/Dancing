@@ -4,11 +4,11 @@ Goal: for full-tutorial videos with no `VideoSegments`, transcribe the video and
 topical section chips (label + start/end) so the "Sections" bar renders on the dance page.
 
 ## Workflow
-1. `python prep_sections.py <ytid>` → caches metadata + auto-captions, writes `_proto/sec_<ytid>.txt`
+1. `python scripts/prep_sections.py <ytid>` → caches metadata + auto-captions, writes `_proto/sec_<ytid>.txt`
    (title, duration, native chapters, condensed timestamped transcript).
 2. Read the transcript, infer 4–10 meaningful topical sections (drop pure filler).
    Skip videos under ~3 min or with no real sub-topics.
-3. `python apply_sections.py <videoDbId> "Label@start-end;..." apply` → inserts segments,
+3. `python scripts/apply_sections.py <videoDbId> "Label@start-end;..." apply` → inserts segments,
    sets `VideoType='tutorial'`. Dry-run without `apply`. Times accept seconds or m:ss.
 4. Mark the row below.
 
@@ -336,13 +336,13 @@ Goal: maximize chips across as many dance categories as possible.
 - **Totals after: 1036 videos / 475 chipped / 2996 segments.** Verified live via API.
 
 <!-- CHIP-QUEUE:START -->
-## Auto-detected chip queue _(last checked 2026-07-02 09:00)_
+## Auto-detected chip queue _(last checked 2026-07-10 12:20)_
 
-1 tutorial video(s) awaiting section chips (1 new since last check):
+1 tutorial video(s) awaiting section chips (0 new since last check):
 
 | VideoDbId | YtId | Dance |
 |---|---|---|
-| 2026 | 3gBbvQ_mgjw | Heels Choreography ⭐ |
+| 2026 | 3gBbvQ_mgjw | Heels Choreography |
 
 _Run `/find-chips` in a local session to process these (LAN DB access required)._
 <!-- CHIP-QUEUE:END -->

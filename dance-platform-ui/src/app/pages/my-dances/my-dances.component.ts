@@ -415,10 +415,12 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
               this.danceService.delete(dance.id).subscribe({ error: () => {} });
               return throwError(() => err);
             }),
-            switchMap(() => this.danceService.toggleInProgress(dance.id))
+            // setStatus is idempotent — the server may have already marked the dance
+            // In Progress when the personal video was created, and this must not undo it.
+            switchMap(() => this.danceService.setStatus(dance.id, 'inprogress'))
           );
         }
-        return this.danceService.toggleInProgress(dance.id);
+        return this.danceService.setStatus(dance.id, 'inprogress');
       })
     ).subscribe({
       next: () => {

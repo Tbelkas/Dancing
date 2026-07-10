@@ -185,6 +185,97 @@ public class DanceServiceTests : IDisposable
         }
     }
 
+    [Fact]
+    public async Task SetStatus_RepeatingTheSameStatus_DoesNotDoubleCount()
+    {
+        await using (var ctx = NewCtx())
+            await Svc(ctx).SetStatusAsync(1, 1, "learned");
+        await using (var ctx = NewCtx())
+            await Svc(ctx).SetStatusAsync(1, 1, "learned");
+
+        await using (var ctx = NewCtx())
+        {
+            Assert.Equal(1, await ctx.Dances.Where(d => d.Id == 1).Select(d => d.LearnedCount).FirstAsync());
+            Assert.Equal(1, await ctx.UserLearnedDances.CountAsync(x => x.UserId == 1 && x.DanceId == 1));
+        }
+    }
+
+    [Fact]
+    public async Task ReslugAll_CollapsesLegacyGlobalSuffixes_AndIsIdempotent()
+    {
+        // "Sway" exists in two styles. Under the old *global* uniqueness rule the second
+        // copy was forced to "sway-2"; per-style uniqueness lets both use the clean slug.
+        await using (var ctx = NewCtx())
+        {
+            ctx.Styles.AddRange(new Style { Id = 1, Name = "House" }, new Style { Id = 2, Name = "Hiphop" });
+            ctx.Dances.AddRange(
+                new Dance { Id = 20, Name = "Sway", Slug = "sway", DanceStyles = new List<DanceStyle> { new() { StyleId = 1 } } },
+                new Dance { Id = 21, Name = "Sway", Slug = "sway-2", DanceStyles = new List<DanceStyle> { new() { StyleId = 2 } } });
+            await ctx.SaveChangesAsync();
+        }
+
+        await using (var ctx = NewCtx())
+            Assert.Equal(1, await Svc(ctx).ReslugAllAsync()); // only the legacy suffix moves
+
+        await using (var ctx = NewCtx())
+        {
+            Assert.Equal("sway", (await ctx.Dances.FindAsync(20))!.Slug);
+            Assert.Equal("sway", (await ctx.Dances.FindAsync(21))!.Slug);
+            Assert.Equal(0, await Svc(ctx).ReslugAllAsync()); // second run: nothing to change
+        }
+    }
+
+    [Fact]
+    public async Task Search_FiltersByStatusAndFavorites_AndCountsTotals()
+    {
+        // Three dances in one style; the user learns one, starts one, favorites one.
+        await using (var ctx = NewCtx())
+        {
+            ctx.Styles.Add(new Style { Id = 1, Name = "House" });
+            ctx.Dances.AddRange(
+                new Dance { Id = 30, Name = "Farmer", Slug = "farmer", DanceStyles = new List<DanceStyle> { new() { StyleId = 1 } } },
+                new Dance { Id = 31, Name = "Loose Legs", Slug = "loose-legs", DanceStyles = new List<DanceStyle> { new() { StyleId = 1 } } },
+                new Dance { Id = 32, Name = "Salsa Step", Slug = "salsa-step", DanceStyles = new List<DanceStyle> { new() { StyleId = 1 } } });
+            await ctx.SaveChangesAsync();
+        }
+        await using (var ctx = NewCtx())
+        {
+            var svc = Svc(ctx);
+            await svc.SetStatusAsync(1, 30, "learned");
+            await svc.SetStatusAsync(1, 31, "inprogress");
+            await svc.ToggleFavoriteAsync(1, 32);
+        }
+
+        await using (var ctx = NewCtx())
+        {
+            var svc = Svc(ctx);
+
+            var learned = await svc.SearchAsync("", styleId: 1, musicalStyleId: null, difficulty: null,
+                status: "learned", sortBy: null, userId: 1);
+            var learnedRow = Assert.Single(learned.Items);
+            Assert.Equal(30, learnedRow.Id);
+            Assert.True(learnedRow.IsLearned);
+
+            // Not-started = in the style but neither learned nor in progress.
+            var notStarted = await svc.SearchAsync("", styleId: 1, musicalStyleId: null, difficulty: null,
+                status: "notstarted", sortBy: null, userId: 1);
+            var notStartedRow = Assert.Single(notStarted.Items);
+            Assert.Equal(32, notStartedRow.Id);
+
+            var favorites = await svc.SearchAsync("", styleId: null, musicalStyleId: null, difficulty: null,
+                status: null, sortBy: null, userId: 1, favoritesOnly: true);
+            var favoriteRow = Assert.Single(favorites.Items);
+            Assert.Equal(32, favoriteRow.Id);
+            Assert.True(favoriteRow.IsFavorite);
+
+            // Style filter drives Total; GrandTotal always counts the whole catalog.
+            var styled = await svc.SearchAsync("", styleId: 1, musicalStyleId: null, difficulty: null,
+                status: null, sortBy: null, userId: null);
+            Assert.Equal(3, styled.Total);
+            Assert.Equal(4, styled.GrandTotal); // + the styleless seed dance
+        }
+    }
+
     public void Dispose()
     {
         _conn.Dispose();

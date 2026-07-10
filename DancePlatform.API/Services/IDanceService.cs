@@ -17,8 +17,6 @@ public interface IDanceService
     Task<DanceDto?> UpdateAsync(int id, UpdateDanceRequest request);
     Task<bool> DeleteAsync(int id);
     Task<bool> ToggleFavoriteAsync(int userId, int danceId);
-    Task<bool> ToggleLearnedAsync(int userId, int danceId);
-    Task<bool> ToggleInProgressAsync(int userId, int danceId);
     Task<DanceStatusDto> SetStatusAsync(int userId, int danceId, string status);
     Task<SearchDancesResult> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, string? sortBy, int? userId, int page = 1, int pageSize = 24, bool favoritesOnly = false);
 

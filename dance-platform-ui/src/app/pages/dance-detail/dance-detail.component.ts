@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EMPTY, Observable } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
-import { DanceService, DanceStatus } from '../../core/services/dance.service';
+import { DanceService, DanceStatus, statusFlags } from '../../core/services/dance.service';
 import { VideoService, SegmentPayload, NotePayload } from '../../core/services/video.service';
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
@@ -28,6 +28,7 @@ import { EditVideoFormComponent } from '../../shared/components/edit-video-form/
 import { MoveVideoPickerComponent } from '../../shared/components/move-video-picker/move-video-picker.component';
 import { DIFFICULTY_LEVELS } from '../../core/constants/dance.constants';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
+import { ThumbFallback } from '../../core/utils/thumb-fallback';
 
 @Component({
   selector: 'app-dance-detail',
@@ -54,7 +55,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   // The signed-in user's timestamped notes, keyed by video id.
   private personalNotes = signal<Map<number, VideoNote[]>>(new Map());
   recommended = signal<Dance[]>([]);
-  private recThumbFailed = signal<Set<number>>(new Set());
+  private readonly recThumbs = new ThumbFallback();
   // Alphabetical neighbours within this dance's canonical style, for prev/next paging.
   prevDance = signal<Dance | null>(null);
   nextDance = signal<Dance | null>(null);
@@ -218,12 +219,12 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
 
   /** YouTube thumbnail for a recommended dance, or null if missing/failed to load. */
   recThumbnailUrl(dance: Dance): string | null {
-    if (this.recThumbFailed().has(dance.id)) return null;
+    if (this.recThumbs.has(dance.id)) return null;
     return youtubeThumbUrl(dance.thumbnailVideoId, dance.thumbnailPlatform);
   }
 
   onRecThumbError(danceId: number): void {
-    this.recThumbFailed.update(set => new Set(set).add(danceId));
+    this.recThumbs.markFailed(danceId);
   }
 
   selectVideo(video: Video): void {
@@ -367,16 +368,15 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     if (!d) return;
     this.actionError.set('');
     const snap = { isLearned: d.isLearned, isInProgress: d.isInProgress, learnedCount: d.learnedCount };
-    const willLearn = status === 'learned';
-    const learnedDelta = (willLearn ? 1 : 0) - (d.isLearned ? 1 : 0);
+    const flags = statusFlags(status);
+    const learnedDelta = (flags.isLearned ? 1 : 0) - (d.isLearned ? 1 : 0);
 
     this.dance.update(cur => cur ? {
       ...cur,
-      isLearned: willLearn,
-      isInProgress: status === 'inprogress',
+      ...flags,
       learnedCount: cur.learnedCount + learnedDelta
     } : cur);
-    this.recentDances.setLearned(d.id, willLearn);
+    this.recentDances.setLearned(d.id, flags.isLearned);
 
     this.danceService.setStatus(d.id, status).subscribe({
       error: () => {

@@ -86,22 +86,6 @@ public class DancesController : AppControllerBase
     }
 
     [Authorize]
-    [HttpPost("{id}/learned")]
-    public async Task<IActionResult> ToggleLearned(int id)
-    {
-        var isLearned = await _danceService.ToggleLearnedAsync(CurrentUserId!.Value, id);
-        return Ok(new { isLearned });
-    }
-
-    [Authorize]
-    [HttpPost("{id}/inprogress")]
-    public async Task<IActionResult> ToggleInProgress(int id)
-    {
-        var isInProgress = await _danceService.ToggleInProgressAsync(CurrentUserId!.Value, id);
-        return Ok(new { isInProgress });
-    }
-
-    [Authorize]
     [HttpPut("{id}/status")]
     public async Task<IActionResult> SetStatus(int id, [FromBody] SetStatusRequest request)
     {

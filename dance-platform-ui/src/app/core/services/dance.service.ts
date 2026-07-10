@@ -6,6 +6,15 @@ import { environment } from '../../../environments/environment';
 
 export type DanceStatus = 'notstarted' | 'inprogress' | 'learned';
 
+/**
+ * The dance flags implied by a learning status — learned and in-progress are
+ * mutually exclusive. Used for optimistic UI updates so every page applies the
+ * same reconciliation the server enforces.
+ */
+export function statusFlags(status: DanceStatus): { isLearned: boolean; isInProgress: boolean } {
+  return { isLearned: status === 'learned', isInProgress: status === 'inprogress' };
+}
+
 export interface CreateDancePayload {
   name: string;
   description?: string;
@@ -123,10 +132,6 @@ export class DanceService {
 
   toggleFavorite(id: number): Observable<{ isFavorite: boolean }> {
     return this.http.post<{ isFavorite: boolean }>(`${this.base}/${id}/favorite`, {});
-  }
-
-  toggleInProgress(id: number): Observable<{ isInProgress: boolean }> {
-    return this.http.post<{ isInProgress: boolean }>(`${this.base}/${id}/inprogress`, {});
   }
 
   /** Sets the mutually-exclusive learning status atomically (one transaction, server-enforced). */

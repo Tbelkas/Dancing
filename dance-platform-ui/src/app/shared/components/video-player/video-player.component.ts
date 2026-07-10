@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TrustUrlPipe } from '../../pipes/trust-url.pipe';
 import { VideoSegment, VideoChapter, VideoNote } from '../../../models/video.model';
-import { formatTimeSecs } from '../../../core/utils/video-url.utils';
 import { ViewerPrefsService } from '../../../core/services/viewer-prefs.service';
+import { PlayerBaseComponent } from '../player-base';
 
 @Component({
   selector: 'app-video-player',
@@ -13,7 +13,7 @@ import { ViewerPrefsService } from '../../../core/services/viewer-prefs.service'
   templateUrl: './video-player.component.html',
   styleUrls: ['./video-player.component.css']
 })
-export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
+export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input({ required: true }) videoId!: string;
   @Input() platform: string = 'youtube';
   @Input() startTime?: number;
@@ -33,10 +33,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() personalNotes: VideoNote[] = [];
   /** Any signed-in user can pin notes to moments in the video. */
   @Input() canTakeNotes = false;
-  /** Emits the current loop region when an admin saves it globally; the parent persists it. */
-  @Output() saveLoop = new EventEmitter<{ label: string; startTime: number; endTime: number }>();
-  /** Emits a global section an admin wants removed; the parent deletes it. */
-  @Output() deleteLoop = new EventEmitter<VideoSegment>();
+  // saveLoop/deleteLoop (inherited): the admin-scoped global sections on this player.
   /** Emits the current loop region when the user saves it to their own account. */
   @Output() savePersonalLoop = new EventEmitter<{ label: string; startTime: number; endTime: number }>();
   /** Emits a personal loop the user wants removed; the parent deletes it. */
@@ -47,46 +44,26 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() updateNote = new EventEmitter<{ id: number; timeSeconds: number; text: string }>();
   /** Emits a note the user wants removed; the parent deletes it. */
   @Output() deleteNote = new EventEmitter<VideoNote>();
-  /** Emits true when the video starts playing, false when it pauses/ends — drives practice timing. */
-  @Output() playingChange = new EventEmitter<boolean>();
   @ViewChild('playerContainer', { static: false }) playerContainer?: ElementRef;
   @ViewChild('tiktokFrame', { static: false }) tiktokFrame?: ElementRef<HTMLIFrameElement>;
   @ViewChild('mediaEl', { static: false }) mediaEl?: ElementRef<HTMLElement>;
 
-  constructor(private viewerPrefs: ViewerPrefsService) {}
+  constructor(private viewerPrefs: ViewerPrefsService) { super(); }
 
-  readonly playbackRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
-  currentRate = signal(1);
-  repeating = signal(false);
-  videoDuration = signal(0);
   activeSegmentId = signal<number | null>(null);
   activePersonalLoopId = signal<number | null>(null);
   loopSegmentId = signal<number | null>(null);
   activeChapterId = signal<number | null>(null);
   chaptersExpanded = signal(false);
-  /** Flip the video horizontally so the instructor's left matches the viewer's left. */
-  mirrored = signal(false);
-  shortcutsOpen = signal(false);
-  /** Brief visual pulse each time the loop wraps back to its start. */
-  loopFlash = signal(false);
 
   /** "Dance Platform video viewer (beta)": hide YouTube's controls and drive the
    *  embed through our own bar. Read once at init — the pref is set on the profile
    *  page, so a player never flips chrome mid-life. YouTube only: TikTok/Instagram
    *  embeds can't hand over their controls. */
   betaChrome = false;
-  playing = signal(false);
-  currentTime = signal(0);
-  muted = signal(false);
-  volume = signal(1);
-  fullscreen = signal(false);
 
   /** Only worth showing the jump row when the source video holds more than one dance. */
   get hasChapters(): boolean { return this.chapters.length > 1; }
-
-  repeatStart = 0;
-  repeatEnd = 0;
-  loopName = '';
 
   // --- Personal notes: draft state for the add row and the inline editor. ---
   noteDraftText = '';
@@ -113,15 +90,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     return '';
   }
 
-  private readonly LOOP_PREF_KEY = 'dp_player_loop';
-  private readonly MIRROR_PREF_KEY = 'dp_player_mirror';
-
   /** Keyboard shortcuts go to the player the user touched (or played) last, so
    *  pages that render several players don't all react to one keypress. */
   private static activeInstance: VideoPlayerComponent | null = null;
 
   private player: YT.Player | null = null;
-  private flashTimeout: ReturnType<typeof setTimeout> | null = null;
   private repeatInterval: ReturnType<typeof setInterval> | null = null;
   /** Drives the beta chrome's seek bar — the iframe API has no timeupdate event. */
   private chromeTickInterval: ReturnType<typeof setInterval> | null = null;
@@ -143,56 +116,21 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.playingChange.emit(playing);
   }
 
-  private readonly keydownHandler = (e: KeyboardEvent) => {
-    if (VideoPlayerComponent.activeInstance !== this) return;
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
-    const target = e.target as HTMLElement | null;
-    const tag = target?.tagName ?? '';
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) return;
+  /** Shortcuts only reach the player the user touched last. */
+  protected override canHandleKey(): boolean {
+    return VideoPlayerComponent.activeInstance === this;
+  }
 
-    switch (e.key) {
-      case ' ':
-        // Let a focused button keep its native space behaviour.
-        if (tag === 'BUTTON') return;
-        if (!this.isYouTube) return;
-        e.preventDefault();
-        this.togglePlay();
-        break;
-      case 'ArrowLeft':
-        if (!this.isYouTube) return;
-        e.preventDefault();
-        this.seekBy(-5);
-        break;
-      case 'ArrowRight':
-        if (!this.isYouTube) return;
-        e.preventDefault();
-        this.seekBy(5);
-        break;
-      case '[':
-        this.setStartToCurrent();
-        break;
-      case ']':
-        this.setEndToCurrent();
-        break;
-      case 'l': case 'L':
-        this.toggleRepeat();
-        break;
-      case 'm': case 'M':
-        this.toggleMirror();
-        break;
-      case '?':
-        this.shortcutsOpen.set(!this.shortcutsOpen());
-        break;
-      default: {
-        const digit = parseInt(e.key, 10);
-        if (this.isYouTube && digit >= 1 && digit <= this.playbackRates.length) {
-          this.setRate(this.playbackRates[digit - 1]);
-        }
-      }
-    }
-  };
+  /** Only the YouTube embed exposes a controllable transport (TikTok/Instagram don't). */
+  protected override shouldSkipTransportKeys(_targetTag: string): boolean {
+    return !this.isYouTube;
+  }
 
-  togglePlay(): void {
+  protected override rateKeysEnabled(): boolean {
+    return this.isYouTube;
+  }
+
+  override togglePlay(): void {
     if (!this.player || !window.YT) return;
     if (this.player.getPlayerState() === window.YT.PlayerState.PLAYING) {
       this.player.pauseVideo();
@@ -201,41 +139,30 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private seekBy(deltaSeconds: number): void {
+  protected override seekBy(deltaSeconds: number): void {
     if (!this.player) return;
     const t = Math.max(0, (this.player.getCurrentTime() ?? 0) + deltaSeconds);
     this.player.seekTo(t, true);
   }
 
-  toggleMirror(): void {
+  protected override seekAndPlay(seconds: number): void {
+    if (this.isYouTube) {
+      this.seekToTime(seconds);
+      this.player?.playVideo();
+    } else if (this.isTikTok) {
+      this.tiktokCurrentTime = seconds;
+      this.tiktokPost({ type: 'seekTo', value: seconds });
+      this.tiktokPost({ type: 'play' });
+    }
+  }
+
+  protected override mediaFrame(): HTMLElement | null {
+    return this.mediaEl?.nativeElement ?? null;
+  }
+
+  override toggleMirror(): void {
     VideoPlayerComponent.activeInstance = this;
-    this.mirrored.set(!this.mirrored());
-    localStorage.setItem(this.MIRROR_PREF_KEY, this.mirrored() ? '1' : '0');
-  }
-
-  /** Percent positions feeding the highlighted A→B region on the dual slider. */
-  loopStartPct(): number {
-    const d = this.videoDuration();
-    return d > 0 ? Math.min(100, (this.repeatStart / d) * 100) : 0;
-  }
-
-  loopWidthPct(): number {
-    const d = this.videoDuration();
-    if (d <= 0) return 0;
-    return Math.max(0, Math.min(100, ((this.repeatEnd - this.repeatStart) / d) * 100));
-  }
-
-  /** When both handles sit near the far end, the start handle must win the
-   *  pointer, or the region can never be reopened. */
-  startThumbOnTop(): boolean {
-    const d = this.videoDuration();
-    return d > 0 && this.repeatStart > d * 0.9;
-  }
-
-  private pulseLoopFlash(): void {
-    if (this.flashTimeout) clearTimeout(this.flashTimeout);
-    this.loopFlash.set(true);
-    this.flashTimeout = setTimeout(() => this.loopFlash.set(false), 700);
+    super.toggleMirror();
   }
 
   private readonly tiktokMessageHandler = (event: MessageEvent) => {
@@ -297,8 +224,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     // Short lists open by default; long ones (some videos hold dozens of dances)
     // start collapsed so they don't bury the player controls.
     this.chaptersExpanded.set(this.chapters.length > 0 && this.chapters.length <= 6);
-    this.repeating.set(localStorage.getItem(this.LOOP_PREF_KEY) === '1');
-    this.mirrored.set(localStorage.getItem(this.MIRROR_PREF_KEY) === '1');
+    this.restorePlayerPrefs();
     VideoPlayerComponent.activeInstance = this;
     document.addEventListener('keydown', this.keydownHandler);
     if (this.isTikTok) {
@@ -338,7 +264,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.chromeTickInterval) clearInterval(this.chromeTickInterval);
     document.removeEventListener('fullscreenchange', this.fullscreenHandler);
     if (this.tiktokStallHandle) clearTimeout(this.tiktokStallHandle);
-    if (this.flashTimeout) clearTimeout(this.flashTimeout);
+    this.clearFlashTimeout();
     document.removeEventListener('keydown', this.keydownHandler);
     if (VideoPlayerComponent.activeInstance === this) VideoPlayerComponent.activeInstance = null;
     this.emitPlaying(false);
@@ -385,30 +311,27 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  setRate(rate: number): void {
+  override setRate(rate: number): void {
     VideoPlayerComponent.activeInstance = this;
     this.currentRate.set(rate);
     this.player?.setPlaybackRate(rate);
   }
 
-  onStartSliderChange(value: number): void {
-    this.repeatStart = Math.min(value, this.repeatEnd > 0 ? this.repeatEnd - 1 : value);
+  /** Hand-moving a slider handle detaches the region from any armed section chip. */
+  override onStartSliderChange(value: number): void {
+    super.onStartSliderChange(value);
     this.loopSegmentId.set(null);
   }
 
-  onEndSliderChange(value: number): void {
-    this.repeatEnd = Math.max(value, this.repeatStart + 1);
+  override onEndSliderChange(value: number): void {
+    super.onEndSliderChange(value);
     this.loopSegmentId.set(null);
   }
 
-  /** Current playback position, floored to whole seconds. */
-  private currentPlaybackTime(): number {
+  protected override currentPlaybackTime(): number {
     const t = this.isYouTube ? (this.player?.getCurrentTime() ?? 0) : this.tiktokCurrentTime;
     return Math.max(0, Math.floor(t));
   }
-
-  setStartToCurrent(): void { this.onStartSliderChange(this.currentPlaybackTime()); }
-  setEndToCurrent(): void { this.onEndSliderChange(this.currentPlaybackTime()); }
 
   /** Jump the player to a personal loop and arm its region. Shares jump mechanics
    *  with sections but tracks its own active chip so highlights don't cross over. */
@@ -418,30 +341,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.activePersonalLoopId.set(loop.id);
   }
 
-  /** Current loop region, or null when it isn't a valid (named, non-empty) range. */
-  private currentLoopPayload(): { label: string; startTime: number; endTime: number } | null {
-    const label = this.loopName.trim();
-    if (!label || this.repeatEnd <= this.repeatStart) return null;
-    return { label, startTime: this.repeatStart, endTime: this.repeatEnd };
-  }
-
-  emitSaveLoop(): void {
-    const payload = this.currentLoopPayload();
-    if (!payload) return;
-    this.saveLoop.emit(payload);
-    this.loopName = '';
-  }
-
   emitSavePersonalLoop(): void {
     const payload = this.currentLoopPayload();
     if (!payload) return;
     this.savePersonalLoop.emit(payload);
     this.loopName = '';
-  }
-
-  emitDeleteLoop(event: Event, segment: VideoSegment): void {
-    event.stopPropagation();
-    this.deleteLoop.emit(segment);
   }
 
   emitDeletePersonalLoop(event: Event, loop: VideoSegment): void {
@@ -516,19 +420,13 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     return d > 0 ? Math.max(0, Math.min(100, (note.timeSeconds / d) * 100)) : 0;
   }
 
-  formatTime = formatTimeSecs;
+  protected override onRepeatArmed(): void {
+    this.startLoop();
+  }
 
-  toggleRepeat(): void {
-    if (this.repeating()) {
-      this.clearRepeat();
-      this.repeating.set(false);
-      this.loopSegmentId.set(null);
-      localStorage.setItem(this.LOOP_PREF_KEY, '0');
-    } else if (this.repeatEnd > this.repeatStart) {
-      this.repeating.set(true);
-      localStorage.setItem(this.LOOP_PREF_KEY, '1');
-      this.startLoop();
-    }
+  protected override onRepeatDisarmed(): void {
+    this.clearRepeat();
+    this.loopSegmentId.set(null);
   }
 
   selectLoopSegment(segment: VideoSegment): void {
@@ -688,13 +586,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.currentTime.set(seconds);
   }
 
-  /** The loop sliders live below the video and vanish in fullscreen, so the bar
-   *  carries its own way back to the armed region's start. */
-  jumpToLoopStart(): void {
-    this.seekToTime(this.repeatStart);
-    this.player?.playVideo();
-  }
-
   toggleMute(): void {
     if (!this.player) return;
     if (this.player.isMuted()) {
@@ -719,27 +610,4 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.volume.set(level);
   }
-
-  volumeIcon(): string {
-    if (this.muted() || this.volume() === 0) return 'fa-volume-xmark';
-    return this.volume() < 0.5 ? 'fa-volume-low' : 'fa-volume-high';
-  }
-
-  /** Displayed volume: 0 while muted so the slider reads as silent. */
-  volumePct(): number {
-    return Math.round((this.muted() ? 0 : this.volume()) * 100);
-  }
-
-  /** Fullscreens the media frame (not the iframe) so our bar rides along. */
-  toggleFullscreen(): void {
-    if (document.fullscreenElement) {
-      void document.exitFullscreen();
-    } else {
-      void this.mediaEl?.nativeElement.requestFullscreen();
-    }
-  }
-
-  private readonly fullscreenHandler = () => {
-    this.fullscreen.set(document.fullscreenElement != null);
-  };
 }

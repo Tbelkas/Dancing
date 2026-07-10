@@ -275,35 +275,6 @@ public class DanceService : IDanceService
         return isFavorite;
     }
 
-    public async Task<bool> ToggleLearnedAsync(int userId, int danceId)
-    {
-        var existing = await _db.UserLearnedDances.FindAsync(userId, danceId);
-        var isLearned = existing is null;
-        if (existing is not null)
-            _db.UserLearnedDances.Remove(existing);
-        else
-            _db.UserLearnedDances.Add(new UserLearnedDance { UserId = userId, DanceId = danceId });
-
-        await using var tx = await _db.Database.BeginTransactionAsync();
-        await _db.SaveChangesAsync();
-        await _db.Dances.Where(d => d.Id == danceId)
-            .ExecuteUpdateAsync(s => s.SetProperty(d => d.LearnedCount, d => d.LearnedCount + (isLearned ? 1 : -1)));
-        await tx.CommitAsync();
-        return isLearned;
-    }
-
-    public async Task<bool> ToggleInProgressAsync(int userId, int danceId)
-    {
-        var existing = await _db.UserInProgressDances.FindAsync(userId, danceId);
-        var isInProgress = existing is null;
-        if (existing is not null)
-            _db.UserInProgressDances.Remove(existing);
-        else
-            _db.UserInProgressDances.Add(new UserInProgressDance { UserId = userId, DanceId = danceId });
-        await _db.SaveChangesAsync();
-        return isInProgress;
-    }
-
     /// <summary>
     /// Sets the mutually-exclusive learning status (notstarted/inprogress/learned) for a user+dance
     /// in a single transaction. Reconciles both join tables together so the two states can never

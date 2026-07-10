@@ -22,21 +22,21 @@ Identity IDs auto-generate. The site reads the DB live — **no deploy needed**.
 ## Per-video procedure
 For each pending video `<vid>`:
 
-1. **Classify**: `python prep_video.py <vid>`
+1. **Classify**: `python scripts/prep_video.py <vid>`
    Reads chapters + description timestamps + caption availability + current DB dances, prints a VERDICT:
    - `TIMED_OK` → names match + all timed → mark ✅ VERIFIED, no DB change.
-   - `NAMES_MATCH_NEED_TIMES` → correct names, missing times → `python map_times.py <vid> apply` (keeps dances, sets StartTime/EndTime from chapters). Mark ✅ DONE.
+   - `NAMES_MATCH_NEED_TIMES` → correct names, missing times → `python scripts/map_times.py <vid> apply` (keeps dances, sets StartTime/EndTime from chapters). Mark ✅ DONE.
    - `MISMATCH` / `NEEDS_MULTIMODAL` → wrong-source → **rebuild** (step 2).
    - `FETCH_FAILED` → `rm _proto/<vid>.json` and retry once. If yt-dlp says *"video is not available"* → mark ❌ DEAD, move on.
 
 2. **Decide the rebuild shape** by looking at the title + chapters (and the video itself if needed — step 3):
    - **Single-move tutorial** (title names one move, e.g. "How to Windmill"): the video teaches ONE move.
      - First check for an existing canonical dance: `SELECT "Id","Name" FROM "Dances" WHERE lower("Name")=lower('<move>');`
-     - If it exists **and is NOT one of the dances already on this video** → `python rebuild_video.py <vid> attach <existingDanceId> apply` (adds this video as another clip, deletes the wrong dances).
-     - If the good dance **is already one of this video's dances** (common for over-split lessons) → `python rebuild_video.py <vid> keep <danceIdToKeep> apply` (deletes the wrong siblings, keeps that dance + its existing video link). Prefer keeping a dance that has multiple videos.
-     - Else → `python rebuild_video.py <vid> single "<Move Name>" <styleId> apply`.
-   - **Real multi-move list** (e.g. "10 Basic Jazz Dance Moves" with real move chapters): `python rebuild_video.py <vid> tutorial "<Video Title>" <styleId> "Label@start-end;Label@start-end;..." apply`. Build segments from the *real* move chapters only — **drop meta sections** (Intro/Outro/Start/Steps/Tutorial/"Bad Habit"/"How to"/section headers). Use chapter start as segment start and the next chapter start (or duration) as end.
-   - **Not a moves video** (technique talk, "5 bad habits", reactions): `python rebuild_video.py <vid> delete apply`.
+     - If it exists **and is NOT one of the dances already on this video** → `python scripts/rebuild_video.py <vid> attach <existingDanceId> apply` (adds this video as another clip, deletes the wrong dances).
+     - If the good dance **is already one of this video's dances** (common for over-split lessons) → `python scripts/rebuild_video.py <vid> keep <danceIdToKeep> apply` (deletes the wrong siblings, keeps that dance + its existing video link). Prefer keeping a dance that has multiple videos.
+     - Else → `python scripts/rebuild_video.py <vid> single "<Move Name>" <styleId> apply`.
+   - **Real multi-move list** (e.g. "10 Basic Jazz Dance Moves" with real move chapters): `python scripts/rebuild_video.py <vid> tutorial "<Video Title>" <styleId> "Label@start-end;Label@start-end;..." apply`. Build segments from the *real* move chapters only — **drop meta sections** (Intro/Outro/Start/Steps/Tutorial/"Bad Habit"/"How to"/section headers). Use chapter start as segment start and the next chapter start (or duration) as end.
+   - **Not a moves video** (technique talk, "5 bad habits", reactions): `python scripts/rebuild_video.py <vid> delete apply`.
 
 3. **Multimodal read** (only when there is no usable text signal, or to confirm a mismatch). The move name is usually on-screen as a title card:
    ```
@@ -48,7 +48,7 @@ For each pending video `<vid>`:
    Then `Read` each `_proto/<vid>_NN.png` montage and OCR the on-screen move names + their burned timestamps (top-left). Reject intro/credit cards. Feed the result into the rebuild in step 2 (`single` or `tutorial`). Segment times from 2s sampling are ±2s — acceptable.
 
 4. **Mark the tracker**:
-   `python update_tracker.py <vid> "<status emoji+word>" "<result>" "<notes>"`
+   `python scripts/update_tracker.py <vid> "<status emoji+word>" "<result>" "<notes>"`
    Statuses: `✅ DONE`, `✅ VERIFIED`, `🗑️ DELETED`, `❌ DEAD`.
 
 ## Style IDs

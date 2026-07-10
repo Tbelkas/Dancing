@@ -8,6 +8,8 @@ import { RoleService } from '../../core/services/role.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastService } from '../../core/services/toast.service';
 import { VideoLibraryItem } from '../../models/video.model';
+import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
+import { ThumbFallback } from '../../core/utils/thumb-fallback';
 
 type LibraryScope = 'mine' | 'global';
 
@@ -23,7 +25,7 @@ export class LibraryComponent implements OnInit {
   items = signal<VideoLibraryItem[]>([]);
   loading = signal(true);
   deletingId = signal<number | null>(null);
-  private thumbFailed = signal<Set<number>>(new Set());
+  private readonly thumbs = new ThumbFallback();
 
   constructor(
     private videoService: VideoService,
@@ -53,15 +55,12 @@ export class LibraryComponent implements OnInit {
   }
 
   thumbnailUrl(item: VideoLibraryItem): string | null {
-    if (this.thumbFailed().has(item.id)) return null;
-    if (item.platform === 'youtube' && item.videoId) {
-      return `https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`;
-    }
-    return null;
+    if (this.thumbs.has(item.id)) return null;
+    return youtubeThumbUrl(item.videoId, item.platform);
   }
 
   onThumbError(id: number): void {
-    this.thumbFailed.update(s => new Set(s).add(id));
+    this.thumbs.markFailed(id);
   }
 
   platformLabel(platform: string): string {

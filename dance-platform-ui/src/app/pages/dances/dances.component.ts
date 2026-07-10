@@ -1,11 +1,11 @@
 import { Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
-import { DanceService, ImportResult, DanceStatus } from '../../core/services/dance.service';
+import { DanceService, ImportResult, DanceStatus, statusFlags } from '../../core/services/dance.service';
 import { StyleService } from '../../core/services/style.service';
 import { MusicalStyleService } from '../../core/services/musical-style.service';
 import { InstructorService } from '../../core/services/instructor.service';
@@ -18,6 +18,8 @@ import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
 import { DIFFICULTY_FILTER_OPTIONS, DIFFICULTY_LEVELS } from '../../core/constants/dance.constants';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
+import { UrlFilterSync, idFromParam, pageFromParam } from '../../core/utils/url-filter-sync';
+import { ThumbFallback } from '../../core/utils/thumb-fallback';
 import { AddStyleFormComponent } from '../../shared/components/add-style-form/add-style-form.component';
 import { AddDanceFormComponent } from '../../shared/components/add-dance-form/add-dance-form.component';
 import { BulkImportFormComponent } from '../../shared/components/bulk-import-form/bulk-import-form.component';
@@ -228,7 +230,7 @@ export class DancesComponent implements OnInit, OnDestroy {
     return pages;
   });
 
-  thumbFailed = signal<Set<number>>(new Set());
+  readonly thumbs = new ThumbFallback();
 
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
   private searchSub: Subscription | null = null;
@@ -243,6 +245,9 @@ export class DancesComponent implements OnInit, OnDestroy {
   showAddVideo = signal(false);
   showAddDance = signal(false);
 
+  /** Declarative URL/localStorage wiring for every filter — one entry per filter. */
+  private readonly filterSync: UrlFilterSync;
+
   constructor(
     private danceService: DanceService,
     private styleService: StyleService,
@@ -253,7 +258,65 @@ export class DancesComponent implements OnInit, OnDestroy {
     private recentDances: RecentDancesService,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) {
+    // Status/favorites only apply to signed-in users; sanitize drops stale personal
+    // filters arriving from the URL when logged out.
+    const authed = () => this.auth.isAuthenticated();
+    this.filterSync = new UrlFilterSync(FILTERS_KEY, this.router, this.route, [
+      {
+        param: 'q', storageKey: 'searchQuery', signal: this.searchQuery,
+        fromParam: raw => raw ?? '',
+        toParam: v => v.trim() || null,
+        fromStored: raw => typeof raw === 'string' ? raw : undefined,
+        // persist() writes the trimmed value, so its URL echo must match untrimmed state.
+        equals: (fromUrl, current) => fromUrl === current.trim()
+      },
+      {
+        param: 'style', storageKey: 'selectedStyleId', signal: this.selectedStyleId,
+        fromParam: idFromParam,
+        toParam: v => v,
+        fromStored: raw => raw === null || typeof raw === 'number' ? raw as number | null : undefined
+      },
+      {
+        param: 'music', storageKey: 'selectedMusicalStyleId', signal: this.selectedMusicalStyleId,
+        fromParam: idFromParam,
+        toParam: v => v,
+        fromStored: raw => raw === null || typeof raw === 'number' ? raw as number | null : undefined
+      },
+      {
+        param: 'level', storageKey: 'selectedDifficulty', signal: this.selectedDifficulty,
+        fromParam: raw => raw,
+        toParam: v => v,
+        fromStored: raw => raw === null || typeof raw === 'string' ? raw as string | null : undefined
+      },
+      {
+        param: 'status', storageKey: 'selectedStatus', signal: this.selectedStatus,
+        fromParam: raw => raw ?? 'all',
+        toParam: v => v !== 'all' ? v : null,
+        fromStored: raw => typeof raw === 'string' ? raw : undefined,
+        sanitize: v => authed() ? v : 'all'
+      },
+      {
+        param: 'fav', storageKey: 'favoritesOnly', signal: this.favoritesOnly,
+        fromParam: raw => raw === '1',
+        toParam: v => v ? '1' : null,
+        fromStored: raw => typeof raw === 'boolean' ? raw : undefined,
+        sanitize: v => authed() ? v : false
+      },
+      {
+        param: 'sort', storageKey: 'sortBy', signal: this.sortBy,
+        fromParam: raw => raw || 'recommended',
+        toParam: v => v !== 'recommended' ? v : null,
+        fromStored: raw => typeof raw === 'string' ? raw : undefined
+      },
+      {
+        param: 'page', storageKey: 'currentPage', signal: this.currentPage,
+        fromParam: pageFromParam,
+        toParam: v => v > 1 ? v : null,
+        fromStored: raw => typeof raw === 'number' && raw >= 1 ? raw : undefined
+      }
+    ]);
+  }
 
   ngOnInit(): void {
     this.styleService.getAll().subscribe(s => this.styles.set(s));
@@ -267,7 +330,9 @@ export class DancesComponent implements OnInit, OnDestroy {
     // while this page is already showing). The first emission is the snapshot
     // restoreFilters() just consumed, and our own syncUrl() writes always match
     // current state, so both no-op in applyUrlIfChanged.
-    this.urlSub = this.route.queryParamMap.pipe(skip(1)).subscribe(qp => this.applyUrlIfChanged(qp));
+    this.urlSub = this.route.queryParamMap.pipe(skip(1)).subscribe(qp => {
+      if (this.filterSync.applyIfChanged(qp)) this.runSearch();
+    });
     if (this.auth.isAuthenticated()) {
       this.railPending.set(true);
       this.danceService.searchDances({ status: 'inprogress', sortBy: 'name', pageSize: 12 })
@@ -278,85 +343,19 @@ export class DancesComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Restore filters: an explicit URL (shared link, back button) wins; otherwise fall back to
-   * the last-used set in localStorage so open/refresh lands where the user left off.
-   */
   private restoreFilters(): void {
-    const qp = this.route.snapshot.queryParamMap;
-    const urlHasFilters = ['q', 'style', 'music', 'level', 'status', 'fav', 'sort', 'page'].some(k => qp.has(k));
-    if (urlHasFilters) {
-      this.searchQuery.set(qp.get('q') ?? '');
-      const style = Number(qp.get('style'));
-      this.selectedStyleId.set(Number.isInteger(style) && style > 0 ? style : null);
-      const music = Number(qp.get('music'));
-      this.selectedMusicalStyleId.set(Number.isInteger(music) && music > 0 ? music : null);
-      this.selectedDifficulty.set(qp.get('level'));
-      this.selectedStatus.set(qp.get('status') ?? 'all');
-      this.favoritesOnly.set(qp.get('fav') === '1');
-      if (qp.get('sort')) this.sortBy.set(qp.get('sort')!);
-      const page = Number(qp.get('page'));
-      if (Number.isInteger(page) && page >= 1) this.currentPage.set(page);
-    } else {
-      try {
-        const raw = localStorage.getItem(FILTERS_KEY);
-        if (raw) {
-          const s = JSON.parse(raw);
-          if (typeof s.searchQuery === 'string') this.searchQuery.set(s.searchQuery);
-          if (s.selectedStyleId === null || typeof s.selectedStyleId === 'number') this.selectedStyleId.set(s.selectedStyleId);
-          if (s.selectedMusicalStyleId === null || typeof s.selectedMusicalStyleId === 'number') this.selectedMusicalStyleId.set(s.selectedMusicalStyleId);
-          if (s.selectedDifficulty === null || typeof s.selectedDifficulty === 'string') this.selectedDifficulty.set(s.selectedDifficulty);
-          if (typeof s.selectedStatus === 'string') this.selectedStatus.set(s.selectedStatus);
-          if (typeof s.favoritesOnly === 'boolean') this.favoritesOnly.set(s.favoritesOnly);
-          if (typeof s.sortBy === 'string') this.sortBy.set(s.sortBy);
-          if (typeof s.currentPage === 'number' && s.currentPage >= 1) this.currentPage.set(s.currentPage);
-        }
-      } catch { /* ignore malformed/unavailable storage */ }
-    }
+    this.filterSync.restore();
     // Legacy stored/linked value from when Favorited lived inside status.
     if (this.selectedStatus() === 'favorite') {
       this.selectedStatus.set('all');
       this.favoritesOnly.set(true);
     }
-    // Status/favorites only apply to signed-in users; drop stale personal filters when logged out.
+    // Status/favorites only apply to signed-in users; drop stale personal filters when
+    // logged out (also covers values restored from the localStorage snapshot).
     if (!this.auth.isAuthenticated()) {
       this.selectedStatus.set('all');
       this.favoritesOnly.set(false);
     }
-  }
-
-  private persistFilters(): void {
-    try {
-      localStorage.setItem(FILTERS_KEY, JSON.stringify({
-        searchQuery: this.searchQuery(),
-        selectedStyleId: this.selectedStyleId(),
-        selectedMusicalStyleId: this.selectedMusicalStyleId(),
-        selectedDifficulty: this.selectedDifficulty(),
-        selectedStatus: this.selectedStatus(),
-        favoritesOnly: this.favoritesOnly(),
-        sortBy: this.sortBy(),
-        currentPage: this.currentPage()
-      }));
-    } catch { /* storage unavailable (private mode, quota) — non-fatal */ }
-    this.syncUrl();
-  }
-
-  /** Mirror the filters into the URL so any filtered view is shareable and back-button-safe. */
-  private syncUrl(): void {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      replaceUrl: true,
-      queryParams: {
-        q: this.searchQuery().trim() || null,
-        style: this.selectedStyleId(),
-        music: this.selectedMusicalStyleId(),
-        level: this.selectedDifficulty(),
-        status: this.selectedStatus() !== 'all' ? this.selectedStatus() : null,
-        fav: this.favoritesOnly() ? '1' : null,
-        sort: this.sortBy() !== 'recommended' ? this.sortBy() : null,
-        page: this.currentPage() > 1 ? this.currentPage() : null
-      }
-    });
   }
 
   ngOnDestroy(): void {
@@ -366,48 +365,13 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.clearHoverTimer();
   }
 
-  /** Adopt filters arriving via the URL (header search, back button) when they
-   *  differ from current state; identical params (our own syncUrl echoes) no-op. */
-  private applyUrlIfChanged(qp: ParamMap): void {
-    const q = qp.get('q') ?? '';
-    const styleRaw = Number(qp.get('style'));
-    const style = Number.isInteger(styleRaw) && styleRaw > 0 ? styleRaw : null;
-    const musicRaw = Number(qp.get('music'));
-    const music = Number.isInteger(musicRaw) && musicRaw > 0 ? musicRaw : null;
-    const level = qp.get('level');
-    const status = qp.get('status') ?? 'all';
-    const fav = qp.get('fav') === '1';
-    const sort = qp.get('sort') ?? 'recommended';
-    const pageRaw = Number(qp.get('page'));
-    const page = Number.isInteger(pageRaw) && pageRaw >= 1 ? pageRaw : 1;
-
-    if (q === this.searchQuery().trim() &&
-        style === this.selectedStyleId() &&
-        music === this.selectedMusicalStyleId() &&
-        level === this.selectedDifficulty() &&
-        status === this.selectedStatus() &&
-        fav === this.favoritesOnly() &&
-        sort === this.sortBy() &&
-        page === this.currentPage()) return;
-
-    this.searchQuery.set(q);
-    this.selectedStyleId.set(style);
-    this.selectedMusicalStyleId.set(music);
-    this.selectedDifficulty.set(level);
-    this.selectedStatus.set(this.auth.isAuthenticated() ? status : 'all');
-    this.favoritesOnly.set(this.auth.isAuthenticated() ? fav : false);
-    this.sortBy.set(sort);
-    this.currentPage.set(page);
-    this.runSearch();
-  }
-
   setViewMode(mode: 'grid' | 'list'): void {
     this.viewMode.set(mode);
     try { localStorage.setItem(this.VIEW_MODE_KEY, mode); } catch { /* non-fatal */ }
   }
 
   private runSearch(): void {
-    this.persistFilters();
+    this.filterSync.persist();
     this.loading.set(true);
     // Cancel any in-flight search so a slower earlier response can't overwrite a newer filter's
     // results (HttpClient aborts the request on unsubscribe).
@@ -542,7 +506,7 @@ export class DancesComponent implements OnInit, OnDestroy {
   private hoverTimer: ReturnType<typeof setInterval> | null = null;
 
   onMediaEnter(dance: Dance): void {
-    if (!dance.thumbnailVideoId || dance.thumbnailPlatform !== 'youtube' || this.thumbFailed().has(dance.id)) return;
+    if (!dance.thumbnailVideoId || dance.thumbnailPlatform !== 'youtube' || this.thumbs.has(dance.id)) return;
     this.hoverDanceId.set(dance.id);
     this.hoverFrame.set(1);
     this.clearHoverTimer();
@@ -563,7 +527,7 @@ export class DancesComponent implements OnInit, OnDestroy {
   }
 
   thumbnailUrl(dance: Dance): string | null {
-    if (this.thumbFailed().has(dance.id)) return null;
+    if (this.thumbs.has(dance.id)) return null;
     // Hovering this card cycles storyboard frames (mq1–mq3); otherwise the static poster.
     const frame = this.hoverDanceId() === dance.id ? this.hoverFrame() : 0;
     return youtubeThumbUrl(dance.thumbnailVideoId, dance.thumbnailPlatform, frame);
@@ -583,17 +547,14 @@ export class DancesComponent implements OnInit, OnDestroy {
   }
 
   onThumbError(danceId: number): void {
-    this.thumbFailed.update(set => {
-      const next = new Set(set);
-      next.add(danceId);
-      return next;
-    });
+    this.thumbs.markFailed(danceId);
   }
 
+  /** YouTube serves a tiny grey placeholder for missing thumbs — treat it as a failure. */
   onThumbLoad(danceId: number, event: Event): void {
     const img = event.target as HTMLImageElement;
     if (img.naturalHeight > 0 && img.naturalHeight <= 90) {
-      this.onThumbError(danceId);
+      this.thumbs.markFailed(danceId);
     }
   }
 
@@ -616,16 +577,14 @@ export class DancesComponent implements OnInit, OnDestroy {
     event.preventDefault();
     const snap = { isLearned: dance.isLearned, isInProgress: dance.isInProgress };
     const status: DanceStatus = dance.isLearned ? 'notstarted' : 'learned';
-    const willLearn = status === 'learned';
+    const flags = statusFlags(status);
 
     this.searchResults.update(list =>
-      list.map(d => d.id === dance.id
-        ? { ...d, isLearned: willLearn, isInProgress: willLearn ? false : d.isInProgress }
-        : d)
+      list.map(d => d.id === dance.id ? { ...d, ...flags } : d)
     );
     // Keep the local recently-viewed trail in step so "Continue learning" rails don't
     // briefly show a dance that the server then reports as learned (or vice versa).
-    this.recentDances.setLearned(dance.id, willLearn);
+    this.recentDances.setLearned(dance.id, flags.isLearned);
 
     this.danceService.setStatus(dance.id, status).subscribe({
       error: () => {

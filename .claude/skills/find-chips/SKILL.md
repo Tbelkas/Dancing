@@ -28,13 +28,13 @@ The chips = the `VideoSegments` table; distinct from "In this video" chapters (r
 ## Per-video procedure
 For each queued video `<ytid>` (DB row `<videoDbId>`):
 
-1. **Fetch transcript**: `python prep_sections.py <ytid>`
+1. **Fetch transcript**: `python scripts/prep_sections.py <ytid>`
    Caches yt-dlp metadata + English auto-captions → `_proto/sec_<ytid>.txt`
    (title, duration, native chapters, condensed timestamped transcript). Prints `dur/chapters/caplines`.
 
 2. **Decide the source of sections** by reading `_proto/sec_<ytid>.txt`:
    - **Human-curated native chapters** (clean labels like Intro / move names / Practice) →
-     `python chapters_spec.py <ytid>` emits `Label@start-end;...`. Adopt, lightly cleaned
+     `python scripts/chapters_spec.py <ytid>` emits `Label@start-end;...`. Adopt, lightly cleaned
      (rename `<Untitled Chapter 1>`→`Intro`, title-case ALL-CAPS labels).
    - **Auto-generated chapters** (labels are transcript fragments, or course-promo links) → ignore them, infer from transcript.
    - **No usable chapters** → infer from the transcript: an Intro, one section per taught move/concept,
@@ -42,7 +42,7 @@ For each queued video `<ytid>` (DB row `<videoDbId>`):
      "with music") as boundaries; convert m:ss to the section start.
 
 3. **Apply** (dry-run first if unsure — omit `apply`):
-   `python apply_sections.py <videoDbId> "Label@start-end;Label@start-end;..." apply`
+   `python scripts/apply_sections.py <videoDbId> "Label@start-end;Label@start-end;..." apply`
    Inserts segments + sets `VideoType='tutorial'`. Times accept seconds or `m:ss`; end optional.
    Replaces any existing segments on that video. (The script pipes SQL via psql **stdin with
    PGCLIENTENCODING=UTF8** — required so en/em-dashes & accents in labels don't corrupt on Windows.)

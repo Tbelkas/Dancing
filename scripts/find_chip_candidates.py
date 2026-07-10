@@ -20,7 +20,8 @@ Run `--init` once to seed the skip list with everything currently un-chipped
 import json, os, subprocess, sys, datetime
 sys.stdout.reconfigure(encoding="utf-8")
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+# This file lives in scripts/ — the repo root is one level up.
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APPSETTINGS = os.path.join(ROOT, "DancePlatform.API", "appsettings.Development.json")
 TRACKER = os.path.join(ROOT, "SECTIONS_FIXUP.md")
 SKIP = os.path.join(ROOT, "_proto", "chip_skip.tsv")

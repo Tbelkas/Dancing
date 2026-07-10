@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ElementRef, 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VideoSegment } from '../../../models/video.model';
-import { formatTimeSecs } from '../../../core/utils/video-url.utils';
+import { PlayerBaseComponent } from '../player-base';
 
 /**
  * Player for videos that live on the user's own disk. The file is handed to us as an
@@ -16,7 +16,7 @@ import { formatTimeSecs } from '../../../core/utils/video-url.utils';
   templateUrl: './local-video-player.component.html',
   styleUrls: ['../video-player/video-player.component.css', './local-video-player.component.css']
 })
-export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
+export class LocalVideoPlayerComponent extends PlayerBaseComponent implements OnInit, OnDestroy {
   /** Object URL of the locally picked file. */
   @Input({ required: true }) src!: string;
   /** The user's saved time slots for this choreo. */
@@ -27,43 +27,22 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
   }
   /** Emits the new rotation when the user changes it; the parent persists it. */
   @Output() rotationChange = new EventEmitter<number>();
-  /** Emits the current loop region when the user saves it; the parent persists it. */
-  @Output() saveLoop = new EventEmitter<{ label: string; startTime: number; endTime: number }>();
-  /** Emits a saved loop the user wants removed; the parent deletes it. */
-  @Output() deleteLoop = new EventEmitter<VideoSegment>();
+  // saveLoop/deleteLoop (inherited): the user's saved time slots for this choreo.
   /** Emits the video duration once metadata loads, so the parent can persist it. */
   @Output() durationDetected = new EventEmitter<number>();
-  /** Emits play/pause transitions, so the parent can track practice time. */
-  @Output() playingChange = new EventEmitter<boolean>();
   @ViewChild('videoEl', { static: true }) videoEl!: ElementRef<HTMLVideoElement>;
   @ViewChild('mediaEl', { static: true }) mediaEl!: ElementRef<HTMLElement>;
 
-  readonly playbackRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
   readonly rotationOptions = [0, 90, 180, 270];
   readonly zoomOptions = [1, 1.5, 2, 3];
   readonly minRate = 0.25;
   readonly maxRate = 2;
-  currentRate = signal(1);
   rotationDeg = signal(0);
-  repeating = signal(false);
-  videoDuration = signal(0);
   activeLoopId = signal<number | null>(null);
-  mirrored = signal(false);
-  shortcutsOpen = signal(false);
-  loopFlash = signal(false);
-  playing = signal(false);
-  currentTime = signal(0);
-  muted = signal(false);
-  volume = signal(1);
-  fullscreen = signal(false);
   zoom = signal(1);
   /** Pan of the zoomed picture, screen pixels from center; 0,0 when not zoomed. */
   panX = signal(0);
   panY = signal(0);
-
-  repeatStart = 0;
-  repeatEnd = 0;
-  loopName = '';
 
   private dragging = false;
   private dragMoved = false;
@@ -74,19 +53,10 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
   private naturalWidth = signal(0);
   private naturalHeight = signal(0);
 
-  // Same keys as the YouTube player, so loop/mirror preferences carry across both.
-  private readonly LOOP_PREF_KEY = 'dp_player_loop';
-  private readonly MIRROR_PREF_KEY = 'dp_player_mirror';
-
-  private flashTimeout: ReturnType<typeof setTimeout> | null = null;
-
   private get video(): HTMLVideoElement { return this.videoEl.nativeElement; }
 
-  formatTime = formatTimeSecs;
-
   ngOnInit(): void {
-    this.repeating.set(localStorage.getItem(this.LOOP_PREF_KEY) === '1');
-    this.mirrored.set(localStorage.getItem(this.MIRROR_PREF_KEY) === '1');
+    this.restorePlayerPrefs();
     document.addEventListener('keydown', this.keydownHandler);
     document.addEventListener('fullscreenchange', this.fullscreenHandler);
   }
@@ -94,7 +64,7 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     document.removeEventListener('keydown', this.keydownHandler);
     document.removeEventListener('fullscreenchange', this.fullscreenHandler);
-    if (this.flashTimeout) clearTimeout(this.flashTimeout);
+    this.clearFlashTimeout();
     // The <video> is torn down without firing pause — tell the parent playback ended.
     if (this.playing()) this.playingChange.emit(false);
   }
@@ -138,7 +108,7 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
 
   /** The native element takes any playbackRate, so speed is a continuous slider
    *  here (unlike the YouTube player, whose API only accepts its preset rates). */
-  setRate(rate: number): void {
+  override setRate(rate: number): void {
     const clamped = Math.round(Math.min(this.maxRate, Math.max(this.minRate, rate)) * 100) / 100;
     this.currentRate.set(clamped);
     this.video.playbackRate = clamped;
@@ -246,16 +216,6 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     this.video.muted = level === 0;
   }
 
-  volumeIcon(): string {
-    if (this.muted() || this.volume() === 0) return 'fa-volume-xmark';
-    return this.volume() < 0.5 ? 'fa-volume-low' : 'fa-volume-high';
-  }
-
-  /** Displayed volume: 0 while muted so the slider reads as silent. */
-  volumePct(): number {
-    return Math.round((this.muted() ? 0 : this.volume()) * 100);
-  }
-
   seekTo(seconds: number): void {
     this.video.currentTime = seconds;
     this.currentTime.set(seconds);
@@ -265,37 +225,19 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     this.video.muted = !this.video.muted;
   }
 
-  /** Fullscreens the media frame (not the <video>) so the rotation layout carries over. */
-  toggleFullscreen(): void {
-    if (document.fullscreenElement) {
-      void document.exitFullscreen();
-    } else {
-      void this.mediaEl.nativeElement.requestFullscreen();
-    }
+  /** The media frame (not the raw <video>) fullscreens, so the rotation layout carries over. */
+  protected override mediaFrame(): HTMLElement | null {
+    return this.mediaEl.nativeElement;
   }
 
-  toggleMirror(): void {
-    this.mirrored.set(!this.mirrored());
-    localStorage.setItem(this.MIRROR_PREF_KEY, this.mirrored() ? '1' : '0');
-  }
-
-  toggleRepeat(): void {
-    if (this.repeating()) {
-      this.repeating.set(false);
-      localStorage.setItem(this.LOOP_PREF_KEY, '0');
-    } else if (this.repeatEnd > this.repeatStart) {
-      this.repeating.set(true);
-      localStorage.setItem(this.LOOP_PREF_KEY, '1');
-      this.video.currentTime = this.repeatStart;
-      void this.video.play();
-    }
-  }
-
-  /** The loop sliders live below the video and vanish in fullscreen, so the bar
-   *  carries its own way back to the armed region's start. */
-  jumpToLoopStart(): void {
+  protected override onRepeatArmed(): void {
     this.video.currentTime = this.repeatStart;
-    this.currentTime.set(this.repeatStart);
+    void this.video.play();
+  }
+
+  protected override seekAndPlay(seconds: number): void {
+    this.video.currentTime = seconds;
+    this.currentTime.set(seconds);
     void this.video.play();
   }
 
@@ -307,52 +249,16 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     void this.video.play();
   }
 
-  onStartSliderChange(value: number): void {
-    this.repeatStart = Math.min(value, this.repeatEnd > 0 ? this.repeatEnd - 1 : value);
+  protected override currentPlaybackTime(): number {
+    return Math.floor(this.video.currentTime);
   }
 
-  onEndSliderChange(value: number): void {
-    this.repeatEnd = Math.max(value, this.repeatStart + 1);
-  }
-
-  setStartToCurrent(): void { this.onStartSliderChange(Math.floor(this.video.currentTime)); }
-  setEndToCurrent(): void { this.onEndSliderChange(Math.floor(this.video.currentTime)); }
-
-  emitSaveLoop(): void {
-    const label = this.loopName.trim();
-    if (!label || this.repeatEnd <= this.repeatStart) return;
-    this.saveLoop.emit({ label, startTime: this.repeatStart, endTime: this.repeatEnd });
-    this.loopName = '';
-  }
-
-  emitDeleteLoop(event: Event, loop: VideoSegment): void {
-    event.stopPropagation();
-    this.deleteLoop.emit(loop);
-  }
-
-  // Percent positions feeding the highlighted A→B region on the dual slider.
-  loopStartPct(): number {
-    const d = this.videoDuration();
-    return d > 0 ? Math.min(100, (this.repeatStart / d) * 100) : 0;
-  }
-
-  loopWidthPct(): number {
-    const d = this.videoDuration();
-    if (d <= 0) return 0;
-    return Math.max(0, Math.min(100, ((this.repeatEnd - this.repeatStart) / d) * 100));
-  }
-
-  startThumbOnTop(): boolean {
-    const d = this.videoDuration();
-    return d > 0 && this.repeatStart > d * 0.9;
-  }
-
-  togglePlay(): void {
+  override togglePlay(): void {
     if (this.video.paused) void this.video.play();
     else this.video.pause();
   }
 
-  private seekBy(deltaSeconds: number): void {
+  protected override seekBy(deltaSeconds: number): void {
     this.video.currentTime = Math.max(0, this.video.currentTime + deltaSeconds);
   }
 
@@ -366,64 +272,16 @@ export class LocalVideoPlayerComponent implements OnInit, OnDestroy {
     this.panY.update(v => Math.max(-maxY, Math.min(maxY, v)));
   }
 
-  private pulseLoopFlash(): void {
-    if (this.flashTimeout) clearTimeout(this.flashTimeout);
-    this.loopFlash.set(true);
-    this.flashTimeout = setTimeout(() => this.loopFlash.set(false), 700);
+  /** A focused native <video> handles space/arrows itself — don't double-handle. */
+  protected override shouldSkipTransportKeys(targetTag: string): boolean {
+    return targetTag === 'VIDEO';
   }
 
-  private readonly fullscreenHandler = () => {
-    this.fullscreen.set(document.fullscreenElement != null);
-  };
-
-  private readonly keydownHandler = (e: KeyboardEvent) => {
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
-    const target = e.target as HTMLElement | null;
-    const tag = target?.tagName ?? '';
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) return;
-
-    switch (e.key) {
-      case ' ':
-        if (tag === 'BUTTON' || tag === 'VIDEO') return; // native handling wins
-        e.preventDefault();
-        this.togglePlay();
-        break;
-      case 'ArrowLeft':
-        if (tag === 'VIDEO') return;
-        e.preventDefault();
-        this.seekBy(-5);
-        break;
-      case 'ArrowRight':
-        if (tag === 'VIDEO') return;
-        e.preventDefault();
-        this.seekBy(5);
-        break;
-      case '[':
-        this.setStartToCurrent();
-        break;
-      case ']':
-        this.setEndToCurrent();
-        break;
-      case 'l': case 'L':
-        this.toggleRepeat();
-        break;
-      case 'm': case 'M':
-        this.toggleMirror();
-        break;
-      case 'z': case 'Z': {
-        const next = (this.zoomOptions.indexOf(this.zoom()) + 1) % this.zoomOptions.length;
-        this.setZoom(this.zoomOptions[next]);
-        break;
-      }
-      case '?':
-        this.shortcutsOpen.set(!this.shortcutsOpen());
-        break;
-      default: {
-        const digit = parseInt(e.key, 10);
-        if (digit >= 1 && digit <= this.playbackRates.length) {
-          this.setRate(this.playbackRates[digit - 1]);
-        }
-      }
-    }
-  };
+  /** Local-only shortcut: Z cycles the zoom presets. */
+  protected override handleExtraKey(e: KeyboardEvent): boolean {
+    if (e.key !== 'z' && e.key !== 'Z') return false;
+    const next = (this.zoomOptions.indexOf(this.zoom()) + 1) % this.zoomOptions.length;
+    this.setZoom(this.zoomOptions[next]);
+    return true;
+  }
 }
