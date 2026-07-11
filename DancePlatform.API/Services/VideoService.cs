@@ -102,16 +102,28 @@ public class VideoService : IVideoService
             .ToListAsync();
     }
 
-    public async Task<VideoDto?> CreateAsync(CreateVideoRequest request, int? userId, bool isAdmin)
+    public async Task<(CreateVideoResult Result, VideoDto? Video)> CreateAsync(CreateVideoRequest request, int? userId, bool isAdmin)
     {
         var danceExists = await _db.Dances.AnyAsync(d => d.Id == request.DanceId);
-        if (!danceExists) return null;
+        if (!danceExists) return (CreateVideoResult.DanceNotFound, null);
 
         // Scope: non-admins can only add personal videos (owned by them). Admins choose —
         // "local" keeps it private to them, anything else (default) makes it global (null owner).
         var ownerUserId = !isAdmin
             ? userId
             : request.Scope == "local" ? userId : (int?)null;
+
+        // Duplicate guard: the same source clip (platform + video id + start) on the same dance,
+        // among the videos this one would coexist with (global plus the owner's personal ones).
+        // Same source with a different StartTime stays allowed — multi-move montages legitimately
+        // put several cuts of one video on the platform, and GetRelatedAsync groups them.
+        var duplicateExists = await _db.Videos.AnyAsync(v =>
+            v.DanceId == request.DanceId &&
+            v.VideoId == request.VideoId &&
+            v.Platform == request.Platform &&
+            v.StartTime == request.StartTime &&
+            (v.OwnerUserId == null || v.OwnerUserId == ownerUserId));
+        if (duplicateExists) return (CreateVideoResult.Duplicate, null);
 
         var video = new Video
         {
@@ -135,7 +147,7 @@ public class VideoService : IVideoService
             await EnsureInProgressAsync(uid, request.DanceId);
 
         await _db.SaveChangesAsync();
-        return await GetByIdAsync(video.Id, userId);
+        return (CreateVideoResult.Success, await GetByIdAsync(video.Id, userId));
     }
 
     // Marks a dance In Progress for a user if they aren't already tracking or have learned it.

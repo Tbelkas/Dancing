@@ -25,8 +25,13 @@ public class ImportController : ControllerBase
     [HttpPost("youtube-video")]
     public async Task<IActionResult> ImportYoutubeVideo([FromBody] YoutubeVideoImportRequest request)
     {
-        var video = await _importService.ImportYoutubeVideoAsync(request);
-        if (video is null) return BadRequest(new { message = "Invalid YouTube URL or dance not found." });
-        return Ok(video);
+        var (result, video) = await _importService.ImportYoutubeVideoAsync(request);
+        return result switch
+        {
+            ImportVideoResult.InvalidUrl => BadRequest(new { message = "Invalid YouTube URL." }),
+            ImportVideoResult.DanceNotFound => BadRequest(new { message = "Dance not found." }),
+            ImportVideoResult.Duplicate => Conflict(new { message = "This video is already on this dance." }),
+            _ => Ok(video)
+        };
     }
 }

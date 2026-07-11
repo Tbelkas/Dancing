@@ -101,7 +101,7 @@ public class ImportService : IImportService
 
                 if (result.VideoId is not null)
                 {
-                    await _videoService.CreateAsync(new CreateVideoRequest
+                    var (videoResult, _) = await _videoService.CreateAsync(new CreateVideoRequest
                     {
                         Title = name,
                         VideoId = result.VideoId,
@@ -111,6 +111,11 @@ public class ImportService : IImportService
                         EndTime = endSeconds,
                         Segments = []
                     }, null, isAdmin: true);
+                    // Throwing routes through the catch below, which rolls the just-created dance back.
+                    if (videoResult != CreateVideoResult.Success)
+                        throw new InvalidOperationException(videoResult == CreateVideoResult.Duplicate
+                            ? "this clip is already on the dance"
+                            : "dance not found for its video");
                 }
 
                 result.Created.Add(dance);
@@ -130,12 +135,12 @@ public class ImportService : IImportService
         return result;
     }
 
-    public async Task<VideoDto?> ImportYoutubeVideoAsync(YoutubeVideoImportRequest request)
+    public async Task<(ImportVideoResult Result, VideoDto? Video)> ImportYoutubeVideoAsync(YoutubeVideoImportRequest request)
     {
         var match = YoutubeRegex.Match(request.YoutubeUrl);
-        if (!match.Success) return null;
+        if (!match.Success) return (ImportVideoResult.InvalidUrl, null);
 
-        return await _videoService.CreateAsync(new CreateVideoRequest
+        var (result, video) = await _videoService.CreateAsync(new CreateVideoRequest
         {
             Title = request.Title,
             VideoId = match.Groups[1].Value,
@@ -146,6 +151,13 @@ public class ImportService : IImportService
             EndTime = request.EndTime,
             Segments = request.Segments
         }, null, isAdmin: true);
+
+        return (result switch
+        {
+            CreateVideoResult.DanceNotFound => ImportVideoResult.DanceNotFound,
+            CreateVideoResult.Duplicate => ImportVideoResult.Duplicate,
+            _ => ImportVideoResult.Success
+        }, video);
     }
 
     private static int ParseTimestamp(string ts)

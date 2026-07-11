@@ -1,4 +1,5 @@
 using DancePlatform.API.Data;
+using DancePlatform.API.DTOs.Video;
 using DancePlatform.API.Models;
 using DancePlatform.API.Services;
 using Microsoft.Data.Sqlite;
@@ -82,6 +83,43 @@ public class VideoServiceTests : IDisposable
             Assert.Equal(3, count);
             Assert.Equal(8.0 / 3.0, avg, precision: 6);
         }
+    }
+
+    [Fact]
+    public async Task Create_RejectsDuplicateClip_ButAllowsOtherDanceOrOtherStartTime()
+    {
+        await using var ctx = NewCtx();
+        ctx.Dances.Add(new Dance { Id = 2, Name = "Other", Slug = "other" });
+        await ctx.SaveChangesAsync();
+        var svc = new VideoService(ctx);
+
+        CreateVideoRequest Request(int danceId, int? startTime = null) => new()
+        {
+            Title = "T", VideoId = "v1", Platform = "youtube", DanceId = danceId, StartTime = startTime
+        };
+
+        // Seeded video 1 is (v1, dance 1, StartTime null, global) — adding it again as admin/global is a dup.
+        var (dup, video) = await svc.CreateAsync(Request(danceId: 1), userId: 1, isAdmin: true);
+        Assert.Equal(CreateVideoResult.Duplicate, dup);
+        Assert.Null(video);
+
+        // A user's personal copy of an existing global clip on the same dance is also a dup for them.
+        var (personalDup, _) = await svc.CreateAsync(Request(danceId: 1), userId: 1, isAdmin: false);
+        Assert.Equal(CreateVideoResult.Duplicate, personalDup);
+
+        // Same source video on a DIFFERENT dance is legitimate (multi-dance montages).
+        var (otherDance, _) = await svc.CreateAsync(Request(danceId: 2), userId: 1, isAdmin: true);
+        Assert.Equal(CreateVideoResult.Success, otherDance);
+
+        // Same dance but a different StartTime is a different cut — allowed.
+        var (otherCut, _) = await svc.CreateAsync(Request(danceId: 1, startTime: 90), userId: 1, isAdmin: true);
+        Assert.Equal(CreateVideoResult.Success, otherCut);
+
+        // One user's personal video doesn't block another user's personal add of the same clip.
+        var (u1Personal, _) = await svc.CreateAsync(Request(danceId: 1, startTime: 30), userId: 1, isAdmin: false);
+        Assert.Equal(CreateVideoResult.Success, u1Personal);
+        var (u2Personal, _) = await svc.CreateAsync(Request(danceId: 1, startTime: 30), userId: 2, isAdmin: false);
+        Assert.Equal(CreateVideoResult.Success, u2Personal);
     }
 
     private static async Task<(int Count, double Avg)> VideoStats(AppDbContext ctx, int videoId)

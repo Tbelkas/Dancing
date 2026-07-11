@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -177,7 +178,12 @@ export class AdminAddVideoComponent implements OnInit {
         this.videoType = 'steps';
         this.segments = [];
       },
-      error: () => { this.error.set('Failed to add video. Please try again.'); this.submitting.set(false); }
+      error: (err: HttpErrorResponse) => {
+        this.error.set(err.status === 409
+          ? (err.error?.message ?? 'This video is already on this dance.')
+          : 'Failed to add video. Please try again.');
+        this.submitting.set(false);
+      }
     });
   }
 }

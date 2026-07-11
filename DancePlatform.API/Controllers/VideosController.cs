@@ -67,9 +67,13 @@ public class VideosController : AppControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateVideoRequest request)
     {
-        var video = await _videoService.CreateAsync(request, CurrentUserId, CurrentUserIsAdmin);
-        if (video is null) return BadRequest(new { message = "Dance not found." });
-        return CreatedAtAction(nameof(GetById), new { id = video.Id }, video);
+        var (result, video) = await _videoService.CreateAsync(request, CurrentUserId, CurrentUserIsAdmin);
+        return result switch
+        {
+            CreateVideoResult.DanceNotFound => BadRequest(new { message = "Dance not found." }),
+            CreateVideoResult.Duplicate => Conflict(new { message = "This video is already on this dance." }),
+            _ => CreatedAtAction(nameof(GetById), new { id = video!.Id }, video)
+        };
     }
 
     [RequireAdmin]

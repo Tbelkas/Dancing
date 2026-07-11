@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DanceService } from '../../../core/services/dance.service';
@@ -209,7 +210,12 @@ export class AddVideoFormComponent implements OnInit {
         }
         this.created.emit(video);
       },
-      error: () => { this.error.set(this.fixedDance ? 'Failed to add video.' : 'Failed to add video. Please try again.'); this.saving.set(false); }
+      error: (err: HttpErrorResponse) => {
+        this.error.set(err.status === 409
+          ? (err.error?.message ?? 'This video is already on this dance.')
+          : this.fixedDance ? 'Failed to add video.' : 'Failed to add video. Please try again.');
+        this.saving.set(false);
+      }
     });
   }
 }
