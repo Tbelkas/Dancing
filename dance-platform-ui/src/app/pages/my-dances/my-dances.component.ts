@@ -66,6 +66,27 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   loadingVideos = signal(false);
   private videoCache = new Map<number, Video[]>();
 
+  // "Recommended for you" — untracked dances in the active style, ranked by the
+  // catalog's recommended sort. Cached per style for the component's lifetime.
+  private readonly RECOMMENDED_SHOWN = 6;
+  recommendedDances = signal<Dance[]>([]);
+  loadingRecommended = signal(false);
+  private recCache = new Map<number, Dance[]>();
+
+  /** Every dance the user tracks in any style — recommendations must never repeat these. */
+  private readonly trackedIds = computed(() =>
+    new Set(this.myStyles().flatMap(ms => ms.dances).map(d => d.id))
+  );
+
+  /**
+   * The server already filters to notstarted, but a dance tracked right here (Add Dance,
+   * status set elsewhere) would go stale in the cache — re-filter against live my-dances data.
+   */
+  readonly recommendedVisible = computed(() => {
+    const tracked = this.trackedIds();
+    return this.recommendedDances().filter(d => !tracked.has(d.id)).slice(0, this.RECOMMENDED_SHOWN);
+  });
+
   readonly myStyleIds = computed(() => new Set(this.myStyles().map(ms => ms.styleId)));
 
   /** Upper bound of "Continue Learning" cards; the carousel scrolls through them. */
@@ -126,6 +147,37 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
     effect(() => {
       this.continueLearning();
       setTimeout(() => this.updateHistoryScrollState());
+    });
+
+    // Fetch recommendations whenever a real style tab becomes active (not Favorites).
+    effect(() => {
+      const id = this.selectedStyleId();
+      if (id !== null && id !== this.FAVORITES_TAB) this.loadRecommended(id);
+    }, { allowSignalWrites: true });
+  }
+
+  private loadRecommended(styleId: number): void {
+    const cached = this.recCache.get(styleId);
+    if (cached) {
+      this.recommendedDances.set(cached);
+      return;
+    }
+    this.recommendedDances.set([]);
+    this.loadingRecommended.set(true);
+    // Over-fetch past the display cap so client-side re-filtering still fills the row.
+    this.danceService.searchDances({
+      styleId, status: 'notstarted', sortBy: 'recommended', pageSize: this.RECOMMENDED_SHOWN * 2
+    }).subscribe({
+      next: res => {
+        this.recCache.set(styleId, res.items);
+        if (this.selectedStyleId() === styleId) {
+          this.recommendedDances.set(res.items);
+          this.loadingRecommended.set(false);
+        }
+      },
+      error: () => {
+        if (this.selectedStyleId() === styleId) this.loadingRecommended.set(false);
+      }
     });
   }
 

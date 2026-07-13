@@ -411,6 +411,51 @@
           </div>
         }
 
+        <!-- Recommended next moves in this style -->
+        @if (loadingRecommended()) {
+          <div class="dance-section" aria-busy="true" aria-label="Loading recommendations">
+            <h3 class="section-title">
+              <span class="section-icon rec-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+              Recommended for you
+            </h3>
+            <div class="rec-grid">
+              @for (i of [0, 1, 2]; track i) {
+                <div class="skeleton rec-skeleton"></div>
+              }
+            </div>
+          </div>
+        } @else if (recommendedVisible().length > 0) {
+          <div class="dance-section">
+            <h3 class="section-title">
+              <span class="section-icon rec-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+              Recommended for you
+              <span class="section-count">{{ selectedStyle()!.styleName }}</span>
+            </h3>
+            <div class="rec-grid">
+              @for (dance of recommendedVisible(); track dance.id) {
+                <a class="card rec-card" [routerLink]="dance.slug | dancePath:dance.styleSlug">
+                  <span class="rec-card__media">
+                    @if (continueThumbnailUrl(dance); as thumb) {
+                      <img [src]="thumb" alt="" loading="lazy" class="rec-card__thumb" (error)="onContinueThumbError(dance.id)" />
+                    } @else {
+                      <span class="rec-card__media-fallback"><i class="fa-solid fa-music"></i></span>
+                    }
+                    @if (dance.difficulty) {
+                      <span class="rec-card__difficulty">{{ dance.difficulty }}</span>
+                    }
+                  </span>
+                  <span class="rec-card__body">
+                    <h4 class="rec-card__name">{{ dance.name }}</h4>
+                    @if (dance.videoCount > 0) {
+                      <span class="rec-card__meta">{{ dance.videoCount }} {{ dance.videoCount === 1 ? 'video' : 'videos' }}</span>
+                    }
+                  </span>
+                </a>
+              }
+            </div>
+          </div>
+        }
+
       </div>
     }
   }
