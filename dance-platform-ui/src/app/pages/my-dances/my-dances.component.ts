@@ -98,12 +98,17 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
     new Set(this.myStyles().flatMap(ms => ms.dances).filter(d => d.status === 'learned').map(d => d.id))
   );
 
-  /** Most-recently-opened dances the user hasn't learned yet — "pick up where you left off". */
+  /**
+   * Most-recently-opened dances the user hasn't learned yet — "pick up where you left off".
+   * Each card carries the query params that reopen the video they were last watching (when we
+   * know it), built here so the objects stay reference-stable across change detection.
+   */
   readonly continueLearning = computed(() => {
     const learned = this.learnedIds();
     return this.recentDances.recent()
       .filter(d => !d.learned && !learned.has(d.id))
-      .slice(0, this.CONTINUE_LIMIT);
+      .slice(0, this.CONTINUE_LIMIT)
+      .map(d => ({ ...d, resume: d.videoId ? { v: d.videoId } : {} }));
   });
 
   // Continue-learning carousel: the track scrolls horizontally; arrows show only

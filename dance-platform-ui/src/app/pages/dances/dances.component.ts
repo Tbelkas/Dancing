@@ -215,6 +215,21 @@ export class DancesComponent implements OnInit, OnDestroy {
   readonly recentRail = computed(() =>
     this.recentDances.recent().filter(d => !d.learned).slice(0, 12));
 
+  /** Per-dance link params that reopen the video the user last watched there, keyed by dance id.
+   *  Rebuilt only when the history trail changes, so the param objects stay reference-stable. */
+  private readonly resumeParams = computed(() => {
+    const map = new Map<number, { v: number }>();
+    for (const r of this.recentDances.recent()) {
+      if (r.videoId) map.set(r.id, { v: r.videoId });
+    }
+    return map;
+  });
+
+  /** Query params for a rail card, so it resumes the video rather than the dance's video list. */
+  resumeFor(danceId: number): { v: number } | null {
+    return this.resumeParams().get(danceId) ?? null;
+  }
+
   readonly totalPages = computed(() => Math.ceil(this.searchTotal() / this.PAGE_SIZE));
 
   readonly pageNumbers = computed(() => {

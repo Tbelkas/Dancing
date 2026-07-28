@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -84,7 +84,11 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   hoverRating = signal(0);
   hoverVideoId = signal<number | null>(null);
 
+  /** Video id from the ?v= deep link (history "Continue learning"), opened once the list loads. */
+  private resumeVideoId: number | null = null;
+
   constructor(
+    private host: ElementRef<HTMLElement>,
     private route: ActivatedRoute,
     private router: Router,
     private location: Location,
@@ -150,6 +154,8 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.recommended.set([]);
     this.showEditDance.set(false);
     this.movingVideoId.set(null);
+    // The snapshot is already on the incoming route by the time paramMap emits.
+    this.resumeVideoId = Number(this.route.snapshot.queryParamMap.get('v')) || null;
 
     const request$ = style
       ? this.danceService.getByStyleAndSlug(style, slug)
@@ -182,9 +188,14 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
       // Guard against a stale response landing after the user already navigated away.
       if (this.dance()?.id !== d.id) return;
       this.videos.set(v);
-      if (v.length === 1) {
-        this.videoService.recordView(v[0].id).subscribe();
-        this.revealVideo(v[0]);
+      // A ?v= deep link resumes that exact video; otherwise a lone video opens itself.
+      const resume = v.find(x => x.id === this.resumeVideoId);
+      this.resumeVideoId = null;
+      const open = resume ?? (v.length === 1 ? v[0] : null);
+      if (open) {
+        this.videoService.recordView(open.id).subscribe();
+        this.revealVideo(open);
+        if (resume && v.length > 1) this.scrollToVideo(open.id);
       }
     });
     this.danceService.getRecommended(d.id).subscribe(r => {
@@ -242,6 +253,8 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   // player: the YouTube player reads `chapters` at creation to decide whether to
   // bound playback at this dance's end, so the chips must be known up front.
   private revealVideo(video: Video): void {
+    const d = this.dance();
+    if (d) this.recentDances.setVideo(d.id, video.id);
     this.selectedVideo.set(null);
     this.chapters.set([]);
     this.loadPersonalLoops(video.id);
@@ -249,6 +262,15 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.videoService.getRelated(video.id).subscribe({
       next: ch => { this.chapters.set(ch); this.selectedVideo.set(video); },
       error: () => this.selectedVideo.set(video)
+    });
+  }
+
+  /** Brings a deep-linked video's row into view, once the list has rendered. */
+  private scrollToVideo(videoId: number): void {
+    setTimeout(() => {
+      this.host.nativeElement
+        .querySelector(`[data-video-id="${videoId}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
 

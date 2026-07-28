@@ -145,7 +145,7 @@
       } @else {
         <div class="video-list">
           @for (video of videos(); track video.id) {
-            <div class="video-list-item" [class.video-list-item--active]="selectedVideo()?.id === video.id" (click)="selectVideo(video)">
+            <div class="video-list-item" [attr.data-video-id]="video.id" [class.video-list-item--active]="selectedVideo()?.id === video.id" (click)="selectVideo(video)">
               <div class="video-list-item__info">
                 <span class="video-list-item__title">
                   {{ video.title }}

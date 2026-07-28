@@ -74,7 +74,7 @@
       <h2 class="rail__title"><i class="fa-solid fa-person-running"></i> Continue learning</h2>
       <div class="rail__scroller">
         @for (d of railDances(); track d.id) {
-          <a class="rail-card" [routerLink]="d.slug | dancePath:d.styleSlug">
+          <a class="rail-card" [routerLink]="d.slug | dancePath:d.styleSlug" [queryParams]="resumeFor(d.id)">
             @if (d.thumbnailVideoId && d.thumbnailPlatform === 'youtube') {
               <img class="rail-card__thumb" [src]="'https://i.ytimg.com/vi/' + d.thumbnailVideoId + '/mqdefault.jpg'" alt="" loading="lazy" />
             } @else {
@@ -90,7 +90,7 @@
       <h2 class="rail__title"><i class="fa-solid fa-clock-rotate-left"></i> Recently viewed</h2>
       <div class="rail__scroller">
         @for (d of recentRail(); track d.id) {
-          <a class="rail-card" [routerLink]="d.slug | dancePath:d.styleSlug">
+          <a class="rail-card" [routerLink]="d.slug | dancePath:d.styleSlug" [queryParams]="resumeFor(d.id)">
             @if (d.thumbnailVideoId && d.thumbnailPlatform === 'youtube') {
               <img class="rail-card__thumb" [src]="'https://i.ytimg.com/vi/' + d.thumbnailVideoId + '/mqdefault.jpg'" alt="" loading="lazy" />
             } @else {

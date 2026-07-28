@@ -10,6 +10,9 @@ export interface RecentDance {
   styleName?: string;
   thumbnailVideoId?: string;
   thumbnailPlatform?: string;
+  /** Id of the last video the user actually opened here, so history resumes that video
+   *  rather than dropping them back on the dance's video list. */
+  videoId?: number;
   /** epoch ms of the last time the dance was opened */
   viewedAt: number;
   /** snapshot of learned status — learned dances are dropped from "Continue Learning" */
@@ -32,6 +35,9 @@ export class RecentDancesService {
 
   /** Records (or refreshes) a dance the user just opened, moving it to the front of the list. */
   record(dance: { id: number; name: string; slug: string; styleSlug: string; styles?: string[]; thumbnailVideoId?: string; thumbnailPlatform?: string; isLearned: boolean }): void {
+    // Opening the dance page again shouldn't forget which video was last watched — the
+    // detail page overwrites it via setVideo() as soon as a video is actually opened.
+    const previous = this._recent().find(d => d.id === dance.id);
     const entry: RecentDance = {
       id: dance.id,
       name: dance.name,
@@ -40,6 +46,7 @@ export class RecentDancesService {
       styleName: dance.styles?.[0],
       thumbnailVideoId: dance.thumbnailVideoId,
       thumbnailPlatform: dance.thumbnailPlatform,
+      videoId: previous?.videoId,
       viewedAt: Date.now(),
       learned: dance.isLearned
     };
@@ -52,6 +59,13 @@ export class RecentDancesService {
     const list = this._recent();
     if (!list.some(d => d.id === id)) return;
     this.commit(list.map(d => d.id === id ? { ...d, learned } : d));
+  }
+
+  /** Remembers the video opened within a dance so history can link straight back to it. */
+  setVideo(danceId: number, videoId: number): void {
+    const list = this._recent();
+    if (!list.some(d => d.id === danceId && d.videoId !== videoId)) return;
+    this.commit(list.map(d => d.id === danceId ? { ...d, videoId } : d));
   }
 
   /** Lets the user dismiss a dance from the "Continue Learning" row. */
