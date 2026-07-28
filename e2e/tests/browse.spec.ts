@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { blockEmbeds } from '../fixtures/block-embeds.js';
 
 /**
  * Browse page: search, filters, sort, pagination, URL sync.
@@ -27,6 +28,9 @@ async function openFilters(page: Page) {
 
 test.describe('browse', () => {
   test.beforeEach(async ({ page }) => {
+    // Nothing here tests an embed; keep YouTube out of the picture so a slow third party
+    // can't time out an assertion about the browse grid.
+    await blockEmbeds(page);
     await page.goto('/dances');
     await expect(page.getByTestId('results-count')).toBeVisible();
   });

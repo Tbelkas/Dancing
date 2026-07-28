@@ -1,5 +1,5 @@
 import { test, expect } from '../fixtures/auth.js';
-import { USERNAME, PASSWORD } from '../fixtures/env.js';
+import { USERNAME, PASSWORD, API_URL } from '../fixtures/env.js';
 import { test as base, expect as baseExpect } from '@playwright/test';
 
 /**
@@ -46,9 +46,20 @@ test.describe('authenticated', () => {
   });
 
   test('favorite toggles on the detail page and persists across a reload', async ({ authedPage: page }) => {
-    await page.goto('/dances');
-    await page.getByTestId('dance-card-link').first().click();
+    // Pick the dance by name order via the API, not "first card on /dances". The default
+    // browse sort is "recommended", which floats styles the signed-in user favorites — so
+    // this test's own favouriting changes which card is first, and a rerun would act on a
+    // different dance than the one it restored.
+    const res = await page.request.get(`${API_URL}/search/dances?sort=name&pageSize=1`);
+    expect(res.ok()).toBe(true);
+    const target = (await res.json()).items[0];
+
+    await page.goto(`/dances/${target.styleSlug}/${target.slug}`);
     await expect(page.getByTestId('dance-title')).toBeVisible();
+
+    // Let the page's other requests (videos, neighbours, recommended) land before clicking.
+    // A dance GET still in flight would otherwise overwrite the toggled state on arrival.
+    await expect(page.getByRole('heading', { name: 'Videos' })).toBeVisible();
 
     const fav = page.getByTestId('favorite-button');
     await expect(fav).toBeVisible();

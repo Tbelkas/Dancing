@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { blockEmbeds } from '../fixtures/block-embeds.js';
 
 /**
  * The "is the site up and not broken" pass. Every test here must pass against a healthy
@@ -23,6 +24,12 @@ async function revealNav(page: Page) {
 }
 
 test.describe('shell + routing @smoke', () => {
+  // None of these test an embed. Keeping third-party iframes out makes the run faster and
+  // stops a slow YouTube from timing out an assertion about our own shell.
+  test.beforeEach(async ({ page }) => {
+    await blockEmbeds(page);
+  });
+
   // A JS error on load means the SPA bundle is broken even if HTML renders.
   test('loads the browse page without console errors', async ({ page }) => {
     const errors: string[] = [];
