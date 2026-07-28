@@ -176,6 +176,37 @@ test.describe('camera pane', () => {
     await page.getByTestId('camera-close').first().click();
   });
 
+  test('a camera that will not open falls back instead of sticking', async ({ page }) => {
+    // Advertise a second camera that doesn't exist, so selecting it fails the way a busy
+    // or unplugged one does. Found on real hardware: the failed choice was stored, so
+    // every later start — including the auto-restore on the next page — retried the dead
+    // camera and left the feature broken with no way back except the picker.
+    await page.addInitScript(() => {
+      const real = navigator.mediaDevices.enumerateDevices.bind(navigator.mediaDevices);
+      navigator.mediaDevices.enumerateDevices = async () => {
+        const found = await real();
+        return [...found, {
+          kind: 'videoinput', deviceId: 'does-not-exist', label: 'Ghost cam', groupId: 'g2',
+          toJSON() { return this; },
+        } as MediaDeviceInfo];
+      };
+    });
+    await openDanceWithYouTubeVideo(page);
+    await page.getByTestId('camera-toggle').first().click();
+    await expectFeedIsLive(page);
+
+    await page.getByRole('button', { name: 'Camera settings' }).click();
+    await page.getByRole('combobox', { name: 'Which camera to use' }).selectOption('does-not-exist');
+
+    // It falls back to the camera that was working, says why, and doesn't keep the choice.
+    await expect(page.getByTestId('camera-notice')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('camera-error')).toHaveCount(0);
+    await expectFeedIsLive(page);
+    expect(await page.evaluate(() => localStorage.getItem('dp_camera_device'))).not.toBe('does-not-exist');
+
+    await page.getByTestId('camera-close').first().click();
+  });
+
   test('the camera comes back on the next page it was left on', async ({ page }) => {
     await openDanceWithYouTubeVideo(page);
     await page.getByTestId('camera-toggle').first().click();

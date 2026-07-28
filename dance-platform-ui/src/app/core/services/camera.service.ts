@@ -32,6 +32,8 @@ export class CameraService {
   readonly status = signal<CameraStatus>('off');
   /** Human-readable reason the camera isn't running; shown inside the pane. */
   readonly error = signal<string | null>(null);
+  /** Something went wrong but the camera is still running — e.g. a switch that fell back. */
+  readonly notice = signal<string | null>(null);
   /** Cameras to choose between; labels only populate once permission is granted. */
   readonly devices = signal<MediaDeviceInfo[]>([]);
   /** The player component currently showing the feed. */
@@ -163,14 +165,31 @@ export class CameraService {
     localStorage.setItem(this.DELAY_KEY, String(seconds));
   }
 
-  /** Switch cameras without dropping ownership — restarts the stream in place. */
+  /**
+   * Switch cameras without dropping ownership — restarts the stream in place.
+   *
+   * A camera that won't open (busy, unplugged, a virtual device whose app isn't running)
+   * must not become the stored choice: it would be retried on every page load and every
+   * auto-restore from then on. So a failed switch reverts to the camera that was working
+   * and says what happened, rather than leaving the feature dead.
+   */
   async switchDevice(deviceId: string): Promise<void> {
-    this.deviceId.set(deviceId);
-    localStorage.setItem(this.DEVICE_KEY, deviceId);
+    const previous = this.deviceId();
+    this.notice.set(null);
+    this.setDevice(deviceId);
     const owner = this.owner();
     if (!owner || !this.stream()) return;
     this.stopStreamOnly();
     await this.start(owner);
+    if (this.status() !== 'error' || previous === deviceId) return;
+
+    const failure = this.error();
+    this.setDevice(previous);
+    await this.start(owner);
+    if (this.status() === 'on') {
+      // Recovered — the error panel is gone, so the reason has to surface somewhere.
+      this.notice.set(failure ?? "That camera wouldn't open.");
+    }
   }
 
   /**
@@ -222,11 +241,17 @@ export class CameraService {
     };
   }
 
+  private setDevice(deviceId: string): void {
+    this.deviceId.set(deviceId);
+    localStorage.setItem(this.DEVICE_KEY, deviceId);
+  }
+
   private teardown(): void {
     this.stopStreamOnly();
     this.owner.set(null);
     this.status.set('off');
     this.error.set(null);
+    this.notice.set(null);
   }
 
   /** Release the device but keep ownership — used when restarting on another camera. */

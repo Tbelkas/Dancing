@@ -103,6 +103,14 @@
         </label>
       }
 
+      <!-- A switch that fell back to the working camera: the feed is fine, so there's no
+           error panel to carry the reason. -->
+      @if (camera.notice()) {
+        <p class="cam__notice" role="status" data-testid="camera-notice">
+          <i class="fa-solid fa-triangle-exclamation"></i> {{ camera.notice() }}
+        </p>
+      }
+
       @if (delayUnavailable()) {
         <p class="cam__hint">This browser can't record video, so delayed replay isn't available here.</p>
       } @else if (camera.delaySeconds() > 0) {

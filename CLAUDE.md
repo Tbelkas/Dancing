@@ -25,7 +25,7 @@ changes land without it, so:
 
 ### The `data-testid` contract
 
-24 attributes across six templates are load-bearing — the suite selects on them precisely
+25 attributes across six templates are load-bearing — the suite selects on them precisely
 so it survives the declutter passes that reshuffle classes and text. They are listed in
 [`e2e/README.md`](e2e/README.md#the-test-id-contract).
 
