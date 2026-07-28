@@ -5,8 +5,8 @@ Daily local check for tutorial videos that still have no "Sections" chips
 
 - Reads the prod DB connection string from DancePlatform.API/appsettings.Development.json
   (so it survives password rotations; no credential hardcoded here).
-- A candidate = youtube video whose title says "tutorial" OR VideoType='tutorial'
-  AND has zero VideoSegments.
+- A candidate = ANY video (all platforms, all types) with zero VideoSegments.
+  (Widened 2026-07-13 for the "chip everything" policy — was tutorial-only.)
 - `_proto/chip_skip.tsv`  : video ids we've deliberately decided NOT to chip
   (music montages, no-caption/no-chapter clips, short single-move clips).
 - `_proto/chip_seen.tsv`  : video ids already announced, so each new one is flagged once.
@@ -71,7 +71,7 @@ def write_queue_block(pending, new_count):
             star = " ⭐" if vid in NEW_IDS else ""
             lines.append(f"| {vid} | {yt} | {name}{star} |")
         lines.append("")
-        lines.append("_Run `/find-chips` in a local session to process these (LAN DB access required)._")
+        lines.append("_Auto-processed daily at 09:15 by the `DanceChipAuto` task (headless `/find-chips`); or run `/find-chips` manually._")
     else:
         lines.append("No videos awaiting chips. ✅")
     lines.append(END)
@@ -94,9 +94,7 @@ def main():
     init = "--init" in sys.argv
     rows = psql("""SELECT v."Id", v."VideoId", d."Name"
 FROM "Videos" v JOIN "Dances" d ON d."Id"=v."DanceId"
-WHERE v."Platform"='youtube'
-  AND (v."Title" ILIKE '%tutorial%' OR v."VideoType"='tutorial')
-  AND NOT EXISTS (SELECT 1 FROM "VideoSegments" s WHERE s."VideoId"=v."Id")
+WHERE NOT EXISTS (SELECT 1 FROM "VideoSegments" s WHERE s."VideoId"=v."Id")
 ORDER BY v."Id";""")
     cands = [(r[0], r[1], r[2]) for r in rows]
     cand_ids = {c[0] for c in cands}

@@ -335,14 +335,40 @@ Goal: maximize chips across as many dance categories as possible.
 - **This session total: 6 videos chipped** (13 across the conversation). Removed 2 now-chipped rows from skip.
 - **Totals after: 1036 videos / 475 chipped / 2996 segments.** Verified live via API.
 
+### Queue run 2026-07-13 (multimodal)
+- **2026 / 3gBbvQ_mgjw "Heels Choreography" (d1980) ✅ DONE — 8 segments via contact-sheet read.**
+  No captions + no chapters, but the video burns on-screen move labels (the chippable multimodal case):
+  Intro / The Walk / Hip Slide / Hip Deep Slide / Hair Whip (on-screen typo "Hair Wripe") /
+  Go Down + Switch / Combo / Outro. Verified live via API.
+- Removed stale `chip_skip.tsv` row `1682 3gBbvQ_mgjw` — that Video row no longer exists in the DB
+  (same ytid, now only on video 2026, which is chipped).
+
 <!-- CHIP-QUEUE:START -->
-## Auto-detected chip queue _(last checked 2026-07-10 12:20)_
+## Auto-detected chip queue _(last checked 2026-07-13 18:17)_
 
-1 tutorial video(s) awaiting section chips (0 new since last check):
-
-| VideoDbId | YtId | Dance |
-|---|---|---|
-| 2026 | 3gBbvQ_mgjw | Heels Choreography |
-
-_Run `/find-chips` in a local session to process these (LAN DB access required)._
+No videos awaiting chips. ✅
 <!-- CHIP-QUEUE:END -->
+
+## Chip-everything push (2026-07-13)
+
+User directive: EVERY video gets chips. Started at 561 unchipped (547 yt + 14 tiktok), ended at 7
+(all deliberately skip-listed). 3,788 total segments in prod (was ~2,900). Lanes:
+
+- **A chapter-adopt**: 5 videos (2052, 1816, 2101, 2106, 1738).
+- **B transcript-inferred**: 7 real reads (2050, 2065, 1737, 1724, 1863, 316, +1856/1771/1802 via thin cues).
+- **C montage slices**: 350 rows from 29 sources via `scripts/slice_chips.py` (4 chapter-mapped,
+  68 cue-split, 278 single-window absolute-time chips). keeptype — slices stay steps.
+- **D short clips**: thin_chips + 16 single named chips.
+- **E/T generic**: 160 rows via `scripts/chip_generic.py` — tutorial-typed >=180s got proportional
+  Intro/Tutorial/Outro; performance/steps got one named chip; 14 TikToks got open-ended `Name@0`.
+- **Multimodal contact-sheets**: 7 videos read frame-by-frame: 1995 (15 labeled poses), 2007 (13
+  exercises), 2103 (22 poses), 2043 (all 10 dips named), 792 (25 moves, grouped anchors), 2022
+  (Spanish anchors), 1716 (10 coarse visual phases — no labels).
+
+Residual 7 (in chip_skip.tsv, need /fix-videos re-source, then unskip + rechip):
+6x p2JrE6JICKk mis-sourced (dbIds 444, 469, 686, 890, 1582, 1584 — dances don't match the shuffle
+montage) + dead sFt9yqACiuI (db 2102). Upgrade candidates: the ~40 proportional Intro/Tutorial/Outro
+tutorials (generic tier) can be improved later via multimodal.
+
+Detector now queues ANY unchipped video (all platforms/types). DanceChipAuto (09:15 daily) drains
+the queue headlessly, capped 5/run.

@@ -17,6 +17,14 @@ The chips = the `VideoSegments` table; distinct from "In this video" chapters (r
   (no hardcoded password). State: `_proto/chip_skip.tsv` (deliberately-skipped) + `_proto/chip_seen.tsv`.
 - To process: take the queued VideoDbId/YtId rows and run the per-video procedure below. **Must run
   locally** — the prod DB is on the LAN (`192.168.0.197`), unreachable from cloud agents.
+- A second Scheduled Task **`DanceChipAuto`** (09:15, `chip_auto.bat`) drains the queue automatically:
+  if the CHIP-QUEUE block has pending rows it runs headless `claude -p "/find-chips ..."` (max 5
+  videos/run), logging to `_proto/chip_auto.log`. Manual runs are still fine anytime.
+- Detector scope (since 2026-07-13, "chip everything" policy): EVERY video with zero VideoSegments
+  is queued — all platforms, all VideoTypes. Use `keeptype` with apply_sections.py for
+  non-tutorial content (performance clips, montage slices) so chipping doesn't flip VideoType.
+  For montage slices (StartTime set) use scripts/slice_chips.py; for no-signal remainder
+  scripts/chip_generic.py documents the fallback tiers.
 
 ## Prod DB / API
 - Postgres on `192.168.0.197`, db `dancing`, user `dance_user`; password lives in

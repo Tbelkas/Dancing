@@ -74,6 +74,6 @@ if len(segs) < 2 or tut < 25:
 spec = ";".join(f"{l}@{s}-{e}" for l, s, e in segs)
 print(f"{vid} -> db{vid_db}: " + " | ".join(f"{l} {s}-{e}" for l, s, e in segs))
 if apply:
-    r = subprocess.run(["python", "apply_sections.py", vid_db, spec, "apply"],
+    r = subprocess.run(["python", "scripts/apply_sections.py", vid_db, spec, "apply"],
                        capture_output=True, text=True, encoding="utf-8")
     print("  APPLIED" if "APPLIED" in r.stdout else "  FAIL " + r.stderr[-160:])

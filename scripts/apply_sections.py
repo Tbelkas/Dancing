@@ -1,6 +1,8 @@
 """
-apply_sections.py <videoDbId> "Label@start-end;Label@start-end;..." [apply]
+apply_sections.py <videoDbId> "Label@start-end;Label@start-end;..." [apply] [keeptype]
 Inserts VideoSegments for one Videos row and sets its VideoType='tutorial'.
+Pass 'keeptype' to leave VideoType untouched (steps/performance clips that get
+chips must NOT be relabeled as tutorials).
 Times accept seconds (int) or m:ss. End optional ("Label@start"). Dry-run unless 'apply'.
 Replaces any existing segments on that video.
 """
@@ -12,7 +14,8 @@ PGPW = "LW3Q19jZyVSXRzNyGoRnWY2G3TKFT8eoRuYR"
 
 vid_db = int(sys.argv[1])
 spec = sys.argv[2]
-apply = len(sys.argv) > 3 and sys.argv[3] == "apply"
+apply = "apply" in sys.argv[3:]
+keeptype = "keeptype" in sys.argv[3:]
 
 def to_sec(s):
     s = s.strip()
@@ -48,9 +51,10 @@ values = ",".join(
     f"('{sql_lit(lbl)}',{st},{'NULL' if et is None else et},{vid_db})"
     for lbl, st, et in segs
 )
+type_sql = "" if keeptype else f"""UPDATE "Videos" SET "VideoType"='tutorial' WHERE "Id"={vid_db};
+"""
 sql = f"""BEGIN;
-UPDATE "Videos" SET "VideoType"='tutorial' WHERE "Id"={vid_db};
-DELETE FROM "VideoSegments" WHERE "VideoId"={vid_db};
+{type_sql}DELETE FROM "VideoSegments" WHERE "VideoId"={vid_db};
 INSERT INTO "VideoSegments"("Label","StartTime","EndTime","VideoId") VALUES {values};
 COMMIT;"""
 
