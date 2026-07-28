@@ -112,6 +112,42 @@ test.describe('camera pane', () => {
     await page.getByTestId('camera-close').first().click();
   });
 
+  test("the player's own controls stay clear of the pane, in and out of fullscreen", async ({ page }) => {
+    // The beta viewer replaces YouTube's controls with ours, which is the only case where
+    // the player draws a control bar across the media frame — and the frame is what the
+    // camera splits. Both halves of this test are regressions:
+    //   1. the bar spanned the whole frame, putting its fullscreen button underneath the
+    //      pane's close button, where it could not be clicked at all;
+    //   2. the pane carried an aspect-ratio that beat the grid's stretch once fullscreen
+    //      made the row height explicit — 1280px of pane inside a 639px column.
+    await page.addInitScript(() => localStorage.setItem('dp_beta_viewer', '1'));
+    await openDanceWithYouTubeVideo(page);
+    await page.getByTestId('camera-toggle').first().click();
+    await expectFeedIsLive(page);
+
+    const fullscreenButton = page.getByRole('button', { name: 'Fullscreen' });
+    const paneBox = (await page.getByTestId('camera-pane').boundingBox())!;
+    const buttonBox = (await fullscreenButton.boundingBox())!;
+    expect(
+      buttonBox.x + buttonBox.width,
+      "the player's controls must not run under the camera pane"
+    ).toBeLessThanOrEqual(paneBox.x + 1);
+
+    await fullscreenButton.click();
+    await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true);
+
+    const geometry = await page.evaluate(() => {
+      const pane = document.querySelector('[data-testid="camera-pane"]')!.getBoundingClientRect();
+      const video = document.querySelector('iframe.yt-player')!.getBoundingClientRect();
+      return { paneWidth: pane.width, videoWidth: video.width, paneHeight: pane.height, viewport: window.innerHeight };
+    });
+    expect(Math.abs(geometry.paneWidth - geometry.videoWidth), 'fullscreen should split evenly').toBeLessThan(4);
+    expect(geometry.paneHeight, 'the pane should fill the height').toBeGreaterThan(geometry.viewport * 0.9);
+
+    await page.keyboard.press('Escape');
+    await page.getByTestId('camera-close').first().click();
+  });
+
   test('the delay records and plays back what you just did', async ({ page }) => {
     await openDanceWithYouTubeVideo(page);
     await page.getByTestId('camera-toggle').first().click();

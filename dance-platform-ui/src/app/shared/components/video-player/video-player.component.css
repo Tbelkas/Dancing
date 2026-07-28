@@ -46,10 +46,15 @@
 }
 
 /* Below the split threshold two half-width videos are too small to learn from,
-   so the camera goes under the video instead of beside it. */
+   so the camera goes under the video instead of beside it. Stacked, the pane's row
+   is auto-sized and it has no content height of its own — hence the explicit aspect. */
 @media (max-width: 720px) {
   .player-media--camera:not(.player-media--camera-overlay) {
     grid-template-columns: 1fr;
+  }
+
+  .player-media--camera:not(.player-media--camera-overlay) app-camera-pane {
+    aspect-ratio: 16 / 9;
   }
 }
 
@@ -78,6 +83,24 @@
   height: 100%;
   align-items: stretch;
   grid-template-rows: 100%;
+}
+
+/* The frame's own overlays (control bar, mirror tag, loop pulse) belong to the video,
+   but they're positioned against the whole frame — which in a two-column split runs
+   them under the camera pane and its controls. The beta bar's fullscreen button ended
+   up behind the pane's close button. Confine them to the video's column.
+   Scoped above the stacking breakpoint: below it the columns become rows, and the
+   video is full width again. */
+@media (min-width: 721px) {
+  .player-media--camera:not(.player-media--camera-overlay) .rc,
+  .player-media--camera:not(.player-media--camera-overlay) .loop-flash {
+    /* Column is calc(50% - 1px) wide — half the frame less half the 2px gap. */
+    inset-inline: 0 calc(50% + 1px);
+  }
+
+  .player-media--camera:not(.player-media--camera-overlay) .mirror-tag {
+    right: calc(50% + 11px);
+  }
 }
 
 .mirror-tag {

@@ -4,17 +4,17 @@
    height, so the two pictures line up top and bottom.
    Overlay mode: the host lifts out of the flow and covers the frame; only the
    control bar keeps pointer events, so clicks still reach the video underneath. */
+/* Everything inside is absolutely positioned, so the host has no content height of its
+   own — it takes the height of the grid row the video sets. The layouts that don't
+   supply one (stacked on narrow screens, TikTok's portrait row) hand it an explicit
+   aspect-ratio from the player's stylesheet. Don't put one here: an aspect-ratio wins
+   over the grid's stretch as soon as the row height is explicit, which in fullscreen
+   made the pane 1280px wide inside a 639px column. */
 :host {
   display: block;
   position: relative;
   min-width: 0;
   background: #000;
-  /* Everything inside is absolutely positioned, so the host has no content height of
-     its own. Beside the video that doesn't matter — the grid row stretches it to the
-     video's height. Stacked (narrow screens), the row is auto-sized and the host would
-     collapse to nothing, so it needs an aspect to fall back on. A definite stretched
-     height wins over aspect-ratio, so this only takes effect when nothing else sizes it. */
-  aspect-ratio: 16 / 9;
 }
 
 :host(.is-overlay) {
@@ -23,6 +23,7 @@
   z-index: 1;
   aspect-ratio: auto;
   background: none;
+  /* Clicks fall through to the video; only the control bar takes them back. */
   pointer-events: none;
 }
 

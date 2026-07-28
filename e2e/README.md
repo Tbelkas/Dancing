@@ -4,7 +4,7 @@ Playwright smoke tests for DancePlatform. They drive a **deployed** app over rea
 production by default — so they answer the question the unit tests can't: *is the thing the
 Pi is actually serving working right now?*
 
-45 tests, ~40 seconds.
+46 tests, ~40 seconds.
 
 ---
 
