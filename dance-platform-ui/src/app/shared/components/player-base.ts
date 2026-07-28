@@ -37,6 +37,13 @@ export abstract class PlayerBaseComponent {
   volume = signal(1);
   fullscreen = signal(false);
 
+  /** Loop is a panel behind a toolbar toggle, not a permanent fixture under every
+   *  video — most watching is just watching. The toggle reports the armed state,
+   *  so nothing is hidden, only folded. */
+  loopOpen = signal(false);
+  /** The name field inside the loop panel only appears once you ask to save. */
+  savingLoop = signal(false);
+
   repeatStart = 0;
   repeatEnd = 0;
   loopName = '';
@@ -97,6 +104,7 @@ export abstract class PlayerBaseComponent {
     } else if (this.repeatEnd > this.repeatStart) {
       this.repeating.set(true);
       localStorage.setItem(this.LOOP_PREF_KEY, '1');
+      this.loopOpen.set(true);
       this.onRepeatArmed();
     }
   }
@@ -115,8 +123,17 @@ export abstract class PlayerBaseComponent {
     this.repeatEnd = Math.max(value, this.repeatStart + 1);
   }
 
-  setStartToCurrent(): void { this.onStartSliderChange(this.currentPlaybackTime()); }
-  setEndToCurrent(): void { this.onEndSliderChange(this.currentPlaybackTime()); }
+  /* Working the region (by button or by [ ] key) means the user wants the panel:
+     show them the numbers they're editing rather than leaving them to guess. */
+  setStartToCurrent(): void {
+    this.onStartSliderChange(this.currentPlaybackTime());
+    this.loopOpen.set(true);
+  }
+
+  setEndToCurrent(): void {
+    this.onEndSliderChange(this.currentPlaybackTime());
+    this.loopOpen.set(true);
+  }
 
   /** Current loop region, or null when it isn't a valid (named, non-empty) range. */
   protected currentLoopPayload(): { label: string; startTime: number; endTime: number } | null {
@@ -130,6 +147,7 @@ export abstract class PlayerBaseComponent {
     if (!payload) return;
     this.saveLoop.emit(payload);
     this.loopName = '';
+    this.savingLoop.set(false);
   }
 
   emitDeleteLoop(event: Event, segment: VideoSegment): void {

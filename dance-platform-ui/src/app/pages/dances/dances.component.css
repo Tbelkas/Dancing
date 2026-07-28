@@ -10,7 +10,7 @@
   gap: 16px;
 }
 
-.admin-actions {
+.page-actions {
   display: flex;
   gap: 8px;
   align-items: center;
@@ -419,24 +419,26 @@
   &:focus-visible { outline: none; }
 }
 
+/* Two lines, then stop: descriptions run from a sentence to a paragraph, and
+   uneven walls of grey text are what makes a grid of cards feel heavy. */
 .dance-card__desc {
   color: var(--color-text-muted);
   font-size: 0.88rem;
   line-height: 1.65;
   flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .dance-card__meta {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: auto;
-}
-
-.dance-card__counts {
-  display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
 }
 
 .count-chip {
@@ -548,7 +550,7 @@
     flex-direction: column;
     gap: 12px;
   }
-  .admin-actions {
+  .page-actions {
     width: 100%;
     flex-wrap: wrap;
   }
@@ -849,9 +851,41 @@
   font-size: 0.8rem;
   color: var(--color-text-muted);
   margin: 0;
+  /* A long teaching credit is a name, not a paragraph — keep it to its line. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.dance-card__instructor i { font-size: 0.72rem; opacity: 0.8; }
+.dance-card__instructor i { font-size: 0.72rem; opacity: 0.8; flex-shrink: 0; }
+
+/* Roll the dice: a play, not a paragraph. Icon-only, matched to the view toggle. */
+.surprise-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 30px; /* 28px inner + border, so it lines up with the view toggle */
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.surprise-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.surprise-btn:disabled { opacity: 0.5; cursor: progress; }
+.surprise-btn.is-rolling i { animation: dice-roll 0.6s linear infinite; }
+
+@keyframes dice-roll {
+  to { transform: rotate(360deg); }
+}
 
 .empty-state__suggestions {
   display: flex;
@@ -1037,6 +1071,7 @@
   .dance-row-item__thumb { width: 64px; height: 40px; }
   /* Comfortable thumb-size tap targets for the grid/list switch on touch screens */
   .view-toggle__btn { width: 40px; height: 36px; }
+  .surprise-btn { width: 40px; height: 38px; }
 }
 
 /* List-view loading rows reuse the real row shell (border, padding, thumb size)

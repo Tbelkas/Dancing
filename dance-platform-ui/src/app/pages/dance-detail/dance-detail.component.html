@@ -3,6 +3,8 @@
     <div class="detail-header">
       <div class="detail-header__main">
         <h1 class="page-title">{{ dance()!.name }}</h1>
+        <!-- Badges and tallies share one line, and a tally only appears once it has
+             something to report — three permanent zeroes said nothing. -->
         <div class="styles-row">
           @if (dance()!.difficulty !== 'None') {
             <span class="badge badge--difficulty badge--difficulty-{{ dance()!.difficulty | lowercase }}">{{ dance()!.difficulty }}</span>
@@ -13,16 +15,30 @@
           @for (ms of dance()!.musicalStyles; track ms) {
             <span class="badge badge--music"><i class="fa-solid fa-music"></i> {{ ms }}</span>
           }
-        </div>
-        <div class="social-counts">
-          <span class="social-count" title="People who favorited this dance"><i class="fa-solid fa-heart"></i> {{ dance()!.favoriteCount }} favorited</span>
-          <span class="social-count learned" title="People who learned this dance"><i class="fa-solid fa-check"></i> {{ dance()!.learnedCount }} learned</span>
-          @if (dance()!.ratingCount > 0) {
-            <span class="social-count" title="Community rating"><i class="fa-solid fa-star"></i> {{ dance()!.averageRating | number:'1.1-1' }} ({{ dance()!.ratingCount }})</span>
+          @if (dance()!.favoriteCount > 0 || dance()!.learnedCount > 0 || dance()!.ratingCount > 0) {
+            <span class="social-counts">
+              @if (dance()!.ratingCount > 0) {
+                <span class="social-count" title="Community rating"><i class="fa-solid fa-star"></i> {{ dance()!.averageRating | number:'1.1-1' }} ({{ dance()!.ratingCount }})</span>
+              }
+              @if (dance()!.favoriteCount > 0) {
+                <span class="social-count" title="People who favorited this dance"><i class="fa-solid fa-heart"></i> {{ dance()!.favoriteCount }}</span>
+              }
+              @if (dance()!.learnedCount > 0) {
+                <span class="social-count learned" title="People who learned this dance"><i class="fa-solid fa-check"></i> {{ dance()!.learnedCount }} learned</span>
+              }
+            </span>
           }
         </div>
         @if (dance()!.description) {
           <p class="description">{{ dance()!.description }}</p>
+        }
+        <!-- A teaching credit is a byline, not a section: one line under the
+             description instead of its own heading and chip row. -->
+        @if (dance()!.instructors.length > 0) {
+          <p class="detail-instructors">
+            <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
+            Taught by {{ dance()!.instructors.join(' · ') }}
+          </p>
         }
       </div>
       <div class="detail-right">
@@ -60,18 +76,6 @@
         }
       </div>
     </div>
-
-    <!-- Instructors Section -->
-    @if (dance()!.instructors.length > 0) {
-      <section class="instructors-section">
-        <h2>Instructors</h2>
-        <div class="instructor-list">
-          @for (inst of dance()!.instructors; track inst) {
-            <span class="instructor-chip">{{ inst }}</span>
-          }
-        </div>
-      </section>
-    }
 
     <!-- Admin: Edit Dance Form — @defer-loaded child; inner @if drives show/hide. -->
     @defer (when showEditDance()) {

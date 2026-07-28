@@ -23,15 +23,27 @@
 
 .styles-row {
   display: flex;
+  align-items: center;
   gap: 6px;
   flex-wrap: wrap;
   margin: 14px 0 10px;
 }
 
+/* Rides at the end of the badge row, set off by a hairline rather than its own line. */
 .social-counts {
-  display: flex;
-  gap: 18px;
-  margin: 10px 0 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: 4px;
+  padding-left: 14px;
+  border-left: 1px solid var(--color-border);
+}
+
+/* No badges to sit behind means no divider to draw. */
+.social-counts:first-child {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: none;
 }
 
 .social-count {
@@ -47,6 +59,21 @@
   color: var(--color-success);
   opacity: 0.9;
 }
+
+.detail-instructors {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+}
+
+.detail-instructors i { font-size: 0.75rem; opacity: 0.8; }
 
 .description {
   color: var(--color-text-muted);

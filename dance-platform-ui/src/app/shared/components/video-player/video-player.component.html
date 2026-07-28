@@ -122,10 +122,7 @@
           }
         </div>
         <div class="control-row__end">
-          <button class="mirror-btn" [class.active]="mirrored()" (click)="toggleMirror()" [attr.aria-pressed]="mirrored()"
-                  title="Flip the video horizontally so the instructor matches your side">
-            <i class="fa-solid fa-left-right"></i> Mirror
-          </button>
+          <ng-container [ngTemplateOutlet]="toolToggles"></ng-container>
           <button class="kbd-btn" (click)="shortcutsOpen.set(!shortcutsOpen())" [attr.aria-expanded]="shortcutsOpen()"
                   title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">
             <i class="fa-regular fa-keyboard"></i>
@@ -144,8 +141,12 @@
         </div>
       }
 
-      <ng-container [ngTemplateOutlet]="loopBlock"></ng-container>
-      <ng-container [ngTemplateOutlet]="notesBlock"></ng-container>
+      @if (loopOpen()) {
+        <ng-container [ngTemplateOutlet]="loopBlock"></ng-container>
+      }
+      @if (notesOpen()) {
+        <ng-container [ngTemplateOutlet]="notesBlock"></ng-container>
+      }
     </div>
   }
 
@@ -187,14 +188,15 @@
       }
 
       <div class="control-row">
-        <button class="mirror-btn" [class.active]="mirrored()" (click)="toggleMirror()" [attr.aria-pressed]="mirrored()"
-                title="Flip the video horizontally so the instructor matches your side">
-          <i class="fa-solid fa-left-right"></i> Mirror
-        </button>
+        <ng-container [ngTemplateOutlet]="toolToggles"></ng-container>
       </div>
 
-      <ng-container [ngTemplateOutlet]="loopBlock"></ng-container>
-      <ng-container [ngTemplateOutlet]="notesBlock"></ng-container>
+      @if (loopOpen()) {
+        <ng-container [ngTemplateOutlet]="loopBlock"></ng-container>
+      }
+      @if (notesOpen()) {
+        <ng-container [ngTemplateOutlet]="notesBlock"></ng-container>
+      }
     </div>
   }
 
@@ -211,11 +213,31 @@
     </div>
   }
 
+  <!-- The practice bench in one row: open a tool when you need it, and each toggle
+       reports its own state (loop armed, note count) while folded. -->
+  <ng-template #toolToggles>
+    <button class="tool-btn tool-btn--loop" [class.is-open]="loopOpen()" [class.is-armed]="repeating()"
+            (click)="loopOpen.set(!loopOpen())" [attr.aria-expanded]="loopOpen()"
+            title="Loop a section of the video over and over">
+      <i class="fa-solid fa-rotate-left"></i> Loop
+    </button>
+    @if (hasNotesTool) {
+      <button class="tool-btn" [class.is-open]="notesOpen()" (click)="notesOpen.set(!notesOpen())"
+              [attr.aria-expanded]="notesOpen()" title="Your private notes pinned to moments in this video">
+        <i class="fa-regular fa-note-sticky"></i> Notes
+        @if (personalNotes.length > 0) { <span class="tool-btn__count">{{ personalNotes.length }}</span> }
+      </button>
+    }
+    <button class="tool-btn" [class.is-open]="mirrored()" (click)="toggleMirror()" [attr.aria-pressed]="mirrored()"
+            title="Flip the video horizontally so the instructor matches your side">
+      <i class="fa-solid fa-left-right"></i> Mirror
+    </button>
+  </ng-template>
+
   <!-- Loop controls shared by YouTube and TikTok: A→B region on one dual-handle slider. -->
   <ng-template #loopBlock>
-    <div class="control-row control-row--column loop-block">
+    <div class="control-row control-row--column loop-block" role="group" aria-label="Loop controls">
       <div class="repeat-header">
-        <label>Loop</label>
         @if (videoDuration() > 0) {
           <span class="repeat-times">{{ formatTime(repeatStart) }} → {{ formatTime(repeatEnd) }}</span>
         }
@@ -245,22 +267,32 @@
             <i class="fa-solid fa-crosshairs"></i>
           </button>
         </div>
+        <!-- Naming and keeping a loop is a deliberate act, not a standing control:
+             one quiet button until you ask for the field. -->
         @if (canSaveLoops || canSavePersonal) {
-          <div class="save-loop-row">
-            <input type="text" class="save-loop-name" [(ngModel)]="loopName" maxlength="40"
-              placeholder="Name this loop" aria-label="Loop name"
-              (keyup.enter)="canSavePersonal ? emitSavePersonalLoop() : emitSaveLoop()" />
-            @if (canSavePersonal) {
-              <button class="btn btn--ghost btn--sm" (click)="emitSavePersonalLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
-                <i class="fa-solid fa-bookmark"></i> Save for me
-              </button>
-            }
-            @if (canSaveLoops) {
-              <button class="btn btn--accent btn--sm" (click)="emitSaveLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
-                <i class="fa-solid fa-users"></i> Save for everyone
-              </button>
-            }
-          </div>
+          @if (savingLoop()) {
+            <div class="save-loop-row">
+              <input type="text" class="save-loop-name" [(ngModel)]="loopName" maxlength="40"
+                placeholder="Name this loop" aria-label="Loop name" autofocus
+                (keyup.enter)="canSavePersonal ? emitSavePersonalLoop() : emitSaveLoop()"
+                (keyup.escape)="savingLoop.set(false)" />
+              @if (canSavePersonal) {
+                <button class="btn btn--ghost btn--sm" (click)="emitSavePersonalLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
+                  <i class="fa-solid fa-bookmark"></i> Save for me
+                </button>
+              }
+              @if (canSaveLoops) {
+                <button class="btn btn--accent btn--sm" (click)="emitSaveLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
+                  <i class="fa-solid fa-users"></i> Save for everyone
+                </button>
+              }
+              <button class="btn btn--ghost btn--sm" (click)="savingLoop.set(false)">Cancel</button>
+            </div>
+          } @else {
+            <button class="save-loop-open" (click)="savingLoop.set(true)" [disabled]="repeatEnd <= repeatStart">
+              <i class="fa-solid fa-bookmark"></i> Save this loop
+            </button>
+          }
         }
       } @else {
         <p class="repeat-hint">Start the video, then drag to set your loop points.</p>
@@ -275,13 +307,7 @@
        so the note lands on the moment that prompted it, not where playback drifted to. -->
   <ng-template #notesBlock>
     @if (canTakeNotes || personalNotes.length > 0) {
-      <div class="control-row control-row--column notes-block">
-        <div class="notes-header">
-          <label><i class="fa-regular fa-note-sticky"></i> My notes</label>
-          @if (personalNotes.length > 0) {
-            <span class="notes-count">{{ personalNotes.length }}</span>
-          }
-        </div>
+      <div class="control-row control-row--column notes-block" role="group" aria-label="My notes">
         @if (personalNotes.length > 0) {
           <ul class="note-list">
             @for (note of personalNotes; track note.id) {

@@ -5,23 +5,32 @@
         <h1 class="page-title">Find your next move</h1>
         <p class="page-subtitle">Browse the catalog, save what moves you, track what you learn</p>
       </div>
-      @if (role.isAdmin()) {
-        <div class="admin-actions">
-          <!-- Rare admin utilities live behind one "More" disclosure so the header stays calm. -->
-          <details class="admin-more">
-            <summary class="btn btn--ghost btn--sm"><i class="fa-solid fa-ellipsis"></i> More</summary>
-            <div class="admin-more__menu">
-              <button class="admin-more__item" (click)="toggleAddStyle()">
-                <i class="fa-solid fa-plus"></i> {{ showAddStyle() ? 'Cancel Add Style' : 'Add Style' }}
-              </button>
-              <button class="admin-more__item" (click)="toggleImport()">
-                <i class="fa-solid fa-file-import"></i> {{ showImport() ? 'Cancel Import' : 'Import' }}
-              </button>
-            </div>
-          </details>
-          <button class="btn btn--primary btn--sm" (click)="toggleAddDance()">
-            @if (showAddDance()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Dance }
+      <!-- Page-level authoring lives in the header with the other page actions;
+           the results bar is for reading the results, not adding to them. -->
+      @if (auth.isAuthenticated()) {
+        <div class="page-actions">
+          @if (role.isAdmin()) {
+            <!-- Rare admin utilities live behind one "More" disclosure so the header stays calm. -->
+            <details class="admin-more">
+              <summary class="btn btn--ghost btn--sm"><i class="fa-solid fa-ellipsis"></i> More</summary>
+              <div class="admin-more__menu">
+                <button class="admin-more__item" (click)="toggleAddStyle()">
+                  <i class="fa-solid fa-plus"></i> {{ showAddStyle() ? 'Cancel Add Style' : 'Add Style' }}
+                </button>
+                <button class="admin-more__item" (click)="toggleImport()">
+                  <i class="fa-solid fa-file-import"></i> {{ showImport() ? 'Cancel Import' : 'Import' }}
+                </button>
+              </div>
+            </details>
+          }
+          <button class="btn btn--ghost btn--sm" (click)="toggleAddVideo()">
+            @if (showAddVideo()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add video }
           </button>
+          @if (role.isAdmin()) {
+            <button class="btn btn--primary btn--sm" (click)="toggleAddDance()">
+              @if (showAddDance()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add dance }
+            </button>
+          }
         </div>
       }
     </div>
@@ -203,6 +212,10 @@
       </div>
     }
 
+    </div>
+
+    <!-- Outside the collapsible body on purpose: what you've narrowed to must stay
+         visible (and removable) even when the filter panel is folded away. -->
     @if (activeFilterChips().length > 0) {
       <div class="active-filters" aria-label="Active filters">
         <span class="filter-label">Active:</span>
@@ -214,7 +227,6 @@
         <button class="active-filters__clear" (click)="clearFilters()">Clear all</button>
       </div>
     }
-    </div>
   </div>
 
   <!-- Always mounted: popping it in after the first load (or unmounting it during
@@ -231,18 +243,11 @@
       </span>
       <div class="results-bar__controls">
         @if (searchTotal() > 1) {
-          <button class="btn btn--ghost btn--xs" (click)="surpriseMe()" [disabled]="surprising()"
-                  title="Jump to a random dance matching your filters">
-            <i class="fa-solid fa-dice"></i> {{ surprising() ? 'Rolling...' : 'Surprise me' }}
+          <button class="surprise-btn" (click)="surpriseMe()" [disabled]="surprising()"
+                  [class.is-rolling]="surprising()"
+                  title="Jump to a random dance matching your filters" aria-label="Surprise me — open a random dance">
+            <i class="fa-solid fa-dice"></i>
           </button>
-        }
-        @if (auth.isAuthenticated()) {
-          <button class="btn btn--ghost btn--xs" (click)="toggleAddVideo()">
-            @if (showAddVideo()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Video }
-          </button>
-        }
-        @if (hasActiveFilters()) {
-          <button class="btn btn--ghost btn--xs" (click)="clearFilters()"><i class="fa-solid fa-xmark"></i> Clear filters</button>
         }
         <div class="view-toggle" role="group" aria-label="View density">
           <button class="view-toggle__btn" [class.active]="viewMode() === 'grid'" (click)="setViewMode('grid')"
@@ -436,6 +441,9 @@
             @if (dance.instructors.length > 0) {
               <p class="dance-card__instructor"><i class="fa-solid fa-chalkboard-user"></i> {{ dance.instructors.join(', ') }}</p>
             }
+            <!-- One footer line: what the dance is, then how it's rated. The
+                 favorite/learned tallies live on the dance page — three monospace
+                 counters on every card was noise, not a reason to click. -->
             <div class="dance-card__meta">
               <div class="dance-card__styles">
                 @if (dance.difficulty !== 'None') {
@@ -444,19 +452,10 @@
                 @for (style of styleBadges(dance); track style) {
                   <span class="badge">{{ style }}</span>
                 }
-                <!-- Music tags hidden for now.
-                @for (ms of dance.musicalStyles; track ms) {
-                  <span class="badge badge--music"><i class="fa-solid fa-music"></i> {{ ms }}</span>
-                }
-                -->
               </div>
-              <div class="dance-card__counts">
-                @if (dance.ratingCount > 0) {
-                  <span class="count-chip" title="Community rating"><i class="fa-solid fa-star"></i> {{ dance.averageRating | number:'1.1-1' }}</span>
-                }
-                <span class="count-chip" title="Favorited by"><i class="fa-solid fa-heart"></i> {{ dance.favoriteCount }}</span>
-                <span class="count-chip" title="Learned by"><i class="fa-solid fa-check"></i> {{ dance.learnedCount }}</span>
-              </div>
+              @if (dance.ratingCount > 0) {
+                <span class="count-chip" title="Community rating"><i class="fa-solid fa-star"></i> {{ dance.averageRating | number:'1.1-1' }}</span>
+              }
             </div>
           </div>
         </div>

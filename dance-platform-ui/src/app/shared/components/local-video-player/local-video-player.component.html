@@ -90,7 +90,13 @@
         (input)="setRate(+$any($event.target).value)" />
       <button class="speed-value" (click)="setRate(1)" title="Reset to 1x">{{ currentRate() }}x</button>
       <div class="control-row__end">
-        <button class="mirror-btn" [class.active]="mirrored()" (click)="toggleMirror()" [attr.aria-pressed]="mirrored()"
+        <!-- Same practice bench as the YouTube player: open a tool when you need it. -->
+        <button class="tool-btn tool-btn--loop" [class.is-open]="loopOpen()" [class.is-armed]="repeating()"
+                (click)="loopOpen.set(!loopOpen())" [attr.aria-expanded]="loopOpen()"
+                title="Loop a section of the video over and over">
+          <i class="fa-solid fa-rotate-left"></i> Loop
+        </button>
+        <button class="tool-btn" [class.is-open]="mirrored()" (click)="toggleMirror()" [attr.aria-pressed]="mirrored()"
                 title="Flip the video horizontally so the dancer matches your side">
           <i class="fa-solid fa-left-right"></i> Mirror
         </button>
@@ -137,9 +143,9 @@
       </div>
     }
 
-    <div class="control-row control-row--column loop-block">
+    @if (loopOpen()) {
+    <div class="control-row control-row--column loop-block" role="group" aria-label="Loop controls">
       <div class="repeat-header">
-        <label>Loop</label>
         @if (videoDuration() > 0) {
           <span class="repeat-times">{{ formatTime(repeatStart) }} → {{ formatTime(repeatEnd) }}</span>
         }
@@ -169,18 +175,27 @@
             <i class="fa-solid fa-crosshairs"></i>
           </button>
         </div>
-        <div class="save-loop-row">
-          <input type="text" class="save-loop-name" [(ngModel)]="loopName" maxlength="40"
-            placeholder="Name this loop" aria-label="Loop name"
-            (keyup.enter)="emitSaveLoop()" />
-          <button class="btn btn--accent btn--sm" (click)="emitSaveLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
-            <i class="fa-solid fa-bookmark"></i> Save loop
+        <!-- Naming and keeping a loop is a deliberate act, not a standing control. -->
+        @if (savingLoop()) {
+          <div class="save-loop-row">
+            <input type="text" class="save-loop-name" [(ngModel)]="loopName" maxlength="40"
+              placeholder="Name this loop" aria-label="Loop name" autofocus
+              (keyup.enter)="emitSaveLoop()" (keyup.escape)="savingLoop.set(false)" />
+            <button class="btn btn--accent btn--sm" (click)="emitSaveLoop()" [disabled]="!loopName.trim() || repeatEnd <= repeatStart">
+              <i class="fa-solid fa-bookmark"></i> Save loop
+            </button>
+            <button class="btn btn--ghost btn--sm" (click)="savingLoop.set(false)">Cancel</button>
+          </div>
+        } @else {
+          <button class="save-loop-open" (click)="savingLoop.set(true)" [disabled]="repeatEnd <= repeatStart">
+            <i class="fa-solid fa-bookmark"></i> Save this loop
           </button>
-        </div>
+        }
       } @else {
         <p class="repeat-hint">Start the video, then drag to set your loop points.</p>
       }
     </div>
+    }
   </div>
 
 </div>

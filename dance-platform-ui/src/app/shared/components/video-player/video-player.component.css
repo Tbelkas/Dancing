@@ -98,10 +98,15 @@
   flex-shrink: 0;
 }
 
+/* Chipped tutorials can carry a dozen sections; capped at ~two rows so the bar
+   never grows tall enough to push the video itself below the fold. */
 .segment-chips {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  align-content: flex-start;
+  max-height: 5.5rem;
+  overflow-y: auto;
 }
 
 .segment-chip {
@@ -340,7 +345,7 @@
 .speed-btn {
   background: rgba(255,255,255,0.05);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   color: var(--color-text-muted);
   font-size: 0.85rem;
   font-weight: 600;
@@ -364,30 +369,55 @@
   margin-left: auto;
 }
 
+/* Practice tools (Loop / Notes / Mirror) — one row of disclosure toggles.
+   .mirror-btn is kept as an alias for the local-file player's own bar. */
+.tool-btn,
 .mirror-btn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   background: rgba(255,255,255,0.05);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   color: var(--color-text-muted);
   font-family: var(--font-ui);
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 6px 12px;
+  padding: 7px 12px;
   cursor: pointer;
   transition: all var(--transition);
 }
 
+.tool-btn:hover,
 .mirror-btn:hover,
+.tool-btn.is-open,
 .mirror-btn.active {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: #07070D;
 }
+
+/* An armed loop keeps its coral identity whether the panel is open or folded. */
+.tool-btn--loop.is-armed,
+.tool-btn--loop.is-armed.is-open,
+.tool-btn--loop.is-armed:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.tool-btn__count {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tool-btn.is-open .tool-btn__count { background: rgba(7, 7, 13, 0.16); }
 
 .kbd-btn {
   display: inline-flex;
@@ -397,7 +427,7 @@
   height: 30px;
   background: rgba(255,255,255,0.05);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   color: var(--color-text-muted);
   font-size: 0.85rem;
   cursor: pointer;
@@ -447,21 +477,15 @@
   flex-wrap: wrap;
 }
 
-.repeat-header label {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
-
+/* The panel is opened from a labelled toggle, so the region itself leads. */
 .repeat-times {
   font-size: 0.95rem;
   color: var(--color-accent);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  margin-left: auto;
 }
+
+.repeat-header .btn { margin-left: auto; }
 
 .repeat-hint {
   font-size: 0.875rem;
@@ -507,7 +531,7 @@
   height: 28px;
   background: rgba(255,255,255,0.05);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   color: var(--color-text-muted);
   font-size: 0.78rem;
   cursor: pointer;
@@ -532,7 +556,7 @@
   min-width: 0;
   background: rgba(255,255,255,0.05);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.875rem;
@@ -548,6 +572,28 @@
 .save-loop-row .btn {
   flex-shrink: 0;
 }
+
+/* Folded state of the save row: one quiet, self-explaining button. */
+.save-loop-open {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.save-loop-open:hover:not(:disabled) { color: var(--color-accent); }
+.save-loop-open:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* Dual-handle A→B loop slider: two transparent range inputs stacked on one
    track; only the thumbs take pointer events, the fill shows the loop region. */
@@ -832,7 +878,7 @@
   max-width: 260px;
   width: max-content;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: rgba(7, 7, 13, 0.92);
   border: 1px solid var(--color-border);
   color: #fff;
@@ -858,29 +904,6 @@
   padding: 14px 16px;
 }
 
-.notes-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.notes-header label {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
-
-.notes-count {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 999px;
-  padding: 1px 8px;
-}
-
 .note-list {
   list-style: none;
   margin: 0;
@@ -901,7 +924,7 @@
   flex-shrink: 0;
   background: rgba(245, 200, 66, 0.12);
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius);
   color: var(--color-primary);
   font-family: var(--font-ui);
   font-size: 0.8rem;
@@ -979,7 +1002,7 @@
   min-width: 0;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.875rem;

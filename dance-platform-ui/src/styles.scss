@@ -658,31 +658,6 @@ textarea:focus-visible,
   min-width: 3.5rem;
 }
 
-// Instructors
-.instructors-section {
-  margin-bottom: 1.5rem;
-
-  h2 { margin-bottom: 0.75rem; }
-}
-
-.instructor-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.instructor-chip {
-  padding: 5px 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--color-border-light);
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
-}
-
 /* Skeleton loading placeholders */
 .skeleton {
   position: relative;

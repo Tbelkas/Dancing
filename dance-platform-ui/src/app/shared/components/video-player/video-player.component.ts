@@ -56,6 +56,10 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
   activeChapterId = signal<number | null>(null);
   chaptersExpanded = signal(false);
 
+  /** Notes fold away behind a toolbar toggle alongside the inherited Loop panel;
+   *  the toggle carries the note count, so nothing is hidden, only folded. */
+  notesOpen = signal(false);
+
   /** "Dance Platform video viewer (beta)": hide YouTube's controls and drive the
    *  embed through our own bar. Read once at init — the pref is set on the profile
    *  page, so a player never flips chrome mid-life. YouTube only: TikTok/Instagram
@@ -317,6 +321,11 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     this.player?.setPlaybackRate(rate);
   }
 
+  /** Notes are worth a toolbar slot only when this user can write them or has some. */
+  get hasNotesTool(): boolean {
+    return this.canTakeNotes || this.personalNotes.length > 0;
+  }
+
   /** Hand-moving a slider handle detaches the region from any armed section chip. */
   override onStartSliderChange(value: number): void {
     super.onStartSliderChange(value);
@@ -346,6 +355,7 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     if (!payload) return;
     this.savePersonalLoop.emit(payload);
     this.loopName = '';
+    this.savingLoop.set(false);
   }
 
   emitDeletePersonalLoop(event: Event, loop: VideoSegment): void {
