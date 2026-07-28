@@ -48,6 +48,7 @@ some client-side filtering; see module-context/dances-catalog.md.)
 |--------|------|------|-------|
 | GET | `/videos/dance/{danceId}` | — | videos for a dance; current user's 4–5★ videos sorted first |
 | GET | `/videos/{id}` | — | single video (+ segments) |
+| GET | `/videos/youtube/{videoId}/chapters` | Admin | the YouTube video's own chapters → `YoutubeChaptersDto { videoId, duration, source: chapters\|description\|none, chapters: VideoSegmentDto[] }`; empty list when it has none (never errors) |
 | POST | `/videos/{id}/view` | — | increment `ViewCount` |
 | POST | `/videos/{id}/rate` | Auth | `RateVideoRequest { rating 1–5 }` (upsert; one per user/video) → updated `VideoDto` |
 | POST | `/videos` | ⚠️ **none** | `CreateVideoRequest` |

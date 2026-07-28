@@ -27,6 +27,15 @@ export interface VideoChapter {
   endTime?: number;
 }
 
+/** Chapters a YouTube upload already publishes, offered as ready-made sections when adding it. */
+export interface YoutubeChapters {
+  videoId: string;
+  duration?: number;
+  /** "chapters" (YouTube's own chapter bar), "description" (timestamp list), or "none". */
+  source: string;
+  chapters: { label: string; startTime: number; endTime?: number }[];
+}
+
 export interface Video {
   id: number;
   title: string;

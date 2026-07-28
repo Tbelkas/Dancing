@@ -60,6 +60,26 @@
       </select>
     </div>
 
+    <!-- Chapters the pasted YouTube video already carries — one click turns them into sections. -->
+    @if (loadingSections()) {
+      <p class="yt-chapters__checking">Checking YouTube for chapters...</p>
+    } @else if (suggestedSections().length > 0) {
+      <div class="yt-chapters">
+        <div class="yt-chapters__head">
+          <span class="yt-chapters__count">{{ suggestedSections().length }} chapters on YouTube</span>
+          <button class="btn btn--ghost btn--sm" (click)="applySuggestedSections()">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            {{ sectionsApplied() ? 'Re-apply as sections' : 'Use as sections' }}
+          </button>
+        </div>
+        <div class="yt-chapters__list">
+          @for (c of suggestedSections(); track c.startTime) {
+            <span class="yt-chapters__chip"><b>{{ formatTime(c.startTime) }}</b> {{ c.label }}</span>
+          }
+        </div>
+      </div>
+    }
+
     @if (videoType === 'tutorial') {
       <div class="form-group">
         <label>Sections <span class="optional">(label + start time as m:ss or seconds)</span></label>

@@ -40,6 +40,19 @@ builder.Services.AddScoped<IPracticeService, PracticeService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IImportService, ImportService>();
 
+// Reads a YouTube video's own chapters when a clip is added. Short timeout and a browser-ish
+// UA: the watch page is the only place chapters are published, and a slow lookup must not
+// hold up the form. The consent cookies keep EU requests off the interstitial page.
+builder.Services.AddHttpClient<IYoutubeChapterService, YoutubeChapterService>(client =>
+{
+    client.BaseAddress = new Uri("https://www.youtube.com");
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.DefaultRequestHeaders.Add("User-Agent",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36");
+    client.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.9");
+    client.DefaultRequestHeaders.Add("Cookie", "CONSENT=YES+cb; SOCS=CAI");
+});
+
 builder.Services.AddHttpClient<IOllamaService, OllamaService>(client =>
 {
     var baseUrl = builder.Configuration["Ollama:BaseUrl"] ?? "http://localhost:11434";

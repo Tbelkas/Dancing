@@ -6,8 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DanceService } from '../../core/services/dance.service';
 import { VideoService, CreateVideoPayload, SegmentPayload } from '../../core/services/video.service';
-import { VideoType } from '../../models/video.model';
-import { parseVideoUrl, parseTimeSecs, fetchVideoTitle } from '../../core/utils/video-url.utils';
+import { VideoType, YoutubeChapters } from '../../models/video.model';
+import { parseVideoUrl, parseTimeSecs, fetchVideoTitle, formatClock } from '../../core/utils/video-url.utils';
 
 const DEFAULT_SEGMENT_LABELS = ['Theory', 'Steps', 'Practice'];
 
@@ -49,6 +49,11 @@ export class AdminAddVideoComponent implements OnInit {
   // a title the user typed or edited themselves.
   private lastTitleFetchKey = '';
   private autoTitle = '';
+
+  // Chapters the pasted YouTube video already publishes, offered as ready-made sections.
+  suggestedSections = signal<YoutubeChapters['chapters']>([]);
+  loadingSections = signal(false);
+  sectionsApplied = signal(false);
 
   submitting = signal(false);
   error = signal('');
@@ -110,6 +115,42 @@ export class AdminAddVideoComponent implements OnInit {
         this.autoTitle = title;
       }
     });
+    this.loadYoutubeChapters(parsed.platform, parsed.videoId, key);
+  }
+
+  /**
+   * Many tutorials are already chaptered on YouTube; those chapters are exactly the sections
+   * we'd otherwise type out by hand. Offer them (the admin applies them explicitly) rather
+   * than filling the editor behind their back.
+   */
+  private loadYoutubeChapters(platform: string, videoId: string, key: string): void {
+    this.suggestedSections.set([]);
+    this.sectionsApplied.set(false);
+    if (platform !== 'youtube') return;
+    this.loadingSections.set(true);
+    this.videoService.getYoutubeChapters(videoId).subscribe({
+      next: res => {
+        if (key !== this.lastTitleFetchKey) return; // URL changed while the lookup was in flight
+        this.loadingSections.set(false);
+        this.suggestedSections.set(res.chapters ?? []);
+      },
+      // A failed lookup is a non-event: the sections editor still works by hand.
+      error: () => { if (key === this.lastTitleFetchKey) this.loadingSections.set(false); }
+    });
+  }
+
+  applySuggestedSections(): void {
+    this.videoType = 'tutorial';
+    this.segments = this.suggestedSections().map(c => ({
+      label: c.label,
+      start: formatClock(c.startTime),
+      end: c.endTime != null ? formatClock(c.endTime) : ''
+    }));
+    this.sectionsApplied.set(true);
+  }
+
+  formatTime(seconds: number): string {
+    return formatClock(seconds);
   }
 
   onVideoTypeChange(): void {
@@ -177,6 +218,8 @@ export class AdminAddVideoComponent implements OnInit {
         this.description = '';
         this.videoType = 'steps';
         this.segments = [];
+        this.suggestedSections.set([]);
+        this.sectionsApplied.set(false);
       },
       error: (err: HttpErrorResponse) => {
         this.error.set(err.status === 409

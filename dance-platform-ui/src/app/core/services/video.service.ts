@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Video, VideoChapter, VideoLibraryItem, VideoNote, VideoSegment, VideoType } from '../../models/video.model';
+import { Video, VideoChapter, VideoLibraryItem, VideoNote, VideoSegment, VideoType, YoutubeChapters } from '../../models/video.model';
 import { environment } from '../../../environments/environment';
 
 export interface SegmentPayload {
@@ -73,6 +73,14 @@ export class VideoService {
   /** Rate a single video 1–5; resolves to the updated video (new average + the user's rating). */
   rate(videoId: number, rating: number): Observable<Video> {
     return this.http.post<Video>(`${this.base}/${videoId}/rate`, { rating });
+  }
+
+  /**
+   * Admin: the chapters a YouTube video already publishes, so a well-chaptered upload can be
+   * added with its sections ready-made. Resolves with an empty `chapters` list when it has none.
+   */
+  getYoutubeChapters(videoId: string): Observable<YoutubeChapters> {
+    return this.http.get<YoutubeChapters>(`${this.base}/youtube/${videoId}/chapters`);
   }
 
   create(payload: CreateVideoPayload): Observable<Video> {

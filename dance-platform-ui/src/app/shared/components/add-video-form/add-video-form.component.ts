@@ -6,9 +6,9 @@ import { RouterLink } from '@angular/router';
 import { DanceService } from '../../../core/services/dance.service';
 import { VideoService, CreateVideoPayload, SegmentPayload } from '../../../core/services/video.service';
 import { RoleService } from '../../../core/services/role.service';
-import { parseVideoUrl, parseTimeSecs, fetchVideoTitle } from '../../../core/utils/video-url.utils';
+import { parseVideoUrl, parseTimeSecs, fetchVideoTitle, formatClock } from '../../../core/utils/video-url.utils';
 import { Dance } from '../../../models/dance.model';
-import { Video, VideoType } from '../../../models/video.model';
+import { Video, VideoType, YoutubeChapters } from '../../../models/video.model';
 
 const DEFAULT_SEGMENT_LABELS = ['Theory', 'Steps', 'Practice'];
 
@@ -64,6 +64,12 @@ export class AddVideoFormComponent implements OnInit {
   description = '';
   videoType: VideoType = 'steps';
   segments: SegmentRow[] = [];
+
+  // Chapters the pasted YouTube video already publishes (admin only), offered as sections.
+  // In picker mode there's no type/section UI, so applying them is what reveals the editor.
+  suggestedSections = signal<YoutubeChapters['chapters']>([]);
+  loadingSections = signal(false);
+  sectionsApplied = signal(false);
 
   // Picker-mode (Browse) state: search a dance by name, or create one inline.
   private danceNames = signal<{ id: number; name: string }[]>([]);
@@ -135,6 +141,42 @@ export class AddVideoFormComponent implements OnInit {
         this.autoTitle = title;
       }
     });
+    this.loadYoutubeChapters(parsed.platform, parsed.videoId, key);
+  }
+
+  /**
+   * Many tutorials are already chaptered on YouTube; those chapters are exactly the sections
+   * we'd otherwise type out by hand. Offer them (applied on click, never silently) to admins,
+   * who are the only ones the section editor is open to.
+   */
+  private loadYoutubeChapters(platform: string, videoId: string, key: string): void {
+    this.suggestedSections.set([]);
+    this.sectionsApplied.set(false);
+    if (platform !== 'youtube' || !this.role.isAdmin()) return;
+    this.loadingSections.set(true);
+    this.videoService.getYoutubeChapters(videoId).subscribe({
+      next: res => {
+        if (key !== this.lastTitleFetchKey) return; // URL changed while the lookup was in flight
+        this.loadingSections.set(false);
+        this.suggestedSections.set(res.chapters ?? []);
+      },
+      // A failed lookup is a non-event: the sections editor still works by hand.
+      error: () => { if (key === this.lastTitleFetchKey) this.loadingSections.set(false); }
+    });
+  }
+
+  applySuggestedSections(): void {
+    this.videoType = 'tutorial';
+    this.segments = this.suggestedSections().map(c => ({
+      label: c.label,
+      start: formatClock(c.startTime),
+      end: c.endTime != null ? formatClock(c.endTime) : ''
+    }));
+    this.sectionsApplied.set(true);
+  }
+
+  formatTime(seconds: number): string {
+    return formatClock(seconds);
   }
 
   onTypeChange(): void {
@@ -185,12 +227,19 @@ export class AddVideoFormComponent implements OnInit {
       ...(this.role.isAdmin() ? { scope: this.scope } : {})
     };
 
-    // The detail form also carries a type, description and tutorial sections.
+    // The detail form also carries a type, description and tutorial sections. The Browse picker
+    // has none of those fields, but it can still carry sections lifted from YouTube's chapters —
+    // those only persist on a tutorial, so applying them settles the type.
     if (this.fixedDance) {
       const segments = this.buildSegments();
       if (segments === null) return;
       payload.videoType = this.videoType;
       payload.description = this.description.trim() || undefined;
+      payload.segments = segments;
+    } else if (this.segments.length > 0) {
+      const segments = this.buildSegments();
+      if (segments === null) return;
+      payload.videoType = 'tutorial';
       payload.segments = segments;
     }
 
@@ -207,6 +256,10 @@ export class AddVideoFormComponent implements OnInit {
           this.url = '';
           this.lastTitleFetchKey = '';
           this.autoTitle = '';
+          this.segments = [];
+          this.videoType = 'steps';
+          this.suggestedSections.set([]);
+          this.sectionsApplied.set(false);
         }
         this.created.emit(video);
       },

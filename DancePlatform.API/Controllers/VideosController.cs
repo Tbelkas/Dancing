@@ -13,13 +13,26 @@ public class VideosController : AppControllerBase
     private readonly IVideoService _videoService;
     private readonly IUserVideoLoopService _loopService;
     private readonly IVideoNoteService _noteService;
+    private readonly IYoutubeChapterService _chapterService;
 
-    public VideosController(IVideoService videoService, IUserVideoLoopService loopService, IVideoNoteService noteService)
+    public VideosController(
+        IVideoService videoService,
+        IUserVideoLoopService loopService,
+        IVideoNoteService noteService,
+        IYoutubeChapterService chapterService)
     {
         _videoService = videoService;
         _loopService = loopService;
         _noteService = noteService;
+        _chapterService = chapterService;
     }
+
+    // Chapters a YouTube video already publishes, offered as ready-made sections in the add
+    // form. Admin-only: sections are an admin-curated field, and this makes an outbound call.
+    [RequireAdmin]
+    [HttpGet("youtube/{videoId}/chapters")]
+    public async Task<IActionResult> GetYoutubeChapters(string videoId, CancellationToken ct) =>
+        Ok(await _chapterService.GetChaptersAsync(videoId, ct));
 
     [HttpGet("dance/{danceId}")]
     public async Task<IActionResult> GetByDance(int danceId) =>

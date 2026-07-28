@@ -10,6 +10,16 @@
 - Endpoints (api-contracts → Videos): get-by-dance, get-one, `POST /videos/{id}/view`
   (anonymous view-count bump), create (⚠️ currently unauthenticated), admin update/delete.
 
+## Chapter suggestions (adding a YouTube clip)
+- `IYoutubeChapterService` / `YoutubeChapterService.cs` reads a video's own chapters off its
+  watch page (`GET /videos/youtube/{videoId}/chapters`, admin-only, cached 6h / 30min on a miss).
+  Two sources: YouTube's chapter bar (`chapterRenderer` in the embedded JSON), else the
+  description's timestamp list. It's scraping, so it's best-effort by design — every failure
+  path returns an empty list, and the add form still takes sections by hand.
+- Both add-video forms (`shared/components/add-video-form`, `pages/admin-add-video`) fetch on
+  URL paste and *offer* the chapters as chips; the admin applies them with a click. Applying
+  sets `videoType = 'tutorial'` — `VideoService.MapSegments` drops segments on any other type.
+
 ## Frontend
 - Component: `shared/components/video-player/` (reusable; used on dance detail)
 - Pipe: `shared/pipes/trust-url.pipe.ts` (`TrustUrl` — sanitizes/embeds iframe src; required

@@ -63,6 +63,70 @@
   margin-top: 10px;
 }
 
+/* The pasted video's own YouTube chapters, previewed as chips before they become sections. */
+.yt-chapters {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-left: 2px solid var(--color-primary);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.yt-chapters__checking,
+.yt-chapters__count {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.yt-chapters__checking {
+  margin-bottom: 18px;
+}
+
+.yt-chapters__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.yt-chapters__head .btn {
+  margin-left: auto;
+}
+
+/* Capped at roughly three rows: a 40-chapter video must not push the form off-screen. */
+.yt-chapters__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 7rem;
+  overflow-y: auto;
+}
+
+.yt-chapters__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.yt-chapters__chip b {
+  color: var(--color-primary);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Tutorial section editor — mirrors the dance-detail inline editor. */
 .segment-rows {
   display: flex;
