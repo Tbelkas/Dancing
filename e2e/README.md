@@ -4,7 +4,7 @@ Playwright smoke tests for DancePlatform. They drive a **deployed** app over rea
 production by default — so they answer the question the unit tests can't: *is the thing the
 Pi is actually serving working right now?*
 
-47 tests, ~45 seconds.
+48 tests, ~45 seconds.
 
 ---
 
@@ -93,7 +93,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 25 attributes are a contract. Treat them like a public API.**
+**These 27 attributes are a contract. Treat them like a public API.**
 
 | Test id | Lives in | Anchors |
 |---|---|---|
@@ -104,8 +104,8 @@ anchors on a small, deliberate set of `data-testid` attributes.
 | `style-filter-pills` | `dances.component.html` | The Style filter row — `.style-filters` alone also matches the Level row |
 | `dance-card`, `dance-card-link` | `dances.component.html` | Result cards — **on both the grid card and the list row** |
 | `dance-title`, `favorite-button`, `progress-learned` | `dance-detail.component.html` | Detail page |
-| `camera-toggle` | `video-player` + `local-video-player` templates | The Camera tool button — **on both players** |
-| `camera-pane`, `camera-close`, `camera-error`, `camera-notice`, `camera-replay` | `camera-pane.component.html` | The camera pane, its close button, its failure panel, its fallback notice, and the delayed-replay `<video>` |
+| `camera-toggle`, `stage-fullscreen` | `video-player` + `local-video-player` templates | The Camera tool button and the stage-fullscreen button — **on both players** |
+| `camera-pane`, `camera-close`, `camera-error`, `camera-notice`, `camera-replay`, `camera-exit-fullscreen` | `camera-pane.component.html` | The camera pane, its close button, its failure panel, its fallback notice, the delayed-replay `<video>`, and the fullscreen exit it carries |
 
 Everything else is selected by ARIA role or accessible name (`getByRole('button', { name:
 'Next page' })`), which is stable *because* it's an accessibility contract — if it changes,

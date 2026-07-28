@@ -112,6 +112,38 @@ test.describe('camera pane', () => {
     await page.getByTestId('camera-close').first().click();
   });
 
+  test('fullscreen takes the camera with it on a default player', async ({ page }) => {
+    // The default player uses YouTube's own controls, whose fullscreen button fullscreens
+    // the iframe — the pane lives outside it and simply disappears. So the tool row grows
+    // its own fullscreen control once the camera is on. This is the common case: the beta
+    // viewer (covered below) is opt-in.
+    await openDanceWithYouTubeVideo(page);
+    await expect(page.getByTestId('stage-fullscreen')).toHaveCount(0);
+
+    await page.getByTestId('camera-toggle').first().click();
+    await expectFeedIsLive(page);
+
+    const stageFullscreen = page.getByTestId('stage-fullscreen').first();
+    await expect(stageFullscreen, 'the control appears with the camera').toBeVisible();
+    await stageFullscreen.click();
+    await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true);
+
+    const geometry = await page.evaluate(() => {
+      const pane = document.querySelector('[data-testid="camera-pane"]')!.getBoundingClientRect();
+      const video = document.querySelector('iframe.yt-player')!.getBoundingClientRect();
+      return { paneWidth: pane.width, videoWidth: video.width, paneHeight: pane.height, viewport: window.innerHeight };
+    });
+    expect(geometry.paneWidth, 'the camera must still be on screen').toBeGreaterThan(0);
+    expect(Math.abs(geometry.paneWidth - geometry.videoWidth), 'fullscreen should split evenly').toBeLessThan(4);
+    expect(geometry.paneHeight).toBeGreaterThan(geometry.viewport * 0.9);
+
+    // In fullscreen the tool row is off screen and the default player's other controls are
+    // inside the iframe, so the camera bar carries the way back out.
+    await page.getByTestId('camera-exit-fullscreen').click();
+    await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(false);
+    await page.getByTestId('camera-close').first().click();
+  });
+
   test("the player's own controls stay clear of the pane, in and out of fullscreen", async ({ page }) => {
     // The beta viewer replaces YouTube's controls with ours, which is the only case where
     // the player draws a control bar across the media frame — and the frame is what the

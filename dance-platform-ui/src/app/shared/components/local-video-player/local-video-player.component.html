@@ -47,7 +47,8 @@
     </video>
     <!-- Inside the media frame on purpose: it fullscreens with the video. -->
     @if (cameraOn()) {
-      <app-camera-pane [layout]="cameraLayout()" [layoutLocked]="cameraLayoutLocked()" />
+      <app-camera-pane [layout]="cameraLayout()" [layoutLocked]="cameraLayoutLocked()"
+                         [isFullscreen]="fullscreen()" (exitFullscreen)="toggleFullscreen()" />
     }
     @if (customControls()) {
       <div class="rc" [class.rc--fade]="playing()">
@@ -111,6 +112,15 @@
                 title="Show your own camera beside the video — nothing is recorded or uploaded">
           <i class="fa-solid" [class.fa-video]="!cameraOn()" [class.fa-video-slash]="cameraOn()"></i> Camera
         </button>
+        <!-- The native <video> controls fullscreen the video alone, leaving the camera
+             behind. This one takes the whole stage. -->
+        @if (showFullscreenTool()) {
+          <button class="tool-btn" data-testid="stage-fullscreen" (click)="toggleFullscreen()"
+                  [attr.aria-pressed]="fullscreen()"
+                  title="Fullscreen the video and your camera together">
+            <i class="fa-solid" [class.fa-expand]="!fullscreen()" [class.fa-compress]="fullscreen()"></i> Fullscreen
+          </button>
+        }
         <button class="kbd-btn" (click)="shortcutsOpen.set(!shortcutsOpen())" [attr.aria-expanded]="shortcutsOpen()"
                 title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">
           <i class="fa-regular fa-keyboard"></i>
@@ -150,6 +160,7 @@
         <span class="kbd-hint__item"><kbd>L</kbd> Loop on/off</span>
         <span class="kbd-hint__item"><kbd>M</kbd> Mirror</span>
         <span class="kbd-hint__item"><kbd>C</kbd> Camera</span>
+        <span class="kbd-hint__item"><kbd>F</kbd> Fullscreen</span>
         <span class="kbd-hint__item"><kbd>Z</kbd> Zoom</span>
         <span class="kbd-hint__item"><kbd>1</kbd>–<kbd>7</kbd> Speed</span>
       </div>

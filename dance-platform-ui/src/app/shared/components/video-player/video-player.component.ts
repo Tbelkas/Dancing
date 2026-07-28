@@ -176,6 +176,11 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     super.toggleCamera();
   }
 
+  /** The beta chrome already carries a fullscreen button over the video. */
+  override showFullscreenTool(): boolean {
+    return super.showFullscreenTool() && !this.betaChrome;
+  }
+
   private readonly tiktokMessageHandler = (event: MessageEvent) => {
     // TikTok may emit events as plain objects or as JSON strings
     let data: any;
@@ -230,7 +235,9 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
 
   ngOnInit(): void {
     this.betaChrome = this.isYouTube && this.viewerPrefs.betaViewer();
-    if (this.betaChrome) document.addEventListener('fullscreenchange', this.fullscreenHandler);
+    // Registered whatever the chrome: the camera pane adds a fullscreen control of its
+    // own, so every player needs to know when it's in fullscreen.
+    document.addEventListener('fullscreenchange', this.fullscreenHandler);
     this.activeChapterId.set(this.activeVideoId ?? null);
     // Short lists open by default; long ones (some videos hold dozens of dances)
     // start collapsed so they don't bury the player controls.

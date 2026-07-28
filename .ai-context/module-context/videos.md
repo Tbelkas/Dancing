@@ -42,6 +42,14 @@
   the former, so the latter updates the picture without updating the UI around it.
 - Needs a secure context (https, or localhost in dev); `CameraService.unsupportedReason` states
   why when there isn't one, and a failed start keeps the pane mounted to explain itself.
+- A device that won't open must never become the stored choice — `switchDevice` reverts to the
+  camera that was working and reports it through `notice`, or the dead device is retried on
+  every page load.
+- **Fullscreen:** the embed's own fullscreen button (YouTube's, a native `<video>`'s)
+  fullscreens *that element*, leaving the pane behind. So `showFullscreenTool()` adds a
+  stage-fullscreen control to the tool row whenever the camera is on and the player isn't
+  already drawing our own bar over the video, `F` does the same from the keyboard, and the
+  pane's bar carries the exit — in fullscreen it's the only chrome of ours still on screen.
 
 ## Data shape / behaviour
 - `Platform` (default `"youtube"`; also tiktok, instagram), `VideoType` (default `"steps"`),

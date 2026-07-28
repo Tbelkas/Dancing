@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnDestroy, ViewChild, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, Output, ViewChild, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CameraLayout, CameraService } from '../../../core/services/camera.service';
 
@@ -32,6 +32,14 @@ export class CameraPaneComponent implements OnDestroy {
   @Input() layout: CameraLayout = 'side';
   /** The host forces the layout (rotated local video can't split), so don't offer the switch. */
   @Input() layoutLocked = false;
+  /**
+   * Whether the stage is currently fullscreen. In fullscreen the player's tool row is off
+   * screen and a default player's only other chrome lives inside the embed's iframe — so
+   * this bar becomes the one visible way back out, and grows a button for it.
+   */
+  @Input() isFullscreen = false;
+  /** Asks the host player to leave fullscreen. */
+  @Output() exitFullscreen = new EventEmitter<void>();
 
   readonly camera = inject(CameraService);
 

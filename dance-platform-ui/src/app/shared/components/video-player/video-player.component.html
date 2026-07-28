@@ -49,7 +49,8 @@
       <div #playerContainer class="yt-player"></div>
       <!-- Inside the media frame on purpose: it fullscreens with the video. -->
       @if (cameraOn()) {
-        <app-camera-pane [layout]="cameraLayout()" [layoutLocked]="cameraLayoutLocked()" />
+        <app-camera-pane [layout]="cameraLayout()" [layoutLocked]="cameraLayoutLocked()"
+                         [isFullscreen]="fullscreen()" (exitFullscreen)="toggleFullscreen()" />
       }
       @if (betaChrome) {
         <div class="rc" [class.rc--fade]="playing()">
@@ -145,6 +146,7 @@
           <span class="kbd-hint__item"><kbd>L</kbd> Loop on/off</span>
           <span class="kbd-hint__item"><kbd>M</kbd> Mirror</span>
           <span class="kbd-hint__item"><kbd>C</kbd> Camera</span>
+          <span class="kbd-hint__item"><kbd>F</kbd> Fullscreen</span>
           <span class="kbd-hint__item"><kbd>1</kbd>–<kbd>7</kbd> Speed</span>
         </div>
       }
@@ -173,7 +175,8 @@
         scrolling="no">
       </iframe>
       @if (cameraOn()) {
-        <app-camera-pane [layout]="cameraLayout()" [layoutLocked]="cameraLayoutLocked()" />
+        <app-camera-pane [layout]="cameraLayout()" [layoutLocked]="cameraLayoutLocked()"
+                         [isFullscreen]="fullscreen()" (exitFullscreen)="toggleFullscreen()" />
       }
       @if (loopFlash()) {
         <div class="loop-flash" aria-hidden="true"><i class="fa-solid fa-rotate-left"></i></div>
@@ -251,6 +254,15 @@
             title="Show your own camera beside the video — nothing is recorded or uploaded">
       <i class="fa-solid" [class.fa-video]="!cameraOn()" [class.fa-video-slash]="cameraOn()"></i> Camera
     </button>
+    <!-- YouTube's own fullscreen button fullscreens its iframe, which leaves the camera
+         behind. This one takes the whole stage. -->
+    @if (showFullscreenTool()) {
+      <button class="tool-btn" data-testid="stage-fullscreen" (click)="toggleFullscreen()"
+              [attr.aria-pressed]="fullscreen()"
+              title="Fullscreen the video and your camera together">
+        <i class="fa-solid" [class.fa-expand]="!fullscreen()" [class.fa-compress]="fullscreen()"></i> Fullscreen
+      </button>
+    }
   </ng-template>
 
   <!-- Loop controls shared by YouTube and TikTok: A→B region on one dual-handle slider. -->

@@ -200,6 +200,15 @@
   color: #07070D;
 }
 
+/* The exit and close buttons sit together at the far end of the bar. */
+.cam__btn--exit {
+  margin-left: auto;
+}
+
+.cam__btn--exit + .cam__btn--close {
+  margin-left: 0;
+}
+
 .cam__btn--close {
   margin-left: auto;
 }

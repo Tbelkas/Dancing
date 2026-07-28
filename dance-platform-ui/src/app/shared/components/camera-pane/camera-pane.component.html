@@ -72,6 +72,13 @@
       <i class="fa-solid fa-sliders"></i>
     </button>
 
+    @if (isFullscreen) {
+      <button class="cam__btn cam__btn--exit" (click)="exitFullscreen.emit()"
+              title="Leave fullscreen" aria-label="Leave fullscreen" data-testid="camera-exit-fullscreen">
+        <i class="fa-solid fa-compress"></i>
+      </button>
+    }
+
     <button class="cam__btn cam__btn--close" (click)="close()" title="Turn the camera off"
             aria-label="Turn the camera off" data-testid="camera-close">
       <i class="fa-solid fa-xmark"></i>

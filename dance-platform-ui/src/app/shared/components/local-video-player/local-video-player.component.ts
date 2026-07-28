@@ -244,6 +244,11 @@ export class LocalVideoPlayerComponent extends PlayerBaseComponent implements On
     return this.sideways();
   }
 
+  /** Rotated or zoomed playback swaps in our own bar, which has a fullscreen button. */
+  override showFullscreenTool(): boolean {
+    return super.showFullscreenTool() && !this.customControls();
+  }
+
   /** The media frame (not the raw <video>) fullscreens, so the rotation layout carries over. */
   protected override mediaFrame(): HTMLElement | null {
     return this.mediaEl.nativeElement;

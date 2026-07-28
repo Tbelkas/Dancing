@@ -238,6 +238,23 @@ export abstract class PlayerBaseComponent {
     return Math.round((this.muted() ? 0 : this.volume()) * 100);
   }
 
+  /**
+   * Whether this player should offer its own fullscreen button in the tool row.
+   *
+   * The embed's *own* fullscreen button (YouTube's, or a native <video>'s) fullscreens
+   * that element alone — the camera pane is elsewhere in the DOM and simply disappears.
+   * So once the camera is on, the player needs a control that fullscreens the whole
+   * stage. Players that already draw our control bar over the video have one there.
+   */
+  showFullscreenTool(): boolean {
+    return this.cameraOn() && this.canFullscreen;
+  }
+
+  /** iOS Safari fullscreens only <video> elements, so the element API is absent there. */
+  get canFullscreen(): boolean {
+    return typeof document !== 'undefined' && document.fullscreenEnabled;
+  }
+
   /** Fullscreens the media frame (not the video/iframe) so our controls ride along. */
   toggleFullscreen(): void {
     if (document.fullscreenElement) {
@@ -291,6 +308,10 @@ export abstract class PlayerBaseComponent {
         break;
       case 'c': case 'C':
         this.toggleCamera();
+        break;
+      case 'f': case 'F':
+        // Our frame, not the embed's: this is the one that takes the camera with it.
+        if (this.canFullscreen) this.toggleFullscreen();
         break;
       case '?':
         this.shortcutsOpen.set(!this.shortcutsOpen());
