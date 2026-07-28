@@ -1,0 +1,22 @@
+{
+  "name": "dance-platform-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "End-to-end smoke suite for DancePlatform. Runs against a deployed environment (prod by default) or a local dev pair.",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:anon": "playwright test --project=anon",
+    "test:authed": "playwright test --project=authed",
+    "test:api": "playwright test --project=api",
+    "report": "playwright show-report",
+    "verify:testids": "node scripts/verify-testids.mjs",
+    "install:browsers": "playwright install chromium",
+    "serve:dist": "node scripts/serve-dist.mjs 4300",
+    "test:local": "node scripts/run-against-build.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

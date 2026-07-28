@@ -2,6 +2,11 @@
 # Stops the perpetual "LF will be replaced by CRLF" churn on Windows.
 * text=auto eol=lf
 
+# ...except Windows batch files, which cmd.exe cannot parse with LF endings — a multi-line
+# if/for block silently garbles ("'etlocal' is not recognized"). These must check out CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
 *.png binary
 *.jpg binary
 *.jpeg binary

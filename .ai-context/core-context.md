@@ -150,6 +150,14 @@ Dance/                              ← repo root
 11. **Do not store secrets in the repo.** JWT key / connection string come from configuration
     (`Jwt:Key`, `ConnectionStrings:Default`), not source.
 12. **Do not remove `DateAdded`** from entities or forget it on new ones.
+13. **Do not change UI markup or an API contract without updating `e2e/`.** The Playwright
+    suite anchors on 18 `data-testid` attributes and on API field/param names. Run
+    `cd e2e && npm run verify:testids` (sub-second) after touching
+    `dance-platform-ui/src`, and update the affected spec in the **same commit**. Full
+    contract and conventions → `e2e/README.md`.
+14. **Do not write an e2e test that leaves data behind.** The `authed` project runs against
+    the **production** database; every test must be read-only or restore what it changed.
+    Scheduled runs repeat forever, so anything left behind accumulates in the real catalog.
 
 ---
 

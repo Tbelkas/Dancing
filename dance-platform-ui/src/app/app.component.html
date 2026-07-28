@@ -29,9 +29,9 @@
 
     <nav id="primary-nav" class="header__nav" [class.header__nav--open]="menuOpen()">
       @if (auth.isAuthenticated()) {
-        <a routerLink="/my-dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">My Dances</a>
+        <a routerLink="/my-dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" data-testid="nav-my-dances" (click)="closeMenu()">My Dances</a>
       }
-      <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeMenu()">Browse</a>
+      <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" data-testid="nav-browse" (click)="closeMenu()">Browse</a>
       @if (auth.isAuthenticated()) {
         <!-- Mobile-menu only; on desktop these live in the avatar dropdown. -->
         <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__nav-mobile" (click)="closeMenu()">Added Videos</a>
@@ -46,7 +46,7 @@
         }
       } @else {
         <a routerLink="/register" class="btn btn--ghost" (click)="closeMenu()">Sign up</a>
-        <a routerLink="/login" class="btn btn--primary" (click)="closeMenu()">Sign in</a>
+        <a routerLink="/login" class="btn btn--primary" data-testid="nav-sign-in" (click)="closeMenu()">Sign in</a>
       }
     </nav>
 
@@ -58,7 +58,8 @@
           (click)="toggleUserMenu()"
           [attr.aria-expanded]="userMenuOpen()"
           aria-haspopup="menu"
-          aria-label="Account menu">
+          aria-label="Account menu"
+          data-testid="user-menu-button">
           {{ userInitial() }}
         </button>
         @if (userMenuOpen()) {
@@ -72,7 +73,7 @@
             <a routerLink="/library" role="menuitem" (click)="closeUserMenu()">
               <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>Added Videos
             </a>
-            <button type="button" role="menuitem" class="user-menu__signout" (click)="signOut()">
+            <button type="button" role="menuitem" class="user-menu__signout" data-testid="sign-out" (click)="signOut()">
               <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>Sign out
             </button>
           </div>

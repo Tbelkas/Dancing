@@ -97,3 +97,16 @@ _proto/
 
 # Playwright-MCP page/transcript scratch (browser-audit session dumps)
 .playwright-mcp/
+
+# ============================================================
+# e2e suite
+# ============================================================
+# Real credentials for the throwaway test account — never commit.
+# Only e2e/.env.example is tracked.
+e2e/.env
+e2e/test-results/
+e2e/playwright-report/
+e2e/blob-report/
+e2e/.last-run.json
+# Scheduled-run logs from e2e-dance.bat
+e2e/runs/

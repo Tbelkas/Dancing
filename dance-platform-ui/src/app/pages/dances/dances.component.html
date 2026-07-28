@@ -115,7 +115,7 @@
   <div class="filters">
     <div class="search-wrapper">
       <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
-      <input type="text" [value]="searchQuery()" (input)="onSearchInput($any($event.target).value)" class="search-input" placeholder="Search dances..." aria-label="Search dances" />
+      <input type="text" data-testid="search-input" [value]="searchQuery()" (input)="onSearchInput($any($event.target).value)" class="search-input" placeholder="Search dances..." aria-label="Search dances" />
       @if (searchQuery()) {
         <button class="search-clear" (click)="onSearchInput('')" aria-label="Clear search"><i class="fa-solid fa-xmark"></i></button>
       }
@@ -232,7 +232,7 @@
   <!-- Always mounted: popping it in after the first load (or unmounting it during
        re-searches) shoves the whole grid up and down. -->
   <div class="results-bar">
-      <span class="results-count">
+      <span class="results-count" data-testid="results-count">
         @if (!hasLoaded()) {
           <span class="skeleton results-count__skeleton"></span>
         } @else if (hasActiveFilters() && searchTotal() < grandTotal()) {
@@ -261,7 +261,7 @@
         </div>
         <label class="sort-control">
           <span class="sort-control__label">Sort</span>
-          <select [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)" aria-label="Sort dances"
+          <select data-testid="sort-select" [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)" aria-label="Sort dances"
                   title="Recommended = dances with full tutorials first, then rating and favorites — tilted toward styles you practice when signed in">
             <option value="recommended">Recommended</option>
             <option value="tutorials">Tutorials first</option>
@@ -317,7 +317,7 @@
       </div>
     }
   } @else if (!loading() && searchResults().length === 0) {
-    <div class="empty-state card">
+    <div class="empty-state card" data-testid="empty-state">
       <div class="empty-state__icon"><i class="fa-solid fa-magnifying-glass"></i></div>
       <h2>No dances found</h2>
       @if (hasActiveFilters()) {
@@ -337,8 +337,8 @@
   } @else if (viewMode() === 'list') {
     <ul class="dance-rows" [class.results--refreshing]="loading()" [attr.aria-busy]="loading() || null">
       @for (dance of searchResults(); track dance.id) {
-        <li class="dance-row-item">
-          <a class="dance-row-item__link" [routerLink]="dance.slug | dancePath:dance.styleSlug">
+        <li class="dance-row-item" data-testid="dance-card">
+          <a class="dance-row-item__link" data-testid="dance-card-link" [routerLink]="dance.slug | dancePath:dance.styleSlug">
             <span class="dance-row-item__thumb">
               @if (thumbnailUrl(dance); as thumb) {
                 <img [src]="thumb" alt="" loading="lazy" (error)="onThumbError(dance.id)" />
@@ -401,7 +401,7 @@
   } @else {
     <div class="grid grid--2" [class.grid--reveal]="cardsReveal()" [class.results--refreshing]="loading()" [attr.aria-busy]="loading() || null">
       @for (dance of searchResults(); track dance.id) {
-        <div class="card dance-card">
+        <div class="card dance-card" data-testid="dance-card">
           <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="dance-card__media" tabindex="-1" aria-hidden="true"
              (mouseenter)="onMediaEnter(dance)" (mouseleave)="onMediaLeave()">
             @if (thumbnailUrl(dance); as thumb) {
@@ -418,7 +418,7 @@
           <div class="dance-card__body">
             <div class="dance-card__header">
               <h3 class="dance-card__name">
-                <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="dance-card__title-link">{{ dance.name }}</a>
+                <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="dance-card__title-link" data-testid="dance-card-link">{{ dance.name }}</a>
               </h3>
               @if (auth.isAuthenticated()) {
                 <div class="dance-card__actions">

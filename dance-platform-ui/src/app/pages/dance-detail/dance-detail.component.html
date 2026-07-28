@@ -2,7 +2,7 @@
   <div class="container">
     <div class="detail-header">
       <div class="detail-header__main">
-        <h1 class="page-title">{{ dance()!.name }}</h1>
+        <h1 class="page-title" data-testid="dance-title">{{ dance()!.name }}</h1>
         <!-- Badges and tallies share one line, and a tally only appears once it has
              something to report — three permanent zeroes said nothing. -->
         <div class="styles-row">
@@ -44,7 +44,7 @@
       <div class="detail-right">
         @if (auth.isAuthenticated()) {
           <div class="detail-actions">
-            <button class="btn fav-btn" [class.btn--accent]="dance()!.isFavorite" [class.btn--ghost]="!dance()!.isFavorite" (click)="toggleFavorite()" [attr.aria-pressed]="dance()!.isFavorite">
+            <button class="btn fav-btn" data-testid="favorite-button" [class.btn--accent]="dance()!.isFavorite" [class.btn--ghost]="!dance()!.isFavorite" (click)="toggleFavorite()" [attr.aria-pressed]="dance()!.isFavorite">
               @if (dance()!.isFavorite) { <i class="fa-solid fa-star"></i> Favorited } @else { <i class="fa-regular fa-star"></i> Favorite }
             </button>
             <div class="progress-control" role="group" aria-label="Track your progress">
@@ -53,7 +53,7 @@
                 <button class="progress-seg progress-seg--inprogress" [class.is-active]="dance()!.isInProgress" (click)="toggleInProgress()" [attr.aria-pressed]="dance()!.isInProgress">
                   <i class="fa-solid fa-circle-half-stroke"></i> In progress
                 </button>
-                <button class="progress-seg progress-seg--learned" [class.is-active]="dance()!.isLearned" (click)="toggleLearned()" [attr.aria-pressed]="dance()!.isLearned">
+                <button class="progress-seg progress-seg--learned" data-testid="progress-learned" [class.is-active]="dance()!.isLearned" (click)="toggleLearned()" [attr.aria-pressed]="dance()!.isLearned">
                   <i class="fa-solid fa-check"></i> Learned
                 </button>
               </div>
