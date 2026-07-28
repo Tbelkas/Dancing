@@ -4,7 +4,7 @@ Playwright smoke tests for DancePlatform. They drive a **deployed** app over rea
 production by default — so they answer the question the unit tests can't: *is the thing the
 Pi is actually serving working right now?*
 
-40 tests, ~25 seconds.
+45 tests, ~40 seconds.
 
 ---
 
@@ -93,7 +93,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 19 attributes are a contract. Treat them like a public API.**
+**These 24 attributes are a contract. Treat them like a public API.**
 
 | Test id | Lives in | Anchors |
 |---|---|---|
@@ -104,6 +104,8 @@ anchors on a small, deliberate set of `data-testid` attributes.
 | `style-filter-pills` | `dances.component.html` | The Style filter row — `.style-filters` alone also matches the Level row |
 | `dance-card`, `dance-card-link` | `dances.component.html` | Result cards — **on both the grid card and the list row** |
 | `dance-title`, `favorite-button`, `progress-learned` | `dance-detail.component.html` | Detail page |
+| `camera-toggle` | `video-player` + `local-video-player` templates | The Camera tool button — **on both players** |
+| `camera-pane`, `camera-close`, `camera-error`, `camera-replay` | `camera-pane.component.html` | The camera pane, its close button, its failure panel, and the delayed-replay `<video>` |
 
 Everything else is selected by ARIA role or accessible name (`getByRole('button', { name:
 'Next page' })`), which is stable *because* it's an accessibility contract — if it changes,
@@ -140,6 +142,7 @@ e2e/
 │  ├─ smoke.spec.ts         shell, routing, guards, SPA fallback — runs desktop AND mobile
 │  ├─ browse.spec.ts        search, filters, sort, pagination, URL sync
 │  ├─ dance-detail.spec.ts  detail page, video embed, prev/next
+│  ├─ camera.spec.ts        the camera pane — see "Testing the camera" below
 │  └─ authed.spec.ts        signed-in flows + the login form
 └─ scripts/
    ├─ verify-testids.mjs    the contract guard
@@ -148,6 +151,24 @@ e2e/
 ```
 
 ---
+
+## Testing the camera
+
+`camera.spec.ts` needs a webcam, and there isn't one on CI. It sets its own launch options
+via `test.use`, and both halves matter:
+
+- `launchOptions.args: ['--use-fake-device-for-media-stream']` — a synthetic capture device,
+  so no hardware and no human clicking "Allow".
+- `channel: 'chromium'` — **required.** Playwright's default headless shell has no media
+  stack at all: `getUserMedia` there rejects with `NotSupportedError` whatever permissions
+  you grant. The `chromium` channel runs the full browser in new headless mode, which does
+  capture. `npx playwright install chromium` already fetches it, so CI needs no extra step.
+
+The `camera denied` block drops `permissions` to assert the failure path — a blocked camera
+has to keep the pane up and explain itself, not silently vanish.
+
+Nothing here touches the API or the database: the camera is browser-local, and the only state
+it leaves behind is `dp_camera_*` in a context that Playwright throws away.
 
 ## Conventions
 

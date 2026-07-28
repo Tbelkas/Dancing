@@ -1,0 +1,341 @@
+/* Your camera, inside the player's media frame.
+
+   Side mode: the host is a grid cell next to the video and stretches to the row's
+   height, so the two pictures line up top and bottom.
+   Overlay mode: the host lifts out of the flow and covers the frame; only the
+   control bar keeps pointer events, so clicks still reach the video underneath. */
+:host {
+  display: block;
+  position: relative;
+  min-width: 0;
+  background: #000;
+  /* Everything inside is absolutely positioned, so the host has no content height of
+     its own. Beside the video that doesn't matter — the grid row stretches it to the
+     video's height. Stacked (narrow screens), the row is auto-sized and the host would
+     collapse to nothing, so it needs an aspect to fall back on. A definite stretched
+     height wins over aspect-ratio, so this only takes effect when nothing else sizes it. */
+  aspect-ratio: 16 / 9;
+}
+
+:host(.is-overlay) {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  aspect-ratio: auto;
+  background: none;
+  pointer-events: none;
+}
+
+.cam {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.cam__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #07070D;
+  display: block;
+}
+
+/* Overlay mode ghosts the feed over the instructor so you can see your limbs
+   diverge from theirs; --cam-opacity is bound from the saved blend setting. */
+.cam--overlay .cam__video {
+  opacity: var(--cam-opacity, 0.5);
+  background: none;
+}
+
+/* Selfie default: your right hand should be on the side of the screen your right
+   hand is actually on. Independent of the video's own mirror. */
+.cam__video--mirrored {
+  transform: scaleX(-1);
+}
+
+/* Keeping both elements mounted (rather than swapping one source) makes the return
+   to live instant, so "hidden" is visibility, not removal. */
+.cam__video--hidden {
+  visibility: hidden;
+}
+
+/* --- Status: starting, or explaining why there's nothing to show ----------- */
+
+.cam__msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+  padding: 18px;
+  background: rgba(7, 7, 13, 0.9);
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  text-align: center;
+  pointer-events: auto;
+}
+
+.cam__msg--error {
+  color: var(--color-text);
+}
+
+.cam__msg-icon {
+  color: var(--color-accent);
+  font-size: 1.4rem;
+}
+
+.cam__msg-text {
+  margin: 0;
+  max-width: 34ch;
+  line-height: 1.4;
+}
+
+.cam__msg-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.cam__spin {
+  animation: cam-spin 1s linear infinite;
+}
+
+@keyframes cam-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cam__spin { animation: none; }
+}
+
+/* --- Corner tag: live, or how far behind the replay is --------------------- */
+
+.cam__tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius);
+  background: rgba(7, 7, 13, 0.72);
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  pointer-events: none;
+}
+
+/* Delayed playback is a different thing from a live feed — say so in coral. */
+.cam__tag--delayed {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* --- Control bar ----------------------------------------------------------- */
+
+.cam__bar {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 20px 8px 7px;
+  background: linear-gradient(transparent, rgba(7, 7, 13, 0.85));
+  opacity: 0;
+  transition: opacity var(--transition);
+  pointer-events: auto;
+}
+
+/* An open settings panel pins the bar — its toggle lives there and must stay hittable. */
+.cam:hover .cam__bar,
+.cam__bar:focus-within,
+.cam:has(.cam__panel) .cam__bar {
+  opacity: 1;
+}
+
+/* Touch has no hover: leave the bar up rather than making it unreachable. */
+@media (hover: none) {
+  .cam__bar { opacity: 1; }
+}
+
+.cam__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.cam__btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.cam__btn.is-on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #07070D;
+}
+
+.cam__btn--close {
+  margin-left: auto;
+}
+
+.cam__btn--close:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.cam__delay {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cam__delay-label {
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.cam__chip {
+  min-width: 28px;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.cam__chip:hover {
+  border-color: var(--color-primary);
+}
+
+/* An armed delay carries the coral "this is a practice tool that's running" cue,
+   the same one the loop toggle uses. */
+.cam__chip.is-on {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* --- Settings panel -------------------------------------------------------- */
+
+/* Sits under the bar (which keeps z-index 3) and reserves room for it in its padding. */
+.cam__panel {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 10px 44px;
+  background: rgba(7, 7, 13, 0.94);
+  border-top: 1px solid var(--color-border);
+  pointer-events: auto;
+}
+
+.cam__field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cam__field-label {
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  min-width: 52px;
+}
+
+.cam__select {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 0.78rem;
+}
+
+.cam__range {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(to right,
+    var(--color-primary) var(--fill, 50%),
+    var(--color-surface-2) var(--fill, 50%));
+  border-radius: 4px;
+  cursor: pointer;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    box-shadow: 0 0 6px var(--color-primary-glow);
+  }
+
+  &::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: none;
+    border-radius: 50%;
+    background: var(--color-primary);
+    box-shadow: 0 0 6px var(--color-primary-glow);
+  }
+}
+
+.cam__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+/* Narrow frames (side-by-side on a phone, or the overlay on a small player) can't
+   carry the delay label and every button on one line. */
+@media (max-width: 560px) {
+  .cam__delay-label { display: none; }
+  .cam__bar { padding: 16px 6px 6px; }
+}

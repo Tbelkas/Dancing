@@ -5,11 +5,12 @@ import { TrustUrlPipe } from '../../pipes/trust-url.pipe';
 import { VideoSegment, VideoChapter, VideoNote } from '../../../models/video.model';
 import { ViewerPrefsService } from '../../../core/services/viewer-prefs.service';
 import { PlayerBaseComponent } from '../player-base';
+import { CameraPaneComponent } from '../camera-pane/camera-pane.component';
 
 @Component({
   selector: 'app-video-player',
   standalone: true,
-  imports: [CommonModule, FormsModule, TrustUrlPipe],
+  imports: [CommonModule, FormsModule, TrustUrlPipe, CameraPaneComponent],
   templateUrl: './video-player.component.html',
   styleUrls: ['./video-player.component.css']
 })
@@ -106,8 +107,8 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
   private tiktokCurrentTime = 0;
   private hasRealDuration = false;
   private regionInitialised = false;
-  /** Guards the deferred iframe-API callback from creating a player after ngOnDestroy. */
-  private destroyed = false;
+  // `destroyed` (inherited) guards the deferred iframe-API callback from creating a
+  // player, and the camera restore from claiming one, after ngOnDestroy.
   private lastPlayingEmit = false;
   private tiktokStallHandle: ReturnType<typeof setTimeout> | null = null;
 
@@ -167,6 +168,12 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
   override toggleMirror(): void {
     VideoPlayerComponent.activeInstance = this;
     super.toggleMirror();
+  }
+
+  /** Clicking a player's camera button also makes it the target of the shortcut keys. */
+  override toggleCamera(): void {
+    VideoPlayerComponent.activeInstance = this;
+    super.toggleCamera();
   }
 
   private readonly tiktokMessageHandler = (event: MessageEvent) => {
@@ -231,6 +238,7 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     this.restorePlayerPrefs();
     VideoPlayerComponent.activeInstance = this;
     document.addEventListener('keydown', this.keydownHandler);
+    void this.restoreCamera();
     if (this.isTikTok) {
       const defaultDur = this.endTime ? this.endTime + 10 : 60;
       this.videoDuration.set(defaultDur);
@@ -270,6 +278,8 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     if (this.tiktokStallHandle) clearTimeout(this.tiktokStallHandle);
     this.clearFlashTimeout();
     document.removeEventListener('keydown', this.keydownHandler);
+    // Frees the device: a stream left running keeps the camera light on after navigation.
+    this.camera.release(this);
     if (VideoPlayerComponent.activeInstance === this) VideoPlayerComponent.activeInstance = null;
     this.emitPlaying(false);
     this.player?.destroy();

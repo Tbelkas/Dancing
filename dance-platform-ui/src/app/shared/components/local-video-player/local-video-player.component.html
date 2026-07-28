@@ -23,6 +23,8 @@
        [class.player-media--mirrored]="mirrored()"
        [class.player-media--sideways]="sideways()"
        [class.player-media--zoomed]="zoom() > 1"
+       [class.player-media--camera]="cameraOn()"
+       [class.player-media--camera-overlay]="cameraOn() && cameraLayout() === 'overlay'"
        [style.aspectRatio]="sidewaysAspect()">
     <video #videoEl
       class="local-video"
@@ -43,6 +45,10 @@
       (click)="onVideoClick()"
       (ended)="onEnded()">
     </video>
+    <!-- Inside the media frame on purpose: it fullscreens with the video. -->
+    @if (cameraOn()) {
+      <app-camera-pane [layout]="cameraLayout()" [layoutLocked]="cameraLayoutLocked()" />
+    }
     @if (customControls()) {
       <div class="rc" [class.rc--fade]="playing()">
         <button class="rc__btn" (click)="togglePlay()" [attr.aria-label]="playing() ? 'Pause' : 'Play'">
@@ -100,6 +106,11 @@
                 title="Flip the video horizontally so the dancer matches your side">
           <i class="fa-solid fa-left-right"></i> Mirror
         </button>
+        <button class="tool-btn" data-testid="camera-toggle" [class.is-open]="cameraOn()" (click)="toggleCamera()"
+                [attr.aria-pressed]="cameraOn()"
+                title="Show your own camera beside the video — nothing is recorded or uploaded">
+          <i class="fa-solid" [class.fa-video]="!cameraOn()" [class.fa-video-slash]="cameraOn()"></i> Camera
+        </button>
         <button class="kbd-btn" (click)="shortcutsOpen.set(!shortcutsOpen())" [attr.aria-expanded]="shortcutsOpen()"
                 title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">
           <i class="fa-regular fa-keyboard"></i>
@@ -138,6 +149,7 @@
         <span class="kbd-hint__item"><kbd>[</kbd><kbd>]</kbd> Loop start / end</span>
         <span class="kbd-hint__item"><kbd>L</kbd> Loop on/off</span>
         <span class="kbd-hint__item"><kbd>M</kbd> Mirror</span>
+        <span class="kbd-hint__item"><kbd>C</kbd> Camera</span>
         <span class="kbd-hint__item"><kbd>Z</kbd> Zoom</span>
         <span class="kbd-hint__item"><kbd>1</kbd>–<kbd>7</kbd> Speed</span>
       </div>

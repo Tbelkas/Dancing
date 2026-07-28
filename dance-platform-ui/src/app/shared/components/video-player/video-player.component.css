@@ -28,6 +28,58 @@
   transform: scaleX(-1);
 }
 
+/* --- Camera pane: the media frame makes room for your own feed --------------
+   Side mode splits the stage into two equal columns; the pane stretches to the
+   row height the video sets, so both pictures line up top and bottom. Overlay
+   mode leaves the stage alone — the pane lifts out of the flow and covers it
+   (see :host(.is-overlay) in camera-pane.component.css). */
+.player-media--camera {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: #07070D;
+}
+
+.player-media--camera-overlay {
+  display: block;
+  gap: 0;
+}
+
+/* Below the split threshold two half-width videos are too small to learn from,
+   so the camera goes under the video instead of beside it. */
+@media (max-width: 720px) {
+  .player-media--camera:not(.player-media--camera-overlay) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* TikTok's portrait embed is a centered flex row of fixed-size frames, not a grid;
+   the pane matches the embed's 325x578 so the two stand side by side. */
+.embed-container.player-media--camera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.embed-container.player-media--camera app-camera-pane {
+  width: 325px;
+  max-width: 100%;
+  aspect-ratio: 325 / 578;
+}
+
+.embed-container.player-media--camera-overlay app-camera-pane {
+  width: auto;
+  aspect-ratio: auto;
+}
+
+/* Fullscreen: fill the height rather than letting the 16:9 row float in a black
+   field, and keep both columns stretched to it. */
+.player-media--camera:fullscreen {
+  height: 100%;
+  align-items: stretch;
+  grid-template-rows: 100%;
+}
+
 .mirror-tag {
   position: absolute;
   top: 10px;

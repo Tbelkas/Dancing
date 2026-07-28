@@ -1,0 +1,118 @@
+<!-- The pane sits inside the player's media frame, so it fullscreens with the video
+     and (in overlay mode) can ghost straight over it. -->
+<div class="cam" [class.cam--overlay]="isOverlay" [style.--cam-opacity]="isOverlay ? camera.opacity() : 1"
+     role="group" aria-label="Your camera" data-testid="camera-pane">
+
+  <!-- Two elements rather than one swapped source: the live feed keeps running behind
+       the delayed clip, so returning to live is instant and never re-prompts. -->
+  <video #camEl class="cam__video"
+         [class.cam__video--mirrored]="camera.mirrored()"
+         [class.cam__video--hidden]="showingReplay()"
+         muted autoplay playsinline></video>
+  <video #replayEl class="cam__video cam__video--replay" data-testid="camera-replay"
+         [class.cam__video--mirrored]="camera.mirrored()"
+         [class.cam__video--hidden]="!showingReplay()"
+         muted playsinline loop></video>
+
+  @if (camera.status() === 'starting') {
+    <p class="cam__msg"><i class="fa-solid fa-spinner cam__spin"></i> Waiting for your camera…</p>
+  }
+
+  @if (camera.status() === 'error') {
+    <div class="cam__msg cam__msg--error" data-testid="camera-error">
+      <i class="fa-solid fa-triangle-exclamation cam__msg-icon"></i>
+      <p class="cam__msg-text">{{ camera.error() }}</p>
+      <span class="cam__msg-actions">
+        <button class="btn btn--accent btn--sm" (click)="retry()">
+          <i class="fa-solid fa-rotate-right"></i> Try again
+        </button>
+        <button class="btn btn--ghost btn--sm" (click)="close()">Close</button>
+      </span>
+    </div>
+  }
+
+  @if (camera.status() === 'on') {
+    <span class="cam__tag" [class.cam__tag--delayed]="showingReplay()" aria-hidden="true">
+      @if (showingReplay()) {
+        <i class="fa-solid fa-clock-rotate-left"></i> −{{ camera.delaySeconds() }}s
+      } @else {
+        <i class="fa-solid fa-video"></i> You
+      }
+    </span>
+  }
+
+  <!-- Fades out of the way while you're dancing; hover or keyboard focus brings it back. -->
+  <div class="cam__bar">
+    <button class="cam__btn" [class.is-on]="camera.mirrored()" (click)="camera.toggleMirror()"
+            [attr.aria-pressed]="camera.mirrored()"
+            title="Mirror your camera (a selfie view reads backwards unmirrored)"
+            aria-label="Mirror your camera">
+      <i class="fa-solid fa-left-right"></i>
+    </button>
+
+    @if (!layoutLocked) {
+      <button class="cam__btn" (click)="setLayout(isOverlay ? 'side' : 'overlay')"
+              [title]="isOverlay ? 'Show side by side' : 'Ghost your camera over the video'"
+              [attr.aria-label]="isOverlay ? 'Show side by side' : 'Overlay on the video'">
+        <i class="fa-solid" [class.fa-table-columns]="isOverlay" [class.fa-layer-group]="!isOverlay"></i>
+      </button>
+    }
+
+    <span class="cam__delay" role="group" aria-label="Delayed replay">
+      <span class="cam__delay-label">Delay</span>
+      @for (seconds of camera.delayOptions; track seconds) {
+        <button class="cam__chip" [class.is-on]="camera.delaySeconds() === seconds"
+                (click)="toggleDelay(seconds)" [attr.aria-pressed]="camera.delaySeconds() === seconds"
+                [attr.aria-label]="'Replay the last ' + seconds + ' seconds'">{{ seconds }}s</button>
+      }
+    </span>
+
+    <button class="cam__btn" [class.is-on]="settingsOpen()" (click)="settingsOpen.set(!settingsOpen())"
+            [attr.aria-expanded]="settingsOpen()" title="Camera settings" aria-label="Camera settings">
+      <i class="fa-solid fa-sliders"></i>
+    </button>
+
+    <button class="cam__btn cam__btn--close" (click)="close()" title="Turn the camera off"
+            aria-label="Turn the camera off" data-testid="camera-close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  @if (settingsOpen()) {
+    <div class="cam__panel">
+      @if (isOverlay) {
+        <label class="cam__field">
+          <span class="cam__field-label">Blend</span>
+          <input type="range" class="cam__range" min="0.15" max="1" step="0.05"
+                 [value]="camera.opacity()" [style.--fill.%]="camera.opacity() * 100"
+                 aria-label="Camera blend" [attr.aria-valuetext]="(camera.opacity() * 100 | number:'1.0-0') + '%'"
+                 (input)="camera.setOpacity(+$any($event.target).value)" />
+        </label>
+      }
+
+      @if (showDevicePicker) {
+        <label class="cam__field">
+          <span class="cam__field-label">Camera</span>
+          <select class="cam__select" [value]="camera.deviceId()" aria-label="Which camera to use"
+                  (change)="onDeviceChange($any($event.target).value)">
+            <option value="">Default</option>
+            @for (device of camera.devices(); track device.deviceId; let i = $index) {
+              <option [value]="device.deviceId">{{ deviceLabel(device, i) }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      @if (delayUnavailable()) {
+        <p class="cam__hint">This browser can't record video, so delayed replay isn't available here.</p>
+      } @else if (camera.delaySeconds() > 0) {
+        <p class="cam__hint">
+          Looping the last {{ camera.delaySeconds() }}s while the next {{ camera.delaySeconds() }}s records.
+          Nothing is saved or uploaded.
+        </p>
+      } @else {
+        <p class="cam__hint">Delay replays your last few seconds on a loop, so you can watch yourself back without stopping.</p>
+      }
+    </div>
+  }
+</div>

@@ -1,6 +1,7 @@
-import { Directive, EventEmitter, Output, signal } from '@angular/core';
+import { Directive, EventEmitter, Output, inject, signal } from '@angular/core';
 import { VideoSegment } from '../../models/video.model';
 import { formatTimeSecs } from '../../core/utils/video-url.utils';
+import { CameraLayout, CameraService } from '../../core/services/camera.service';
 
 /**
  * Everything the embed player (YouTube/TikTok/Instagram) and the local-file player
@@ -51,6 +52,12 @@ export abstract class PlayerBaseComponent {
   protected readonly LOOP_PREF_KEY = 'dp_player_loop';
   protected readonly MIRROR_PREF_KEY = 'dp_player_mirror';
 
+  /** The webcam feed shown beside the video. One player owns it page-wide — see CameraService. */
+  readonly camera = inject(CameraService);
+
+  /** Set by each player in its ngOnDestroy; guards deferred async callbacks. */
+  protected destroyed = false;
+
   private flashTimeout: ReturnType<typeof setTimeout> | null = null;
 
   formatTime = formatTimeSecs;
@@ -94,6 +101,42 @@ export abstract class PlayerBaseComponent {
   toggleMirror(): void {
     this.mirrored.set(!this.mirrored());
     localStorage.setItem(this.MIRROR_PREF_KEY, this.mirrored() ? '1' : '0');
+  }
+
+  // --- Camera pane -----------------------------------------------------------
+
+  /** True when this player is the one showing the camera (only one does at a time). */
+  cameraOn(): boolean {
+    return this.camera.isOwner(this);
+  }
+
+  toggleCamera(): void {
+    if (this.cameraOn()) this.camera.stop();
+    else void this.camera.start(this);
+  }
+
+  /** Where the pane sits. Overridden where a player's frame can't be split. */
+  cameraLayout(): CameraLayout {
+    return this.camera.layout();
+  }
+
+  /** Whether the pane should hide its layout switch because this player forces one. */
+  cameraLayoutLocked(): boolean {
+    return false;
+  }
+
+  /**
+   * Bring the camera back on a fresh page when it was on before — but only if
+   * permission is already granted, so opening a dance never triggers a prompt.
+   * Safe to call from every player instance: the first to resolve takes ownership.
+   */
+  protected async restoreCamera(): Promise<void> {
+    if (this.camera.owner()) return;
+    if (!(await this.camera.shouldAutoStart())) return;
+    // Re-check after the await: another player may have taken it, or this one may
+    // have been destroyed while the permission query was in flight.
+    if (this.camera.owner() || this.destroyed) return;
+    await this.camera.start(this);
   }
 
   toggleRepeat(): void {
@@ -245,6 +288,9 @@ export abstract class PlayerBaseComponent {
         break;
       case 'm': case 'M':
         this.toggleMirror();
+        break;
+      case 'c': case 'C':
+        this.toggleCamera();
         break;
       case '?':
         this.shortcutsOpen.set(!this.shortcutsOpen());

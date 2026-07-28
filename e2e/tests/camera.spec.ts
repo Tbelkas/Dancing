@@ -1,0 +1,160 @@
+import { test, expect, type Page } from '@playwright/test';
+import { API_URL } from '../fixtures/env.js';
+
+/**
+ * The camera pane: your own webcam beside (or over) the practice video.
+ *
+ * Chromium's fake capture device stands in for real hardware, so these run headless on
+ * CI and on a machine with no webcam — and nobody is ever asked to click "Allow".
+ * Everything here is read-only: the camera is a browser-local feature that touches no
+ * API and no database.
+ */
+test.use({
+  permissions: ['camera'],
+  // The default headless shell has no media stack at all — getUserMedia there rejects
+  // with NotSupportedError no matter what you grant it. `channel: 'chromium'` runs the
+  // full browser in new headless mode, which does capture. `npx playwright install
+  // chromium` already fetches it, so CI needs no extra step.
+  channel: 'chromium',
+  launchOptions: { args: ['--use-fake-device-for-media-stream'] },
+});
+
+/** Opens a dance whose first video is a YouTube embed — the player that carries the tools. */
+async function openDanceWithYouTubeVideo(page: Page): Promise<void> {
+  const res = await page.request.get(`${API_URL}/search/dances?sort=tutorials&pageSize=20`);
+  expect(res.ok()).toBe(true);
+  const candidates = (await res.json()).items.filter((d: { videoCount: number }) => d.videoCount > 0);
+  expect(candidates.length, 'catalog should contain dances with videos').toBeGreaterThan(0);
+
+  for (const dance of candidates.slice(0, 8)) {
+    const videos = await page.request.get(`${API_URL}/videos/dance/${dance.id}`);
+    if (!videos.ok()) continue;
+    if (!(await videos.json()).some((v: { platform: string }) => v.platform === 'youtube')) continue;
+    await page.goto(`/dances/${dance.styleSlug}/${dance.slug}`);
+    await expect(page.getByTestId('dance-title')).toBeVisible();
+    return;
+  }
+  // Not a skip: a catalog with no YouTube video is a content problem worth failing on,
+  // and a skip here would quietly go green forever.
+  throw new Error('no dance with a YouTube video found in the first 8 candidates');
+}
+
+/** The pane's live <video>, once it's actually carrying frames. */
+async function expectFeedIsLive(page: Page) {
+  const feed = page.getByTestId('camera-pane').locator('video').first();
+  await expect.poll(
+    () => feed.evaluate((el: HTMLVideoElement) => el.videoWidth),
+    { message: 'camera feed should report a picture size', timeout: 15_000 }
+  ).toBeGreaterThan(0);
+}
+
+test.describe('camera denied', () => {
+  // No camera permission: getUserMedia rejects, the way it does for a user who clicked
+  // "Block". The pane must stay mounted and say so — a pane that silently vanished
+  // would read as a broken button.
+  test.use({ permissions: [] });
+
+  test('a blocked camera explains itself instead of disappearing', async ({ page }) => {
+    await openDanceWithYouTubeVideo(page);
+    await page.getByTestId('camera-toggle').first().click();
+
+    const error = page.getByTestId('camera-error');
+    await expect(error).toBeVisible({ timeout: 15_000 });
+    await expect(error.getByRole('button', { name: 'Try again' })).toBeVisible();
+
+    await error.getByRole('button', { name: 'Close' }).click();
+    await expect(page.getByTestId('camera-pane')).toHaveCount(0);
+  });
+});
+
+test.describe('camera pane', () => {
+  test('the Camera tool shows a live feed and closes again @smoke', async ({ page }) => {
+    await openDanceWithYouTubeVideo(page);
+
+    const toggle = page.getByTestId('camera-toggle').first();
+    await expect(toggle).toBeVisible();
+    await expect(page.getByTestId('camera-pane')).toHaveCount(0);
+
+    await toggle.click();
+    await expect(page.getByTestId('camera-pane')).toBeVisible();
+    await expectFeedIsLive(page);
+
+    await page.getByTestId('camera-close').first().click();
+    await expect(page.getByTestId('camera-pane')).toHaveCount(0);
+  });
+
+  test('side layout puts the camera beside the video, overlay puts it on top', async ({ page }) => {
+    await openDanceWithYouTubeVideo(page);
+    await page.getByTestId('camera-toggle').first().click();
+    await expectFeedIsLive(page);
+
+    const pane = page.getByTestId('camera-pane');
+    const embed = page.locator('iframe[src*="youtube"]').first();
+
+    // Geometry rather than class names: the assertion survives a restyle, and it's the
+    // thing that actually matters — do the two pictures sit next to each other?
+    const sideBySide = async () => {
+      const [paneBox, embedBox] = [await pane.boundingBox(), await embed.boundingBox()];
+      expect(paneBox && embedBox).toBeTruthy();
+      return paneBox!.x >= embedBox!.x + embedBox!.width - 4;
+    };
+    expect(await sideBySide(), 'camera should start beside the video').toBe(true);
+
+    await page.getByRole('button', { name: 'Overlay on the video' }).click();
+    await expect.poll(async () => await sideBySide(), { message: 'overlay should stop being beside' })
+      .toBe(false);
+
+    const [paneBox, embedBox] = [await pane.boundingBox(), await embed.boundingBox()];
+    expect(Math.abs(paneBox!.x - embedBox!.x), 'overlay should sit on the video').toBeLessThan(8);
+
+    // Put it back so a rerun in the same profile starts from the documented default.
+    await page.getByRole('button', { name: 'Show side by side' }).click();
+    await page.getByTestId('camera-close').first().click();
+  });
+
+  test('the delay records and plays back what you just did', async ({ page }) => {
+    await openDanceWithYouTubeVideo(page);
+    await page.getByTestId('camera-toggle').first().click();
+    await expectFeedIsLive(page);
+
+    const threeSeconds = page.getByRole('button', { name: 'Replay the last 3 seconds' });
+    await threeSeconds.click();
+    await expect(threeSeconds).toHaveAttribute('aria-pressed', 'true');
+
+    // Wait for the recorder to actually finish a clip and start playing it back — this
+    // is the whole feature, not just the button state.
+    const replay = page.getByTestId('camera-replay');
+    await expect.poll(
+      () => replay.evaluate((el: HTMLVideoElement) => !el.paused && el.currentTime > 0),
+      { message: 'a recorded clip should be playing back', timeout: 20_000 }
+    ).toBe(true);
+
+    // …and the label has to agree with the picture. Asserted on a short timeout on
+    // purpose: MediaRecorder's on* properties aren't zone-patched, and assigning them
+    // (rather than addEventListener) left the pane playing the replay while still
+    // announcing itself as live.
+    await expect(page.getByTestId('camera-pane').getByText('−3s')).toBeVisible({ timeout: 2_000 });
+
+    await threeSeconds.click();
+    await expect(page.getByTestId('camera-pane').getByText('You')).toBeVisible();
+    await page.getByTestId('camera-close').first().click();
+  });
+
+  test('the camera comes back on the next page it was left on', async ({ page }) => {
+    await openDanceWithYouTubeVideo(page);
+    await page.getByTestId('camera-toggle').first().click();
+    await expectFeedIsLive(page);
+
+    // Navigate away with it on, then into another dance: permission is already granted,
+    // so the pane should return without another click.
+    await page.goto('/dances');
+    await openDanceWithYouTubeVideo(page);
+    await expect(page.getByTestId('camera-pane')).toBeVisible({ timeout: 15_000 });
+
+    await page.getByTestId('camera-close').first().click();
+    await expect(page.getByTestId('camera-pane')).toHaveCount(0);
+    // And an explicit close must not come back on the next page.
+    await openDanceWithYouTubeVideo(page);
+    await expect(page.getByTestId('camera-pane')).toHaveCount(0);
+  });
+});

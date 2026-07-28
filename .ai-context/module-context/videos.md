@@ -26,6 +26,23 @@
   for Angular to allow the embed URL)
 - Service: `core/services/video.service.ts`; Model: `models/video.model.ts`
 
+## Camera pane (practise against yourself)
+- `shared/components/camera-pane/` + `core/services/camera.service.ts`. Entirely browser-local:
+  no endpoint, no upload, nothing persisted but preferences in localStorage (`dp_camera_*`).
+- Lives **inside** each player's `.player-media` frame so it fullscreens with the video. Side
+  mode splits that frame into two grid columns; overlay mode lifts the pane out of the flow and
+  ghosts it over the video at an adjustable blend.
+- **The stream is a singleton.** Dance detail can mount several players at once; one *owns* the
+  camera at a time (`CameraService.owner`), and every player's `ngOnDestroy` calls
+  `camera.release(this)` — a stream left running keeps the camera light on after navigation.
+- **Delayed replay** records `delaySeconds`-long clips and loops the finished one while the next
+  records. A continuous N-second-behind feed isn't achievable on the web: MediaRecorder chunks
+  can't be played independently, and a frame ring buffer costs tens of MB per few seconds.
+- Wire recorder callbacks with `addEventListener`, never `recorder.onstop = …` — zone.js patches
+  the former, so the latter updates the picture without updating the UI around it.
+- Needs a secure context (https, or localhost in dev); `CameraService.unsupportedReason` states
+  why when there isn't one, and a failed start keeps the pane mounted to explain itself.
+
 ## Data shape / behaviour
 - `Platform` (default `"youtube"`; also tiktok, instagram), `VideoType` (default `"steps"`),
   `VideoId` = the platform embed id.

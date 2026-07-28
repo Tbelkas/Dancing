@@ -54,7 +54,8 @@ export default defineConfig({
     },
     {
       name: 'anon',
-      testMatch: /(smoke|browse|dance-detail)\.spec\.ts/,
+      // camera.spec.ts brings its own launch flags (a fake capture device) via test.use.
+      testMatch: /(smoke|browse|dance-detail|camera)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
     {

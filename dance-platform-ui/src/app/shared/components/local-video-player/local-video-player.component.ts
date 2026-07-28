@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VideoSegment } from '../../../models/video.model';
 import { PlayerBaseComponent } from '../player-base';
+import { CameraPaneComponent } from '../camera-pane/camera-pane.component';
+import { CameraLayout } from '../../../core/services/camera.service';
 
 /**
  * Player for videos that live on the user's own disk. The file is handed to us as an
@@ -12,7 +14,7 @@ import { PlayerBaseComponent } from '../player-base';
 @Component({
   selector: 'app-local-video-player',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CameraPaneComponent],
   templateUrl: './local-video-player.component.html',
   styleUrls: ['../video-player/video-player.component.css', './local-video-player.component.css']
 })
@@ -59,11 +61,15 @@ export class LocalVideoPlayerComponent extends PlayerBaseComponent implements On
     this.restorePlayerPrefs();
     document.addEventListener('keydown', this.keydownHandler);
     document.addEventListener('fullscreenchange', this.fullscreenHandler);
+    void this.restoreCamera();
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     document.removeEventListener('keydown', this.keydownHandler);
     document.removeEventListener('fullscreenchange', this.fullscreenHandler);
+    // Frees the device: a stream left running keeps the camera light on after navigation.
+    this.camera.release(this);
     this.clearFlashTimeout();
     // The <video> is torn down without firing pause — tell the parent playback ended.
     if (this.playing()) this.playingChange.emit(false);
@@ -223,6 +229,19 @@ export class LocalVideoPlayerComponent extends PlayerBaseComponent implements On
 
   toggleMute(): void {
     this.video.muted = !this.video.muted;
+  }
+
+  /**
+   * A rotated picture is positioned against the whole media frame, so splitting that
+   * frame into columns would leave the video lying across the camera. Ghost the camera
+   * over it instead, and hide the switch that can't work here.
+   */
+  override cameraLayout(): CameraLayout {
+    return this.sideways() ? 'overlay' : this.camera.layout();
+  }
+
+  override cameraLayoutLocked(): boolean {
+    return this.sideways();
   }
 
   /** The media frame (not the raw <video>) fullscreens, so the rotation layout carries over. */

@@ -42,8 +42,15 @@
   }
 
   @if (isYouTube) {
-    <div #mediaEl class="player-media" [class.player-media--mirrored]="mirrored()">
+    <div #mediaEl class="player-media"
+         [class.player-media--mirrored]="mirrored()"
+         [class.player-media--camera]="cameraOn()"
+         [class.player-media--camera-overlay]="cameraOn() && cameraLayout() === 'overlay'">
       <div #playerContainer class="yt-player"></div>
+      <!-- Inside the media frame on purpose: it fullscreens with the video. -->
+      @if (cameraOn()) {
+        <app-camera-pane [layout]="cameraLayout()" [layoutLocked]="cameraLayoutLocked()" />
+      }
       @if (betaChrome) {
         <div class="rc" [class.rc--fade]="playing()">
           <button class="rc__btn" (click)="togglePlay()" [attr.aria-label]="playing() ? 'Pause' : 'Play'">
@@ -137,6 +144,7 @@
           <span class="kbd-hint__item"><kbd>[</kbd><kbd>]</kbd> Loop start / end</span>
           <span class="kbd-hint__item"><kbd>L</kbd> Loop on/off</span>
           <span class="kbd-hint__item"><kbd>M</kbd> Mirror</span>
+          <span class="kbd-hint__item"><kbd>C</kbd> Camera</span>
           <span class="kbd-hint__item"><kbd>1</kbd>–<kbd>7</kbd> Speed</span>
         </div>
       }
@@ -151,7 +159,10 @@
   }
 
   @if (isTikTok) {
-    <div class="embed-container embed-container--portrait player-media" [class.player-media--mirrored]="mirrored()">
+    <div class="embed-container embed-container--portrait player-media"
+         [class.player-media--mirrored]="mirrored()"
+         [class.player-media--camera]="cameraOn()"
+         [class.player-media--camera-overlay]="cameraOn() && cameraLayout() === 'overlay'">
       <iframe
         #tiktokFrame
         [src]="embedUrl | trustUrl"
@@ -161,6 +172,9 @@
         frameborder="0"
         scrolling="no">
       </iframe>
+      @if (cameraOn()) {
+        <app-camera-pane [layout]="cameraLayout()" [layoutLocked]="cameraLayoutLocked()" />
+      }
       @if (loopFlash()) {
         <div class="loop-flash" aria-hidden="true"><i class="fa-solid fa-rotate-left"></i></div>
       }
@@ -231,6 +245,11 @@
     <button class="tool-btn" [class.is-open]="mirrored()" (click)="toggleMirror()" [attr.aria-pressed]="mirrored()"
             title="Flip the video horizontally so the instructor matches your side">
       <i class="fa-solid fa-left-right"></i> Mirror
+    </button>
+    <button class="tool-btn" data-testid="camera-toggle" [class.is-open]="cameraOn()" (click)="toggleCamera()"
+            [attr.aria-pressed]="cameraOn()"
+            title="Show your own camera beside the video — nothing is recorded or uploaded">
+      <i class="fa-solid" [class.fa-video]="!cameraOn()" [class.fa-video-slash]="cameraOn()"></i> Camera
     </button>
   </ng-template>
 
