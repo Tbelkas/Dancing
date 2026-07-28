@@ -139,7 +139,7 @@
             <button class="option-search__clear" (click)="styleQuery.set('')" aria-label="Clear style filter"><i class="fa-solid fa-xmark"></i></button>
           }
         </div>
-        <div class="style-filters">
+        <div class="style-filters" data-testid="style-filter-pills">
           <button class="filter-pill" [class.active]="selectedStyleId() === null" (click)="filterByStyle(null)">All</button>
           @for (style of displayedStyles(); track style.id) {
             <button class="filter-pill" [class.active]="selectedStyleId() === style.id" (click)="filterByStyle(style.id)">

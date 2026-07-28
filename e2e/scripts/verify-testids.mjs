@@ -41,13 +41,25 @@ for (const file of walk(uiSrc, ['.html', '.ts'])) {
   }
 }
 
-/** testid -> spec files that use it */
+/**
+ * testid -> spec files that use it.
+ *
+ * Matches both `getByTestId('x')` and a raw `[data-testid="x"]` CSS selector. The second
+ * form is easy to reach for inside a `.locator()` chain, and without it a test could depend
+ * on an anchor that this guard never checks — which is exactly the failure it exists to stop.
+ */
 const used = new Map();
+const USAGE_PATTERNS = [
+  /getByTestId\(\s*["'`]([^"'`]+)["'`]\s*\)/g,
+  /\[data-testid=["']([^"']+)["']\]/g,
+];
 for (const file of walk(testsDir, ['.ts'])) {
   const source = readFileSync(file, 'utf8');
-  for (const [, id] of source.matchAll(/getByTestId\(\s*["'`]([^"'`]+)["'`]\s*\)/g)) {
-    if (!used.has(id)) used.set(id, []);
-    used.get(id).push(relative(repoRoot, file));
+  for (const pattern of USAGE_PATTERNS) {
+    for (const [, id] of source.matchAll(pattern)) {
+      if (!used.has(id)) used.set(id, []);
+      used.get(id).push(relative(repoRoot, file));
+    }
   }
 }
 

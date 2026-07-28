@@ -93,7 +93,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 18 attributes are a contract. Treat them like a public API.**
+**These 19 attributes are a contract. Treat them like a public API.**
 
 | Test id | Lives in | Anchors |
 |---|---|---|
@@ -101,6 +101,7 @@ anchors on a small, deliberate set of `data-testid` attributes.
 | `user-menu-button`, `sign-out` | `app.component.html` | Account menu |
 | `login-username`, `login-password`, `login-submit`, `login-error` | `login.component.html` | Sign-in form |
 | `search-input`, `results-count`, `sort-select`, `empty-state` | `dances.component.html` | Browse controls |
+| `style-filter-pills` | `dances.component.html` | The Style filter row — `.style-filters` alone also matches the Level row |
 | `dance-card`, `dance-card-link` | `dances.component.html` | Result cards — **on both the grid card and the list row** |
 | `dance-title`, `favorite-button`, `progress-learned` | `dance-detail.component.html` | Detail page |
 
@@ -161,6 +162,12 @@ e2e/
 - **A `test.skip` must be justified and reachable.** Skips that fire on every run are worse
   than failures — they look green. If a test skips because data hasn't loaded yet, that's a
   bug in the test: wait for the data, then decide.
+- **Wait for async-loaded lists before clicking into them.** Style pills arrive from
+  `/api/styles` after first paint; clicking at first paint either hits a node that's about to
+  be replaced by the re-render, or the wrong row entirely. Poll for the expected count first.
+- **Scope locators tightly.** Shared class names recur across rows (`.style-filters` is used
+  by both the Style and Level filters). Prefer a `data-testid` on the container over an
+  `nth()` that silently points somewhere else once the page changes.
 - **Nothing in `smoke.spec.ts` may assume a viewport** — it runs under both desktop and
   mobile. Below 720px the nav collapses behind the hamburger and the filter panel behind a
   "Filters" toggle; use the `revealNav` / `openFilters` helpers.

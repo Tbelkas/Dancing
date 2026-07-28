@@ -68,8 +68,18 @@ test.describe('browse', () => {
   test('style filter applies and is clearable', async ({ page }) => {
     await openFilters(page);
 
+    // Scoped to the style row: `.style-filters` alone also matches the Level row, so before
+    // the styles finish loading nth(1) would land on Level's "All" button — a click that
+    // does nothing and fails the URL assertion below.
+    const pills = page.getByTestId('style-filter-pills').locator('.filter-pill');
+
+    // Styles arrive from /api/styles after first paint. Wait for the real pills so the click
+    // can't hit a node that's about to be replaced by the re-render.
+    await expect.poll(() => pills.count(), { message: 'style pills should load' })
+      .toBeGreaterThan(1);
+
     // Skip "All" (index 0) — pick the first real style pill.
-    const stylePill = page.locator('.style-filters .filter-pill').nth(1);
+    const stylePill = pills.nth(1);
     await expect(stylePill).toBeVisible();
     const styleName = (await stylePill.textContent())?.trim() ?? '';
     await stylePill.click();
