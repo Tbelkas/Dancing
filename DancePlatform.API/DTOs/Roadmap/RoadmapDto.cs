@@ -52,6 +52,23 @@ public class RoadmapStepDto
 
     /// <summary>Null when the catalog has no move for this step yet.</summary>
     public RoadmapStepDanceDto? Dance { get; set; }
+
+    /// <summary>
+    /// Set when the step covers one section of one of the dance's videos rather than the whole
+    /// move. The UI shows just that clip and deep-links the player to its start.
+    /// </summary>
+    public RoadmapStepSegmentDto? Segment { get; set; }
+}
+
+/// <summary>The slice of a video a step points at, plus which video it lives in.</summary>
+public class RoadmapStepSegmentDto
+{
+    public int Id { get; set; }
+    public string Label { get; set; } = string.Empty;
+    public int StartTime { get; set; }
+    public int? EndTime { get; set; }
+    /// <summary>Row id of the owning video — matches an entry in the step dance's `videos`.</summary>
+    public int VideoId { get; set; }
 }
 
 /// <summary>

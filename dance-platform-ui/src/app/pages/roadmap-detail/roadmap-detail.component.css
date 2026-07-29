@@ -246,6 +246,16 @@
 .tag--difficulty { color: var(--color-text); }
 .tag--rating { color: var(--color-primary); }
 
+/* A step pinned to one section of a longer tutorial — teal marks "this is a slice". */
+.tag--clip {
+  color: var(--color-music);
+  border-color: color-mix(in srgb, var(--color-music) 40%, var(--color-border));
+}
+
+.video__section {
+  color: var(--color-music);
+}
+
 .tag--pending {
   border-style: dashed;
   background: transparent;

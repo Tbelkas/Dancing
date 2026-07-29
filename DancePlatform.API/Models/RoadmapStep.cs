@@ -27,5 +27,16 @@ public class RoadmapStep
     public int? DanceId { get; set; }
     public Dance? Dance { get; set; }
 
+    /// <summary>
+    /// Optional narrowing of <see cref="DanceId"/> to one section of one of its videos.
+    ///
+    /// Multi-move tutorials are deliberately kept whole and attached to a single canonical
+    /// dance (see VIDEO_FIXUP.md) with their sub-moves recorded as segments. Without this a
+    /// step could only say "watch the 12-minute waacking tutorial"; with it, the step lands on
+    /// the 4 minutes that teach the arm roll. Null = the step covers the whole dance.
+    /// </summary>
+    public int? VideoSegmentId { get; set; }
+    public VideoSegment? VideoSegment { get; set; }
+
     public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 }

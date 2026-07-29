@@ -6,7 +6,7 @@ import { RoadmapService } from '../../core/services/roadmap.service';
 import { DanceService, DanceStatus, statusFlags } from '../../core/services/dance.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
-import { Roadmap, RoadmapStep } from '../../models/roadmap.model';
+import { Roadmap, RoadmapStep, RoadmapStepVideo } from '../../models/roadmap.model';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
 
@@ -143,11 +143,45 @@ export class RoadmapDetailComponent implements OnInit {
     if (img.naturalHeight > 0 && img.naturalHeight <= 90) this.thumbs.markFailed(key);
   }
 
-  /** Watchable seconds for a clip: an explicit window, else the source length minus any offset. */
-  videoLength(v: { startTime?: number; endTime?: number; durationSeconds?: number }): string | null {
-    const seconds = v.endTime != null
-      ? v.endTime - (v.startTime ?? 0)
-      : (v.durationSeconds ?? 0) - (v.startTime ?? 0);
+  /**
+   * The videos a step should show. A step pinned to a segment shows only the video that
+   * segment lives in — the rest of the dance's videos belong to other steps of the path.
+   */
+  stepVideos(step: RoadmapStep): RoadmapStepVideo[] {
+    const videos = step.dance?.videos ?? [];
+    const segment = step.segment;
+    if (!segment) return videos;
+    return videos.filter(v => v.id === segment.videoId);
+  }
+
+  /** Deep-links the player to this step's clip: the video, and the second it starts at. */
+  stepVideoParams(step: RoadmapStep, video: RoadmapStepVideo): Record<string, number> {
+    const params: Record<string, number> = { v: video.id };
+    if (step.segment && step.segment.videoId === video.id) params['t'] = step.segment.startTime;
+    return params;
+  }
+
+  /** "4:01 – 5:25" for a segment, so the step says up front how long the clip is. */
+  segmentRange(step: RoadmapStep): string | null {
+    const segment = step.segment;
+    if (!segment) return null;
+    const clock = (s: number) => `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
+    return segment.endTime == null
+      ? `from ${clock(segment.startTime)}`
+      : `${clock(segment.startTime)} – ${clock(segment.endTime)}`;
+  }
+
+  /**
+   * How long the user is actually being asked to watch. For a segment step that's the
+   * segment's own span, not the whole tutorial it was cut from.
+   */
+  clipLength(step: RoadmapStep, v: RoadmapStepVideo): string | null {
+    const segment = step.segment;
+    const seconds = segment && segment.videoId === v.id && segment.endTime != null
+      ? segment.endTime - segment.startTime
+      : v.endTime != null
+        ? v.endTime - (v.startTime ?? 0)
+        : (v.durationSeconds ?? 0) - (v.startTime ?? 0);
     if (seconds <= 0) return null;
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60);

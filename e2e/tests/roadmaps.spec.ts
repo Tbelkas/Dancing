@@ -66,6 +66,24 @@ test.describe('roadmaps', () => {
     await expect(page.getByTestId('dance-title')).toBeVisible();
   });
 
+  /**
+   * Steps can be pinned to one section of a longer tutorial (`segmentLabel` in the authored
+   * JSON). Those must deep-link with a `t=` offset, or the user lands at 0:00 of a 12-minute
+   * video and has to hunt for the part the step is about.
+   */
+  test('a step pinned to a video section deep-links to that timestamp', async ({ page }) => {
+    await page.goto('/roadmaps/waacking');
+    await expect(page.getByTestId('roadmap-title')).toBeVisible();
+
+    const clipLink = page.locator('a.video__link[href*="t="]').first();
+    await expect(clipLink).toBeVisible();
+    await expect(clipLink).toHaveAttribute('href', /\/dances\/[a-z0-9-]+\/[a-z0-9-]+\?v=\d+&t=\d+/);
+
+    await clipLink.click();
+    await expect(page.getByTestId('dance-title')).toBeVisible();
+    await expect(page).toHaveURL(/[?&]t=\d+/);
+  });
+
   test('an unknown slug shows the not-found state, not a redirect', async ({ page }) => {
     await page.goto('/roadmaps/definitely-not-a-real-path');
 

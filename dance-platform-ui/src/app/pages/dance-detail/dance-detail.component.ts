@@ -86,6 +86,9 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
 
   /** Video id from the ?v= deep link (history "Continue learning"), opened once the list loads. */
   private resumeVideoId: number | null = null;
+  /** ?t= offset for the deep-linked video; consumed by the first playerStart() that uses it. */
+  private resumeTime: number | null = null;
+  private resumeTimeVideoId: number | null = null;
 
   constructor(
     private host: ElementRef<HTMLElement>,
@@ -156,6 +159,9 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.movingVideoId.set(null);
     // The snapshot is already on the incoming route by the time paramMap emits.
     this.resumeVideoId = Number(this.route.snapshot.queryParamMap.get('v')) || null;
+    // ?t= opens that video at a given second — how a roadmap step pointing at one section
+    // of a long tutorial lands on the part it is actually about.
+    this.resumeTime = Number(this.route.snapshot.queryParamMap.get('t')) || null;
 
     const request$ = style
       ? this.danceService.getByStyleAndSlug(style, slug)
@@ -190,6 +196,9 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
       this.videos.set(v);
       // A ?v= deep link resumes that exact video; otherwise a lone video opens itself.
       const resume = v.find(x => x.id === this.resumeVideoId);
+      // Pin the ?t= offset to the video it was aimed at, so selecting a different video
+      // afterwards starts from that video's own beginning rather than a stale timestamp.
+      this.resumeTimeVideoId = resume && this.resumeTime !== null ? resume.id : null;
       this.resumeVideoId = null;
       const open = resume ?? (v.length === 1 ? v[0] : null);
       if (open) {
@@ -263,6 +272,18 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
       next: ch => { this.chapters.set(ch); this.selectedVideo.set(video); },
       error: () => this.selectedVideo.set(video)
     });
+  }
+
+  /**
+   * Where the player should start. Normally the video's own clip offset; for the video a
+   * `?t=` deep link named, that timestamp instead — clamped into the clip window so a stale
+   * or hand-edited link can't start the player past its end.
+   */
+  playerStart(video: Video): number | undefined {
+    if (this.resumeTime === null || video.id !== this.resumeTimeVideoId) return video.startTime;
+    const lower = video.startTime ?? 0;
+    const upper = video.endTime ?? Number.MAX_SAFE_INTEGER;
+    return Math.min(Math.max(this.resumeTime, lower), upper);
   }
 
   /** Brings a deep-linked video's row into view, once the list has rendered. */

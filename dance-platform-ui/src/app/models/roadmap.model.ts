@@ -40,6 +40,17 @@ export interface RoadmapStep {
   description?: string;
   /** Null when the catalog has no move for this step yet — the node still renders. */
   dance?: RoadmapStepDance;
+  /** Set when the step covers one section of one of the dance's videos, not the whole move. */
+  segment?: RoadmapStepSegment;
+}
+
+export interface RoadmapStepSegment {
+  id: number;
+  label: string;
+  startTime: number;
+  endTime?: number;
+  /** Row id of the owning video — matches one of the step dance's `videos`. */
+  videoId: number;
 }
 
 export interface RoadmapStepDance {

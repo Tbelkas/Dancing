@@ -88,6 +88,7 @@ public static class RoadmapSeeder
         roadmap.StyleId = styleId;
 
         var danceIds = await ResolveDanceIdsAsync(db, file, styleId, logger);
+        var segmentIds = await ResolveSegmentIdsAsync(db, file, danceIds, logger);
 
         if (SignatureOf(file) != SignatureOf(roadmap))
         {
@@ -108,7 +109,8 @@ public static class RoadmapSeeder
                         Title = step.Title,
                         Description = step.Description,
                         SortOrder = pi,
-                        DanceId = Resolve(danceIds, step.DanceSlug)
+                        DanceId = Resolve(danceIds, step.DanceSlug),
+                        VideoSegmentId = Resolve(segmentIds, SegmentKey(step))
                     }).ToList()
                 });
             }
@@ -123,7 +125,9 @@ public static class RoadmapSeeder
                 var storedSteps = storedStages[si].Steps.OrderBy(s => s.SortOrder).ToList();
                 for (var pi = 0; pi < storedSteps.Count; pi++)
                 {
-                    storedSteps[pi].DanceId = Resolve(danceIds, file.Stages[si].Steps[pi].DanceSlug);
+                    var authored = file.Stages[si].Steps[pi];
+                    storedSteps[pi].DanceId = Resolve(danceIds, authored.DanceSlug);
+                    storedSteps[pi].VideoSegmentId = Resolve(segmentIds, SegmentKey(authored));
                 }
             }
         }
@@ -139,8 +143,75 @@ public static class RoadmapSeeder
         }
     }
 
-    private static int? Resolve(Dictionary<string, int> danceIds, string? slug) =>
-        !string.IsNullOrWhiteSpace(slug) && danceIds.TryGetValue(slug, out var id) ? id : null;
+    private static int? Resolve(Dictionary<string, int> ids, string? key) =>
+        !string.IsNullOrWhiteSpace(key) && ids.TryGetValue(key, out var id) ? id : null;
+
+    /// <summary>A segment is only meaningful inside its dance, so it's keyed by both.</summary>
+    private static string? SegmentKey(StepFile step) =>
+        string.IsNullOrWhiteSpace(step.DanceSlug) || string.IsNullOrWhiteSpace(step.SegmentLabel)
+            ? null
+            : $"{step.DanceSlug}{step.SegmentLabel}";
+
+    /// <summary>
+    /// Maps each authored (danceSlug, segmentLabel) pair to a VideoSegment id, looked up among
+    /// the global videos of that dance. Personal videos are excluded — roadmap content must be
+    /// the same for every viewer.
+    /// </summary>
+    private static async Task<Dictionary<string, int>> ResolveSegmentIdsAsync(
+        AppDbContext db, RoadmapFile file, Dictionary<string, int> danceIds, ILogger logger)
+    {
+        var wanted = file.Stages
+            .SelectMany(s => s.Steps)
+            .Select(s => (Step: s, Key: SegmentKey(s)))
+            .Where(x => x.Key is not null)
+            .GroupBy(x => x.Key!)
+            .Select(g => (Key: g.Key, g.First().Step.DanceSlug, g.First().Step.SegmentLabel))
+            .ToList();
+
+        var found = new Dictionary<string, int>();
+        if (wanted.Count == 0) return found;
+
+        var danceIdList = wanted.Select(w => Resolve(danceIds, w.DanceSlug)).OfType<int>().Distinct().ToList();
+        var candidates = await db.VideoSegments
+            .Where(seg => seg.Video.OwnerUserId == null && danceIdList.Contains(seg.Video.DanceId))
+            .Select(seg => new { seg.Id, seg.Label, seg.StartTime, seg.Video.DanceId, VideoAdded = seg.Video.DateAdded })
+            .ToListAsync();
+
+        foreach (var (key, danceSlug, label) in wanted)
+        {
+            if (Resolve(danceIds, danceSlug) is not int danceId)
+            {
+                logger.LogWarning("Roadmap '{Slug}': step wants segment '{Label}' but its dance '{Dance}' did not resolve.",
+                    file.Slug, label, danceSlug);
+                continue;
+            }
+
+            var matches = candidates
+                .Where(c => c.DanceId == danceId && string.Equals(c.Label, label, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(c => c.VideoAdded).ThenBy(c => c.StartTime)
+                .ToList();
+
+            if (matches.Count == 0)
+            {
+                // Not fatal: the step falls back to covering the whole dance.
+                logger.LogWarning("Roadmap '{Slug}': dance '{Dance}' has no segment labelled '{Label}' — step widens to the whole move.",
+                    file.Slug, danceSlug, label);
+                continue;
+            }
+
+            if (matches.Count > 1)
+            {
+                // Generic labels ("Intro") repeat across a dance's videos. Deterministic, but
+                // almost certainly not what the author meant — say so.
+                logger.LogWarning("Roadmap '{Slug}': label '{Label}' matches {Count} segments on '{Dance}'; taking the earliest.",
+                    file.Slug, label, matches.Count, danceSlug);
+            }
+
+            found[key] = matches[0].Id;
+        }
+
+        return found;
+    }
 
     /// <summary>
     /// Maps each authored dance slug to a dance id. Dance slugs are unique per style, not globally
@@ -219,5 +290,8 @@ public static class RoadmapSeeder
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? DanceSlug { get; set; }
+
+        /// <summary>Optional: narrows the step to one section of one of the dance's videos.</summary>
+        public string? SegmentLabel { get; set; }
     }
 }

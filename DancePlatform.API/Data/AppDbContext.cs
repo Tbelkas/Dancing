@@ -293,5 +293,14 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(s => s.DanceId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Segments are rebuilt wholesale by the chip scripts, so their ids are not stable —
+        // the seeder re-resolves this from the authored label each boot. SetNull keeps a
+        // re-chipped video from deleting the step; it just widens back to the whole dance.
+        modelBuilder.Entity<RoadmapStep>()
+            .HasOne(s => s.VideoSegment)
+            .WithMany()
+            .HasForeignKey(s => s.VideoSegmentId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

@@ -26,10 +26,15 @@ public class RoadmapService : IRoadmapService
                 StageCount = r.Stages.Count,
                 StepCount = r.Stages.SelectMany(s => s.Steps).Count(),
                 MoveCount = r.Stages.SelectMany(s => s.Steps).Count(st => st.DanceId != null),
+                // Distinct: one dance can back several steps (a long tutorial sliced by segment),
+                // and counting its videos once per step would inflate the headline figure.
                 VideoCount = r.Stages.SelectMany(s => s.Steps)
                     .Where(st => st.Dance != null)
                     .SelectMany(st => st.Dance!.Videos)
-                    .Count(v => v.OwnerUserId == null || v.OwnerUserId == uid),
+                    .Where(v => v.OwnerUserId == null || v.OwnerUserId == uid)
+                    .Select(v => v.Id)
+                    .Distinct()
+                    .Count(),
                 LearnedCount = hasUser
                     ? r.Stages.SelectMany(s => s.Steps).Count(st => st.Dance != null && st.Dance.LearnedBy.Any(l => l.UserId == uid))
                     : 0,
@@ -87,6 +92,14 @@ public class RoadmapService : IRoadmapService
                     Steps = s.Steps.OrderBy(st => st.SortOrder).Select(st => new
                     {
                         st.Id, st.Title, st.Description,
+                        Segment = st.VideoSegment == null ? null : new
+                        {
+                            st.VideoSegment.Id,
+                            st.VideoSegment.Label,
+                            st.VideoSegment.StartTime,
+                            st.VideoSegment.EndTime,
+                            st.VideoSegment.VideoId
+                        },
                         Dance = st.Dance == null ? null : new
                         {
                             st.Dance.Id,
@@ -129,6 +142,14 @@ public class RoadmapService : IRoadmapService
                 Id = st.Id,
                 Title = st.Title,
                 Description = st.Description,
+                Segment = st.Segment is null ? null : new RoadmapStepSegmentDto
+                {
+                    Id = st.Segment.Id,
+                    Label = st.Segment.Label,
+                    StartTime = st.Segment.StartTime,
+                    EndTime = st.Segment.EndTime,
+                    VideoId = st.Segment.VideoId
+                },
                 Dance = st.Dance is null ? null : new RoadmapStepDanceDto
                 {
                     Id = st.Dance.Id,
@@ -162,6 +183,8 @@ public class RoadmapService : IRoadmapService
         var allSteps = stages.SelectMany(s => s.Steps).ToList();
         var moves = allSteps.Where(s => s.Dance is not null).Select(s => s.Dance!).ToList();
         var cover = moves.SelectMany(m => m.Videos).FirstOrDefault();
+        // Same de-duplication as the index: several steps can share one sliced-up tutorial.
+        var distinctVideos = moves.SelectMany(m => m.Videos).Select(v => v.Id).Distinct().Count();
 
         return new RoadmapDto
         {
@@ -176,7 +199,7 @@ public class RoadmapService : IRoadmapService
             StageCount = stages.Count,
             StepCount = allSteps.Count,
             MoveCount = moves.Count,
-            VideoCount = moves.Sum(m => m.Videos.Count),
+            VideoCount = distinctVideos,
             LearnedCount = moves.Count(m => m.IsLearned),
             InProgressCount = moves.Count(m => m.IsInProgress),
             ThumbnailVideoId = cover?.VideoId,

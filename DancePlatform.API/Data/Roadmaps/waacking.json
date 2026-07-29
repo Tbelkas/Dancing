@@ -3,17 +3,23 @@
   "styleName": "Waacking",
   "title": "Waacking",
   "subtitle": "Arms first, then the turns, then the attitude that holds it together.",
-  "description": "Waacking came out of the 1970s Los Angeles disco clubs: whipping arm rotations, sharp poses and musicality that plays the record rather than the count. The arms carry the style, but they only read if the stance underneath them is quiet — so the path builds the frame before it builds the speed.",
+  "description": "Waacking came out of the 1970s Los Angeles disco clubs: whipping arm rotations, sharp poses and musicality that plays the record rather than the count. The arms carry the style, but they only read if the stance underneath them is quiet — so the path builds the frame before it builds the speed. Work it slowly. Every whip here is a shape you can hold at quarter tempo before it is a whip.",
   "sortOrder": 20,
   "stages": [
     {
-      "title": "Stance and sound",
-      "description": "Where the style comes from and how to stand in it. Do not add arms yet.",
+      "title": "What the style is",
+      "description": "Watch before drilling. Waacking has a vocabulary and a history, and the moves make more sense once you know which part of the dance they belong to.",
       "steps": [
         {
-          "title": "What waacking is",
-          "description": "The whole style in one sitting — rotations, poses and the disco that they belong to. Watch before drilling anything.",
+          "title": "Waacking, end to end",
+          "description": "A full beginner tutorial in one sitting — rotations, poses and the disco they belong to. Come back to this whenever a later step stops making sense on its own.",
           "danceSlug": "waacking"
+        },
+        {
+          "title": "Whack, punk and pose",
+          "description": "The three things the style is made of: the whip of the arm, the character you play, and the shape you land on. Almost everything below is one of these three.",
+          "danceSlug": "waacking",
+          "segmentLabel": "The 3 aspects (whack, punk, pose)"
         },
         {
           "title": "Root the stance",
@@ -23,31 +29,75 @@
     },
     {
       "title": "The arm",
-      "description": "The signature move of the style, learned slowly. Speed comes from the path being clean, not from throwing harder.",
+      "description": "The signature of the style, learned slowly. Speed comes from the path being clean, not from throwing harder.",
       "steps": [
         {
           "title": "The waack",
-          "description": "A wide circular arm throw from the shoulder, not the elbow. Trace the circle at quarter speed until the path is the same every time.",
-          "danceSlug": "waacking-arm"
+          "description": "A wide circular arm throw from the shoulder, not the elbow. Trace the circle at quarter speed until the path is identical every time.",
+          "danceSlug": "waacking-arm",
+          "segmentLabel": "Waacking Arm"
         },
         {
-          "title": "Rolls and circles",
-          "description": "Continuous arm rotations, one side and then both. The connective tissue between poses — without them the dance is a series of unrelated shapes."
+          "title": "The arm roll",
+          "description": "A continuous rotation that never stops at the top. This is the connective tissue — without it the dance is a series of unrelated shapes.",
+          "danceSlug": "waacking",
+          "segmentLabel": "Arm Roll"
+        },
+        {
+          "title": "Single arm roll, right",
+          "description": "The roll isolated on one side, broken all the way down. Four minutes on one arm; it is worth every second.",
+          "danceSlug": "waacking",
+          "segmentLabel": "Single arm roll — right"
+        },
+        {
+          "title": "Single arm roll, left",
+          "description": "The same on your weaker side. Do not skip it — waacking reads as lopsided the moment one arm is behind the other.",
+          "danceSlug": "waacking",
+          "segmentLabel": "Single arm roll — left"
         }
       ]
     },
     {
-      "title": "Flicks and speed",
-      "description": "Now the arm gets fast, and the body starts to answer it.",
+      "title": "Speed",
+      "description": "Same paths, more of them per bar. Add tempo only once the shape survives it.",
       "steps": [
         {
-          "title": "Flicks with rotation",
-          "description": "Whip the arm and let the body pivot a quarter turn with it. The first place the arms and the floor have to cooperate.",
-          "danceSlug": "flicks-with-rotation"
+          "title": "Quick arms",
+          "description": "The roll tightened until it snaps. The circle gets smaller, not sloppier.",
+          "danceSlug": "waacking",
+          "segmentLabel": "Quick Arms"
+        },
+        {
+          "title": "Medium tempo",
+          "description": "First pass at speed. If the elbow starts leading, drop back to the single-arm breakdown.",
+          "danceSlug": "waacking",
+          "segmentLabel": "Medium tempo"
+        },
+        {
+          "title": "Fast tempo",
+          "description": "Disco tempo. At this point the arm should be running on shape memory, leaving your attention free for the record.",
+          "danceSlug": "waacking",
+          "segmentLabel": "Fast tempo"
         },
         {
           "title": "Doubles and triples",
-          "description": "Two and three whips inside one beat. Practise against a metronome before a track — the temptation is to rush the second one."
+          "description": "Two and three whips inside one beat. Practise against a metronome before a track — the temptation is always to rush the second one."
+        }
+      ]
+    },
+    {
+      "title": "Rotation",
+      "description": "Where the arms and the floor start negotiating. The body turns; the arm keeps its path.",
+      "steps": [
+        {
+          "title": "Flicks with rotation",
+          "description": "Whip the arm and let the body pivot a quarter turn with it. The first place the two halves have to cooperate.",
+          "danceSlug": "flicks-with-rotation",
+          "segmentLabel": "Flicks with Rotation"
+        },
+        {
+          "title": "Whip out of a turn",
+          "description": "Land the rotation and throw on the exit, not during. Turning and whipping at once reads as a stumble; turning then whipping reads as a hit."
         }
       ]
     },
@@ -55,6 +105,12 @@
       "title": "Footwork underneath",
       "description": "Waacking is not danced standing still. These keep the lower half alive while the arms do the talking.",
       "steps": [
+        {
+          "title": "Footwork and arm placement",
+          "description": "How the feet and the arms agree with each other. The section to rewatch when your arms look right but the dance looks static.",
+          "danceSlug": "the-heel-toe",
+          "segmentLabel": "Footwork & arm placement"
+        },
         {
           "title": "The heel-toe",
           "description": "Rocking between heel and ball of the foot. Small, quiet, and it gives the arms something to travel over.",
@@ -64,12 +120,16 @@
           "title": "Sous-sous",
           "description": "A tight rise onto both balls of the feet, borrowed straight from ballet. Waacking leans on ballet vocabulary more than any other club style.",
           "danceSlug": "sous-sous"
+        },
+        {
+          "title": "Walks and struts",
+          "description": "Crossing the floor in character. The runway walk is half the performance in a battle and it is almost never drilled."
         }
       ]
     },
     {
       "title": "Turns",
-      "description": "Rotation on a fixed axis, so the arms can keep their shape all the way through.",
+      "description": "Rotation on a fixed axis, so the arms can hold their shape all the way through.",
       "steps": [
         {
           "title": "En dehors",
@@ -78,8 +138,9 @@
         },
         {
           "title": "The inverted turn",
-          "description": "A turn on the ball of one foot with the other leg extended. Combines the stage-four footwork with the stage-two arm path.",
-          "danceSlug": "inverted-turn"
+          "description": "A turn on the ball of one foot with the other leg extended. Combines the footwork above with the arm path from stage two.",
+          "danceSlug": "inverted-turn",
+          "segmentLabel": "Inverted Turn"
         }
       ]
     },
@@ -88,8 +149,21 @@
       "description": "The part that cannot be drilled — it is decided by the record.",
       "steps": [
         {
-          "title": "Posing on the accent",
-          "description": "Every phrase of whips lands on a held shape. Pick one accent in a track and hit exactly that one for a whole pass, then pick a different one."
+          "title": "Posing",
+          "description": "Every phrase of whips ends on a held shape. Poses are what the audience actually remembers, and they are the cheapest thing on this path to get good at.",
+          "danceSlug": "waacking-poses"
+        },
+        {
+          "title": "Put it all together",
+          "description": "Rolls, quick arms and a pose strung into one phrase. The first thing on this path that looks like dancing rather than drilling.",
+          "danceSlug": "waacking",
+          "segmentLabel": "Put It All Together"
+        },
+        {
+          "title": "Practice with music",
+          "description": "The same material over a real track. Notice how much of your timing was coming from the count rather than the song.",
+          "danceSlug": "waacking",
+          "segmentLabel": "Practice with music"
         },
         {
           "title": "Freestyle rounds",

@@ -118,6 +118,27 @@ test.describe('api health @smoke', () => {
     }
   });
 
+  test('roadmap steps can pin to a video section', async ({ request }) => {
+    // Waacking's tutorials are consolidated onto one dance with their sub-moves as segments,
+    // so its path leans on segmentLabel. If resolution breaks, every step silently widens to
+    // "watch the whole 12-minute video" — which still renders, hence the explicit check.
+    const res = await request.get('roadmaps/waacking');
+    expect(res.status()).toBe(200);
+    const roadmap = await res.json();
+
+    const steps = roadmap.stages.flatMap((s: { steps: unknown[] }) => s.steps);
+    const pinned = steps.filter((s: { segment?: unknown }) => s.segment);
+    expect(pinned.length, 'no step resolved to a video segment').toBeGreaterThan(0);
+
+    const segment = pinned[0].segment;
+    for (const field of ['id', 'label', 'startTime', 'videoId']) {
+      expect(segment, `step segment missing "${field}"`).toHaveProperty(field);
+    }
+    // The segment must belong to a video the step actually offers, or the UI filters it away.
+    const videoIds = pinned[0].dance.videos.map((v: { id: number }) => v.id);
+    expect(videoIds).toContain(segment.videoId);
+  });
+
   test('unknown roadmap returns 404, not 500', async ({ request }) => {
     const res = await request.get('roadmaps/definitely-not-a-real-path-xyz');
     expect(res.status()).toBe(404);

@@ -78,7 +78,11 @@
                       @if (d.difficulty && d.difficulty !== 'None') {
                         <span class="tag tag--difficulty">{{ d.difficulty }}</span>
                       }
-                      <span class="tag">{{ d.videos.length }} {{ d.videos.length === 1 ? 'video' : 'videos' }}</span>
+                      @if (segmentRange(step); as range) {
+                        <span class="tag tag--clip"><i class="fa-solid fa-scissors" aria-hidden="true"></i> {{ range }}</span>
+                      } @else {
+                        <span class="tag">{{ d.videos.length }} {{ d.videos.length === 1 ? 'video' : 'videos' }}</span>
+                      }
                       @if (d.ratingCount > 0) {
                         <span class="tag tag--rating"><i class="fa-solid fa-star" aria-hidden="true"></i> {{ d.averageRating | number:'1.1-1' }}</span>
                       }
@@ -91,18 +95,18 @@
                 @if (step.description) { <p class="step__desc">{{ step.description }}</p> }
 
                 @if (step.dance; as d) {
-                  @if (d.videos.length > 0) {
+                  @if (stepVideos(step).length > 0) {
                     <button type="button" class="step__toggle" (click)="toggleCollapsed(step)"
                             [attr.aria-expanded]="!isCollapsed(step)">
                       <i class="fa-solid" [class.fa-chevron-down]="!isCollapsed(step)" [class.fa-chevron-right]="isCollapsed(step)" aria-hidden="true"></i>
-                      {{ isCollapsed(step) ? 'Show' : 'Hide' }} videos
+                      {{ isCollapsed(step) ? 'Show' : 'Hide' }} {{ step.segment ? 'clip' : 'videos' }}
                     </button>
 
                     @if (!isCollapsed(step)) {
                       <ul class="videos" data-testid="roadmap-step-videos">
-                        @for (v of d.videos; track v.id) {
+                        @for (v of stepVideos(step); track v.id) {
                           <li class="video">
-                            <a class="video__link" [routerLink]="['/dances', d.styleSlug, d.slug]" [queryParams]="{ v: v.id }">
+                            <a class="video__link" [routerLink]="['/dances', d.styleSlug, d.slug]" [queryParams]="stepVideoParams(step, v)">
                               <span class="video__thumb">
                                 @if (videoThumb(v.videoId, v.platform, v.id); as thumb) {
                                   <img [src]="thumb" alt="" loading="lazy"
@@ -110,13 +114,18 @@
                                 } @else {
                                   <span class="video__thumb-placeholder" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
                                 }
-                                @if (videoLength(v); as len) { <span class="video__len">{{ len }}</span> }
+                                @if (clipLength(step, v); as len) { <span class="video__len">{{ len }}</span> }
                               </span>
                               <span class="video__meta">
                                 <span class="video__title">{{ v.title }}</span>
                                 <span class="video__sub">
-                                  {{ v.videoType === 'tutorial' ? 'Tutorial' : 'Steps' }}
-                                  @if (v.ratingCount > 0) { · {{ v.averageRating | number:'1.1-1' }}&#9733; }
+                                  @if (step.segment; as seg) {
+                                    <!-- Name the section, not the file: the step is about this slice. -->
+                                    <span class="video__section">{{ seg.label }}</span>
+                                  } @else {
+                                    {{ v.videoType === 'tutorial' ? 'Tutorial' : 'Steps' }}
+                                    @if (v.ratingCount > 0) { · {{ v.averageRating | number:'1.1-1' }}&#9733; }
+                                  }
                                 </span>
                               </span>
                             </a>
