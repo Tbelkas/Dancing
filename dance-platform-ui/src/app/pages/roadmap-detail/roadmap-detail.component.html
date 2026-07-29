@@ -9,7 +9,7 @@
       @if (r.description) { <p class="roadmap-intro">{{ r.description }}</p> }
 
       <ul class="roadmap-stats">
-        <li><strong>{{ r.stageCount }}</strong> stages</li>
+        <li><strong>{{ r.stageCount }}</strong> branches</li>
         <li><strong>{{ r.stepCount }}</strong> moves</li>
         <li><strong>{{ r.videoCount }}</strong> videos</li>
         <li><a [routerLink]="['/dances']" [queryParams]="{ style: r.styleId }">All {{ r.styleName }} in the catalog</a></li>
@@ -26,7 +26,7 @@
               @if (inProgressCount() > 0) { <span class="roadmap-progress__wip">· {{ inProgressCount() }} in progress</span> }
             </span>
             @if (nextStep(); as next) {
-              <button type="button" class="btn btn--ghost btn--xs" (click)="scrollToNext()">
+              <button type="button" class="btn btn--ghost btn--xs" (click)="focusStep(next)">
                 <i class="fa-solid fa-arrow-down" aria-hidden="true"></i> Next: {{ next.title }}
               </button>
             } @else {
@@ -35,132 +35,119 @@
           </div>
         </div>
       } @else if (!auth.isAuthenticated()) {
-        <p class="roadmap-signin"><a routerLink="/login">Sign in</a> to tick moves off as you learn them.</p>
+        <p class="roadmap-signin"><a routerLink="/login">Sign in</a> to tick moves off and unlock the tree as you go.</p>
       }
     </div>
 
-    @for (stage of r.stages; track stage.id; let si = $index) {
-      <section class="stage" [attr.aria-labelledby]="'stage-' + stage.id">
-        <header class="stage__header">
-          <span class="stage__index" aria-hidden="true">Stage {{ si + 1 }}</span>
-          <h2 class="stage__title" [id]="'stage-' + stage.id">{{ stage.title }}</h2>
-          @if (stage.description) { <p class="stage__desc">{{ stage.description }}</p> }
-        </header>
+    <div class="view-bar">
+      <div class="view-toggle" role="tablist" aria-label="Roadmap view">
+        <button type="button" class="view-tab" role="tab" data-testid="roadmap-view-tree"
+                [class.is-active]="view() === 'tree'" [attr.aria-selected]="view() === 'tree'"
+                (click)="setView('tree')">
+          <i class="fa-solid fa-sitemap" aria-hidden="true"></i> Tree
+        </button>
+        <button type="button" class="view-tab" role="tab" data-testid="roadmap-view-list"
+                [class.is-active]="view() === 'list'" [attr.aria-selected]="view() === 'list'"
+                (click)="setView('list')">
+          <i class="fa-solid fa-list-ul" aria-hidden="true"></i> List
+        </button>
+      </div>
+      @if (auth.isAuthenticated() && view() === 'tree') {
+        <span class="view-bar__hint">
+          <strong>{{ r.availableCount }}</strong> {{ r.availableCount === 1 ? 'move' : 'moves' }} ready to learn
+        </span>
+      }
+    </div>
 
-        <ol class="path">
-          @for (step of stage.steps; track step.id) {
-            <li class="step"
-                [id]="'step-' + step.id"
-                [class.is-learned]="step.dance?.isLearned"
-                [class.is-inprogress]="step.dance?.isInProgress"
-                [class.is-unlinked]="!step.dance"
-                data-testid="roadmap-step">
-              <div class="step__marker" aria-hidden="true">
-                @if (step.dance?.isLearned) {
-                  <i class="fa-solid fa-check"></i>
-                } @else {
-                  {{ stepNumber(step) }}
-                }
-              </div>
+    @if (view() === 'tree') {
+      <app-roadmap-tree [roadmap]="r" [selectedKey]="selectedKey()" (stepSelected)="onTreeSelect($event)" />
 
-              <div class="step__body">
-                <div class="step__head">
-                  <h3 class="step__title">
-                    @if (step.dance; as d) {
-                      <a [routerLink]="['/dances', d.styleSlug, d.slug]">{{ step.title }}</a>
-                    } @else {
-                      {{ step.title }}
-                    }
-                  </h3>
+      <!-- Branch names, matching the tree's stage grouping. -->
+      <ol class="branches" aria-label="Branches">
+        @for (stage of r.stages; track stage.id; let si = $index) {
+          <li class="branch">
+            <span class="branch__index" aria-hidden="true">{{ si + 1 }}</span>
+            <div>
+              <h3 class="branch__title">{{ stage.title }}</h3>
+              @if (stage.description) { <p class="branch__desc">{{ stage.description }}</p> }
+            </div>
+          </li>
+        }
+      </ol>
 
-                  @if (step.dance; as d) {
-                    <div class="step__tags">
-                      @if (d.difficulty && d.difficulty !== 'None') {
-                        <span class="tag tag--difficulty">{{ d.difficulty }}</span>
-                      }
-                      @if (segmentRange(step); as range) {
-                        <span class="tag tag--clip"><i class="fa-solid fa-scissors" aria-hidden="true"></i> {{ range }}</span>
-                      } @else {
-                        <span class="tag">{{ d.videos.length }} {{ d.videos.length === 1 ? 'video' : 'videos' }}</span>
-                      }
-                      @if (d.ratingCount > 0) {
-                        <span class="tag tag--rating"><i class="fa-solid fa-star" aria-hidden="true"></i> {{ d.averageRating | number:'1.1-1' }}</span>
-                      }
-                    </div>
+      <section class="detail" data-testid="roadmap-detail-panel" aria-live="polite">
+        @if (selectedStep(); as step) {
+          <div class="detail__head">
+            <span class="detail__state detail__state--{{ step.state }}">
+              {{ step.state === 'learned' ? 'Learned' : step.state === 'locked' ? 'Comes later' : 'Ready now' }}
+            </span>
+            <h2 class="detail__title">
+              @if (step.dance; as d) {
+                <a [routerLink]="['/dances', d.styleSlug, d.slug]">{{ step.title }}</a>
+              } @else {
+                {{ step.title }}
+              }
+            </h2>
+            <p class="detail__branch">{{ branchTitle(step) }}</p>
+          </div>
+
+          @if (requiredTitles(step).length > 0) {
+            <p class="detail__requires">
+              <span class="detail__requires-label">Comes after</span>
+              @for (req of requiredTitles(step); track req.key; let last = $last) {
+                <button type="button" class="detail__req" (click)="focusStep(req.step)">{{ req.title }}</button>{{ last ? '' : ' ' }}
+              }
+            </p>
+          }
+
+          <ng-container *ngTemplateOutlet="stepBody; context: { $implicit: step, styleId: r.styleId }" />
+        } @else {
+          <p class="detail__empty">Pick a move on the tree to see what it is and what teaches it.</p>
+        }
+      </section>
+    } @else {
+      @for (stage of r.stages; track stage.id; let si = $index) {
+        <section class="stage" [attr.aria-labelledby]="'stage-' + stage.id">
+          <header class="stage__header">
+            <span class="stage__index" aria-hidden="true">Branch {{ si + 1 }}</span>
+            <h2 class="stage__title" [id]="'stage-' + stage.id">{{ stage.title }}</h2>
+            @if (stage.description) { <p class="stage__desc">{{ stage.description }}</p> }
+          </header>
+
+          <ol class="path">
+            @for (step of stage.steps; track step.id) {
+              <li class="step"
+                  [id]="'step-' + step.id"
+                  [class.is-learned]="step.dance?.isLearned"
+                  [class.is-inprogress]="step.dance?.isInProgress"
+                  [class.is-unlinked]="!step.dance"
+                  data-testid="roadmap-step">
+                <div class="step__marker" aria-hidden="true">
+                  @if (step.dance?.isLearned) {
+                    <i class="fa-solid fa-check"></i>
                   } @else {
-                    <span class="tag tag--pending">No video yet</span>
+                    {{ stepNumber(step) }}
                   }
                 </div>
 
-                @if (step.description) { <p class="step__desc">{{ step.description }}</p> }
+                <div class="step__body">
+                  <div class="step__head">
+                    <h3 class="step__title">
+                      @if (step.dance; as d) {
+                        <a [routerLink]="['/dances', d.styleSlug, d.slug]">{{ step.title }}</a>
+                      } @else {
+                        {{ step.title }}
+                      }
+                    </h3>
+                  </div>
 
-                @if (step.dance; as d) {
-                  @if (stepVideos(step).length > 0) {
-                    <button type="button" class="step__toggle" (click)="toggleCollapsed(step)"
-                            [attr.aria-expanded]="!isCollapsed(step)">
-                      <i class="fa-solid" [class.fa-chevron-down]="!isCollapsed(step)" [class.fa-chevron-right]="isCollapsed(step)" aria-hidden="true"></i>
-                      {{ isCollapsed(step) ? 'Show' : 'Hide' }} {{ step.segment ? 'clip' : 'videos' }}
-                    </button>
-
-                    @if (!isCollapsed(step)) {
-                      <ul class="videos" data-testid="roadmap-step-videos">
-                        @for (v of stepVideos(step); track v.id) {
-                          <li class="video">
-                            <a class="video__link" [routerLink]="['/dances', d.styleSlug, d.slug]" [queryParams]="stepVideoParams(step, v)">
-                              <span class="video__thumb">
-                                @if (videoThumb(v.videoId, v.platform, v.id); as thumb) {
-                                  <img [src]="thumb" alt="" loading="lazy"
-                                       (error)="onThumbError(v.id)" (load)="onThumbLoad($event, v.id)" />
-                                } @else {
-                                  <span class="video__thumb-placeholder" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
-                                }
-                                @if (clipLength(step, v); as len) { <span class="video__len">{{ len }}</span> }
-                              </span>
-                              <span class="video__meta">
-                                <span class="video__title">{{ v.title }}</span>
-                                <span class="video__sub">
-                                  @if (step.segment; as seg) {
-                                    <!-- Name the section, not the file: the step is about this slice. -->
-                                    <span class="video__section">{{ seg.label }}</span>
-                                  } @else {
-                                    {{ v.videoType === 'tutorial' ? 'Tutorial' : 'Steps' }}
-                                    @if (v.ratingCount > 0) { · {{ v.averageRating | number:'1.1-1' }}&#9733; }
-                                  }
-                                </span>
-                              </span>
-                            </a>
-                          </li>
-                        }
-                      </ul>
-                    }
-                  } @else {
-                    <p class="step__note">This move is in the catalog but has no video attached yet.</p>
-                  }
-
-                  @if (auth.isAuthenticated()) {
-                    <div class="step__actions">
-                      <button type="button" class="chip-btn" [class.is-active]="d.isInProgress"
-                              (click)="toggleInProgress(step)" [attr.aria-pressed]="d.isInProgress">
-                        <i class="fa-solid fa-person-walking" aria-hidden="true"></i> In progress
-                      </button>
-                      <button type="button" class="chip-btn chip-btn--learned" [class.is-active]="d.isLearned"
-                              data-testid="roadmap-step-learned"
-                              (click)="toggleLearned(step)" [attr.aria-pressed]="d.isLearned">
-                        <i class="fa-solid fa-check" aria-hidden="true"></i> Learned
-                      </button>
-                    </div>
-                  }
-                } @else {
-                  <p class="step__note">
-                    Nothing in the catalog teaches this yet — drill it from the description, or
-                    <a [routerLink]="['/dances']" [queryParams]="{ q: step.title, style: r.styleId }">search for it</a>.
-                  </p>
-                }
-              </div>
-            </li>
-          }
-        </ol>
-      </section>
+                  <ng-container *ngTemplateOutlet="stepBody; context: { $implicit: step, styleId: r.styleId }" />
+                </div>
+              </li>
+            }
+          </ol>
+        </section>
+      }
     }
   } @else if (loading()) {
     <div class="page-header" aria-busy="true">
@@ -187,3 +174,91 @@
     </div>
   }
 </div>
+
+<!-- Shared by the tree's detail panel and the list rows, so the two views can never drift. -->
+<ng-template #stepBody let-step let-styleId="styleId">
+  <div class="step__head">
+    @if (step.dance; as d) {
+      <div class="step__tags">
+        @if (d.difficulty && d.difficulty !== 'None') {
+          <span class="tag tag--difficulty">{{ d.difficulty }}</span>
+        }
+        @if (segmentRange(step); as range) {
+          <span class="tag tag--clip"><i class="fa-solid fa-scissors" aria-hidden="true"></i> {{ range }}</span>
+        } @else {
+          <span class="tag">{{ d.videos.length }} {{ d.videos.length === 1 ? 'video' : 'videos' }}</span>
+        }
+        @if (d.ratingCount > 0) {
+          <span class="tag tag--rating"><i class="fa-solid fa-star" aria-hidden="true"></i> {{ d.averageRating | number:'1.1-1' }}</span>
+        }
+      </div>
+    } @else {
+      <span class="tag tag--pending">No video yet</span>
+    }
+  </div>
+
+  @if (step.description) { <p class="step__desc">{{ step.description }}</p> }
+
+  @if (step.dance; as d) {
+    @if (stepVideos(step).length > 0) {
+      <button type="button" class="step__toggle" (click)="toggleCollapsed(step)"
+              [attr.aria-expanded]="!isCollapsed(step)">
+        <i class="fa-solid" [class.fa-chevron-down]="!isCollapsed(step)" [class.fa-chevron-right]="isCollapsed(step)" aria-hidden="true"></i>
+        {{ isCollapsed(step) ? 'Show' : 'Hide' }} {{ step.segment ? 'clip' : 'videos' }}
+      </button>
+
+      @if (!isCollapsed(step)) {
+        <ul class="videos" data-testid="roadmap-step-videos">
+          @for (v of stepVideos(step); track v.id) {
+            <li class="video">
+              <a class="video__link" [routerLink]="['/dances', d.styleSlug, d.slug]" [queryParams]="stepVideoParams(step, v)">
+                <span class="video__thumb">
+                  @if (videoThumb(v.videoId, v.platform, v.id); as thumb) {
+                    <img [src]="thumb" alt="" loading="lazy"
+                         (error)="onThumbError(v.id)" (load)="onThumbLoad($event, v.id)" />
+                  } @else {
+                    <span class="video__thumb-placeholder" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
+                  }
+                  @if (clipLength(step, v); as len) { <span class="video__len">{{ len }}</span> }
+                </span>
+                <span class="video__meta">
+                  <span class="video__title">{{ v.title }}</span>
+                  <span class="video__sub">
+                    @if (step.segment; as seg) {
+                      <!-- Name the section, not the file: the step is about this slice. -->
+                      <span class="video__section">{{ seg.label }}</span>
+                    } @else {
+                      {{ v.videoType === 'tutorial' ? 'Tutorial' : 'Steps' }}
+                      @if (v.ratingCount > 0) { · {{ v.averageRating | number:'1.1-1' }}&#9733; }
+                    }
+                  </span>
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    } @else {
+      <p class="step__note">This move is in the catalog but has no video attached yet.</p>
+    }
+
+    @if (auth.isAuthenticated()) {
+      <div class="step__actions">
+        <button type="button" class="chip-btn" [class.is-active]="d.isInProgress"
+                (click)="toggleInProgress(step)" [attr.aria-pressed]="d.isInProgress">
+          <i class="fa-solid fa-person-walking" aria-hidden="true"></i> In progress
+        </button>
+        <button type="button" class="chip-btn chip-btn--learned" [class.is-active]="d.isLearned"
+                data-testid="roadmap-step-learned"
+                (click)="toggleLearned(step)" [attr.aria-pressed]="d.isLearned">
+          <i class="fa-solid fa-check" aria-hidden="true"></i> Learned
+        </button>
+      </div>
+    }
+  } @else {
+    <p class="step__note">
+      Nothing in the catalog teaches this yet — drill it from the description, or
+      <a [routerLink]="['/dances']" [queryParams]="{ q: step.title, style: styleId }">search for it</a>.
+    </p>
+  }
+</ng-template>

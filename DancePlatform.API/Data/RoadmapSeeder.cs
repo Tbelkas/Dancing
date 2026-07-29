@@ -106,6 +106,7 @@ public static class RoadmapSeeder
                     SortOrder = si,
                     Steps = stage.Steps.Select((step, pi) => new RoadmapStep
                     {
+                        Key = StepKey(step),
                         Title = step.Title,
                         Description = step.Description,
                         SortOrder = pi,
@@ -134,14 +135,106 @@ public static class RoadmapSeeder
 
         await db.SaveChangesAsync();
 
+        // Edges last: they need the step rows to exist so keys can be turned into ids.
+        var edges = await SyncPrerequisitesAsync(db, file, roadmap, logger);
+
         if (logger.IsEnabled(LogLevel.Information))
         {
             var wanted = file.Stages.SelectMany(s => s.Steps)
                 .Select(s => s.DanceSlug).Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().Count();
-            logger.LogInformation("Roadmap '{Slug}' seeded: {Stages} stages, {Steps} steps, {Linked}/{Wanted} moves linked.",
-                file.Slug, file.Stages.Count, file.Stages.Sum(s => s.Steps.Count), danceIds.Count, wanted);
+            logger.LogInformation(
+                "Roadmap '{Slug}' seeded: {Stages} stages, {Steps} steps, {Linked}/{Wanted} moves linked, {Segments} pinned to a clip, {Edges} tree edges.",
+                file.Slug, file.Stages.Count, file.Stages.Sum(s => s.Steps.Count), danceIds.Count, wanted,
+                segmentIds.Count, edges);
         }
     }
+
+    /// <summary>
+    /// Rebuilds the roadmap's prerequisite edges from the authored `requires` keys. Always a full
+    /// replace: edges are cheap, and a diff would have to reason about steps that were just
+    /// recreated. Unknown keys and cycles are dropped with a logged error rather than throwing —
+    /// a bad edge should cost one connector, not the whole path (and never boot).
+    /// </summary>
+    private static async Task<int> SyncPrerequisitesAsync(
+        AppDbContext db, RoadmapFile file, Roadmap roadmap, ILogger logger)
+    {
+        var stepsByKey = roadmap.Stages
+            .SelectMany(s => s.Steps)
+            .GroupBy(s => s.Key)
+            .ToDictionary(g => g.Key, g => g.First().Id, StringComparer.OrdinalIgnoreCase);
+
+        var existing = await db.RoadmapStepPrerequisites
+            .Where(p => stepsByKey.Values.Contains(p.StepId))
+            .ToListAsync();
+        db.RoadmapStepPrerequisites.RemoveRange(existing);
+
+        // Authored adjacency, keyed the same way the steps are, for the cycle check below.
+        var authored = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var step in file.Stages.SelectMany(s => s.Steps))
+        {
+            var key = StepKey(step);
+            var deps = new List<string>();
+            foreach (var required in step.Requires.Where(r => !string.IsNullOrWhiteSpace(r)))
+            {
+                if (!stepsByKey.ContainsKey(required))
+                {
+                    logger.LogError("Roadmap '{Slug}': step '{Step}' requires unknown key '{Key}'; edge dropped.",
+                        file.Slug, key, required);
+                    continue;
+                }
+                if (string.Equals(required, key, StringComparison.OrdinalIgnoreCase))
+                {
+                    logger.LogError("Roadmap '{Slug}': step '{Step}' requires itself; edge dropped.", file.Slug, key);
+                    continue;
+                }
+                deps.Add(required);
+            }
+            authored[key] = deps;
+        }
+
+        var added = 0;
+        foreach (var (key, deps) in authored)
+        {
+            foreach (var required in deps)
+            {
+                // A cycle would make every node in it unreachable and hang any depth walk.
+                if (CreatesCycle(authored, from: required, to: key))
+                {
+                    logger.LogError("Roadmap '{Slug}': '{Step}' requires '{Key}' but that closes a cycle; edge dropped.",
+                        file.Slug, key, required);
+                    continue;
+                }
+                db.RoadmapStepPrerequisites.Add(new RoadmapStepPrerequisite
+                {
+                    StepId = stepsByKey[key],
+                    PrerequisiteStepId = stepsByKey[required]
+                });
+                added++;
+            }
+        }
+
+        await db.SaveChangesAsync();
+        return added;
+    }
+
+    /// <summary>True when <paramref name="to"/> is already reachable from <paramref name="from"/>.</summary>
+    private static bool CreatesCycle(Dictionary<string, List<string>> authored, string from, string to)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var stack = new Stack<string>([from]);
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+            if (string.Equals(current, to, StringComparison.OrdinalIgnoreCase)) return true;
+            if (!seen.Add(current)) continue;
+            if (authored.TryGetValue(current, out var deps))
+                foreach (var d in deps) stack.Push(d);
+        }
+        return false;
+    }
+
+    private static string StepKey(StepFile step) =>
+        string.IsNullOrWhiteSpace(step.Key) ? Services.SlugGenerator.Slugify(step.Title) : step.Key.Trim();
 
     private static int? Resolve(Dictionary<string, int> ids, string? key) =>
         !string.IsNullOrWhiteSpace(key) && ids.TryGetValue(key, out var id) ? id : null;
@@ -256,7 +349,7 @@ public static class RoadmapSeeder
         {
             s.Title,
             s.Description,
-            Steps = s.Steps.Select(p => new { p.Title, p.Description })
+            Steps = s.Steps.Select(p => new { Key = StepKey(p), p.Title, p.Description })
         }));
 
     private static string SignatureOf(Roadmap roadmap) =>
@@ -264,7 +357,7 @@ public static class RoadmapSeeder
         {
             s.Title,
             s.Description,
-            Steps = s.Steps.OrderBy(p => p.SortOrder).Select(p => new { p.Title, p.Description })
+            Steps = s.Steps.OrderBy(p => p.SortOrder).Select(p => new { p.Key, p.Title, p.Description })
         }));
 
     private sealed class RoadmapFile
@@ -287,11 +380,17 @@ public static class RoadmapSeeder
 
     private sealed class StepFile
     {
+        /// <summary>Stable id used by other steps' <see cref="Requires"/>. Defaults to a slug of the title.</summary>
+        public string? Key { get; set; }
+
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? DanceSlug { get; set; }
 
         /// <summary>Optional: narrows the step to one section of one of the dance's videos.</summary>
         public string? SegmentLabel { get; set; }
+
+        /// <summary>Keys of steps that come before this one. Empty = a root of the tree.</summary>
+        public List<string> Requires { get; set; } = new();
     }
 }

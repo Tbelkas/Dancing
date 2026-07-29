@@ -25,7 +25,11 @@ export interface RoadmapSummary {
 
 export interface Roadmap extends RoadmapSummary {
   stages: RoadmapStage[];
+  /** Steps whose prerequisites are met but which aren't learned yet — what to do next. */
+  availableCount: number;
 }
+
+export type RoadmapStepState = 'learned' | 'available' | 'locked';
 
 export interface RoadmapStage {
   id: number;
@@ -36,6 +40,16 @@ export interface RoadmapStage {
 
 export interface RoadmapStep {
   id: number;
+  /** Stable key within the roadmap; what `requires` refers to. */
+  key: string;
+  /** Keys of steps that come before this one. Empty = a root of the tree. */
+  requires: string[];
+  /** Index of the owning stage — the tree colours and labels branches by it. */
+  stageIndex: number;
+  /** Longest distance from a root; the node's ring in the tree. Computed server-side. */
+  depth: number;
+  /** Advisory: a locked step is dimmed but still markable. */
+  state: RoadmapStepState;
   title: string;
   description?: string;
   /** Null when the catalog has no move for this step yet — the node still renders. */

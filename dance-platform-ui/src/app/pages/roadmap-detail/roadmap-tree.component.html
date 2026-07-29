@@ -1,0 +1,105 @@
+@if (layout(); as l) {
+  <div class="tree" data-testid="roadmap-tree">
+    <!-- Scrolls horizontally on narrow screens rather than shrinking the nodes to mush. -->
+    <div class="tree__scroll">
+      <svg
+        [attr.viewBox]="l.viewBox"
+        class="tree__svg"
+        role="tree"
+        [attr.aria-label]="'Skill tree, ' + l.nodes.length + ' moves'"
+        (mouseleave)="hovered.set(null)">
+
+        <!-- Depth rings: the "how far in am I" scale, kept faint so it never competes. -->
+        <g class="tree__rings" aria-hidden="true">
+          @for (ring of l.rings; track ring.r) {
+            <circle [attr.cx]="ring.cx" [attr.cy]="ring.cy" [attr.r]="ring.r" />
+          }
+        </g>
+
+        <g class="tree__edges" aria-hidden="true">
+          @for (edge of l.edges; track edge.from.key + '>' + edge.to.key) {
+            <!-- Cross-links (a second prerequisite) only appear for the focused lineage.
+                 Drawn always they turn the tree into a web and hide the branch structure. -->
+            @if (edge.isPrimary || edgeActive(edge.from.key, edge.to.key)) {
+              <path
+                [attr.d]="edge.path"
+                class="tree__edge"
+                [class.tree__edge--cross]="!edge.isPrimary"
+                [class.is-active]="edgeActive(edge.from.key, edge.to.key)"
+                [class.is-cleared]="edge.from.state === 'learned' && edge.to.state === 'learned'" />
+            }
+          }
+        </g>
+
+        <g class="tree__nodes">
+          @for (node of l.nodes; track node.key) {
+            <g
+              class="tree__node"
+              [class.is-learned]="node.state === 'learned'"
+              [class.is-available]="node.state === 'available'"
+              [class.is-locked]="node.state === 'locked'"
+              [class.is-selected]="selected() === node.key"
+              [class.is-dimmed]="isDimmed(node)"
+              [class.is-unlinked]="!node.step.dance"
+              [attr.data-stage]="node.stageIndex"
+              data-testid="tree-node"
+              role="treeitem"
+              tabindex="0"
+              [attr.aria-selected]="selected() === node.key"
+              [attr.aria-label]="ariaLabel(node)"
+              (click)="select(node)"
+              (keydown.enter)="select(node)"
+              (keydown.space)="select(node); $event.preventDefault()"
+              (mouseenter)="hovered.set(node.key)"
+              (focus)="hovered.set(node.key)">
+
+              <!-- Selection halo, drawn under the node so the ring reads as a glow around it. -->
+              @if (selected() === node.key) {
+                <circle class="tree__halo" [attr.cx]="node.x" [attr.cy]="node.y" r="30" />
+              }
+
+              <circle class="tree__node-disc" [attr.cx]="node.x" [attr.cy]="node.y" r="19" />
+              <circle class="tree__node-ring" [attr.cx]="node.x" [attr.cy]="node.y" r="19" />
+
+              @if (node.state === 'learned') {
+                <!-- Tick, drawn as a path so it scales with the viewBox instead of needing a font. -->
+                <path class="tree__glyph"
+                  [attr.d]="'M ' + (node.x - 6) + ' ' + node.y + ' l 4 4.5 l 8 -9'" />
+              } @else if (node.state === 'locked') {
+                <g class="tree__glyph-lock" [attr.transform]="'translate(' + (node.x - 4.5) + ',' + (node.y - 5) + ')'">
+                  <rect x="0" y="4" width="9" height="7" rx="1.4" />
+                  <path d="M 1.8 4 v -1.6 a 2.7 2.7 0 0 1 5.4 0 V 4" />
+                </g>
+              } @else {
+                <circle class="tree__glyph-dot" [attr.cx]="node.x" [attr.cy]="node.y" r="4" />
+              }
+
+              <!-- Marks a step whose move isn't in the catalog yet. -->
+              @if (!node.step.dance) {
+                <circle class="tree__pending" [attr.cx]="node.x + 14" [attr.cy]="node.y - 14" r="3.4" />
+              }
+
+              <!-- Labels only for what you're looking at, plus the moves already learned.
+                   31 names on one fan collide no matter how they're placed; the detail panel,
+                   the branch list and the List view carry the full text. -->
+              @if (showLabel(node)) {
+                <text
+                  class="tree__label"
+                  [attr.x]="node.labelX"
+                  [attr.y]="node.labelY"
+                  [attr.text-anchor]="node.labelAnchor">{{ shortLabel(node) }}</text>
+              }
+            </g>
+          }
+        </g>
+      </svg>
+    </div>
+
+    <ul class="tree__legend" aria-label="Legend">
+      <li><span class="key key--learned"></span>Learned</li>
+      <li><span class="key key--available"></span>Ready</li>
+      <li><span class="key key--locked"></span>Needs an earlier move</li>
+      <li><span class="key key--pending"></span>No video yet</li>
+    </ul>
+  </div>
+}

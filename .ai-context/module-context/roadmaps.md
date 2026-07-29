@@ -5,12 +5,17 @@
 
 ## What it is
 
-A roadmap is an ordered path through one style: **stages** (themed groups) holding **steps**
-(the moves, in the order they build on each other). Each step optionally links to a catalog
+A roadmap is a **skill tree** through one style: **stages** (branches) holding **steps** (the
+moves), wired together by explicit **prerequisites**. Each step optionally links to a catalog
 `Dance`; when it does, the page shows that move's videos and the user's learned status.
 
-The point is sequencing. Browse answers "what exists in House?"; a roadmap answers "what do I
-learn first, and what does it unlock?".
+The point is sequencing, and it is deliberately **not linear** — the twists and the travelling
+steps both come off the jack and never touch each other again. Browse answers "what exists in
+House?"; a roadmap answers "what do I learn first, and what does it unlock?".
+
+Two views, toggled and remembered in `localStorage['dp_roadmap_view']`:
+- **Tree** (default) — a radial fan, root at the bottom, one ring per depth, plus a detail panel.
+- **List** — the branches as ordered rows, every step's videos on screen at once.
 
 ## Backend
 
@@ -85,6 +90,40 @@ time range, and links to `/dances/{style}/{slug}?v={videoId}&t={startTime}`.
   one. Don't author against a generic label.
 - `moveCount` counts *steps* with a dance (so progress reads "8 of 18 steps"), but `videoCount`
   counts **distinct** videos — otherwise one sliced-up tutorial would be counted once per step.
+
+## The tree: keys, prerequisites and node state
+
+Each step carries a `key` (stable, unique per roadmap, defaults to a slug of the title) and
+`requires: [key, …]`. Edges live in `RoadmapStepPrerequisites` (composite PK, `Step` cascade /
+`PrerequisiteStep` NoAction — two cascade paths into one table is more than Postgres allows).
+
+The seeder **fully replaces** the edges every boot and drops, with a logged error, any edge that
+names an unknown key, points at itself, or closes a cycle. A bad edge costs one connector, never
+the boot.
+
+`Depth` (longest distance from a root → the node's ring) and `State` are computed **server-side**
+in `RoadmapService`, by bounded iterative relaxation rather than recursion — the endpoint is
+public and must not be one malformed row away from a stack overflow.
+
+**State is `learned` / `available` / `locked`, and locks are advisory.** A locked step is dimmed
+but still markable: someone may already know the Skate. Signed out, nothing is locked — a visitor
+sees the whole tree, not a wall of padlocks.
+
+**The subtle rule: an unlinked step passes through.** A step with no catalog move can never be
+ticked off, so "satisfied" ≠ "learned" for it — it counts as satisfied exactly when *its own*
+prerequisites are. Gate on it directly and its branch locks forever; ignore it entirely and the
+branch leaks open early (Lofting, whose only prerequisite is the un-covered Skate, would unlock
+before the Slide). The relaxation loop in `AssignStates` exists for this.
+
+`roadmap-detail.component.ts#withStates` mirrors that logic client-side so ticking a move off
+unlocks the next ring immediately. **If you change one, change both** — a drift shows up as the
+tree disagreeing with itself until reload.
+
+Layout is a pure function: `core/utils/roadmap-tree.layout.ts`. Each node gets one *structural*
+parent (its first resolvable prerequisite) which decides its angle; extra prerequisites are drawn
+as faint cross-links, and only while their lineage is focused, since drawn always they turn the
+fan into a web. Labels appear only for the hovered/selected lineage and for learned moves — 31
+names on one fan collide however they're placed.
 
 ## Key behaviours / rules
 

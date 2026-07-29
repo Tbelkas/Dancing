@@ -9,8 +9,11 @@ import { blockEmbeds } from '../fixtures/block-embeds.js';
  * rendered for a signed-in user and this suite never touches them.
  *
  * Nothing here asserts a specific move name — the paths are authored content that can be
- * re-cut. It asserts the *shape*: stages contain numbered steps, linked steps offer videos,
- * and a step's link lands on that move's dance page.
+ * re-cut. It asserts the *shape*: the tree has nodes and connectors, branches have headings,
+ * linked steps offer videos, and a step's link lands on that move's dance page.
+ *
+ * The tree is the default view; tests that need every step's videos on screen at once switch
+ * to the list first rather than clicking around the fan.
  */
 
 test.describe('roadmaps', () => {
@@ -33,7 +36,7 @@ test.describe('roadmaps', () => {
     await expect(first).toHaveAttribute('href', /\/roadmaps\/[a-z0-9-]+$/);
   });
 
-  test('a path renders stages of numbered steps @smoke', async ({ page }) => {
+  test('a path opens as a skill tree @smoke', async ({ page }) => {
     await page.goto('/roadmaps');
     await expect(page.getByTestId('roadmap-card').first()).toBeVisible();
     await page.getByTestId('roadmap-card-link').first().click();
@@ -41,12 +44,40 @@ test.describe('roadmaps', () => {
     await expect(page).toHaveURL(/\/roadmaps\/[a-z0-9-]+$/);
     await expect(page.getByTestId('roadmap-title')).toBeVisible();
 
+    // Tree is the default view.
+    await expect(page.getByTestId('roadmap-tree')).toBeVisible();
+    const nodes = page.getByTestId('tree-node');
+    expect(await nodes.count()).toBeGreaterThan(1);
+
+    // Connectors are what make it a tree rather than a scatter of circles. Cross-links are
+    // hidden until focused, so this counts the structural ones only.
+    expect(await page.locator('.tree__edge').count()).toBeGreaterThan(1);
+
+    // Clicking a node fills the detail panel with that move.
+    await nodes.nth(1).click();
+    await expect(page.getByTestId('roadmap-detail-panel')).toBeVisible();
+    await expect(page.getByTestId('roadmap-detail-panel').locator('.detail__title')).not.toBeEmpty();
+  });
+
+  test('the list view is reachable and shows the same steps as branches', async ({ page }) => {
+    await page.goto('/roadmaps/house');
+    await expect(page.getByTestId('roadmap-title')).toBeVisible();
+
+    await page.getByTestId('roadmap-view-list').click();
     const steps = page.getByTestId('roadmap-step');
     await expect(steps.first()).toBeVisible();
     expect(await steps.count()).toBeGreaterThan(1);
-
-    // A path with no stage headings is a flat list, not a roadmap.
+    // A path with no branch headings is a flat list, not a roadmap.
     expect(await page.locator('.stage__title').count()).toBeGreaterThan(0);
+
+    // The choice sticks — it's a strong preference either way.
+    await page.reload();
+    await expect(page.getByTestId('roadmap-step').first()).toBeVisible();
+    await expect(page.getByTestId('roadmap-tree')).toHaveCount(0);
+
+    // Put it back so a later test (and the next scheduled run) starts on the tree.
+    await page.getByTestId('roadmap-view-tree').click();
+    await expect(page.getByTestId('roadmap-tree')).toBeVisible();
   });
 
   test('steps backed by a move show their videos and link to the move', async ({ page }) => {
@@ -54,6 +85,8 @@ test.describe('roadmaps', () => {
     await expect(page.getByTestId('roadmap-card').first()).toBeVisible();
     await page.getByTestId('roadmap-card-link').first().click();
     await expect(page.getByTestId('roadmap-title')).toBeVisible();
+    // The list view is where every step's videos are on screen at once.
+    await page.getByTestId('roadmap-view-list').click();
 
     // Videos are expanded by default, so the first linked step should already show some.
     const videoLists = page.getByTestId('roadmap-step-videos');
@@ -74,6 +107,7 @@ test.describe('roadmaps', () => {
   test('a step pinned to a video section deep-links to that timestamp', async ({ page }) => {
     await page.goto('/roadmaps/waacking');
     await expect(page.getByTestId('roadmap-title')).toBeVisible();
+    await page.getByTestId('roadmap-view-list').click();
 
     const clipLink = page.locator('a.video__link[href*="t="]').first();
     await expect(clipLink).toBeVisible();

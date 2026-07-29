@@ -71,10 +71,14 @@ some client-side filtering; see module-context/dances-catalog.md.)
 | GET | `/roadmaps/{idOrSlug}` | — | `RoadmapDto` (stages → steps → dance → videos); 404 if missing |
 
 Read-only: roadmaps are authored content seeded from `Data/Roadmaps/*.json`, not API-editable.
-Both endpoints are anonymous but **not** response-cached — `learnedCount` / `inProgressCount`
-and each step's `isLearned` / `isInProgress` are per current user. A step's `dance` is **null**
-when the catalog has no move for it yet. Progress is written through the existing
-`PUT /dances/{id}/status`, not through a roadmap endpoint.
+Both endpoints are anonymous but **not** response-cached — `learnedCount` / `inProgressCount`,
+`availableCount` and each step's `isLearned` / `isInProgress` / `state` are per current user.
+Progress is written through the existing `PUT /dances/{id}/status`, not a roadmap endpoint.
+
+A step carries the skill tree: `key`, `requires` (keys of earlier steps), `stageIndex`, `depth`
+(ring) and `state` (`learned` / `available` / `locked`). `depth` and `state` are **computed
+per-request**, not stored. `dance` is null when the catalog has no move for the step yet;
+`segment` is set when it's pinned to one section of a video.
 
 ## Musical Styles — `/api/musicalstyles`
 | Method | Path | Auth |

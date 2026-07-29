@@ -17,6 +17,13 @@ public class RoadmapStep
     public int RoadmapStageId { get; set; }
     public RoadmapStage Stage { get; set; } = null!;
 
+    /// <summary>
+    /// Stable author-chosen id, unique within its roadmap ("jack", "toe-twist"). Prerequisites
+    /// are authored against these, so reordering or renaming a step's title doesn't break the
+    /// graph. Falls back to a slug of the title when the JSON omits it.
+    /// </summary>
+    public string Key { get; set; } = string.Empty;
+
     public string Title { get; set; } = string.Empty;
 
     /// <summary>What to work on, in the authored voice — not the dance's own description.</summary>
@@ -37,6 +44,13 @@ public class RoadmapStep
     /// </summary>
     public int? VideoSegmentId { get; set; }
     public VideoSegment? VideoSegment { get; set; }
+
+    /// <summary>
+    /// Steps that should be learned before this one. Progression through a style is a graph,
+    /// not a line — the twists and the travelling steps both come off the jack but don't depend
+    /// on each other — so the path renders as a tree rather than a numbered list.
+    /// </summary>
+    public List<RoadmapStepPrerequisite> Prerequisites { get; set; } = new();
 
     public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 }

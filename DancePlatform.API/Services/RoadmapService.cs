@@ -91,7 +91,8 @@ public class RoadmapService : IRoadmapService
                     s.Id, s.Title, s.Description,
                     Steps = s.Steps.OrderBy(st => st.SortOrder).Select(st => new
                     {
-                        st.Id, st.Title, st.Description,
+                        st.Id, st.Key, st.Title, st.Description,
+                        Requires = st.Prerequisites.Select(p => p.PrerequisiteStep.Key).ToList(),
                         Segment = st.VideoSegment == null ? null : new
                         {
                             st.VideoSegment.Id,
@@ -132,7 +133,7 @@ public class RoadmapService : IRoadmapService
 
         if (roadmap is null) return null;
 
-        var stages = roadmap.Stages.Select(s => new RoadmapStageDto
+        var stages = roadmap.Stages.Select((s, si) => new RoadmapStageDto
         {
             Id = s.Id,
             Title = s.Title,
@@ -140,6 +141,9 @@ public class RoadmapService : IRoadmapService
             Steps = s.Steps.Select(st => new RoadmapStepDto
             {
                 Id = st.Id,
+                Key = st.Key,
+                Requires = st.Requires,
+                StageIndex = si,
                 Title = st.Title,
                 Description = st.Description,
                 Segment = st.Segment is null ? null : new RoadmapStepSegmentDto
@@ -181,6 +185,8 @@ public class RoadmapService : IRoadmapService
         }).ToList();
 
         var allSteps = stages.SelectMany(s => s.Steps).ToList();
+        AssignDepths(allSteps);
+        AssignStates(allSteps, hasUser);
         var moves = allSteps.Where(s => s.Dance is not null).Select(s => s.Dance!).ToList();
         var cover = moves.SelectMany(m => m.Videos).FirstOrDefault();
         // Same de-duplication as the index: several steps can share one sliced-up tutorial.
@@ -204,7 +210,81 @@ public class RoadmapService : IRoadmapService
             InProgressCount = moves.Count(m => m.IsInProgress),
             ThumbnailVideoId = cover?.VideoId,
             ThumbnailPlatform = cover?.Platform,
-            Stages = stages
+            Stages = stages,
+            AvailableCount = allSteps.Count(s => s.State == "available")
         };
+    }
+
+    /// <summary>
+    /// Longest distance from a root, which is what puts a node on the right ring of the tree:
+    /// a step must sit outside every prerequisite, so the *max* depth is the correct one.
+    ///
+    /// Iterative relaxation rather than recursion — the seeder rejects cycles, but this endpoint
+    /// is public and must not be one bad row away from a stack overflow. The loop is bounded by
+    /// the step count, so a cycle that somehow got in yields odd depths instead of hanging.
+    /// </summary>
+    private static void AssignDepths(List<RoadmapStepDto> steps)
+    {
+        var byKey = steps.GroupBy(s => s.Key).ToDictionary(g => g.Key, g => g.First());
+
+        for (var pass = 0; pass < steps.Count; pass++)
+        {
+            var changed = false;
+            foreach (var step in steps)
+            {
+                var depth = 0;
+                foreach (var key in step.Requires)
+                    if (byKey.TryGetValue(key, out var parent))
+                        depth = Math.Max(depth, parent.Depth + 1);
+
+                if (depth != step.Depth) { step.Depth = depth; changed = true; }
+            }
+            if (!changed) break;
+        }
+    }
+
+    /// <summary>
+    /// Marks each step learned / available / locked. Available means every prerequisite is
+    /// learned (a root always qualifies); locked means at least one isn't yet.
+    /// Anonymous callers have no progress, so nothing is locked for them — a signed-out visitor
+    /// should see the whole tree, not a wall of padlocks.
+    /// </summary>
+    private static void AssignStates(List<RoadmapStepDto> steps, bool hasUser)
+    {
+        var byKey = steps.GroupBy(s => s.Key).ToDictionary(g => g.Key, g => g.First());
+
+        if (!hasUser)
+        {
+            // Signed out there is no progress, so nothing is locked — a visitor should see the
+            // whole tree rather than a wall of padlocks.
+            foreach (var step in steps) step.State = "available";
+            return;
+        }
+
+        // "Satisfied" is not the same as "learned". A step with no catalog move behind it can
+        // never be ticked off, so it passes through: it counts as satisfied exactly when the
+        // things IT depends on are. Without the pass-through, one un-covered concept would either
+        // lock its whole branch forever (if it gated) or leak the branch open early (if it
+        // didn't) — Lofting would unlock before the Slide it actually follows.
+        var satisfied = steps.ToDictionary(s => s.Key, s => s.Dance is not null && s.Dance.IsLearned);
+
+        for (var pass = 0; pass < steps.Count; pass++)
+        {
+            var changed = false;
+            foreach (var step in steps)
+            {
+                if (step.Dance is not null) continue; // fixed by its own learned flag
+                var ok = step.Requires.All(key => !byKey.ContainsKey(key) || satisfied[key]);
+                if (ok != satisfied[step.Key]) { satisfied[step.Key] = ok; changed = true; }
+            }
+            if (!changed) break;
+        }
+
+        foreach (var step in steps)
+        {
+            if (step.Dance?.IsLearned == true) { step.State = "learned"; continue; }
+            var blocked = step.Requires.Any(key => byKey.ContainsKey(key) && !satisfied[key]);
+            step.State = blocked ? "locked" : "available";
+        }
     }
 }

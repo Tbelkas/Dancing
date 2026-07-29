@@ -31,6 +31,7 @@ public class AppDbContext : DbContext
     public DbSet<Roadmap> Roadmaps => Set<Roadmap>();
     public DbSet<RoadmapStage> RoadmapStages => Set<RoadmapStage>();
     public DbSet<RoadmapStep> RoadmapSteps => Set<RoadmapStep>();
+    public DbSet<RoadmapStepPrerequisite> RoadmapStepPrerequisites => Set<RoadmapStepPrerequisite>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -293,6 +294,24 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(s => s.DanceId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<RoadmapStepPrerequisite>()
+            .HasKey(p => new { p.StepId, p.PrerequisiteStepId });
+
+        modelBuilder.Entity<RoadmapStepPrerequisite>()
+            .HasOne(p => p.Step)
+            .WithMany(s => s.Prerequisites)
+            .HasForeignKey(p => p.StepId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // NoAction on this side: two cascade paths into the same table is more than Postgres
+        // will accept, and it isn't needed — the seeder drops every edge before rebuilding
+        // steps, and deleting a roadmap cascades its steps (and therefore its edges) anyway.
+        modelBuilder.Entity<RoadmapStepPrerequisite>()
+            .HasOne(p => p.PrerequisiteStep)
+            .WithMany()
+            .HasForeignKey(p => p.PrerequisiteStepId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         // Segments are rebuilt wholesale by the chip scripts, so their ids are not stable —
         // the seeder re-resolves this from the authored label each boot. SetNull keeps a

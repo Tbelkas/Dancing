@@ -114,14 +114,25 @@ Id PK · RoadmapId FK · Title · Description? · SortOrder · DateAdded. Nav: S
 |--------|------|-------|
 | Id | int PK | |
 | RoadmapStageId | int FK → RoadmapStage | cascade |
+| Key | string | stable, unique per roadmap ("jack"); what prerequisites are authored against |
 | Title | string | authoritative — a path teaches moves whether or not the catalog covers them |
 | Description | string? | |
 | SortOrder | int | |
 | DanceId | int? FK → Dance | **nullable**, `OnDelete=SetNull`; null renders as "no video yet" |
+| VideoSegmentId | int? FK → VideoSegment | **nullable**, `OnDelete=SetNull`; narrows the step to one section of that dance's video |
 | DateAdded | datetime | |
 
+Nav: Prerequisites (`RoadmapStepPrerequisite`).
+
+### RoadmapStepPrerequisite  (the skill tree's edges)
+Composite PK **(StepId, PrerequisiteStepId)**, both FK → RoadmapStep. `Step` side cascades;
+`PrerequisiteStep` side is **NoAction** — two cascade paths into one table is more than Postgres
+accepts, and it isn't needed (the seeder drops all edges before rebuilding, and deleting a
+roadmap cascades its steps). Both ends always belong to the same roadmap. *(No `DateAdded`.)*
+
 There is no roadmap-progress table: progress is read from the existing
-`UserLearnedDances` / `UserInProgressDances` joins via the step's linked dance.
+`UserLearnedDances` / `UserInProgressDances` joins via the step's linked dance. A step's
+depth and locked/available state are computed per-request in `RoadmapService`, not stored.
 
 ## Join entities (explicit, composite keys)
 

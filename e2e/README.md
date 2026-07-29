@@ -93,7 +93,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 36 attributes are a contract. Treat them like a public API.**
+**These 41 attributes are a contract. Treat them like a public API.**
 
 | Test id | Lives in | Anchors |
 |---|---|---|
@@ -105,7 +105,9 @@ anchors on a small, deliberate set of `data-testid` attributes.
 | `dance-card`, `dance-card-link` | `dances.component.html` | Result cards — **on both the grid card and the list row** |
 | `dance-title`, `favorite-button`, `progress-learned` | `dance-detail.component.html` | Detail page |
 | `roadmap-card`, `roadmap-card-link` | `roadmaps.component.html` | Roadmap index cards |
-| `roadmap-title`, `roadmap-progress`, `roadmap-step`, `roadmap-step-videos`, `roadmap-step-learned` | `roadmap-detail.component.html` | A path: its title, the progress bar, each step node, a step's video list, and the per-step Learned chip (signed-in only) |
+| `roadmap-title`, `roadmap-progress`, `roadmap-step`, `roadmap-step-videos`, `roadmap-step-learned` | `roadmap-detail.component.html` | A path: its title, the progress bar, each step row (list view), a step's video list, and the Learned chip (signed-in only) |
+| `roadmap-view-tree`, `roadmap-view-list`, `roadmap-detail-panel` | `roadmap-detail.component.html` | The view toggle and the tree's detail panel. **Tree is the default view** — a test that needs every step's videos on screen must click `roadmap-view-list` first |
+| `roadmap-tree`, `tree-node` | `roadmap-tree.component.html` | The skill-tree SVG and each node `<g>` in it |
 | `camera-toggle`, `stage-fullscreen` | `video-player` + `local-video-player` templates | The Camera tool button and the stage-fullscreen button — **on both players** |
 | `camera-pane`, `camera-close`, `camera-error`, `camera-notice`, `camera-replay`, `camera-exit-fullscreen` | `camera-pane.component.html` | The camera pane, its close button, its failure panel, its fallback notice, the delayed-replay `<video>`, and the fullscreen exit it carries |
 

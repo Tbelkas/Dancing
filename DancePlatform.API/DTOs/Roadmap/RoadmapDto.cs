@@ -34,6 +34,9 @@ public class RoadmapSummaryDto
 public class RoadmapDto : RoadmapSummaryDto
 {
     public List<RoadmapStageDto> Stages { get; set; } = new();
+
+    /// <summary>Steps whose prerequisites are all met but which aren't learned yet — what to do next.</summary>
+    public int AvailableCount { get; set; }
 }
 
 public class RoadmapStageDto
@@ -47,6 +50,29 @@ public class RoadmapStageDto
 public class RoadmapStepDto
 {
     public int Id { get; set; }
+
+    /// <summary>Stable key within the roadmap; what <see cref="Requires"/> refers to.</summary>
+    public string Key { get; set; } = string.Empty;
+
+    /// <summary>Keys of the steps that come before this one. Empty = a root of the tree.</summary>
+    public List<string> Requires { get; set; } = new();
+
+    /// <summary>Index of the owning stage, so the tree can colour and label its branches.</summary>
+    public int StageIndex { get; set; }
+
+    /// <summary>
+    /// Longest distance from a root, precomputed server-side so every client lays the tree out
+    /// identically (and so a malformed graph can't hang the browser).
+    /// </summary>
+    public int Depth { get; set; }
+
+    /// <summary>
+    /// `learned`, `available` (every prerequisite learned, or it's a root) or `locked`.
+    /// Advisory only — a locked step is still markable, since someone may already know it.
+    /// Always `available`/`learned` for anonymous callers, who have no progress.
+    /// </summary>
+    public string State { get; set; } = "available";
+
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
 
