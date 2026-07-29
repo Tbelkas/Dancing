@@ -1,0 +1,207 @@
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-subtitle {
+  max-width: 62ch;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  margin-top: 10px;
+}
+
+.section-heading--spaced {
+  margin-top: 36px;
+}
+
+.section-heading {
+  margin-bottom: 14px;
+}
+
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.roadmap-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color var(--transition), transform var(--transition);
+
+  &:hover {
+    border-color: var(--color-border-light);
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roadmap-card:hover { transform: none; }
+}
+
+.roadmap-card__media {
+  position: relative;
+  flex: 0 0 auto;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--color-surface-2);
+}
+
+/* Absolute, not height:100% — a percentage height against an auto-height flex item
+   collapses to auto, which lets YouTube's 4:3 hqdefault stretch the box and show its
+   baked-in letterbox bars instead of being cropped to 16:9. */
+.roadmap-card__thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.roadmap-card__thumb--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: var(--color-border-light);
+}
+
+/* Tier-3 utility label over the cover image. */
+.roadmap-card__style {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 4px 9px;
+  background: rgba(7, 7, 13, 0.82);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.roadmap-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px 18px;
+  flex: 1;
+}
+
+.roadmap-card__title {
+  font-size: 1.25rem;
+}
+
+/* Stretched link: the whole card is the target, so the anchor covers it. */
+.roadmap-card__title-link {
+  color: var(--color-text);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  &:hover { color: var(--color-primary); }
+}
+
+.roadmap-card { position: relative; }
+
+.roadmap-card__subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.roadmap-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  list-style: none;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+
+  strong {
+    color: var(--color-text);
+    font-weight: 700;
+    margin-right: 3px;
+  }
+}
+
+.roadmap-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.roadmap-progress__bar {
+  height: 4px;
+  background: var(--color-surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.roadmap-progress__fill {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roadmap-progress__fill { transition: none; }
+}
+
+.roadmap-progress__label {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.roadmap-progress__wip {
+  color: var(--color-music);
+}
+
+.roadmap-card--skeleton {
+  pointer-events: none;
+
+  .roadmap-card__body { gap: 12px; }
+}
+
+/* Empty / error state */
+.empty-state {
+  text-align: center;
+  padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.empty-state__icon {
+  font-size: 2rem;
+  color: var(--color-border-light);
+  margin-bottom: 4px;
+}
+
+.empty-state h2 { color: var(--color-text); }
+
+.empty-state p {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}

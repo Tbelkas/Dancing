@@ -1,0 +1,101 @@
+{
+  "slug": "waacking",
+  "styleName": "Waacking",
+  "title": "Waacking",
+  "subtitle": "Arms first, then the turns, then the attitude that holds it together.",
+  "description": "Waacking came out of the 1970s Los Angeles disco clubs: whipping arm rotations, sharp poses and musicality that plays the record rather than the count. The arms carry the style, but they only read if the stance underneath them is quiet — so the path builds the frame before it builds the speed.",
+  "sortOrder": 20,
+  "stages": [
+    {
+      "title": "Stance and sound",
+      "description": "Where the style comes from and how to stand in it. Do not add arms yet.",
+      "steps": [
+        {
+          "title": "What waacking is",
+          "description": "The whole style in one sitting — rotations, poses and the disco that they belong to. Watch before drilling anything.",
+          "danceSlug": "waacking"
+        },
+        {
+          "title": "Root the stance",
+          "description": "Weight slightly forward, knees soft, shoulders down and still. Every whip you throw is only as sharp as the body that stays put behind it. Drill it in a mirror with the arms hanging dead."
+        }
+      ]
+    },
+    {
+      "title": "The arm",
+      "description": "The signature move of the style, learned slowly. Speed comes from the path being clean, not from throwing harder.",
+      "steps": [
+        {
+          "title": "The waack",
+          "description": "A wide circular arm throw from the shoulder, not the elbow. Trace the circle at quarter speed until the path is the same every time.",
+          "danceSlug": "waacking-arm"
+        },
+        {
+          "title": "Rolls and circles",
+          "description": "Continuous arm rotations, one side and then both. The connective tissue between poses — without them the dance is a series of unrelated shapes."
+        }
+      ]
+    },
+    {
+      "title": "Flicks and speed",
+      "description": "Now the arm gets fast, and the body starts to answer it.",
+      "steps": [
+        {
+          "title": "Flicks with rotation",
+          "description": "Whip the arm and let the body pivot a quarter turn with it. The first place the arms and the floor have to cooperate.",
+          "danceSlug": "flicks-with-rotation"
+        },
+        {
+          "title": "Doubles and triples",
+          "description": "Two and three whips inside one beat. Practise against a metronome before a track — the temptation is to rush the second one."
+        }
+      ]
+    },
+    {
+      "title": "Footwork underneath",
+      "description": "Waacking is not danced standing still. These keep the lower half alive while the arms do the talking.",
+      "steps": [
+        {
+          "title": "The heel-toe",
+          "description": "Rocking between heel and ball of the foot. Small, quiet, and it gives the arms something to travel over.",
+          "danceSlug": "the-heel-toe"
+        },
+        {
+          "title": "Sous-sous",
+          "description": "A tight rise onto both balls of the feet, borrowed straight from ballet. Waacking leans on ballet vocabulary more than any other club style.",
+          "danceSlug": "sous-sous"
+        }
+      ]
+    },
+    {
+      "title": "Turns",
+      "description": "Rotation on a fixed axis, so the arms can keep their shape all the way through.",
+      "steps": [
+        {
+          "title": "En dehors",
+          "description": "The outward turn. Spot it properly before adding any arm — a whip out of a wobbly turn reads as an accident.",
+          "danceSlug": "en-dehors"
+        },
+        {
+          "title": "The inverted turn",
+          "description": "A turn on the ball of one foot with the other leg extended. Combines the stage-four footwork with the stage-two arm path.",
+          "danceSlug": "inverted-turn"
+        }
+      ]
+    },
+    {
+      "title": "Pose and perform",
+      "description": "The part that cannot be drilled — it is decided by the record.",
+      "steps": [
+        {
+          "title": "Posing on the accent",
+          "description": "Every phrase of whips lands on a held shape. Pick one accent in a track and hit exactly that one for a whole pass, then pick a different one."
+        },
+        {
+          "title": "Freestyle rounds",
+          "description": "Ninety seconds of disco, no plan. Waacking is a battle style — the goal is reacting to the record in real time, not recalling a combo."
+        }
+      ]
+    }
+  ]
+}

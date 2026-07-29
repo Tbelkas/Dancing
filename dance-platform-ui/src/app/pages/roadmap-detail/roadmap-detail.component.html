@@ -1,0 +1,180 @@
+<div class="container">
+  <!-- `as` aliasing only binds on @if, not @else if, so the loaded case leads. -->
+  @if (roadmap(); as r) {
+    <nav class="crumb"><a routerLink="/roadmaps">Roadmaps</a> <span aria-hidden="true">/</span> {{ r.styleName }}</nav>
+
+    <div class="page-header">
+      <h1 class="page-title" data-testid="roadmap-title">{{ r.title }}</h1>
+      <p class="roadmap-subtitle">{{ r.subtitle }}</p>
+      @if (r.description) { <p class="roadmap-intro">{{ r.description }}</p> }
+
+      <ul class="roadmap-stats">
+        <li><strong>{{ r.stageCount }}</strong> stages</li>
+        <li><strong>{{ r.stepCount }}</strong> moves</li>
+        <li><strong>{{ r.videoCount }}</strong> videos</li>
+        <li><a [routerLink]="['/dances']" [queryParams]="{ style: r.styleId }">All {{ r.styleName }} in the catalog</a></li>
+      </ul>
+
+      @if (auth.isAuthenticated() && moveCount() > 0) {
+        <div class="roadmap-progress" data-testid="roadmap-progress">
+          <div class="roadmap-progress__bar">
+            <span class="roadmap-progress__fill" [style.width.%]="progressPercent()"></span>
+          </div>
+          <div class="roadmap-progress__meta">
+            <span class="roadmap-progress__label">
+              {{ learnedCount() }} of {{ moveCount() }} learned
+              @if (inProgressCount() > 0) { <span class="roadmap-progress__wip">· {{ inProgressCount() }} in progress</span> }
+            </span>
+            @if (nextStep(); as next) {
+              <button type="button" class="btn btn--ghost btn--xs" (click)="scrollToNext()">
+                <i class="fa-solid fa-arrow-down" aria-hidden="true"></i> Next: {{ next.title }}
+              </button>
+            } @else {
+              <span class="roadmap-progress__done"><i class="fa-solid fa-check" aria-hidden="true"></i> Path complete</span>
+            }
+          </div>
+        </div>
+      } @else if (!auth.isAuthenticated()) {
+        <p class="roadmap-signin"><a routerLink="/login">Sign in</a> to tick moves off as you learn them.</p>
+      }
+    </div>
+
+    @for (stage of r.stages; track stage.id; let si = $index) {
+      <section class="stage" [attr.aria-labelledby]="'stage-' + stage.id">
+        <header class="stage__header">
+          <span class="stage__index" aria-hidden="true">Stage {{ si + 1 }}</span>
+          <h2 class="stage__title" [id]="'stage-' + stage.id">{{ stage.title }}</h2>
+          @if (stage.description) { <p class="stage__desc">{{ stage.description }}</p> }
+        </header>
+
+        <ol class="path">
+          @for (step of stage.steps; track step.id) {
+            <li class="step"
+                [id]="'step-' + step.id"
+                [class.is-learned]="step.dance?.isLearned"
+                [class.is-inprogress]="step.dance?.isInProgress"
+                [class.is-unlinked]="!step.dance"
+                data-testid="roadmap-step">
+              <div class="step__marker" aria-hidden="true">
+                @if (step.dance?.isLearned) {
+                  <i class="fa-solid fa-check"></i>
+                } @else {
+                  {{ stepNumber(step) }}
+                }
+              </div>
+
+              <div class="step__body">
+                <div class="step__head">
+                  <h3 class="step__title">
+                    @if (step.dance; as d) {
+                      <a [routerLink]="['/dances', d.styleSlug, d.slug]">{{ step.title }}</a>
+                    } @else {
+                      {{ step.title }}
+                    }
+                  </h3>
+
+                  @if (step.dance; as d) {
+                    <div class="step__tags">
+                      @if (d.difficulty && d.difficulty !== 'None') {
+                        <span class="tag tag--difficulty">{{ d.difficulty }}</span>
+                      }
+                      <span class="tag">{{ d.videos.length }} {{ d.videos.length === 1 ? 'video' : 'videos' }}</span>
+                      @if (d.ratingCount > 0) {
+                        <span class="tag tag--rating"><i class="fa-solid fa-star" aria-hidden="true"></i> {{ d.averageRating | number:'1.1-1' }}</span>
+                      }
+                    </div>
+                  } @else {
+                    <span class="tag tag--pending">No video yet</span>
+                  }
+                </div>
+
+                @if (step.description) { <p class="step__desc">{{ step.description }}</p> }
+
+                @if (step.dance; as d) {
+                  @if (d.videos.length > 0) {
+                    <button type="button" class="step__toggle" (click)="toggleCollapsed(step)"
+                            [attr.aria-expanded]="!isCollapsed(step)">
+                      <i class="fa-solid" [class.fa-chevron-down]="!isCollapsed(step)" [class.fa-chevron-right]="isCollapsed(step)" aria-hidden="true"></i>
+                      {{ isCollapsed(step) ? 'Show' : 'Hide' }} videos
+                    </button>
+
+                    @if (!isCollapsed(step)) {
+                      <ul class="videos" data-testid="roadmap-step-videos">
+                        @for (v of d.videos; track v.id) {
+                          <li class="video">
+                            <a class="video__link" [routerLink]="['/dances', d.styleSlug, d.slug]" [queryParams]="{ v: v.id }">
+                              <span class="video__thumb">
+                                @if (videoThumb(v.videoId, v.platform, v.id); as thumb) {
+                                  <img [src]="thumb" alt="" loading="lazy"
+                                       (error)="onThumbError(v.id)" (load)="onThumbLoad($event, v.id)" />
+                                } @else {
+                                  <span class="video__thumb-placeholder" aria-hidden="true"><i class="fa-solid fa-play"></i></span>
+                                }
+                                @if (videoLength(v); as len) { <span class="video__len">{{ len }}</span> }
+                              </span>
+                              <span class="video__meta">
+                                <span class="video__title">{{ v.title }}</span>
+                                <span class="video__sub">
+                                  {{ v.videoType === 'tutorial' ? 'Tutorial' : 'Steps' }}
+                                  @if (v.ratingCount > 0) { · {{ v.averageRating | number:'1.1-1' }}&#9733; }
+                                </span>
+                              </span>
+                            </a>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  } @else {
+                    <p class="step__note">This move is in the catalog but has no video attached yet.</p>
+                  }
+
+                  @if (auth.isAuthenticated()) {
+                    <div class="step__actions">
+                      <button type="button" class="chip-btn" [class.is-active]="d.isInProgress"
+                              (click)="toggleInProgress(step)" [attr.aria-pressed]="d.isInProgress">
+                        <i class="fa-solid fa-person-walking" aria-hidden="true"></i> In progress
+                      </button>
+                      <button type="button" class="chip-btn chip-btn--learned" [class.is-active]="d.isLearned"
+                              data-testid="roadmap-step-learned"
+                              (click)="toggleLearned(step)" [attr.aria-pressed]="d.isLearned">
+                        <i class="fa-solid fa-check" aria-hidden="true"></i> Learned
+                      </button>
+                    </div>
+                  }
+                } @else {
+                  <p class="step__note">
+                    Nothing in the catalog teaches this yet — drill it from the description, or
+                    <a [routerLink]="['/dances']" [queryParams]="{ q: step.title, style: r.styleId }">search for it</a>.
+                  </p>
+                }
+              </div>
+            </li>
+          }
+        </ol>
+      </section>
+    }
+  } @else if (loading()) {
+    <div class="page-header" aria-busy="true">
+      <div class="skeleton skeleton-line skeleton-line--page-title"></div>
+      <div class="skeleton skeleton-line skeleton-line--short"></div>
+    </div>
+    <div class="path" aria-hidden="true">
+      @for (i of [0,1,2,3]; track i) {
+        <div class="step step--skeleton">
+          <div class="step__marker skeleton"></div>
+          <div class="step__body">
+            <div class="skeleton skeleton-line skeleton-line--title"></div>
+            <div class="skeleton skeleton-line skeleton-line--short"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state card">
+      <div class="empty-state__icon"><i class="fa-solid fa-route"></i></div>
+      <h2>Roadmap not found</h2>
+      <p>That path doesn't exist, or it hasn't been written yet.</p>
+      <a routerLink="/roadmaps" class="btn btn--primary">All roadmaps</a>
+    </div>
+  }
+</div>

@@ -32,6 +32,7 @@
         <a routerLink="/my-dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" data-testid="nav-my-dances" (click)="closeMenu()">My Dances</a>
       }
       <a routerLink="/dances" routerLinkActive="is-active" ariaCurrentWhenActive="page" data-testid="nav-browse" (click)="closeMenu()">Browse</a>
+      <a routerLink="/roadmaps" routerLinkActive="is-active" ariaCurrentWhenActive="page" data-testid="nav-roadmaps" (click)="closeMenu()">Roadmaps</a>
       @if (auth.isAuthenticated()) {
         <!-- Mobile-menu only; on desktop these live in the avatar dropdown. -->
         <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__nav-mobile" (click)="closeMenu()">Added Videos</a>

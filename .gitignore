@@ -110,3 +110,7 @@ e2e/blob-report/
 e2e/.last-run.json
 # Scheduled-run logs from e2e-dance.bat
 e2e/runs/
+
+# Python bytecode from the scripts/ helpers
+__pycache__/
+*.pyc

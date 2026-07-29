@@ -28,6 +28,9 @@ public class AppDbContext : DbContext
     public DbSet<PracticeSessionItem> PracticeSessionItems => Set<PracticeSessionItem>();
     public DbSet<Instructor> Instructors => Set<Instructor>();
     public DbSet<DanceInstructor> DanceInstructors => Set<DanceInstructor>();
+    public DbSet<Roadmap> Roadmaps => Set<Roadmap>();
+    public DbSet<RoadmapStage> RoadmapStages => Set<RoadmapStage>();
+    public DbSet<RoadmapStep> RoadmapSteps => Set<RoadmapStep>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -259,5 +262,36 @@ public class AppDbContext : DbContext
             .WithMany(i => i.DanceInstructors)
             .HasForeignKey(di => di.InstructorId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Roadmaps are addressed by slug, like dances.
+        modelBuilder.Entity<Roadmap>()
+            .HasIndex(r => r.Slug)
+            .IsUnique();
+
+        modelBuilder.Entity<Roadmap>()
+            .HasOne(r => r.Style)
+            .WithMany()
+            .HasForeignKey(r => r.StyleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RoadmapStage>()
+            .HasOne(s => s.Roadmap)
+            .WithMany(r => r.Stages)
+            .HasForeignKey(s => s.RoadmapId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RoadmapStep>()
+            .HasOne(s => s.Stage)
+            .WithMany(st => st.Steps)
+            .HasForeignKey(s => s.RoadmapStageId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Deleting a dance must not tear a hole in the path — the step stays and falls back to
+        // its authored title, exactly like a step whose move isn't in the catalog yet.
+        modelBuilder.Entity<RoadmapStep>()
+            .HasOne(s => s.Dance)
+            .WithMany()
+            .HasForeignKey(s => s.DanceId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

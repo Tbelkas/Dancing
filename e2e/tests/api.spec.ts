@@ -88,6 +88,41 @@ test.describe('api health @smoke', () => {
     expect(res.status()).toBe(404);
   });
 
+  test('roadmaps expose the shape the path page renders', async ({ request }) => {
+    const list = await request.get('roadmaps');
+    expect(list.status()).toBe(200);
+    const summaries = await list.json();
+    expect(Array.isArray(summaries)).toBe(true);
+    expect(summaries.length, 'no roadmaps seeded').toBeGreaterThan(0);
+
+    for (const field of ['id', 'slug', 'title', 'styleName', 'styleSlug', 'stageCount', 'stepCount', 'moveCount', 'videoCount']) {
+      expect(summaries[0], `roadmap summary missing "${field}"`).toHaveProperty(field);
+    }
+
+    const detail = await request.get(`roadmaps/${summaries[0].slug}`);
+    expect(detail.status()).toBe(200);
+    const roadmap = await detail.json();
+
+    expect(Array.isArray(roadmap.stages)).toBe(true);
+    expect(roadmap.stages.length).toBeGreaterThan(0);
+    expect(roadmap.stages[0].steps.length).toBeGreaterThan(0);
+
+    // A step's dance is optional (moves the catalog doesn't cover yet render unlinked), but
+    // a path where nothing resolves has silently lost its links — that is the regression to catch.
+    const steps = roadmap.stages.flatMap((s: { steps: unknown[] }) => s.steps);
+    const linked = steps.filter((s: { dance?: unknown }) => s.dance);
+    expect(linked.length, 'no step resolved to a catalog move').toBeGreaterThan(0);
+
+    for (const field of ['id', 'name', 'slug', 'styleSlug', 'difficulty', 'videos']) {
+      expect(linked[0].dance, `roadmap step dance missing "${field}"`).toHaveProperty(field);
+    }
+  });
+
+  test('unknown roadmap returns 404, not 500', async ({ request }) => {
+    const res = await request.get('roadmaps/definitely-not-a-real-path-xyz');
+    expect(res.status()).toBe(404);
+  });
+
   test('protected endpoints reject anonymous callers', async ({ request }) => {
     for (const path of ['profile', 'practice', 'practice/review', 'videos/mine', 'videos/global']) {
       const res = await request.get(path);

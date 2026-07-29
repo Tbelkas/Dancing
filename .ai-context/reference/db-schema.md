@@ -91,6 +91,38 @@ the ratings across all of its videos (recomputed on rate, video delete, and vide
 | Notes | string? | |
 | DateAdded | datetime | |
 
+### Roadmap  (curated learning path through one style)
+| Column | Type | Notes |
+|--------|------|-------|
+| Id | int PK | |
+| Slug | string | **unique index**; usually the style slug (`house`, `waacking`) |
+| Title | string | |
+| Subtitle | string | one-line pitch |
+| Description | string? | intro paragraph |
+| StyleId | int FK → Style | cascade |
+| SortOrder | int | position on the index |
+| DateAdded | datetime | |
+
+Nav: Stages. **Content, not user data** — authored in `Data/Roadmaps/*.json` and upserted on
+every boot by `Data/RoadmapSeeder.cs` (not gated on an empty DB, unlike `SeedData`).
+
+### RoadmapStage  (one-to-many: Roadmap → Stages, cascade)
+Id PK · RoadmapId FK · Title · Description? · SortOrder · DateAdded. Nav: Steps.
+
+### RoadmapStep  (one-to-many: RoadmapStage → Steps, cascade)
+| Column | Type | Notes |
+|--------|------|-------|
+| Id | int PK | |
+| RoadmapStageId | int FK → RoadmapStage | cascade |
+| Title | string | authoritative — a path teaches moves whether or not the catalog covers them |
+| Description | string? | |
+| SortOrder | int | |
+| DanceId | int? FK → Dance | **nullable**, `OnDelete=SetNull`; null renders as "no video yet" |
+| DateAdded | datetime | |
+
+There is no roadmap-progress table: progress is read from the existing
+`UserLearnedDances` / `UserInProgressDances` joins via the step's linked dance.
+
 ## Join entities (explicit, composite keys)
 
 | Entity | Key | Meaning |

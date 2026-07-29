@@ -54,6 +54,14 @@ test.describe('shell + routing @smoke', () => {
     await expect(page).toHaveURL(/\/dances/);
   });
 
+  test('the roadmaps destination is reachable from the nav', async ({ page }) => {
+    await page.goto('/dances');
+    await revealNav(page);
+    await page.getByTestId('nav-roadmaps').click();
+    await expect(page).toHaveURL(/\/roadmaps/);
+    await expect(page.getByTestId('roadmap-card').first()).toBeVisible();
+  });
+
   test('unknown route shows the 404 page, not a blank shell', async ({ page }) => {
     await page.goto('/this-route-does-not-exist');
     await expect(page).toHaveTitle(/Page not found/);

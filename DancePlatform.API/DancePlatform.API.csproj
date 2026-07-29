@@ -17,4 +17,8 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Authored roadmap content, read at boot by RoadmapSeeder — must ship next to the DLL. -->
+    <Content Update="Data\Roadmaps\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

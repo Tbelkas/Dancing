@@ -93,17 +93,19 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 27 attributes are a contract. Treat them like a public API.**
+**These 36 attributes are a contract. Treat them like a public API.**
 
 | Test id | Lives in | Anchors |
 |---|---|---|
-| `nav-browse`, `nav-my-dances`, `nav-sign-in` | `app.component.html` | Header nav links |
+| `nav-browse`, `nav-my-dances`, `nav-sign-in`, `nav-roadmaps` | `app.component.html` | Header nav links |
 | `user-menu-button`, `sign-out` | `app.component.html` | Account menu |
 | `login-username`, `login-password`, `login-submit`, `login-error` | `login.component.html` | Sign-in form |
 | `search-input`, `results-count`, `sort-select`, `empty-state` | `dances.component.html` | Browse controls |
 | `style-filter-pills` | `dances.component.html` | The Style filter row — `.style-filters` alone also matches the Level row |
 | `dance-card`, `dance-card-link` | `dances.component.html` | Result cards — **on both the grid card and the list row** |
 | `dance-title`, `favorite-button`, `progress-learned` | `dance-detail.component.html` | Detail page |
+| `roadmap-card`, `roadmap-card-link` | `roadmaps.component.html` | Roadmap index cards |
+| `roadmap-title`, `roadmap-progress`, `roadmap-step`, `roadmap-step-videos`, `roadmap-step-learned` | `roadmap-detail.component.html` | A path: its title, the progress bar, each step node, a step's video list, and the per-step Learned chip (signed-in only) |
 | `camera-toggle`, `stage-fullscreen` | `video-player` + `local-video-player` templates | The Camera tool button and the stage-fullscreen button — **on both players** |
 | `camera-pane`, `camera-close`, `camera-error`, `camera-notice`, `camera-replay`, `camera-exit-fullscreen` | `camera-pane.component.html` | The camera pane, its close button, its failure panel, its fallback notice, the delayed-replay `<video>`, and the fullscreen exit it carries |
 

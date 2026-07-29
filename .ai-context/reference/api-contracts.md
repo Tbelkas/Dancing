@@ -64,6 +64,18 @@ some client-side filtering; see module-context/dances-catalog.md.)
 | DELETE | `/styles/{id}` | Admin |
 | POST | `/styles/{id}/mystyle` | Auth | toggle style in user's "my styles" |
 
+## Roadmaps — `/api/roadmaps`  (curated learning paths)
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| GET | `/roadmaps` | — | `RoadmapSummaryDto[]`, authored order |
+| GET | `/roadmaps/{idOrSlug}` | — | `RoadmapDto` (stages → steps → dance → videos); 404 if missing |
+
+Read-only: roadmaps are authored content seeded from `Data/Roadmaps/*.json`, not API-editable.
+Both endpoints are anonymous but **not** response-cached — `learnedCount` / `inProgressCount`
+and each step's `isLearned` / `isInProgress` are per current user. A step's `dance` is **null**
+when the catalog has no move for it yet. Progress is written through the existing
+`PUT /dances/{id}/status`, not through a roadmap endpoint.
+
 ## Musical Styles — `/api/musicalstyles`
 | Method | Path | Auth |
 |--------|------|------|

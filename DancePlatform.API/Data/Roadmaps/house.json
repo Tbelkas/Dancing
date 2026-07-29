@@ -1,0 +1,197 @@
+{
+  "slug": "house",
+  "styleName": "House",
+  "title": "House",
+  "subtitle": "Jack first, footwork second. Everything else is decoration.",
+  "description": "House dance is built from the chest down: a bounce that never stops, footwork that rides it, and travel that keeps you moving through the room. Work the stages in order — every later step assumes the pulse from stage one is still running underneath it.",
+  "sortOrder": 10,
+  "stages": [
+    {
+      "title": "Find the pulse",
+      "description": "Before any footwork, get the bounce into your body. If the jack stops, the dance stops.",
+      "steps": [
+        {
+          "title": "The jack",
+          "description": "The core of house — a chest-to-pelvis wave that rocks you on the beat. Learn it standing still and keep it running under every step that follows.",
+          "danceSlug": "house-jack"
+        },
+        {
+          "title": "Bounce on one leg",
+          "description": "The same pulse with your weight parked on one side. This is what lets you free a foot without losing the groove.",
+          "danceSlug": "bounce-one-leg"
+        },
+        {
+          "title": "Knee up",
+          "description": "Alternating knee lifts on the beat. The first step where the jack and the legs have to agree with each other.",
+          "danceSlug": "knee-up-standard"
+        },
+        {
+          "title": "Loose legs",
+          "description": "Let the knees swing in and out under a relaxed upper body. Not a step so much as a permission — house footwork only works when the legs stop bracing."
+        }
+      ]
+    },
+    {
+      "title": "First footwork",
+      "description": "Small, fast, on the spot. These six live in almost every house combo you will ever learn.",
+      "steps": [
+        {
+          "title": "Toe twist",
+          "description": "Pivot on the balls of both feet, torso quiet. The foundation of the whole twist family.",
+          "danceSlug": "twist-toe-twist"
+        },
+        {
+          "title": "Heel twist",
+          "description": "Same idea, weight back on the heels. Feels wrong at first — that is the point, it opens a different set of exits.",
+          "danceSlug": "twist-heel-twist"
+        },
+        {
+          "title": "Snap kick",
+          "description": "Heel lifts, then snaps back down. Your first accent — a step that makes a sound.",
+          "danceSlug": "snap-kick-standard"
+        },
+        {
+          "title": "Knock",
+          "description": "A knee-in knock counted out loud. Drill it slowly; the count is what stops it drifting off the beat.",
+          "danceSlug": "knock-and-count"
+        },
+        {
+          "title": "Ball change",
+          "description": "Weight from one foot to the other and back. The connector that gets you out of any step and into the next.",
+          "danceSlug": "ball-change"
+        },
+        {
+          "title": "Farmer",
+          "description": "High knee lifts with a swinging arm. The knee-up with attitude, and the first step that reads from across the room.",
+          "danceSlug": "knee-up-challenge-farmer"
+        }
+      ]
+    },
+    {
+      "title": "Travel",
+      "description": "Everything so far happens in one square foot. Now cover ground without dropping the bounce.",
+      "steps": [
+        {
+          "title": "The slide",
+          "description": "One foot glides while the other holds. The cleanest way to leave the spot you have been drilling on.",
+          "danceSlug": "the-slide"
+        },
+        {
+          "title": "Forward cross over",
+          "description": "Step forward, cross the other foot over. Adds direction to the footwork you already have.",
+          "danceSlug": "forward-cross-over"
+        },
+        {
+          "title": "Shuffle",
+          "description": "Fast alternating feet with the bounce on top. Where speed starts to matter more than shape.",
+          "danceSlug": "bounce-challenge-shuffle"
+        },
+        {
+          "title": "The chug",
+          "description": "Knees drive down, arms swing through. A down-groove that travels, and a good rest between faster passes.",
+          "danceSlug": "the-chug"
+        },
+        {
+          "title": "Skate",
+          "description": "Push off one foot and glide onto the other, like pushing across ice. Reads as effortless travel and hides how much leg it takes."
+        },
+        {
+          "title": "Train",
+          "description": "The long-distance step: quick alternating pushes that carry you across the whole floor in a straight line."
+        }
+      ]
+    },
+    {
+      "title": "Turns, spirals and drops",
+      "description": "Add the vertical axis. Everything here needs the pulse from stage one or it turns into gymnastics.",
+      "steps": [
+        {
+          "title": "Swirl",
+          "description": "A circular sweep of the upper body over quiet feet. Your first move that changes which way you are facing.",
+          "danceSlug": "swirl"
+        },
+        {
+          "title": "Spiral",
+          "description": "Corkscrew toward the floor through a stepped rotation and come back up without stopping. Slow it down until the descent is one continuous line.",
+          "danceSlug": "spiral"
+        },
+        {
+          "title": "Lofting",
+          "description": "The airy half of house — skips, glides and suspended steps that float above the beat instead of driving into it.",
+          "danceSlug": "loft"
+        },
+        {
+          "title": "Twist into a freeze",
+          "description": "Twist the torso and cut it dead on a held pose. Learning to stop is as much of a skill as learning to move.",
+          "danceSlug": "twist-freeze"
+        },
+        {
+          "title": "Helicopter",
+          "description": "One leg sweeps under the body while the hands take the weight. The floor move most house dancers reach for first — treat it as advanced and warm up properly.",
+          "danceSlug": "helicopter"
+        }
+      ]
+    },
+    {
+      "title": "Variations",
+      "description": "The same twists with something extra on top. This is the stage that builds real coordination — do not skip it to get to the combos.",
+      "steps": [
+        {
+          "title": "Toe twist into a knee up",
+          "description": "Stage-two toe twist with a knee lift laid over it.",
+          "danceSlug": "twist-toe-twist-knee-up"
+        },
+        {
+          "title": "Toe twist into a leg curl",
+          "description": "Same base, heel curls up behind you. Watch that the bounce survives the curl.",
+          "danceSlug": "twist-toe-twist-leg-curl"
+        },
+        {
+          "title": "Heel twist into bedrock",
+          "description": "Heel twist that rocks side to side. Adds a lateral shift to a step that was going nowhere.",
+          "danceSlug": "twist-heel-twist-bedrock"
+        },
+        {
+          "title": "Twist separate",
+          "description": "Torso twists one way, feet step apart the other. Two directions at once.",
+          "danceSlug": "twist-separate"
+        },
+        {
+          "title": "Knock into a hurdle",
+          "description": "The knock with a jump over an imaginary hurdle. Land on the balls of the feet and straight back into the bounce.",
+          "danceSlug": "knock-challenge-hurdle"
+        },
+        {
+          "title": "Heel twist into jacking in the box",
+          "description": "Fast heel twists under a jacking torso wave. The hardest coordination test on this path.",
+          "danceSlug": "heel-twist-challenge-jacking-in-the-box"
+        },
+        {
+          "title": "Toe twist into charleston",
+          "description": "Toe twist that borrows the charleston kick. House takes from everywhere — this is the clearest example.",
+          "danceSlug": "toe-twist-challenge-charleston"
+        }
+      ]
+    },
+    {
+      "title": "Put it together",
+      "description": "Steps are vocabulary. These are sentences.",
+      "steps": [
+        {
+          "title": "Foundational combo class",
+          "description": "A full hour building the stage-two and stage-three steps into one combo. Do it once through slowly, then at tempo.",
+          "danceSlug": "house-combo-class"
+        },
+        {
+          "title": "Jacking and skating combo",
+          "description": "Shorter choreo that alternates torso grooves with quick travelling footwork.",
+          "danceSlug": "fiji-house-choreo"
+        },
+        {
+          "title": "Freestyle a track end to end",
+          "description": "No counts, no mirror. Put on one house track and keep the jack running for the whole thing — swap steps whenever you feel the music change. This is the actual goal of the path."
+        }
+      ]
+    }
+  ]
+}

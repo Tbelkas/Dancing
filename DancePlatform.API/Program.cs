@@ -38,6 +38,7 @@ builder.Services.AddScoped<IChoreoService, ChoreoService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPracticeService, PracticeService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();
+builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IImportService, ImportService>();
 
 // Reads a YouTube video's own chapters when a clip is added. Short timeout and a browser-ish
@@ -113,6 +114,12 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
     await SeedData.SeedAsync(db);
+    // Roadmaps are authored content, so this runs every boot (not only on an empty DB) — it
+    // re-syncs edited paths and re-links steps to moves that have since been added.
+    await RoadmapSeeder.SeedAsync(
+        db,
+        app.Environment.ContentRootPath,
+        scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(RoadmapSeeder)));
 }
 
 app.Run();

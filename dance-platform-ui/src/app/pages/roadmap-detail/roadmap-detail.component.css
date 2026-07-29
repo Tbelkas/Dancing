@@ -1,0 +1,466 @@
+/* ---- Header ---- */
+
+.crumb {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 14px;
+
+  span { margin: 0 6px; }
+}
+
+.page-header {
+  margin-bottom: 40px;
+  max-width: 68ch;
+}
+
+.roadmap-subtitle {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+  margin-top: 10px;
+}
+
+.roadmap-intro {
+  color: var(--color-text-muted);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+.roadmap-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  list-style: none;
+  margin-top: 18px;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+
+  strong {
+    color: var(--color-text);
+    font-weight: 700;
+    margin-right: 3px;
+  }
+}
+
+.roadmap-progress {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roadmap-progress__bar {
+  height: 5px;
+  background: var(--color-surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.roadmap-progress__fill {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+.roadmap-progress__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.roadmap-progress__label,
+.roadmap-progress__done {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.roadmap-progress__wip { color: var(--color-music); }
+.roadmap-progress__done { color: var(--color-success); }
+
+.btn--xs {
+  padding: 7px 12px;
+  font-size: 0.75rem;
+}
+
+.roadmap-signin {
+  margin-top: 16px;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+/* ---- Stages ---- */
+
+.stage {
+  margin-bottom: 44px;
+}
+
+.stage__header {
+  margin-bottom: 20px;
+  max-width: 68ch;
+}
+
+.stage__index {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.stage__title {
+  font-size: 1.45rem;
+  margin-top: 4px;
+}
+
+.stage__desc {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin-top: 8px;
+}
+
+/* ---- The path itself ---- */
+
+.path {
+  list-style: none;
+  position: relative;
+  padding-left: 0;
+}
+
+/* The spine: one continuous line the markers sit on. */
+.path::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.step {
+  position: relative;
+  display: flex;
+  gap: 18px;
+  padding-bottom: 26px;
+}
+
+/* The spine spans the whole list, so trailing padding on the final step would leave a
+   stub of line hanging below the last marker. */
+.step:last-child { padding-bottom: 0; }
+
+.step__marker {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.step.is-inprogress .step__marker {
+  border-color: var(--color-music);
+  color: var(--color-music);
+}
+
+.step.is-learned .step__marker {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #07070D;
+}
+
+.step.is-unlinked .step__marker {
+  border-style: dashed;
+}
+
+.step__body {
+  flex: 1;
+  min-width: 0;
+  padding-top: 3px;
+}
+
+.step__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.step__title {
+  font-size: 1.1rem;
+
+  a { color: var(--color-text); }
+  a:hover { color: var(--color-primary); }
+}
+
+.step.is-learned .step__title a { color: var(--color-text-muted); }
+
+.step__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  padding: 3px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface-2);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.tag--difficulty { color: var(--color-text); }
+.tag--rating { color: var(--color-primary); }
+
+.tag--pending {
+  border-style: dashed;
+  background: transparent;
+}
+
+.step__desc {
+  color: var(--color-text-muted);
+  font-size: 0.94rem;
+  line-height: 1.6;
+  margin-top: 8px;
+  max-width: 66ch;
+}
+
+.step__note {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.step__toggle {
+  margin-top: 12px;
+  background: none;
+  border: none;
+  padding: 6px 0;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover { color: var(--color-text); }
+}
+
+/* ---- Videos under a step ---- */
+
+.videos {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.video__link {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color var(--transition);
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-text);
+  }
+}
+
+.video__thumb {
+  position: relative;
+  flex: 0 0 104px;
+  width: 104px;
+  aspect-ratio: 16 / 9;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--color-surface-2);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.video__thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-border-light);
+}
+
+.video__len {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  background: rgba(7, 7, 13, 0.85);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--color-text);
+}
+
+.video__meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.video__title {
+  font-size: 0.88rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.video__sub {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* ---- Status chips ---- */
+
+.step__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 7px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+
+  &:hover {
+    border-color: var(--color-border-light);
+    color: var(--color-text);
+  }
+
+  &.is-active {
+    background: var(--color-music);
+    border-color: var(--color-music);
+    color: #07070D;
+  }
+}
+
+.chip-btn--learned.is-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #07070D;
+}
+
+/* ---- States ---- */
+
+.step--skeleton {
+  pointer-events: none;
+
+  .step__marker { border: none; border-radius: 50%; }
+  .step__body { display: flex; flex-direction: column; gap: 10px; }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.empty-state__icon {
+  font-size: 2rem;
+  color: var(--color-border-light);
+  margin-bottom: 4px;
+}
+
+.empty-state h2 { color: var(--color-text); }
+
+.empty-state p {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roadmap-progress__fill { transition: none; }
+}
+
+@media (max-width: 640px) {
+  .step { gap: 12px; }
+  .path::before { left: 13px; }
+  .step__marker { flex-basis: 28px; width: 28px; height: 28px; font-size: 0.78rem; }
+  .videos { grid-template-columns: 1fr; }
+  .roadmap-progress__meta { align-items: flex-start; flex-direction: column; }
+}

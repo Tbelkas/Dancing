@@ -152,6 +152,25 @@ test.describe('authenticated', () => {
     await expect(page.locator('.continue-card', { hasText: probe.name })).toHaveCount(0);
     expect(await page.evaluate(() => localStorage.getItem('dp_recent_dances'))).not.toContain(probe.name);
   });
+
+  /**
+   * Read-only on purpose. The "Learned" chip writes the same production status a real user
+   * sets, so this asserts the signed-in affordances exist and never clicks them — the toggle
+   * itself is already covered on the dance detail page, where it can be restored cleanly.
+   */
+  test('a path shows progress and per-step status chips when signed in', async ({ authedPage: page }) => {
+    await page.goto('/roadmaps');
+    await page.getByTestId('roadmap-card-link').first().click();
+    await expect(page.getByTestId('roadmap-title')).toBeVisible();
+
+    await expect(page.getByTestId('roadmap-progress')).toBeVisible();
+    await expect(page.getByTestId('roadmap-progress')).toContainText(/\d+ of \d+ learned/);
+
+    // Every step backed by a catalog move offers the status chips; unlinked steps do not.
+    const learnedChips = page.getByTestId('roadmap-step-learned');
+    await expect(learnedChips.first()).toBeVisible();
+    expect(await learnedChips.count()).toBeGreaterThan(0);
+  });
 });
 
 /**
