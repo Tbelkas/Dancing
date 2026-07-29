@@ -34,6 +34,48 @@
 .toast--error { border-left-color: var(--color-error); }
 .toast--error > i { color: var(--color-error); }
 
+/* Undo toasts sit longer and carry an action, so they read as neutral rather than
+   as a success — nothing has actually been destroyed yet. */
+.toast--undo {
+  position: relative;
+  overflow: hidden;
+  border-left-color: var(--color-text-muted);
+}
+.toast--undo > i { color: var(--color-text-muted); }
+
+.toast__undo {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 2px;
+  margin-left: 4px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-primary);
+  transition: color var(--transition);
+}
+.toast__undo:hover { text-decoration: underline; }
+
+/* Drains left-to-right over the undo window. */
+.toast__countdown {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--color-primary);
+  transform-origin: left center;
+  animation: toast-countdown linear both;
+}
+
+@keyframes toast-countdown {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
 .toast__close {
   background: none;
   border: none;
@@ -53,6 +95,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .toast { animation: none; }
+  /* The bar still has to drain — it's the only cue for how long undo lasts — but it
+     steps rather than sweeps. */
+  .toast__countdown { animation-timing-function: steps(4, end); }
 }
 
 @media (max-width: 720px) {

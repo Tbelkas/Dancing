@@ -2,12 +2,19 @@
 @if (toast.toasts().length > 0) {
   <div class="toast-stack">
     @for (t of toast.toasts(); track t.id) {
-      <div class="toast" [class.toast--error]="t.kind === 'error'" role="status">
-        <i class="fa-solid" [class.fa-circle-check]="t.kind === 'success'" [class.fa-triangle-exclamation]="t.kind === 'error'" aria-hidden="true"></i>
+      <div class="toast" [class.toast--error]="t.kind === 'error'" [class.toast--undo]="t.kind === 'undo'" role="status">
+        <i class="fa-solid" [class.fa-circle-check]="t.kind === 'success'" [class.fa-triangle-exclamation]="t.kind === 'error'" [class.fa-trash-can]="t.kind === 'undo'" aria-hidden="true"></i>
         <span>{{ t.message }}</span>
-        <button class="toast__close" (click)="toast.dismiss(t.id)" aria-label="Dismiss notification">
+        @if (t.kind === 'undo') {
+          <button class="toast__undo" (click)="t.undo!()" data-testid="toast-undo">Undo</button>
+        }
+        <button class="toast__close" (click)="toast.dismiss(t.id)" [attr.aria-label]="t.kind === 'undo' ? 'Dismiss and delete now' : 'Dismiss notification'">
           <i class="fa-solid fa-xmark"></i>
         </button>
+        @if (t.kind === 'undo') {
+          <!-- Shows the undo window closing, so the button doesn't vanish without warning. -->
+          <span class="toast__countdown" [style.animation-duration.ms]="t.durationMs" aria-hidden="true"></span>
+        }
       </div>
     }
   </div>

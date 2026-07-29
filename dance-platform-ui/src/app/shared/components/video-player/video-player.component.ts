@@ -1,10 +1,11 @@
-import { Component, Input, Output, EventEmitter, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TrustUrlPipe } from '../../pipes/trust-url.pipe';
 import { VideoSegment, VideoChapter, VideoNote } from '../../../models/video.model';
 import { ViewerPrefsService } from '../../../core/services/viewer-prefs.service';
 import { PlayerBaseComponent } from '../player-base';
+import { sectionMarkers } from '../../../core/utils/section-markers.utils';
 import { CameraPaneComponent } from '../camera-pane/camera-pane.component';
 
 @Component({
@@ -446,6 +447,17 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     const d = this.videoDuration();
     return d > 0 ? Math.max(0, Math.min(100, (note.timeSeconds / d) * 100)) : 0;
   }
+
+  /**
+   * Sections marked on the beta seek bar. Recomputed off currentTime() — it ticks while
+   * playing, so the marker under the playhead lights up as the video moves without
+   * needing a second timer. Placement rules live in sectionMarkers().
+   */
+  readonly seekSections = computed(() =>
+    sectionMarkers(this.segments, this.videoDuration(), this.currentTime()));
+
+  /** Name of the section the playhead is in, shown above the beta seek bar. */
+  readonly currentSectionLabel = computed(() => this.seekSections().find(s => s.current)?.label ?? '');
 
   protected override onRepeatArmed(): void {
     this.startLoop();

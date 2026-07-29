@@ -76,7 +76,7 @@
             </span>
           </a>
           @if (canDelete(item)) {
-            <button class="video-row__delete" (click)="deleteVideo(item, $event)" [disabled]="deletingId() === item.id" title="Delete video" aria-label="Delete video">
+            <button class="video-row__delete" (click)="deleteVideo(item, $event)" title="Delete video" aria-label="Delete video">
               <i class="fa-solid fa-trash"></i>
             </button>
           }

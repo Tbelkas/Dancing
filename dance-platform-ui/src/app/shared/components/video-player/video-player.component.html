@@ -64,8 +64,25 @@
           }
           <span class="rc__time">{{ formatTime(currentTime()) }}</span>
           <div class="rc__seekwrap">
+            <!-- Section bands sit under the track and never take pointer events — dragging
+                 the playhead has to stay the only thing this strip responds to. The chips
+                 below the video remain the way to jump to a section. -->
+            @if (seekSections().length > 0) {
+              <span class="rc__sections" aria-hidden="true">
+                @for (s of seekSections(); track s.id) {
+                  <!-- A tick at 0% would just sit under the track's rounded cap. -->
+                  @if (s.startPct > 0) {
+                    <span class="rc__section" [class.rc__section--current]="s.current"
+                      [style.left.%]="s.startPct"></span>
+                  }
+                }
+              </span>
+              @if (currentSectionLabel(); as label) {
+                <span class="rc__section-label">{{ label }}</span>
+              }
+            }
             <input type="range" class="rc__seek" [min]="0" [max]="videoDuration()" step="0.1" [value]="currentTime()"
-              aria-label="Seek" [attr.aria-valuetext]="formatTime(currentTime())"
+              aria-label="Seek" [attr.aria-valuetext]="formatTime(currentTime()) + (currentSectionLabel() ? ', ' + currentSectionLabel() : '')"
               [style.--fill.%]="videoDuration() > 0 ? (currentTime() / videoDuration()) * 100 : 0"
               (input)="seekToTime(+$any($event.target).value)" />
             @if (videoDuration() > 0) {

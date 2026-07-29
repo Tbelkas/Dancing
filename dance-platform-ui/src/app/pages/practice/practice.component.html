@@ -386,10 +386,4 @@
     </div>
   }
 
-  @if (pendingDelete(); as deleted) {
-    <div class="undo-toast" role="status">
-      <span>Session deleted.</span>
-      <button class="undo-toast__btn" (click)="undoDelete()">Undo</button>
-    </div>
-  }
 </div>

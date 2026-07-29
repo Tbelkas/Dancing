@@ -24,7 +24,6 @@ export class LibraryComponent implements OnInit {
   scope = signal<LibraryScope>('mine');
   items = signal<VideoLibraryItem[]>([]);
   loading = signal(true);
-  deletingId = signal<number | null>(null);
   private readonly thumbs = new ThumbFallback();
 
   constructor(
@@ -80,18 +79,19 @@ export class LibraryComponent implements OnInit {
   async deleteVideo(item: VideoLibraryItem, event: Event): Promise<void> {
     event.stopPropagation();
     event.preventDefault();
-    if (!await this.confirmSvc.ask(`Delete video "${item.title}"? This can't be undone.`, { title: 'Delete video' })) return;
-    this.deletingId.set(item.id);
-    this.videoService.delete(item.id).subscribe({
-      next: () => {
-        this.items.update(list => list.filter(v => v.id !== item.id));
-        this.deletingId.set(null);
-        this.toast.success('Video deleted.');
-      },
-      error: () => {
-        this.deletingId.set(null);
-        this.toast.error('Failed to delete video.');
-      }
+    if (!await this.confirmSvc.ask(`Delete video "${item.title}"?`, { title: 'Delete video' })) return;
+    const index = this.items().findIndex(v => v.id === item.id);
+    this.items.update(list => list.filter(v => v.id !== item.id));
+    const restore = () => this.items.update(list => {
+      const next = [...list];
+      next.splice(index, 0, item);
+      return next;
+    });
+    this.toast.undoable(`Video "${item.title}" deleted.`, {
+      undo: restore,
+      commit: () => this.videoService.delete(item.id).subscribe({
+        error: () => { restore(); this.toast.error('Failed to delete video.'); }
+      })
     });
   }
 }

@@ -914,6 +914,55 @@
   width: 100%;
 }
 
+/* Section boundaries on the seek track: they mirror the "Sections" chips below the video
+   so you can see the shape of a tutorial — and which part you're in — without leaving
+   fullscreen. Purely indicative; pointer-events stay with the slider underneath.
+
+   Dividers rather than filled bands: the track already carries the progress gradient, and
+   a translucent band over it washes the fill out. A dark tick reads against both halves. */
+.rc__sections {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.rc__section {
+  position: absolute;
+  top: -1px;
+  width: 2px;
+  height: calc(100% + 2px);
+  margin-left: -1px;
+  border-radius: 1px;
+  background: rgba(7, 7, 13, 0.85);
+}
+
+/* The tick opening the section you're in gets the accent, so the bar says where you are
+   even when the label is clipped. */
+.rc__section--current { background: var(--color-primary); }
+
+/* Rides above the bar rather than inside it — the control row is already tight, and on
+   mobile a text label in the flow would push the volume and fullscreen buttons off. */
+.rc__section-label {
+  position: absolute;
+  bottom: calc(100% - 2px);
+  left: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 3px rgba(7, 7, 13, 0.9);
+}
+
 .rc__note {
   position: absolute;
   top: 50%;

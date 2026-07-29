@@ -31,7 +31,6 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
   videoUrl = signal<string | null>(null);
   /** Set when the re-picked file's name differs from the one saved for the choreo. */
   fileMismatch = signal<string | null>(null);
-  deletingId = signal<number | null>(null);
   /** Choreo whose title is currently an inline rename input. */
   renamingId = signal<number | null>(null);
   renameValue = '';
@@ -179,9 +178,13 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
     const choreo = this.selected();
     if (!choreo) return;
     if (!await this.confirmSvc.ask(`Delete loop "${loop.label}"?`, { title: 'Delete loop' })) return;
-    this.choreoService.deleteLoop(choreo.id, loop.id).subscribe({
-      next: updated => this.applyUpdate(updated),
-      error: () => this.toast.error('Failed to delete loop.')
+    this.applyUpdate({ ...choreo, loops: choreo.loops.filter(l => l.id !== loop.id) });
+    this.toast.undoable(`Loop "${loop.label}" deleted.`, {
+      undo: () => this.applyUpdate(choreo),
+      commit: () => this.choreoService.deleteLoop(choreo.id, loop.id).subscribe({
+        next: updated => this.applyUpdate(updated),
+        error: () => { this.applyUpdate(choreo); this.toast.error('Failed to delete loop.'); }
+      })
     });
   }
 
@@ -192,19 +195,23 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
       `The video file on your computer is not touched.`,
       { title: 'Remove choreo' }
     )) return;
-    this.deletingId.set(choreo.id);
-    this.choreoService.delete(choreo.id).subscribe({
-      next: () => {
-        this.choreoService.forgetFile(choreo.id);
-        this.choreos.update(list => list.filter(c => c.id !== choreo.id));
-        if (this.selected()?.id === choreo.id) this.closePlayer();
-        this.deletingId.set(null);
-        this.toast.success('Choreo removed.');
-      },
-      error: () => {
-        this.deletingId.set(null);
-        this.toast.error('Failed to remove choreo.');
-      }
+    const index = this.choreos().findIndex(c => c.id === choreo.id);
+    this.choreos.update(list => list.filter(c => c.id !== choreo.id));
+    if (this.selected()?.id === choreo.id) this.closePlayer();
+
+    // forgetFile drops the handle to the file on disk, so it waits for the commit too —
+    // undoing has to give back a choreo the user can still play without re-picking it.
+    const restore = () => this.choreos.update(list => {
+      const next = [...list];
+      next.splice(index, 0, choreo);
+      return next;
+    });
+    this.toast.undoable(`"${choreo.name}" removed.`, {
+      undo: restore,
+      commit: () => this.choreoService.delete(choreo.id).subscribe({
+        next: () => this.choreoService.forgetFile(choreo.id),
+        error: () => { restore(); this.toast.error('Failed to remove choreo.'); }
+      })
     });
   }
 

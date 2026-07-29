@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { PracticeService, CreatePracticePayload } from '../../core/services/practice.service';
 import { DanceService } from '../../core/services/dance.service';
+import { ToastService } from '../../core/services/toast.service';
 import { PracticeSession, PracticeSessionItem } from '../../models/practice-session.model';
 import { ReviewDance } from '../../models/review-dance.model';
 import { toLocalDateString, toPracticeDateString, formatClock } from '../../core/utils/video-url.utils';
@@ -64,7 +65,7 @@ interface BreakdownRow {
   templateUrl: './practice.component.html',
   styleUrls: ['./practice.component.css']
 })
-export class PracticeComponent implements OnInit, OnDestroy {
+export class PracticeComponent implements OnInit {
   sessions = signal<PracticeSession[]>([]);
   dances = signal<{ id: number; name: string }[]>([]);
   loading = signal(true);
@@ -97,10 +98,6 @@ export class PracticeComponent implements OnInit, OnDestroy {
   editNotes = '';
   savingEdit = signal(false);
   editError = signal('');
-
-  // Optimistic delete with an undo window; the API delete only fires once the toast expires.
-  pendingDelete = signal<PracticeSession | null>(null);
-  private deleteTimer: ReturnType<typeof setTimeout> | null = null;
 
   /** Only surface sessions that lasted more than a minute — sub-minute blips (stray watches) are noise. */
   readonly visibleSessions = computed(() => this.sessions().filter(s => s.totalSeconds > 60));
@@ -350,7 +347,8 @@ export class PracticeComponent implements OnInit, OnDestroy {
 
   constructor(
     private practiceService: PracticeService,
-    private danceService: DanceService
+    private danceService: DanceService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -365,11 +363,6 @@ export class PracticeComponent implements OnInit, OnDestroy {
       next: q => this.reviewQueue.set(q),
       error: () => {}
     });
-  }
-
-  ngOnDestroy(): void {
-    // Leaving the page forfeits the undo window — commit the pending delete now.
-    this.commitPendingDelete();
   }
 
   // --- Stats helpers ---
@@ -510,37 +503,15 @@ export class PracticeComponent implements OnInit, OnDestroy {
   // --- Delete with undo ---
 
   deleteSession(session: PracticeSession): void {
-    // Only one pending delete at a time; a second delete commits the first immediately.
-    this.commitPendingDelete();
     this.sessions.update(list => list.filter(s => s.id !== session.id));
-    this.pendingDelete.set(session);
-    this.deleteTimer = setTimeout(() => this.commitPendingDelete(), 6000);
-  }
-
-  undoDelete(): void {
-    const session = this.pendingDelete();
-    if (!session) return;
-    this.clearDeleteTimer();
-    this.pendingDelete.set(null);
-    this.sessions.update(list => this.sorted([session, ...list]));
-  }
-
-  private commitPendingDelete(): void {
-    const session = this.pendingDelete();
-    if (!session) return;
-    this.clearDeleteTimer();
-    this.pendingDelete.set(null);
-    this.practiceService.delete(session.id).subscribe({
-      // If the server refuses, quietly put the session back rather than losing data.
-      error: () => this.sessions.update(list => this.sorted([session, ...list]))
+    const restore = () => this.sessions.update(list => this.sorted([session, ...list]));
+    this.toast.undoable('Session deleted.', {
+      undo: restore,
+      commit: () => this.practiceService.delete(session.id).subscribe({
+        // If the server refuses, quietly put the session back rather than losing data.
+        error: () => { restore(); this.toast.error('Failed to delete session.'); }
+      })
     });
-  }
-
-  private clearDeleteTimer(): void {
-    if (this.deleteTimer) {
-      clearTimeout(this.deleteTimer);
-      this.deleteTimer = null;
-    }
   }
 
   private sorted(list: PracticeSession[]): PracticeSession[] {

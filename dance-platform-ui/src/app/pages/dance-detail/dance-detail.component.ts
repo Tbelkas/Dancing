@@ -302,12 +302,14 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   /** A signed-in user removed one of their own saved loops. */
   async onDeletePersonalLoop(video: Video, loop: VideoSegment): Promise<void> {
     if (!await this.confirmSvc.ask(`Delete your loop "${loop.label}"?`, { title: 'Delete loop' })) return;
-    this.videoService.deleteMyLoop(video.id, loop.id).subscribe({
-      next: loops => {
-        this.setPersonalLoops(video.id, loops);
-        this.toast.success('Loop deleted.');
-      },
-      error: () => this.toast.error('Failed to delete your loop. Please try again.')
+    const before = this.personalLoopsFor(video.id);
+    this.setPersonalLoops(video.id, before.filter(l => l.id !== loop.id));
+    this.toast.undoable(`Loop "${loop.label}" deleted.`, {
+      undo: () => this.setPersonalLoops(video.id, before),
+      commit: () => this.videoService.deleteMyLoop(video.id, loop.id).subscribe({
+        next: loops => this.setPersonalLoops(video.id, loops),
+        error: () => { this.setPersonalLoops(video.id, before); this.toast.error('Failed to delete your loop. Please try again.'); }
+      })
     });
   }
 
@@ -347,12 +349,14 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   /** A signed-in user removed one of their own notes. */
   async onDeleteNote(video: Video, note: VideoNote): Promise<void> {
     if (!await this.confirmSvc.ask('Delete this note?', { title: 'Delete note' })) return;
-    this.videoService.deleteMyNote(video.id, note.id).subscribe({
-      next: notes => {
-        this.setPersonalNotes(video.id, notes);
-        this.toast.success('Note deleted.');
-      },
-      error: () => this.toast.error('Failed to delete your note. Please try again.')
+    const before = this.personalNotesFor(video.id);
+    this.setPersonalNotes(video.id, before.filter(n => n.id !== note.id));
+    this.toast.undoable('Note deleted.', {
+      undo: () => this.setPersonalNotes(video.id, before),
+      commit: () => this.videoService.deleteMyNote(video.id, note.id).subscribe({
+        next: notes => this.setPersonalNotes(video.id, notes),
+        error: () => { this.setPersonalNotes(video.id, before); this.toast.error('Failed to delete your note. Please try again.'); }
+      })
     });
   }
 
@@ -523,24 +527,29 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   /** Admin saved a named loop region in the player — persist it as a section. */
   onSaveLoop(video: Video, payload: SegmentPayload): void {
     this.videoService.addSegment(video.id, payload).subscribe({
-      next: updated => {
-        this.videos.update(list => list.map(v => v.id === updated.id ? updated : v));
-        if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
-      },
+      next: updated => this.applyVideo(updated),
       error: () => this.actionError.set('Failed to save loop. Please try again.')
     });
+  }
+
+  /** Swaps a video into the list, keeping the open player in step if it's the same one. */
+  private applyVideo(video: Video): void {
+    this.videos.update(list => list.map(v => v.id === video.id ? video : v));
+    if (this.selectedVideo()?.id === video.id) this.selectedVideo.set(video);
   }
 
   /** Admin removed a saved loop/section from the player. */
   async onDeleteLoop(video: Video, segment: VideoSegment): Promise<void> {
     if (!await this.confirmSvc.ask(`Delete section "${segment.label}"? Everyone loses this section.`, { title: 'Delete section' })) return;
-    this.videoService.deleteSegment(video.id, segment.id).subscribe({
-      next: updated => {
-        this.videos.update(list => list.map(v => v.id === updated.id ? updated : v));
-        if (this.selectedVideo()?.id === updated.id) this.selectedVideo.set(updated);
-        this.toast.success('Section deleted.');
-      },
-      error: () => this.toast.error('Failed to delete section. Please try again.')
+    const before = this.videos().find(v => v.id === video.id);
+    if (!before) return;
+    this.applyVideo({ ...before, segments: before.segments.filter(s => s.id !== segment.id) });
+    this.toast.undoable(`Section "${segment.label}" deleted.`, {
+      undo: () => this.applyVideo(before),
+      commit: () => this.videoService.deleteSegment(video.id, segment.id).subscribe({
+        next: updated => this.applyVideo(updated),
+        error: () => { this.applyVideo(before); this.toast.error('Failed to delete section. Please try again.'); }
+      })
     });
   }
 
@@ -561,14 +570,28 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
 
   async deleteVideo(video: Video): Promise<void> {
     if (!await this.confirmSvc.ask(`Delete video "${video.title}"?`, { title: 'Delete video' })) return;
-    this.videoService.delete(video.id).subscribe({
-      next: () => {
-        this.videos.update(list => list.filter(v => v.id !== video.id));
-        this.dance.update(d => d ? { ...d, videoCount: Math.max(0, d.videoCount - 1) } : d);
-        if (this.selectedVideo()?.id === video.id) this.selectedVideo.set(null);
-        this.toast.success('Video deleted.');
-      },
-      error: () => this.toast.error('Failed to delete video.')
+    // Deleting cascades to the video's segments, ratings and notes, so nothing is sent until
+    // the undo window closes — a delete-then-recreate could not bring those back.
+    const index = this.videos().findIndex(v => v.id === video.id);
+    const wasOpen = this.selectedVideo()?.id === video.id;
+    this.videos.update(list => list.filter(v => v.id !== video.id));
+    this.dance.update(d => d ? { ...d, videoCount: Math.max(0, d.videoCount - 1) } : d);
+    if (wasOpen) this.selectedVideo.set(null);
+
+    const restore = () => {
+      this.videos.update(list => {
+        const next = [...list];
+        next.splice(index, 0, video);
+        return next;
+      });
+      this.dance.update(d => d ? { ...d, videoCount: d.videoCount + 1 } : d);
+      if (wasOpen) this.selectedVideo.set(video);
+    };
+    this.toast.undoable(`Video "${video.title}" deleted.`, {
+      undo: restore,
+      commit: () => this.videoService.delete(video.id).subscribe({
+        error: () => { restore(); this.toast.error('Failed to delete video.'); }
+      })
     });
   }
 

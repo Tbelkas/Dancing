@@ -91,6 +91,67 @@ test.describe('authenticated', () => {
     const stars = page.getByTestId('dance-card').locator('button[aria-pressed]').first();
     await expect(stars).toHaveAttribute('aria-pressed', 'true');
   });
+
+  /**
+   * The undo toast, exercised on the one deletion that touches nothing but localStorage.
+   * The other undoable deletes (video, choreo, practice session, note) share the same
+   * ToastService machinery but would write to the production database, so this stands in
+   * for all of them — see the file header.
+   *
+   * The card is seeded rather than earned by browsing: "Continue learning" is built from
+   * a local trail, so a synthetic entry gives the test a card that is guaranteed present
+   * and belongs to no real dance.
+   */
+  test('dismissing a Continue learning card offers an undo that puts it back', async ({ authedPage: page }) => {
+    const probe = {
+      id: 999_001,
+      name: 'E2E Undo Probe',
+      slug: 'e2e-undo-probe',
+      styleSlug: 'hip-hop',
+      styleName: 'Hip-hop',
+      viewedAt: Date.now(),
+      learned: false,
+    };
+    await page.addInitScript(entry => {
+      localStorage.setItem('dp_recent_dances', JSON.stringify([entry]));
+    }, probe);
+
+    await page.goto('/my-dances');
+    const card = page.locator('.continue-card', { hasText: probe.name });
+    await expect(card).toBeVisible();
+
+    await page.getByLabel(`Remove ${probe.name} from Continue learning`).click();
+    await expect(card, 'the card should go straight away, before any undo window closes').toHaveCount(0);
+
+    const undo = page.getByTestId('toast-undo');
+    await expect(undo).toBeVisible();
+    await undo.click();
+
+    await expect(card, 'undo should restore the dismissed card').toBeVisible();
+    await expect(undo, 'the toast should close once undo is taken').toHaveCount(0);
+  });
+
+  test('a dismissal left alone sticks once the undo window closes', async ({ authedPage: page }) => {
+    const probe = {
+      id: 999_002,
+      name: 'E2E Expiry Probe',
+      slug: 'e2e-expiry-probe',
+      styleSlug: 'hip-hop',
+      viewedAt: Date.now(),
+      learned: false,
+    };
+    await page.addInitScript(entry => {
+      localStorage.setItem('dp_recent_dances', JSON.stringify([entry]));
+    }, probe);
+
+    await page.goto('/my-dances');
+    await page.getByLabel(`Remove ${probe.name} from Continue learning`).click();
+
+    // Toast self-closes after its window; the removal must survive it.
+    await expect(page.getByTestId('toast-undo')).toHaveCount(0, { timeout: 15_000 });
+    await expect(page.locator('.continue-card', { hasText: probe.name })).toHaveCount(0);
+    expect(await page.evaluate(() => localStorage.getItem('dp_recent_dances'))).not.toContain(probe.name);
+  });
 });
 
 /**

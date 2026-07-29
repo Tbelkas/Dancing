@@ -11,6 +11,7 @@ import { StyleService } from '../../core/services/style.service';
 import { DanceService, CreateDancePayload } from '../../core/services/dance.service';
 import { VideoService, CreateVideoPayload } from '../../core/services/video.service';
 import { RecentDancesService } from '../../core/services/recent-dances.service';
+import { ToastService } from '../../core/services/toast.service';
 import { MyStyleWithDances } from '../../models/user.model';
 import { Style } from '../../models/style.model';
 import { Video } from '../../models/video.model';
@@ -145,6 +146,7 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
     private danceService: DanceService,
     private videoService: VideoService,
     private recentDances: RecentDancesService,
+    private toast: ToastService,
     private route: ActivatedRoute
   ) {
     // The card list grows/shrinks as history loads or a card is dismissed — re-measure
@@ -231,7 +233,15 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   dismissContinue(danceId: number, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
+    const name = this.continueLearning().find(d => d.id === danceId)?.name;
+    // Purely local, so the removal has already happened and there is nothing to defer —
+    // undo just puts the trail back the way it was.
+    const before = this.recentDances.snapshot();
     this.recentDances.remove(danceId);
+    this.toast.undoable(name ? `Removed "${name}" from Continue learning.` : 'Removed from Continue learning.', {
+      commit: () => {},
+      undo: () => this.recentDances.restore(before)
+    });
   }
 
   ngOnInit(): void {

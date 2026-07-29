@@ -73,6 +73,20 @@ export class RecentDancesService {
     this.commit(this._recent().filter(d => d.id !== id));
   }
 
+  /**
+   * The trail as it stands, for a caller that wants to offer an undo of a dismissal.
+   * Restoring the whole list rather than re-inserting one entry keeps the recency order
+   * exactly as it was — the row is sorted by viewedAt, so a re-add would jump the card
+   * to wherever its timestamp lands instead of back where the user removed it from.
+   */
+  snapshot(): RecentDance[] {
+    return this._recent();
+  }
+
+  restore(list: RecentDance[]): void {
+    this.commit(list);
+  }
+
   private commit(list: RecentDance[]): void {
     this._recent.set(list);
     try {
