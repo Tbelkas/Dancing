@@ -93,7 +93,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 41 attributes are a contract. Treat them like a public API.**
+**These 47 attributes are a contract. Treat them like a public API.**
 
 | Test id | Lives in | Anchors |
 |---|---|---|
@@ -106,8 +106,10 @@ anchors on a small, deliberate set of `data-testid` attributes.
 | `dance-title`, `favorite-button`, `progress-learned` | `dance-detail.component.html` | Detail page |
 | `roadmap-card`, `roadmap-card-link` | `roadmaps.component.html` | Roadmap index cards |
 | `roadmap-title`, `roadmap-progress`, `roadmap-step`, `roadmap-step-videos`, `roadmap-step-learned` | `roadmap-detail.component.html` | A path: its title, the progress bar, each step row (list view), a step's video list, and the Learned chip (signed-in only) |
-| `roadmap-view-tree`, `roadmap-view-list`, `roadmap-detail-panel` | `roadmap-detail.component.html` | The view toggle and the tree's detail panel. **Tree is the default view** — a test that needs every step's videos on screen must click `roadmap-view-list` first |
+| `roadmap-view-tree`, `roadmap-view-list`, `roadmap-detail-panel` | `roadmap-detail.component.html` | The view toggle and the tree's detail panel. **All three are signed-in only** — signed out the page renders the bare tree, so a test that needs the list view or a step's videos must use the `authed` project |
+| `roadmap-tree-hint` | `roadmap-detail.component.html` | The signed-out line under the tree. Its presence is how the anon suite proves the teaser state is still the teaser state |
 | `roadmap-tree`, `tree-node` | `roadmap-tree.component.html` | The skill-tree SVG and each node `<g>` in it |
+| `signin-dialog`, `signin-username`, `signin-password`, `signin-submit`, `signin-error` | `sign-in-dialog.component.html` | The in-place sign-in modal a signed-out visitor gets when they touch a roadmap node — distinct ids from `login-*`, which anchor the `/login` page |
 | `camera-toggle`, `stage-fullscreen` | `video-player` + `local-video-player` templates | The Camera tool button and the stage-fullscreen button — **on both players** |
 | `camera-pane`, `camera-close`, `camera-error`, `camera-notice`, `camera-replay`, `camera-exit-fullscreen` | `camera-pane.component.html` | The camera pane, its close button, its failure panel, its fallback notice, the delayed-replay `<video>`, and the fullscreen exit it carries |
 

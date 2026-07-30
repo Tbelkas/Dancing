@@ -85,8 +85,12 @@ export class RoadmapTreeComponent {
     return chain.has(fromKey) && chain.has(toKey);
   }
 
+  /**
+   * Controlled selection: emit and let the page decide. It doesn't always select — signed out
+   * a node opens the sign-in dialog instead — and a tree that ringed the node anyway would be
+   * showing a selection nothing is displaying.
+   */
   protected select(node: TreeNode): void {
-    this.selected.set(node.key);
     this.stepSelected.emit(node.step);
   }
 

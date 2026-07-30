@@ -35,33 +35,48 @@
           </div>
         </div>
       } @else if (!auth.isAuthenticated()) {
-        <p class="roadmap-signin"><a routerLink="/login">Sign in</a> to tick moves off and unlock the tree as you go.</p>
+        <p class="roadmap-signin">
+          <button type="button" class="link" (click)="signInOpen.set(true)">Sign in</button>
+          to tick moves off and unlock the tree as you go.
+        </p>
       }
     </div>
 
-    <div class="view-bar">
-      <div class="view-toggle" role="tablist" aria-label="Roadmap view">
-        <button type="button" class="view-tab" role="tab" data-testid="roadmap-view-tree"
-                [class.is-active]="view() === 'tree'" [attr.aria-selected]="view() === 'tree'"
-                (click)="setView('tree')">
-          <i class="fa-solid fa-sitemap" aria-hidden="true"></i> Tree
-        </button>
-        <button type="button" class="view-tab" role="tab" data-testid="roadmap-view-list"
-                [class.is-active]="view() === 'list'" [attr.aria-selected]="view() === 'list'"
-                (click)="setView('list')">
-          <i class="fa-solid fa-list-ul" aria-hidden="true"></i> List
-        </button>
+    <!-- Signed out the tree is the whole page: no view toggle, no branch blurbs, no detail
+         panel. Every one of those hands over the curriculum without an account to record it
+         against, and the toggle would offer a list view that isn't rendered. -->
+    @if (auth.isAuthenticated()) {
+      <div class="view-bar">
+        <div class="view-toggle" role="tablist" aria-label="Roadmap view">
+          <button type="button" class="view-tab" role="tab" data-testid="roadmap-view-tree"
+                  [class.is-active]="view() === 'tree'" [attr.aria-selected]="view() === 'tree'"
+                  (click)="setView('tree')">
+            <i class="fa-solid fa-sitemap" aria-hidden="true"></i> Tree
+          </button>
+          <button type="button" class="view-tab" role="tab" data-testid="roadmap-view-list"
+                  [class.is-active]="view() === 'list'" [attr.aria-selected]="view() === 'list'"
+                  (click)="setView('list')">
+            <i class="fa-solid fa-list-ul" aria-hidden="true"></i> List
+          </button>
+        </div>
+        @if (view() === 'tree') {
+          <span class="view-bar__hint">
+            <strong>{{ r.availableCount }}</strong> {{ r.availableCount === 1 ? 'move' : 'moves' }} ready to learn
+          </span>
+        }
       </div>
-      @if (auth.isAuthenticated() && view() === 'tree') {
-        <span class="view-bar__hint">
-          <strong>{{ r.availableCount }}</strong> {{ r.availableCount === 1 ? 'move' : 'moves' }} ready to learn
-        </span>
-      }
-    </div>
+    }
 
     @if (view() === 'tree') {
       <app-roadmap-tree [roadmap]="r" [selectedKey]="selectedKey()" (stepSelected)="onTreeSelect($event)" />
 
+      @if (!auth.isAuthenticated()) {
+        <p class="tree-hint" data-testid="roadmap-tree-hint">
+          Pick any move to see what teaches it — you'll need an account to follow the path.
+        </p>
+      }
+
+      @if (auth.isAuthenticated()) {
       <!-- Branch names, matching the tree's stage grouping. -->
       <ol class="branches" aria-label="Branches">
         @for (stage of r.stages; track stage.id; let si = $index) {
@@ -105,6 +120,7 @@
           <p class="detail__empty">Pick a move on the tree to see what it is and what teaches it.</p>
         }
       </section>
+      }
     } @else {
       @for (stage of r.stages; track stage.id; let si = $index) {
         <section class="stage" [attr.aria-labelledby]="'stage-' + stage.id">
@@ -174,6 +190,14 @@
     </div>
   }
 </div>
+
+@if (signInOpen()) {
+  <app-sign-in-dialog
+    heading="Sign in to follow this path"
+    message="Tick moves off as you learn them and the tree unlocks as you go."
+    (signedIn)="onSignedIn()"
+    (dismissed)="signInOpen.set(false)" />
+}
 
 <!-- Shared by the tree's detail panel and the list rows, so the two views can never drift. -->
 <ng-template #stepBody let-step let-styleId="styleId">

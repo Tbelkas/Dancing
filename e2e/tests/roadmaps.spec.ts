@@ -2,18 +2,18 @@ import { test, expect } from '@playwright/test';
 import { blockEmbeds } from '../fixtures/block-embeds.js';
 
 /**
- * Roadmaps: the index and one path end to end, signed out.
+ * Roadmaps signed out: the index, and a path as the teaser it is.
  *
- * Read-only by design. The status chips on a step write to the production database
- * (they set the same learned/in-progress flags as the dance page), so they are only
- * rendered for a signed-in user and this suite never touches them.
+ * A signed-out visitor gets the tree and nothing else — no view toggle, no branch blurbs, no
+ * detail panel — and touching any node opens the sign-in dialog. So everything that reads the
+ * *contents* of a path (the list view, a step's videos, the segment deep-links) now lives in
+ * `authed.spec.ts`; this file guards the wall itself.
  *
- * Nothing here asserts a specific move name — the paths are authored content that can be
- * re-cut. It asserts the *shape*: the tree has nodes and connectors, branches have headings,
- * linked steps offer videos, and a step's link lands on that move's dance page.
+ * Read-only by design, and it never submits the dialog — the sign-in flow through a form is
+ * covered once, in authed.spec.ts.
  *
- * The tree is the default view; tests that need every step's videos on screen at once switch
- * to the list first rather than clicking around the fan.
+ * Nothing here asserts a specific move name — the paths are authored content that can be re-cut.
+ * It asserts the *shape*: the tree has nodes and connectors, and clicking one asks for an account.
  */
 
 test.describe('roadmaps', () => {
@@ -36,7 +36,7 @@ test.describe('roadmaps', () => {
     await expect(first).toHaveAttribute('href', /\/roadmaps\/[a-z0-9-]+$/);
   });
 
-  test('a path opens as a skill tree @smoke', async ({ page }) => {
+  test('a path opens as a skill tree and nothing else @smoke', async ({ page }) => {
     await page.goto('/roadmaps');
     await expect(page.getByTestId('roadmap-card').first()).toBeVisible();
     await page.getByTestId('roadmap-card-link').first().click();
@@ -44,7 +44,6 @@ test.describe('roadmaps', () => {
     await expect(page).toHaveURL(/\/roadmaps\/[a-z0-9-]+$/);
     await expect(page.getByTestId('roadmap-title')).toBeVisible();
 
-    // Tree is the default view.
     await expect(page.getByTestId('roadmap-tree')).toBeVisible();
     const nodes = page.getByTestId('tree-node');
     expect(await nodes.count()).toBeGreaterThan(1);
@@ -53,69 +52,61 @@ test.describe('roadmaps', () => {
     // hidden until focused, so this counts the structural ones only.
     expect(await page.locator('.tree__edge').count()).toBeGreaterThan(1);
 
-    // Clicking a node fills the detail panel with that move.
-    await nodes.nth(1).click();
-    await expect(page.getByTestId('roadmap-detail-panel')).toBeVisible();
-    await expect(page.getByTestId('roadmap-detail-panel').locator('.detail__title')).not.toBeEmpty();
+    // The rest of the page is signed-in only. If any of these come back, the path is
+    // readable without an account again and the wall below is decorative.
+    await expect(page.getByTestId('roadmap-view-list')).toHaveCount(0);
+    await expect(page.getByTestId('roadmap-view-tree')).toHaveCount(0);
+    await expect(page.getByTestId('roadmap-detail-panel')).toHaveCount(0);
+    await expect(page.getByTestId('roadmap-step')).toHaveCount(0);
+    await expect(page.getByTestId('roadmap-tree-hint')).toBeVisible();
   });
 
-  test('the list view is reachable and shows the same steps as branches', async ({ page }) => {
+  test('clicking a move asks a signed-out visitor to sign in', async ({ page }) => {
     await page.goto('/roadmaps/house');
     await expect(page.getByTestId('roadmap-title')).toBeVisible();
 
-    await page.getByTestId('roadmap-view-list').click();
-    const steps = page.getByTestId('roadmap-step');
-    await expect(steps.first()).toBeVisible();
-    expect(await steps.count()).toBeGreaterThan(1);
-    // A path with no branch headings is a flat list, not a roadmap.
-    expect(await page.locator('.stage__title').count()).toBeGreaterThan(0);
+    const dialog = page.getByTestId('signin-dialog');
+    await expect(dialog).toHaveCount(0);
 
-    // The choice sticks — it's a strong preference either way.
-    await page.reload();
-    await expect(page.getByTestId('roadmap-step').first()).toBeVisible();
-    await expect(page.getByTestId('roadmap-tree')).toHaveCount(0);
+    await page.getByTestId('tree-node').nth(1).click();
 
-    // Put it back so a later test (and the next scheduled run) starts on the tree.
-    await page.getByTestId('roadmap-view-tree').click();
+    // The form itself, not a bounce to /login — the visitor keeps the path they were reading.
+    await expect(dialog).toBeVisible();
+    await expect(page.getByTestId('signin-username')).toBeVisible();
+    await expect(page.getByTestId('signin-password')).toBeVisible();
+    await expect(page).toHaveURL(/\/roadmaps\/house$/);
+
+    // Escape closes it and leaves the tree standing, rather than trapping them behind it.
+    await page.keyboard.press('Escape');
+    await expect(dialog).toHaveCount(0);
     await expect(page.getByTestId('roadmap-tree')).toBeVisible();
   });
 
-  test('steps backed by a move show their videos and link to the move', async ({ page }) => {
-    await page.goto('/roadmaps');
-    await expect(page.getByTestId('roadmap-card').first()).toBeVisible();
-    await page.getByTestId('roadmap-card-link').first().click();
+  test('the header sign-in prompt opens the same dialog', async ({ page }) => {
+    await page.goto('/roadmaps/house');
     await expect(page.getByTestId('roadmap-title')).toBeVisible();
-    // The list view is where every step's videos are on screen at once.
-    await page.getByTestId('roadmap-view-list').click();
 
-    // Videos are expanded by default, so the first linked step should already show some.
-    const videoLists = page.getByTestId('roadmap-step-videos');
-    await expect(videoLists.first()).toBeVisible();
+    await page.locator('.roadmap-signin .link').click();
+    await expect(page.getByTestId('signin-dialog')).toBeVisible();
 
-    const firstVideo = videoLists.first().locator('a.video__link').first();
-    await expect(firstVideo).toHaveAttribute('href', /\/dances\/[a-z0-9-]+\/[a-z0-9-]+\?v=\d+/);
-
-    await firstVideo.click();
-    await expect(page.getByTestId('dance-title')).toBeVisible();
+    // Register is reachable in place too — most people hitting this wall have no account yet.
+    await page.getByTestId('signin-dialog').getByRole('button', { name: 'Create account' }).click();
+    await expect(page.getByTestId('signin-submit')).toHaveText(/create account/i);
   });
 
   /**
-   * Steps can be pinned to one section of a longer tutorial (`segmentLabel` in the authored
-   * JSON). Those must deep-link with a `t=` offset, or the user lands at 0:00 of a 12-minute
-   * video and has to hunt for the part the step is about.
+   * Validation only — deliberately no credentials, so this never posts to the auth endpoint on
+   * a scheduled run. Wrong-password handling is covered once, on the /login form.
    */
-  test('a step pinned to a video section deep-links to that timestamp', async ({ page }) => {
-    await page.goto('/roadmaps/waacking');
-    await expect(page.getByTestId('roadmap-title')).toBeVisible();
-    await page.getByTestId('roadmap-view-list').click();
+  test('the dialog validates before it posts anything', async ({ page }) => {
+    await page.goto('/roadmaps/house');
+    await page.getByTestId('tree-node').nth(1).click();
+    await expect(page.getByTestId('signin-dialog')).toBeVisible();
 
-    const clipLink = page.locator('a.video__link[href*="t="]').first();
-    await expect(clipLink).toBeVisible();
-    await expect(clipLink).toHaveAttribute('href', /\/dances\/[a-z0-9-]+\/[a-z0-9-]+\?v=\d+&t=\d+/);
-
-    await clipLink.click();
-    await expect(page.getByTestId('dance-title')).toBeVisible();
-    await expect(page).toHaveURL(/[?&]t=\d+/);
+    await page.getByTestId('signin-submit').click();
+    await expect(page.getByTestId('signin-error')).toBeVisible();
+    // Still on the path, still signed out.
+    await expect(page.getByTestId('nav-sign-in')).toBeVisible();
   });
 
   test('an unknown slug shows the not-found state, not a redirect', async ({ page }) => {

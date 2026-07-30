@@ -1,6 +1,7 @@
 import { test, expect } from '../fixtures/auth.js';
 import { USERNAME, PASSWORD, API_URL } from '../fixtures/env.js';
 import { test as base, expect as baseExpect } from '@playwright/test';
+import { blockEmbeds } from '../fixtures/block-embeds.js';
 
 /**
  * Signed-in flows. Skipped entirely when E2E_USERNAME / E2E_PASSWORD are unset.
@@ -170,6 +171,85 @@ test.describe('authenticated', () => {
     const learnedChips = page.getByTestId('roadmap-step-learned');
     await expect(learnedChips.first()).toBeVisible();
     expect(await learnedChips.count()).toBeGreaterThan(0);
+  });
+
+  /**
+   * The contents of a path — the view toggle, the branch headings, every step's videos — are
+   * signed-in only; a signed-out visitor gets the bare tree (see roadmaps.spec.ts). The three
+   * tests below therefore live here rather than in the anon suite. All read-only: they click
+   * through the path but never touch a status chip.
+   */
+  test('a path detail panel fills in when a move is picked off the tree', async ({ authedPage: page }) => {
+    await blockEmbeds(page);
+    await page.goto('/roadmaps/house');
+    await expect(page.getByTestId('roadmap-title')).toBeVisible();
+    await expect(page.getByTestId('roadmap-tree')).toBeVisible();
+
+    await page.getByTestId('tree-node').nth(1).click();
+    await expect(page.getByTestId('roadmap-detail-panel')).toBeVisible();
+    await expect(page.getByTestId('roadmap-detail-panel').locator('.detail__title')).not.toBeEmpty();
+  });
+
+  test('the list view is reachable and shows the same steps as branches', async ({ authedPage: page }) => {
+    await blockEmbeds(page);
+    await page.goto('/roadmaps/house');
+    await expect(page.getByTestId('roadmap-title')).toBeVisible();
+
+    await page.getByTestId('roadmap-view-list').click();
+    const steps = page.getByTestId('roadmap-step');
+    await expect(steps.first()).toBeVisible();
+    expect(await steps.count()).toBeGreaterThan(1);
+    // A path with no branch headings is a flat list, not a roadmap.
+    expect(await page.locator('.stage__title').count()).toBeGreaterThan(0);
+
+    // The choice sticks — it's a strong preference either way.
+    await page.reload();
+    await expect(page.getByTestId('roadmap-step').first()).toBeVisible();
+    await expect(page.getByTestId('roadmap-tree')).toHaveCount(0);
+
+    // Put it back so a later test (and the next scheduled run) starts on the tree.
+    await page.getByTestId('roadmap-view-tree').click();
+    await expect(page.getByTestId('roadmap-tree')).toBeVisible();
+  });
+
+  test('steps backed by a move show their videos and link to the move', async ({ authedPage: page }) => {
+    await blockEmbeds(page);
+    await page.goto('/roadmaps');
+    await expect(page.getByTestId('roadmap-card').first()).toBeVisible();
+    await page.getByTestId('roadmap-card-link').first().click();
+    await expect(page.getByTestId('roadmap-title')).toBeVisible();
+    // The list view is where every step's videos are on screen at once.
+    await page.getByTestId('roadmap-view-list').click();
+
+    // Videos are expanded by default, so the first linked step should already show some.
+    const videoLists = page.getByTestId('roadmap-step-videos');
+    await expect(videoLists.first()).toBeVisible();
+
+    const firstVideo = videoLists.first().locator('a.video__link').first();
+    await expect(firstVideo).toHaveAttribute('href', /\/dances\/[a-z0-9-]+\/[a-z0-9-]+\?v=\d+/);
+
+    await firstVideo.click();
+    await expect(page.getByTestId('dance-title')).toBeVisible();
+  });
+
+  /**
+   * Steps can be pinned to one section of a longer tutorial (`segmentLabel` in the authored
+   * JSON). Those must deep-link with a `t=` offset, or the user lands at 0:00 of a 12-minute
+   * video and has to hunt for the part the step is about.
+   */
+  test('a step pinned to a video section deep-links to that timestamp', async ({ authedPage: page }) => {
+    await blockEmbeds(page);
+    await page.goto('/roadmaps/waacking');
+    await expect(page.getByTestId('roadmap-title')).toBeVisible();
+    await page.getByTestId('roadmap-view-list').click();
+
+    const clipLink = page.locator('a.video__link[href*="t="]').first();
+    await expect(clipLink).toBeVisible();
+    await expect(clipLink).toHaveAttribute('href', /\/dances\/[a-z0-9-]+\/[a-z0-9-]+\?v=\d+&t=\d+/);
+
+    await clipLink.click();
+    await expect(page.getByTestId('dance-title')).toBeVisible();
+    await expect(page).toHaveURL(/[?&]t=\d+/);
   });
 });
 

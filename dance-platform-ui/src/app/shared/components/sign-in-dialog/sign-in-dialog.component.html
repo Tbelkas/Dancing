@@ -1,0 +1,57 @@
+<div class="signin-backdrop" data-testid="signin-dialog"
+     (click)="onBackdropClick($event)" (keydown.escape)="dismiss()" tabindex="-1">
+  <div class="signin-dialog" role="dialog" aria-modal="true" aria-labelledby="signin-dialog-title">
+    <button type="button" class="signin-dialog__close" aria-label="Close" (click)="dismiss()">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+
+    <h2 class="signin-dialog__title" id="signin-dialog-title">
+      {{ isRegister() ? 'Create an account' : heading }}
+    </h2>
+    <p class="signin-dialog__message">{{ message }}</p>
+
+    @if (error()) {
+      <div class="error-message" data-testid="signin-error">{{ error() }}</div>
+    }
+
+    <form (ngSubmit)="submit()">
+      <div class="form-group">
+        <label for="signin-username">Username</label>
+        <input #firstField id="signin-username" data-testid="signin-username" type="text"
+               [(ngModel)]="username" name="username" required minlength="3"
+               placeholder="your_username" autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label for="signin-password">Password</label>
+        <input id="signin-password" data-testid="signin-password" type="password"
+               [(ngModel)]="password" name="password" required
+               [attr.minlength]="isRegister() ? 8 : null"
+               placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+               [attr.autocomplete]="isRegister() ? 'new-password' : 'current-password'" />
+        @if (isRegister()) {
+          <span class="field-hint">At least 8 characters</span>
+        }
+      </div>
+      @if (isRegister()) {
+        <div class="form-group">
+          <label for="signin-name">Full Name</label>
+          <input id="signin-name" type="text" [(ngModel)]="name" name="name" required
+                 placeholder="Your Name" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label for="signin-nickname">Nickname</label>
+          <input id="signin-nickname" type="text" [(ngModel)]="nickname" name="nickname"
+                 placeholder="Optional nickname" autocomplete="nickname" />
+        </div>
+      }
+      <button type="submit" class="btn btn--primary btn--full" data-testid="signin-submit" [disabled]="loading()">
+        {{ loading() ? 'Loading...' : (isRegister() ? 'Create Account' : 'Sign In') }}
+      </button>
+    </form>
+
+    <p class="signin-dialog__toggle">
+      {{ isRegister() ? 'Already have an account?' : 'New here?' }}
+      <button type="button" class="link" (click)="toggleMode()">{{ isRegister() ? 'Sign in' : 'Create account' }}</button>
+    </p>
+  </div>
+</div>

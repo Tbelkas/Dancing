@@ -10,6 +10,7 @@ import { Roadmap, RoadmapStep, RoadmapStepVideo } from '../../models/roadmap.mod
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
 import { RoadmapTreeComponent } from './roadmap-tree.component';
+import { SignInDialogComponent } from '../../shared/components/sign-in-dialog/sign-in-dialog.component';
 
 type RoadmapView = 'tree' | 'list';
 const VIEW_KEY = 'dp_roadmap_view';
@@ -17,7 +18,7 @@ const VIEW_KEY = 'dp_roadmap_view';
 @Component({
   selector: 'app-roadmap-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, RoadmapTreeComponent],
+  imports: [CommonModule, RouterLink, RoadmapTreeComponent, SignInDialogComponent],
   templateUrl: './roadmap-detail.component.html',
   styleUrls: ['./roadmap-detail.component.css']
 })
@@ -26,11 +27,21 @@ export class RoadmapDetailComponent implements OnInit {
   loading = signal(true);
 
   /** Tree or list. Remembered across visits — it's a strong personal preference either way. */
-  view = signal<RoadmapView>('tree');
+  private readonly storedView = signal<RoadmapView>('tree');
   /** Key of the step open in the tree's detail panel. */
   selectedKey = signal<string | null>(null);
   /** Step ids the user collapsed; everything is open by default — a path is meant to be read. */
   collapsed = signal<Set<number>>(new Set());
+  /** The sign-in dialog, opened by a signed-out visitor touching anything on the tree. */
+  signInOpen = signal(false);
+
+  /**
+   * Signed out the page is a teaser: the shape of the path and nothing else. The list view,
+   * the branch blurbs and the detail panel all give away the curriculum a step at a time, so
+   * they only exist once there's an account to record progress against. The stored preference
+   * is left untouched — signing in restores whichever view the user last chose.
+   */
+  readonly view = computed<RoadmapView>(() => this.auth.isAuthenticated() ? this.storedView() : 'tree');
 
   private readonly thumbs = new ThumbFallback();
 
@@ -71,8 +82,12 @@ export class RoadmapDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const stored = localStorage.getItem(VIEW_KEY);
-    if (stored === 'tree' || stored === 'list') this.view.set(stored);
+    if (stored === 'tree' || stored === 'list') this.storedView.set(stored);
 
+    this.load();
+  }
+
+  private load(): void {
     const slug = this.route.snapshot.paramMap.get('slug') ?? '';
     this.roadmapService.getBySlug(slug).subscribe({
       next: r => {
@@ -80,7 +95,10 @@ export class RoadmapDetailComponent implements OnInit {
         this.loading.set(false);
         this.title.setTitle(`${r.title} roadmap · Dance Platform`);
         // Open the tree on the move they should do next, so the panel is never empty on arrival.
-        this.selectedKey.set(this.nextStep()?.key ?? this.steps()[0]?.key ?? null);
+        // Signed out there is no panel, and a pre-ringed node would look like a selection that
+        // did nothing — the tree rests unselected until they click and sign in.
+        this.selectedKey.set(
+          this.auth.isAuthenticated() ? this.nextStep()?.key ?? this.steps()[0]?.key ?? null : null);
       },
       error: () => {
         // Same contract as dance detail: show a not-found state rather than silently redirecting.
@@ -89,6 +107,18 @@ export class RoadmapDetailComponent implements OnInit {
         this.title.setTitle('Roadmap not found · Dance Platform');
       }
     });
+  }
+
+  /**
+   * Refetches the path now that there's a user on the request: states, learned flags and the
+   * available count are all computed per-user server-side, so the signed-out payload is stale
+   * the moment the dialog succeeds.
+   */
+  onSignedIn(): void {
+    this.signInOpen.set(false);
+    this.loading.set(true);
+    this.roadmap.set(null);
+    this.load();
   }
 
   /** Running 1-based index of a step across the whole path, for the node markers. */
@@ -109,11 +139,19 @@ export class RoadmapDetailComponent implements OnInit {
   }
 
   setView(view: RoadmapView): void {
-    this.view.set(view);
+    this.storedView.set(view);
     localStorage.setItem(VIEW_KEY, view);
   }
 
+  /**
+   * Signed out, a node is the invitation to sign in rather than a way to read the move —
+   * that's the only interactive thing left on the page, so it's where the wall goes.
+   */
   onTreeSelect(step: RoadmapStep): void {
+    if (!this.auth.isAuthenticated()) {
+      this.signInOpen.set(true);
+      return;
+    }
     this.selectedKey.set(step.key);
   }
 

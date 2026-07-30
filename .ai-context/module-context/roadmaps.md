@@ -17,6 +17,12 @@ Two views, toggled and remembered in `localStorage['dp_roadmap_view']`:
 - **Tree** (default) — a radial fan, root at the bottom, one ring per depth, plus a detail panel.
 - **List** — the branches as ordered rows, every step's videos on screen at once.
 
+**Signed out, the path is a teaser: the tree and nothing else.** No view toggle, no branch
+blurbs, no detail panel — those give the curriculum away with no account to record it against.
+Clicking any node opens `SignInDialogComponent` instead of selecting it; succeeding refetches
+the roadmap (states and learned flags are per-user) rather than reloading the page. The stored
+view preference is left alone, so signing in restores whichever view they last chose.
+
 ## Backend
 
 - Controller: `Controllers/RoadmapsController.cs` (both endpoints anonymous, read-only)
@@ -34,6 +40,9 @@ Two views, toggled and remembered in `localStorage['dp_roadmap_view']`:
 - Service: `core/services/roadmap.service.ts` (deliberately uncached — the payload is per-user)
 - Model: `models/roadmap.model.ts`
 - Routes: `/roadmaps`, `/roadmaps/:slug`. Both public. Header nav link `nav-roadmaps`.
+- Sign-in wall: `shared/components/sign-in-dialog/` — the `/login` form as a modal, reusable by
+  any page that reads signed out but needs an account to act. It signs in *in place*; sending
+  someone to `/login` would land them on `/my-dances` and lose the path they were reading.
 
 ## The content lives in JSON, not the database
 
