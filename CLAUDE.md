@@ -60,9 +60,15 @@ Conventions (and the reasoning behind each) are in
 and hold real credentials. Scripts must read the connection string from `appsettings`, the
 way `scripts/find_chip_candidates.py` and `scripts/enrich_views.py` do — never hardcode it.
 
-> `scripts/apply_sections.py` and `scripts/backfill_durations.py` still hardcode the
-> production DB password, and the repo is public. Rotate the password and fix both before
-> treating this rule as satisfied.
+No tracked file hardcodes the password any more: the 11 that did (`scripts/apply_sections.py`,
+`scripts/backfill_durations.py`, and nine `archive/*.py`) now call a local `_prod_password()`
+that reads `appsettings.Development.json`. Keep it that way — `git grep` for a literal before
+committing a new script.
+
+> **The password still needs rotating.** It sat in HEAD of a public repo, so it is in the
+> GitHub history and must be treated as compromised even though it is gone from the worktree.
+> Removing it from the current files does not unpublish it. Rotate on the Pi, update the
+> gitignored `appsettings.*.json`, and only then is this rule actually satisfied.
 
 ---
 

@@ -143,7 +143,8 @@
             "knee-up"
           ],
           "description": "Knees drive down, arms swing through. A down-groove that travels, and a good rest between faster passes.",
-          "danceSlug": "the-chug"
+          "danceSlug": "the-chug",
+          "segmentLabel": "Down Rock With And Without Arms"
         },
         {
           "key": "skate",

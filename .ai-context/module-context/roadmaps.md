@@ -142,6 +142,11 @@ names on one fan collide however they're placed.
 - **Progress is not stored on the roadmap.** `learnedCount` / `isLearned` are computed from
   `UserLearnedDances` / `UserInProgressDances` through the step's dance. Ticking a step off
   calls the same `PUT /dances/{id}/status` as the dance page, so the two never disagree.
+  The cost is that progress is per *dance*, not per step: where one dance backs several steps,
+  marking it learned flips all of them at once. Waacking is the bad case (the `waacking` dance
+  backs 10 of its 23 steps); hip-hop has one 3-step dance, House none. Fixing it properly means
+  a per-step `UserRoadmapStep` table — not built. Until then, prefer one dance per step, and
+  read the validator's warnings as a budget rather than noise.
 - A move may legitimately appear in more than one stage; `applyFlags` in the detail component
   updates **every** step pointing at that dance so their chips stay in sync.
 - Video visibility follows the catalog rule: global videos plus the viewer's own personal ones.
@@ -149,9 +154,20 @@ names on one fan collide however they're placed.
 
 ## Authoring notes
 
+- **Run `python scripts/validate_roadmaps.py` before deploying a roadmap change.** The seeder
+  is deliberately forgiving — a bad `danceSlug`, a `segmentLabel` matching nothing, or an edge
+  naming an unknown key is skipped with a logged error rather than failing the boot — so a typo
+  ships silently and only shows up as a step with no video. The validator checks slugs, labels,
+  keys, cycles, reachability and video coverage against the prod catalog, and exits 1 on error.
+  It also warns where one dance backs several steps (see the progress caveat below).
 - Only link a `danceSlug` whose video actually teaches that move. Several catalog entries are
   mistagged (a "Gazelle" whose video is a Zootopia clip); linking those makes the path worse
-  than leaving the step unlinked.
+  than leaving the step unlinked. Check the *video title*, not just the dance name — and note
+  that `Videos.Title` holds the move name, so a title naming a whole montage
+  ("60 Hip Hop Dance Steps") means the row was never cleaned up.
+- Prefer a `segmentLabel` over a link to a long class video. A step that points at an
+  11-minute lesson tells the reader "watch all of this"; pinning the one relevant section is
+  the difference between a curriculum and a playlist.
 - Order stages so each assumes the previous one. House leads with the jack because every later
   step rides that pulse.
 

@@ -8,7 +8,21 @@ Read-only. Writes _proto/audit_videos.tsv, _proto/all_ytids.txt, _proto/nochip_s
 import os, subprocess, sys
 from collections import Counter, defaultdict
 sys.stdout.reconfigure(encoding="utf-8")
-PGPW = "LW3Q19jZyVSXRzNyGoRnWY2G3TKFT8eoRuYR"
+def _prod_password():
+    """Read the prod DB password from appsettings (gitignored) rather than hardcoding it.
+
+    This repo is public: a literal here leaks the production database on every push.
+    """
+    import json as _json
+    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _cfg = os.path.join(_root, "DancePlatform.API", "appsettings.Development.json")
+    for _v in _json.load(open(_cfg, encoding="utf-8-sig")).get("ConnectionStrings", {}).values():
+        if "192.168.0.197" in _v:
+            return dict(_p.split("=", 1) for _p in _v.split(";") if "=" in _p).get("Password", "")
+    raise SystemExit(f"No prod (192.168.0.197) connection string in {_cfg}")
+
+
+PGPW = _prod_password()
 
 def psql(sql):
     env = dict(os.environ); env["PGPASSWORD"] = PGPW; env["PGCLIENTENCODING"] = "UTF8"

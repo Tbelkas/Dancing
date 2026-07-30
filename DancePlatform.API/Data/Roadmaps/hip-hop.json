@@ -225,7 +225,8 @@
             "arm-wave"
           ],
           "description": "Take the arm wave across the chest and out the other side. Three angles, one continuous line, no visible seams at the shoulders.",
-          "danceSlug": "waving"
+          "danceSlug": "waving",
+          "segmentLabel": "Through the Chest"
         },
         {
           "key": "boogaloo",
