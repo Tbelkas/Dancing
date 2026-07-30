@@ -16,42 +16,69 @@
           <h2 class="section-heading continue-learning__title">Continue learning</h2>
           <p class="continue-learning__sub">Pick up where you left off</p>
         </div>
-        @if (historyOverflow()) {
-          <div class="continue-nav">
+        <div class="continue-nav">
+          <button type="button" class="continue-toggle" [class.is-on]="historyGrouped()"
+            [attr.aria-pressed]="historyGrouped()" (click)="toggleHistoryGrouped()">
+            <i class="fa-solid fa-layer-group"></i> By style
+          </button>
+          @if (!historyGrouped() && historyOverflow()) {
             <button type="button" class="carousel-arrow" (click)="scrollHistory(-1)" [disabled]="historyAtStart()" aria-label="Scroll to more recent">
               <i class="fa-solid fa-chevron-left"></i>
             </button>
             <button type="button" class="carousel-arrow" (click)="scrollHistory(1)" [disabled]="historyAtEnd()" aria-label="Scroll to older history">
               <i class="fa-solid fa-chevron-right"></i>
             </button>
-          </div>
-        }
+          }
+        </div>
       </div>
-      <div #historyTrack class="continue-track" (scroll)="onHistoryScroll()">
-        @for (dance of continueLearning(); track dance.id) {
-          <a class="card continue-card" [routerLink]="dance.slug | dancePath:dance.styleSlug" [queryParams]="dance.resume">
-            <span class="continue-card__media">
-              @if (continueThumbnailUrl(dance); as thumb) {
-                <img [src]="thumb" alt="" loading="lazy" class="continue-card__thumb" (error)="onContinueThumbError(dance.id)" />
-              } @else {
-                <span class="continue-card__media-fallback"><i class="fa-solid fa-music"></i></span>
-              }
-              <span class="continue-card__resume"><i class="fa-solid fa-play"></i> Resume</span>
-            </span>
-            <span class="continue-card__body">
-              <h3 class="continue-card__name">{{ dance.name }}</h3>
-              @if (dance.styleName) {
-                <span class="continue-card__style">{{ dance.styleName }}</span>
-              }
-            </span>
-            <button type="button" class="continue-card__dismiss" (click)="dismissContinue(dance.id, $event)"
-              [attr.aria-label]="'Remove ' + dance.name + ' from Continue learning'">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </a>
-        }
-      </div>
+
+      @if (historyGrouped()) {
+        <div class="continue-groups">
+          @for (group of continueGroups(); track group.styleName) {
+            <div class="continue-group">
+              <div class="continue-group__head">
+                <h3 class="continue-group__name">{{ group.styleName }}</h3>
+                <span class="continue-group__count">{{ group.dances.length }}</span>
+              </div>
+              <div class="continue-grid">
+                @for (dance of group.dances; track dance.id) {
+                  <ng-container *ngTemplateOutlet="continueCard; context: { $implicit: dance }"></ng-container>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div #historyTrack class="continue-track" (scroll)="onHistoryScroll()">
+          @for (dance of continueLearning(); track dance.id) {
+            <ng-container *ngTemplateOutlet="continueCard; context: { $implicit: dance }"></ng-container>
+          }
+        </div>
+      }
     </section>
+
+    <ng-template #continueCard let-dance>
+      <a class="card continue-card" [routerLink]="dance.slug | dancePath:dance.styleSlug" [queryParams]="dance.resume">
+        <span class="continue-card__media">
+          @if (continueThumbnailUrl(dance); as thumb) {
+            <img [src]="thumb" alt="" loading="lazy" class="continue-card__thumb" (error)="onContinueThumbError(dance.id)" />
+          } @else {
+            <span class="continue-card__media-fallback"><i class="fa-solid fa-music"></i></span>
+          }
+          <span class="continue-card__resume"><i class="fa-solid fa-play"></i> Resume</span>
+        </span>
+        <span class="continue-card__body">
+          <h3 class="continue-card__name">{{ dance.name }}</h3>
+          @if (dance.styleName) {
+            <span class="continue-card__style">{{ dance.styleName }}</span>
+          }
+        </span>
+        <button type="button" class="continue-card__dismiss" (click)="dismissContinue(dance.id, $event)"
+          [attr.aria-label]="'Remove ' + dance.name + ' from Continue learning'">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </a>
+    </ng-template>
   }
 
   @if (showStylePicker()) {

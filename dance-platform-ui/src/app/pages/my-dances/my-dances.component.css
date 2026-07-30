@@ -583,8 +583,85 @@
 
 .continue-nav {
   display: flex;
+  align-items: center;
   gap: 8px;
   flex-shrink: 0;
+}
+
+/* Recency ⇄ by-style switch. Styled as a pressable chip so its "on" state is
+   readable at a glance, unlike the arrows which are momentary actions. */
+.continue-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.continue-toggle:hover {
+  color: var(--color-text);
+  border-color: var(--color-border-light);
+}
+
+.continue-toggle.is-on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #07070D;
+}
+
+/* ---------- Continue Learning, grouped by style ---------- */
+.continue-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.continue-group__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.continue-group__name {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text);
+}
+
+.continue-group__count {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.continue-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+/* The group heading already names the style — repeating it on every card is noise. */
+.continue-grid .continue-card__style {
+  display: none;
 }
 
 .carousel-arrow {

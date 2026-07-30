@@ -10,13 +10,18 @@ import { ProfileService } from '../../core/services/profile.service';
 import { StyleService } from '../../core/services/style.service';
 import { DanceService, CreateDancePayload } from '../../core/services/dance.service';
 import { VideoService, CreateVideoPayload } from '../../core/services/video.service';
-import { RecentDancesService } from '../../core/services/recent-dances.service';
+import { RecentDancesService, RecentDance } from '../../core/services/recent-dances.service';
 import { ToastService } from '../../core/services/toast.service';
 import { MyStyleWithDances } from '../../models/user.model';
 import { Style } from '../../models/style.model';
 import { Video } from '../../models/video.model';
 import { Dance } from '../../models/dance.model';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
+
+/** A history entry plus the query params that reopen the video it was left on. */
+interface ContinueCard extends RecentDance {
+  resume: { v?: number };
+}
 
 @Component({
   selector: 'app-my-dances',
@@ -28,6 +33,7 @@ import { VideoPlayerComponent } from '../../shared/components/video-player/video
 export class MyDancesComponent implements OnInit, AfterViewInit {
   private readonly SELECTED_STYLE_KEY = 'dp_mydances_style';
   private readonly EXPANDED_DANCE_KEY = 'dp_mydances_expanded';
+  private readonly CONTINUE_GROUPED_KEY = 'dp_continue_grouped';
 
   myStyles = signal<MyStyleWithDances[]>([]);
   allStyles = signal<Style[]>([]);
@@ -104,7 +110,7 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
    * Each card carries the query params that reopen the video they were last watching (when we
    * know it), built here so the objects stay reference-stable across change detection.
    */
-  readonly continueLearning = computed(() => {
+  readonly continueLearning = computed<ContinueCard[]>(() => {
     const learned = this.learnedIds();
     return this.recentDances.recent()
       .filter(d => !d.learned && !learned.has(d.id))
@@ -118,6 +124,35 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   readonly historyOverflow = signal(false);
   readonly historyAtStart = signal(true);
   readonly historyAtEnd = signal(false);
+
+  /**
+   * "By style" swaps the single recency carousel for one wrapped grid per style. The choice
+   * is remembered — someone who thinks of their history as "what was I doing in House?"
+   * shouldn't have to re-pick it on every visit.
+   */
+  readonly historyGrouped = signal(localStorage.getItem(this.CONTINUE_GROUPED_KEY) === '1');
+
+  /**
+   * The same cards as {@link continueLearning}, bucketed by style. Groups appear in order of
+   * their most recently viewed dance (the source list is already recency-sorted), so the style
+   * you were just working on stays at the top.
+   */
+  readonly continueGroups = computed(() => {
+    const groups = new Map<string, ContinueCard[]>();
+    for (const dance of this.continueLearning()) {
+      const key = dance.styleName || 'Other';
+      const existing = groups.get(key);
+      if (existing) existing.push(dance);
+      else groups.set(key, [dance]);
+    }
+    return [...groups].map(([styleName, dances]) => ({ styleName, dances }));
+  });
+
+  toggleHistoryGrouped(): void {
+    const grouped = !this.historyGrouped();
+    this.historyGrouped.set(grouped);
+    localStorage.setItem(this.CONTINUE_GROUPED_KEY, grouped ? '1' : '0');
+  }
 
   readonly selectedStyle = computed(() => {
     const id = this.selectedStyleId();
@@ -153,6 +188,7 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
     // the track after the DOM settles so the arrows reflect the new scrollable width.
     effect(() => {
       this.continueLearning();
+      this.historyGrouped();
       setTimeout(() => this.updateHistoryScrollState());
     });
 

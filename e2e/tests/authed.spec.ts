@@ -155,6 +155,46 @@ test.describe('authenticated', () => {
   });
 
   /**
+   * "By style" regroups the same local trail — nothing server-side — so a pair of synthetic
+   * entries in two styles is enough to prove the grouping and that the choice is remembered.
+   */
+  test('Continue learning can be regrouped by style, and remembers the choice', async ({ authedPage: page }) => {
+    const probes = [
+      { id: 999_003, name: 'E2E Group Probe House', slug: 'e2e-group-house', styleSlug: 'house', styleName: 'House', viewedAt: Date.now(), learned: false },
+      { id: 999_004, name: 'E2E Group Probe Hip-hop', slug: 'e2e-group-hiphop', styleSlug: 'hip-hop', styleName: 'Hip-hop', viewedAt: Date.now() - 1000, learned: false },
+    ];
+    await page.addInitScript(entries => {
+      localStorage.setItem('dp_recent_dances', JSON.stringify(entries));
+      // This runs on the reload too, so only force the starting state once — otherwise it
+      // would undo the very toggle the reload is meant to prove was remembered.
+      if (!sessionStorage.getItem('e2e_grouping_seeded')) {
+        sessionStorage.setItem('e2e_grouping_seeded', '1');
+        localStorage.removeItem('dp_continue_grouped');
+      }
+    }, probes);
+
+    await page.goto('/my-dances');
+    const toggle = page.getByRole('button', { name: 'By style' });
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('.continue-group')).toHaveCount(0);
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+
+    // One group per style, most recently viewed first, each holding its own card.
+    const groups = page.locator('.continue-group');
+    await expect(groups).toHaveCount(2);
+    await expect(groups.first().locator('.continue-group__name')).toHaveText('House');
+    await expect(groups.first().locator('.continue-card')).toHaveText(/E2E Group Probe House/);
+    await expect(groups.nth(1).locator('.continue-group__name')).toHaveText('Hip-hop');
+
+    // The grouping survives a reload — it is stored, not just component state.
+    await page.reload();
+    await expect(page.locator('.continue-group')).toHaveCount(2);
+    await expect(page.getByRole('button', { name: 'By style' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  /**
    * Read-only on purpose. The "Learned" chip writes the same production status a real user
    * sets, so this asserts the signed-in affordances exist and never clicks them — the toggle
    * itself is already covered on the dance detail page, where it can be restored cleanly.
