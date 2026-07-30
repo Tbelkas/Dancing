@@ -1,0 +1,480 @@
+{
+  "slug": "hip-hop",
+  "styleName": "Hip-hop",
+  "title": "Hip-Hop",
+  "subtitle": "Bounce first. Every step in this style is the bounce plus one idea.",
+  "description": "Hip-hop is the widest style in the catalog, and the reason beginners stall in it is that there is no obvious order — the party steps, the funk styles and the choreo classes all look like starting points. They are not. Get the bounce into your body, learn to isolate one part at a time, then work through the old-school vocabulary the whole style is quoting. The funk branches (popping, locking, waving) and the travelling walks come off that trunk, and the choreo stage is where the vocabulary turns into sentences.",
+  "sortOrder": 30,
+  "stages": [
+    {
+      "title": "Get the bounce",
+      "description": "The pulse everything else sits on. Hip-hop is a down-groove — you hit the beat by dropping into it, not by lifting off it. If you skip this stage every later step will look like an exercise instead of a dance.",
+      "steps": [
+        {
+          "key": "bounce",
+          "title": "The bounce",
+          "description": "Knees soft, weight down, chest answering the beat. Learn it standing on the spot and keep it running underneath every other step on this path.",
+          "danceSlug": "the-bounce"
+        },
+        {
+          "key": "head-nod",
+          "title": "Head nod",
+          "requires": [
+            "bounce"
+          ],
+          "description": "The bounce read from the neck up. It looks like nothing and it is the difference between dancing to the track and counting along with it.",
+          "danceSlug": "the-head-nod"
+        },
+        {
+          "key": "two-step",
+          "title": "Two step",
+          "requires": [
+            "bounce"
+          ],
+          "description": "Side to side, weight fully transferring, bounce intact. The default hip-hop step and the thing you return to between everything else.",
+          "danceSlug": "two-step"
+        },
+        {
+          "key": "rocksteady",
+          "title": "Rock steady grooves",
+          "requires": [
+            "bounce"
+          ],
+          "description": "The Pork Chop, the Leo Walk and the Bump — the grooves the Rock Steady Crew put into the vocabulary. Four ways to rock the same pulse before you own any footwork.",
+          "danceSlug": "the-rocksteady"
+        }
+      ]
+    },
+    {
+      "title": "Isolate it",
+      "description": "Move one part of your body while the rest stays quiet. This is the stage people skip and the reason their steps look stiff — the party dances in stage three are all isolations with a name attached.",
+      "steps": [
+        {
+          "key": "chest-pop",
+          "title": "Chest pop",
+          "requires": [
+            "bounce"
+          ],
+          "description": "Punch the chest forward and release, shoulders out of it. Your first accent, and the base of half the moves in this style.",
+          "danceSlug": "chest-pop"
+        },
+        {
+          "key": "body-roll",
+          "title": "Body roll",
+          "requires": [
+            "chest-pop"
+          ],
+          "description": "Ripple the isolation down through head, chest and hips as one continuous line. Practise it in eight slow counts before you try it at tempo.",
+          "danceSlug": "the-body-roll"
+        },
+        {
+          "key": "hip-roll",
+          "title": "Hip roll",
+          "requires": [
+            "chest-pop"
+          ],
+          "description": "The same rolling motion driven from the hips, feet flat. Where the body roll gets its bottom half.",
+          "danceSlug": "chest-slide",
+          "segmentLabel": "How to hip roll"
+        },
+        {
+          "key": "hip-swivel",
+          "title": "Hip swivel",
+          "requires": [
+            "two-step"
+          ],
+          "description": "Also called the Indian Step: kick, switch and twist the hips against the direction of travel. The first step where the top and bottom half disagree on purpose.",
+          "danceSlug": "hip-swivel"
+        },
+        {
+          "key": "arm-wave",
+          "title": "Arm wave",
+          "requires": [
+            "chest-pop"
+          ],
+          "description": "Isolate every joint from shoulder to fingertip and fire them in sequence. Drill the joints separately first — a wave is a control exercise before it is a move.",
+          "danceSlug": "arm-wave"
+        }
+      ]
+    },
+    {
+      "title": "Old-school foundation",
+      "description": "The party dances from the eighties and nineties. Learn them because everything newer is quoting them, and because a freestyle without vocabulary is just a bounce with nowhere to go. Start with the guided tour, then take the steps one at a time.",
+      "steps": [
+        {
+          "key": "old-school-tour",
+          "title": "Tour the old-school steps",
+          "requires": [
+            "two-step",
+            "rocksteady"
+          ],
+          "description": "Fifteen classic steps demonstrated back to back with their names. Watch it once for the map, then come back to it whenever a step name means nothing to you.",
+          "danceSlug": "old-school-hip-hop-steps"
+        },
+        {
+          "key": "prep",
+          "title": "The prep",
+          "requires": [
+            "old-school-tour"
+          ],
+          "description": "The Kid 'n Play bounce-and-reach. The cleanest place to start because it is almost pure groove with an arm on top.",
+          "danceSlug": "the-prep"
+        },
+        {
+          "key": "running-man",
+          "title": "Running man",
+          "requires": [
+            "two-step"
+          ],
+          "description": "Slide one foot back as the other knee drives up. The single most recognisable step in the style — get the weight transfer clean before you speed it up.",
+          "danceSlug": "running-man-variation",
+          "segmentLabel": "Basic Running Man"
+        },
+        {
+          "key": "roger-rabbit",
+          "title": "Roger rabbit",
+          "requires": [
+            "running-man"
+          ],
+          "description": "The running man travelling backwards with a hop. Same mechanics, reversed — which is exactly why it goes after it and not before.",
+          "danceSlug": "roger-rabbit"
+        },
+        {
+          "key": "reebok",
+          "title": "The reebok",
+          "requires": [
+            "running-man"
+          ],
+          "description": "A bouncing shuffle with the arms pumping across the body. Fast, low and the easiest of these to hide a mistake in.",
+          "danceSlug": "reebok",
+          "segmentLabel": "The Reebok"
+        },
+        {
+          "key": "cabbage-patch",
+          "title": "Cabbage patch",
+          "requires": [
+            "old-school-tour"
+          ],
+          "description": "Circle both arms in front of you over a rocking bounce. Pure upper body — a good one to drill while your legs recover.",
+          "danceSlug": "cabbage-patch"
+        },
+        {
+          "key": "wop",
+          "title": "The wop",
+          "requires": [
+            "old-school-tour"
+          ],
+          "description": "Alternating arm sweeps with a chest bounce behind them. Sits right next to the cabbage patch and swaps in for it mid-freestyle.",
+          "danceSlug": "wop"
+        },
+        {
+          "key": "smurf",
+          "title": "The smurf",
+          "requires": [
+            "old-school-tour"
+          ],
+          "description": "A side-to-side bounce with the arms crossing over. One of the oldest party steps here and still one of the most useful for filling eight counts.",
+          "danceSlug": "smurf"
+        },
+        {
+          "key": "bart-simpson",
+          "title": "Bart simpson",
+          "requires": [
+            "old-school-tour"
+          ],
+          "description": "Hop and swing the arms across in front. Comes with a full breakdown, a practice pass and a variation — the most thoroughly taught step on this path.",
+          "danceSlug": "bart-simpson"
+        },
+        {
+          "key": "biz-markie",
+          "title": "Biz markie",
+          "requires": [
+            "bart-simpson"
+          ],
+          "description": "A stomping step with a shoulder shrug behind it. Same lesson structure as the bart simpson, so learn them in the same session.",
+          "danceSlug": "biz-markie"
+        },
+        {
+          "key": "chicken",
+          "title": "The chicken / monastery",
+          "requires": [
+            "two-step"
+          ],
+          "description": "Hands in, knees bouncing out, elbows doing the work. Learn the chicken and the monastery variation together — the tutorial compares them directly.",
+          "danceSlug": "the-chicken"
+        }
+      ]
+    },
+    {
+      "title": "Pop, lock and wave",
+      "description": "The funk styles hip-hop borrows from. They are separate traditions with their own rules, but every hip-hop freestyle raids them, and the control they teach transfers straight back into your grooves.",
+      "steps": [
+        {
+          "key": "hit",
+          "title": "The hit",
+          "requires": [
+            "chest-pop"
+          ],
+          "description": "Popping's whole foundation: tense a muscle hard enough to snap, then release, on the beat. Find the forearm tendon first — if you can pop that, you can pop anywhere.",
+          "danceSlug": "popping-basics"
+        },
+        {
+          "key": "waving",
+          "title": "Waving through the body",
+          "requires": [
+            "arm-wave"
+          ],
+          "description": "Take the arm wave across the chest and out the other side. Three angles, one continuous line, no visible seams at the shoulders.",
+          "danceSlug": "waving"
+        },
+        {
+          "key": "boogaloo",
+          "title": "Boogaloo",
+          "requires": [
+            "hit",
+            "hip-roll"
+          ],
+          "description": "The rolling, boneless counterpart to the hit — hips and knees circling while the hits punctuate. Popping's two halves, and most people only ever learn one.",
+          "danceSlug": "popping",
+          "segmentLabel": "Boogaloo"
+        },
+        {
+          "key": "robot",
+          "title": "The robot",
+          "requires": [
+            "hit"
+          ],
+          "description": "Dime stops: travel a limb, then kill it dead. A full routine built from pivots and stops — the clearest test of whether your hit is actually clean.",
+          "danceSlug": "the-robot"
+        },
+        {
+          "key": "lock-muscleman",
+          "title": "The muscleman lock",
+          "requires": [
+            "rocksteady"
+          ],
+          "description": "Locking's signature freeze: arms up, everything stops at once. The lock is the point — the travel between locks barely matters.",
+          "danceSlug": "locking",
+          "segmentLabel": "Muscleman"
+        },
+        {
+          "key": "lock-uncle-sam",
+          "title": "Uncle sam point",
+          "requires": [
+            "lock-muscleman"
+          ],
+          "description": "Throw the point out and lock behind it. Your first locking move that goes somewhere instead of holding still.",
+          "danceSlug": "locking",
+          "segmentLabel": "Uncle Sam"
+        },
+        {
+          "key": "lock-clap",
+          "title": "Punch and clap",
+          "requires": [
+            "lock-uncle-sam"
+          ],
+          "description": "Punches and claps threaded between the locks. This is where locking starts sounding like music instead of looking like poses.",
+          "danceSlug": "locking",
+          "segmentLabel": "Clap"
+        }
+      ]
+    },
+    {
+      "title": "Walks and glides",
+      "description": "Everything so far happens on one spot. These cover ground, and most of them are illusions — the audience should not be able to tell which foot is carrying you.",
+      "steps": [
+        {
+          "key": "moonwalk",
+          "title": "The moonwalk",
+          "requires": [
+            "two-step"
+          ],
+          "description": "Drag one foot back while the other rolls heel to toe. The most attempted move in dance and the one most often given up on after ten minutes — slow it right down.",
+          "danceSlug": "the-moonwalk"
+        },
+        {
+          "key": "side-glide",
+          "title": "Side glide",
+          "requires": [
+            "moonwalk"
+          ],
+          "description": "The same trick sideways, feet swapping which one hides the push. Builds through footwork, then the illusion, then full speed.",
+          "danceSlug": "slide-step"
+        },
+        {
+          "key": "air-walk",
+          "title": "Air walk",
+          "requires": [
+            "side-glide"
+          ],
+          "description": "Walk forward while travelling nowhere. Needs the glide's weight control or it collapses into ordinary steps.",
+          "danceSlug": "air-walk"
+        },
+        {
+          "key": "wiggle-walk",
+          "title": "Wiggle walk",
+          "requires": [
+            "hip-swivel"
+          ],
+          "description": "Mr Wiggles' travelling step: the swivel taken forward, hips leading, upper body loose.",
+          "danceSlug": "wiggle-wiggle"
+        },
+        {
+          "key": "c-walk",
+          "title": "C-walk",
+          "requires": [
+            "two-step"
+          ],
+          "description": "The west-coast walk — quick pivots on the balls of the feet that trace a letter on the floor. All ankle, no knee.",
+          "danceSlug": "swag-walk"
+        },
+        {
+          "key": "heel-toe",
+          "title": "Heel-toe walk out",
+          "requires": [
+            "two-step"
+          ],
+          "description": "Split the feet out on the heels and back in on the toes. Basic footwork that shows up inside half the choreo you will be given.",
+          "danceSlug": "heel-toe-walk-out"
+        }
+      ]
+    },
+    {
+      "title": "New-school social steps",
+      "description": "The ones people actually do at a party. They are easier than stage three and they age faster, but knowing them is the difference between watching a floor and joining it.",
+      "steps": [
+        {
+          "key": "dougie",
+          "title": "The dougie",
+          "requires": [
+            "bounce"
+          ],
+          "description": "Lean, rock and run a hand through your hair. Barely a step — almost entirely attitude, which is the skill it teaches.",
+          "danceSlug": "dougie"
+        },
+        {
+          "key": "milly-rock",
+          "title": "Milly rock",
+          "requires": [
+            "bounce"
+          ],
+          "description": "Alternating arm rocks over a shoulder bounce. Built up arms first, then body, then feet — a good model for how to learn any of these.",
+          "danceSlug": "the-milly-rock"
+        },
+        {
+          "key": "stanky-leg",
+          "title": "Stanky leg",
+          "requires": [
+            "two-step"
+          ],
+          "description": "Plant one leg and wobble the other from the knee down. Your first move built entirely on one loose joint.",
+          "danceSlug": "stanky-leg"
+        },
+        {
+          "key": "nae-nae",
+          "title": "Nae nae",
+          "requires": [
+            "bounce"
+          ],
+          "description": "Bend, step back, arm up high. Three counts and done — learn it for the transition into the whip.",
+          "danceSlug": "nae-nae"
+        },
+        {
+          "key": "whip",
+          "title": "The whip",
+          "requires": [
+            "nae-nae"
+          ],
+          "description": "Throw the arm out over a leaning bounce. Pairs with the nae nae by design; the same tutorial adds the superman on top.",
+          "danceSlug": "whip",
+          "segmentLabel": "The Whip (Watch Me)"
+        },
+        {
+          "key": "harlem-shake",
+          "title": "Harlem shake",
+          "requires": [
+            "chest-pop",
+            "body-roll"
+          ],
+          "description": "Shoulders shuddering fast and loose over a held stance. Needs the isolation work from stage two — without it the whole torso shakes and the move disappears.",
+          "danceSlug": "the-shake"
+        }
+      ]
+    },
+    {
+      "title": "Put it together",
+      "description": "Steps are vocabulary. These are sentences. Work up the length — a five-minute combo, a beginner routine, then a full class — and finish by throwing the counts away.",
+      "steps": [
+        {
+          "key": "short-combo",
+          "title": "Lunge and running man combo",
+          "requires": [
+            "running-man"
+          ],
+          "description": "Five minutes, two moves, one phrase. The smallest possible thing that is more than a step.",
+          "danceSlug": "lungeline"
+        },
+        {
+          "key": "beginner-routine",
+          "title": "First full routine",
+          "requires": [
+            "two-step",
+            "chest-pop"
+          ],
+          "description": "A short beginner routine with jumps, rocks, corners and a kick ball change — taught slowly, then with music. The first time the bounce has to survive a whole track.",
+          "danceSlug": "honey-dipper"
+        },
+        {
+          "key": "class-length",
+          "title": "A full class",
+          "requires": [
+            "beginner-routine",
+            "old-school-tour"
+          ],
+          "description": "Twenty minutes of class: warm-up, phrase, repeat, run. Longer than anything above it and the first one that will actually make you sweat.",
+          "danceSlug": "flicks"
+        },
+        {
+          "key": "choreo-bounce-back",
+          "title": "Choreo to a track",
+          "requires": [
+            "beginner-routine"
+          ],
+          "description": "A beginner routine set to one song end to end. Learning choreography is its own skill — picking phrases up fast is separate from knowing moves.",
+          "danceSlug": "bounce-back"
+        },
+        {
+          "key": "choreo-long",
+          "title": "Long-form choreography",
+          "requires": [
+            "class-length"
+          ],
+          "description": "Three parts, each broken down, recapped and run to slow music before it speeds up. Thirty-plus minutes of tutorial — treat it as a week of practice, not a session.",
+          "danceSlug": "milkshake"
+        },
+        {
+          "key": "crew-choreo",
+          "title": "Crew-style choreography",
+          "requires": [
+            "choreo-long",
+            "lock-clap",
+            "robot"
+          ],
+          "description": "A Jabbawockeez routine with a tutorial attached. Precision work — the funk-style control from stage four is what makes the hits land together.",
+          "danceSlug": "the-bop"
+        },
+        {
+          "key": "freestyle",
+          "title": "Freestyle a track end to end",
+          "requires": [
+            "crew-choreo",
+            "harlem-shake",
+            "moonwalk",
+            "biz-markie"
+          ],
+          "description": "No counts, no mirror, no routine. One track, bounce running the whole way through, and you change step whenever the music tells you to. Everything above this exists to give you something to reach for when it does — this is the actual goal of the path."
+        }
+      ]
+    }
+  ]
+}
