@@ -88,7 +88,7 @@
                   class="tree__label"
                   [attr.x]="node.labelX"
                   [attr.y]="node.labelY"
-                  [attr.text-anchor]="node.labelAnchor">{{ shortLabel(node) }}</text>
+                  [attr.text-anchor]="node.labelAnchor">{{ node.label }}</text>
               }
             </g>
           }
@@ -131,6 +131,7 @@
     <!-- The page's detail panel, projected in so it rides along into fullscreen — left in the
          page it would simply vanish behind the fullscreened tree. Out of fullscreen this is
          display:contents, so the panel still lays out exactly as if it were a page sibling. -->
-    <div class="tree__aside"><ng-content /></div>
+    <div class="tree__aside" #treeAside [class.has-more]="asideMore()"
+         (scroll)="onAsideScroll()"><ng-content /></div>
   </div>
 }

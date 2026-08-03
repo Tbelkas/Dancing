@@ -17,10 +17,31 @@ const SPREAD_DEG = 142;
 /** Radius of the innermost ring, and the gap between rings. */
 const ROOT_RADIUS = 98;
 const RING_GAP = 80;
-/** Slack around the content so node circles and their labels aren't clipped. */
-const PAD_X = 46;
-const PAD_TOP = 34;
-const PAD_BOTTOM = 26;
+/** Slack around the content, on top of the measured extent of the nodes and their labels. */
+const PAD = 12;
+/** Outermost thing drawn on a node: the selection halo, not the r=19 disc. */
+const NODE_R = 30;
+/**
+ * How far the label sits from the node centre, along the spoke. Clears the selection halo —
+ * at 30 the selected node's label started exactly on the halo's stroke.
+ */
+const LABEL_OUTWARD = 38;
+/**
+ * Rough label metrics, used only to keep the text inside the viewBox. The font is the condensed
+ * bold UI face at 11.5px, measured at 3.98–4.25px per character across the authored paths. The
+ * headroom here is deliberate but not lavish: under-estimating clips the text, and over-
+ * estimating widens the viewBox, which shrinks the whole tree at any given render width.
+ */
+const LABEL_CHAR_W = 4.6;
+const LABEL_ASCENT = 12;
+const LABEL_DESCENT = 4;
+/** Longest label drawn on the tree; the full title lives in the detail panel. */
+const LABEL_MAX_CHARS = 18;
+
+/** The label as drawn — truncated here rather than in the view so the bounds can measure it. */
+function shortLabel(title: string): string {
+  return title.length <= LABEL_MAX_CHARS ? title : `${title.slice(0, LABEL_MAX_CHARS - 1).trimEnd()}…`;
+}
 
 export interface TreeNode {
   step: RoadmapStep;
@@ -32,6 +53,8 @@ export interface TreeNode {
   state: string;
   /** True when this node sits on the outer edge of its branch — nothing depends on it. */
   isLeaf: boolean;
+  /** The label as drawn, already truncated — the full title is in the detail panel. */
+  label: string;
   /** Where the label goes relative to the node, so text never overlaps the circle. */
   labelAnchor: 'start' | 'middle' | 'end';
   labelX: number;
@@ -138,35 +161,56 @@ export function layoutRoadmapTree(roadmap: Roadmap): TreeLayout {
   });
 
   const maxDepth = Math.max(...steps.map(s => s.depth));
-  const minX = Math.min(...raw.map(p => p.x)) - PAD_X;
-  const maxX = Math.max(...raw.map(p => p.x)) + PAD_X;
-  const minY = Math.min(...raw.map(p => p.y)) - PAD_TOP;
-  const maxY = Math.max(...raw.map(p => p.y)) + PAD_BOTTOM;
+
+  /**
+   * Label placement, resolved before the bounds so the bounds can include it. Push the label
+   * outward along the spoke, and away from the circle horizontally so the text of a node on the
+   * left of the fan reads leftward and vice versa.
+   *
+   * The extents matter: on the outermost nodes of the fan the label reaches much further than
+   * the circle does, and a fixed pad never covered it — the text ran off the edge of the viewBox
+   * and was clipped by the svg, with no ellipsis to show that it had been.
+   */
+  const placed = raw.map(p => {
+    const cos = Math.cos(p.a);
+    const labelAnchor: TreeNode['labelAnchor'] = cos < -0.35 ? 'end' : cos > 0.35 ? 'start' : 'middle';
+    const label = shortLabel(p.step.title);
+    const w = label.length * LABEL_CHAR_W;
+    const dx = cos * LABEL_OUTWARD;
+    const dy = Math.sin(p.a) * LABEL_OUTWARD + (labelAnchor === 'middle' ? -6 : 4);
+    return {
+      p, label, labelAnchor, dx, dy,
+      left: p.x + dx - (labelAnchor === 'end' ? w : labelAnchor === 'middle' ? w / 2 : 0),
+      right: p.x + dx + (labelAnchor === 'start' ? w : labelAnchor === 'middle' ? w / 2 : 0),
+      top: p.y + dy - LABEL_ASCENT,
+      bottom: p.y + dy + LABEL_DESCENT
+    };
+  });
+
+  const minX = Math.min(...placed.map(q => Math.min(q.p.x - NODE_R, q.left))) - PAD;
+  const maxX = Math.max(...placed.map(q => Math.max(q.p.x + NODE_R, q.right))) + PAD;
+  const minY = Math.min(...placed.map(q => Math.min(q.p.y - NODE_R, q.top))) - PAD;
+  const maxY = Math.max(...placed.map(q => Math.max(q.p.y + NODE_R, q.bottom))) + PAD;
   const originX = -minX;
   const originY = -minY;
   const width = maxX - minX;
   const height = maxY - minY;
 
-  const nodes: TreeNode[] = raw.map(p => {
-    const x = p.x + originX;
-    const y = p.y + originY;
-    const isLeaf = children.get(p.step.key)!.length === 0;
-    // Push the label outward along the spoke, and away from the circle horizontally so the
-    // text of a node on the left of the fan reads leftward and vice versa.
-    const outward = 30;
-    const cos = Math.cos(p.a);
-    const labelAnchor: TreeNode['labelAnchor'] = cos < -0.35 ? 'end' : cos > 0.35 ? 'start' : 'middle';
+  const nodes: TreeNode[] = placed.map(q => {
+    const x = q.p.x + originX;
+    const y = q.p.y + originY;
     return {
-      step: p.step,
-      key: p.step.key,
+      step: q.p.step,
+      key: q.p.step.key,
       x, y,
-      depth: p.step.depth,
-      stageIndex: p.step.stageIndex,
-      state: p.step.state,
-      isLeaf,
-      labelAnchor,
-      labelX: x + cos * outward,
-      labelY: y + Math.sin(p.a) * outward + (labelAnchor === 'middle' ? -6 : 4)
+      depth: q.p.step.depth,
+      stageIndex: q.p.step.stageIndex,
+      state: q.p.step.state,
+      isLeaf: children.get(q.p.step.key)!.length === 0,
+      label: q.label,
+      labelAnchor: q.labelAnchor,
+      labelX: x + q.dx,
+      labelY: y + q.dy
     };
   });
 

@@ -277,6 +277,32 @@ test.describe('authenticated', () => {
     await expect(button).toHaveAttribute('aria-pressed', 'false');
   });
 
+  /**
+   * A panel taller than the screen used to stop dead at the bottom edge, which reads as the end
+   * of the text rather than the end of the box — you'd assume you'd seen everything. The fade is
+   * driven by a measured class, so this asserts the measurement: present when there is more,
+   * gone at the bottom. A fade that never cleared would be just as misleading.
+   *
+   * The window is deliberately short so any step's panel overflows; asserting on a particular
+   * move's content would tie the test to authored curriculum that gets re-cut.
+   */
+  test('a detail panel taller than the screen shows there is more below', async ({ authedPage: page }) => {
+    await blockEmbeds(page);
+    await page.setViewportSize({ width: 1100, height: 400 });
+    await page.goto('/roadmaps/house');
+    await expect(page.getByTestId('roadmap-tree')).toBeVisible();
+
+    await page.getByTestId('tree-fullscreen').click();
+    await expect(page.getByTestId('tree-fullscreen')).toHaveAttribute('aria-pressed', 'true');
+    await page.getByTestId('tree-node').first().click();
+
+    const aside = page.locator('.tree__aside');
+    await expect(aside, 'a panel that overflows must advertise it').toHaveClass(/has-more/);
+
+    await aside.evaluate(el => { el.scrollTop = el.scrollHeight; });
+    await expect(aside, 'and stop advertising it once you reach the end').not.toHaveClass(/has-more/);
+  });
+
   test('the list view is reachable and shows the same steps as branches', async ({ authedPage: page }) => {
     await blockEmbeds(page);
     await page.goto('/roadmaps/house');

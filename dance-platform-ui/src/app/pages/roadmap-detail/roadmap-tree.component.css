@@ -292,17 +292,52 @@
    Scrolls on its own — a long step (videos + prerequisites) must not stretch the tree column. */
 .tree:fullscreen .tree__aside {
   display: block;
-  flex: 0 0 clamp(300px, 26vw, 420px);
+  flex: 0 0 clamp(340px, 27vw, 560px);
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-light) transparent;
 }
 
-/* Signed out no panel is projected, and the empty column would otherwise hold 300px of the
+.tree:fullscreen .tree__aside::-webkit-scrollbar { width: 6px; }
+.tree:fullscreen .tree__aside::-webkit-scrollbar-thumb {
+  background: var(--color-border-light);
+  border-radius: 3px;
+}
+.tree:fullscreen .tree__aside::-webkit-scrollbar-track { background: transparent; }
+
+/* Content continues below the fold. Without this the panel just stopped at the screen edge,
+   which reads as the end of the text rather than the end of the box. Cleared at the bottom of
+   the scroll, so a panel that fits is never decorated. */
+.tree:fullscreen .tree__aside.has-more {
+  mask-image: linear-gradient(#000 calc(100% - 64px), transparent);
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 64px), transparent);
+}
+
+/* Signed out no panel is projected, and the empty column would otherwise hold 340px of the
    screen open for nothing. (Comment anchors left by @if don't count against :empty.) */
 .tree:fullscreen .tree__aside:empty {
   display: none;
 }
+
+/* The panel is the page's, so reaching it means piercing encapsulation — the same thing the
+   video player does for its own fullscreen (video-player.component.css). Scoped under
+   .tree:fullscreen, which carries this component's attribute, so it can't leak past it.
+
+   Fullscreen is a much bigger canvas than the page column the panel was sized for, and type
+   that doesn't grow with it reads as small print in a corner. */
+.tree:fullscreen ::ng-deep .detail {
+  margin: 0;
+  padding: 24px 26px 26px;
+}
+
+.tree:fullscreen ::ng-deep .detail__title { font-size: 1.85rem; }
+.tree:fullscreen ::ng-deep .detail__branch { font-size: 0.82rem; }
+.tree:fullscreen ::ng-deep .detail .step__desc { font-size: 1.04rem; }
+.tree:fullscreen ::ng-deep .detail .step__note,
+.tree:fullscreen ::ng-deep .detail .detail__empty { font-size: 0.98rem; }
+.tree:fullscreen ::ng-deep .detail .video__title { font-size: 0.95rem; }
 
 @media (prefers-reduced-motion: reduce) {
   .tree__node,

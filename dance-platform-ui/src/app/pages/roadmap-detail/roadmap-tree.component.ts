@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, computed, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Roadmap, RoadmapStep } from '../../models/roadmap.model';
 import { TreeNode, layoutRoadmapTree } from '../../core/utils/roadmap-tree.layout';
@@ -16,7 +16,7 @@ const LEGEND_KEY = 'dp_roadmap_legend';
   templateUrl: './roadmap-tree.component.html',
   styleUrls: ['./roadmap-tree.component.css']
 })
-export class RoadmapTreeComponent implements OnInit, OnDestroy {
+export class RoadmapTreeComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly roadmapSignal = signal<Roadmap | null>(null);
 
   @Input({ required: true }) set roadmap(value: Roadmap) {
@@ -26,6 +26,8 @@ export class RoadmapTreeComponent implements OnInit, OnDestroy {
   /** Key of the step the page currently has open, so the tree can ring it. */
   @Input() set selectedKey(value: string | null) {
     this.selected.set(value);
+    // A different step means different panel content, so the overflow state is stale.
+    this.scheduleAsideMeasure();
   }
 
   @Output() stepSelected = new EventEmitter<RoadmapStep>();
@@ -73,14 +75,59 @@ export class RoadmapTreeComponent implements OnInit, OnDestroy {
   /** Esc and the browser's own exit affordance both bypass the button — follow the document. */
   private readonly fullscreenHandler = () => {
     this.isFullscreen.set(document.fullscreenElement != null);
+    this.scheduleAsideMeasure();
   };
+
+  /**
+   * Whether the detail panel has content below the fold. In fullscreen the panel is capped by
+   * the screen height, and a long step simply ran off the bottom edge with nothing to say so —
+   * it read as the end of the text. This drives a fade at the bottom edge; `has-more` clears
+   * once you reach the end, so a panel that fits is never decorated.
+   */
+  @ViewChild('treeAside') private treeAside?: ElementRef<HTMLElement>;
+  protected readonly asideMore = signal(false);
+
+  protected onAsideScroll(): void {
+    this.measureAside();
+  }
+
+  private measureAside(): void {
+    const el = this.treeAside?.nativeElement;
+    // Out of fullscreen the aside is display:contents and never scrolls, so scrollHeight
+    // tracks clientHeight and this is false — no need to special-case it.
+    this.asideMore.set(!!el && el.scrollHeight - el.clientHeight - el.scrollTop > 1);
+  }
+
+  /** Re-measure after the DOM settles — entering fullscreen and swapping step both resize it. */
+  private scheduleAsideMeasure(): void {
+    setTimeout(() => this.measureAside());
+  }
+
+  private readonly resizeHandler = () => this.measureAside();
+  private asideObserver?: ResizeObserver;
 
   ngOnInit(): void {
     document.addEventListener('fullscreenchange', this.fullscreenHandler);
+    window.addEventListener('resize', this.resizeHandler);
+  }
+
+  /**
+   * The panel's height also changes from inside it — expanding a step's videos, say — and that
+   * click never reaches this component. An observer catches those; the scroll and selection
+   * hooks alone would leave the fade stale.
+   */
+  ngAfterViewInit(): void {
+    const el = this.treeAside?.nativeElement;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    this.asideObserver = new ResizeObserver(() => this.measureAside());
+    this.asideObserver.observe(el);
+    if (el.firstElementChild) this.asideObserver.observe(el.firstElementChild);
   }
 
   ngOnDestroy(): void {
     document.removeEventListener('fullscreenchange', this.fullscreenHandler);
+    window.removeEventListener('resize', this.resizeHandler);
+    this.asideObserver?.disconnect();
     // Navigating away from a fullscreened tree would otherwise leave the next page fullscreen.
     if (document.fullscreenElement === this.treeRoot?.nativeElement) void document.exitFullscreen();
   }
@@ -146,12 +193,6 @@ export class RoadmapTreeComponent implements OnInit, OnDestroy {
    */
   protected select(node: TreeNode): void {
     this.stepSelected.emit(node.step);
-  }
-
-  /** Short label for the node; the full title lives in the detail panel and the aria-label. */
-  protected shortLabel(node: TreeNode): string {
-    const title = node.step.title;
-    return title.length <= 18 ? title : `${title.slice(0, 17).trimEnd()}…`;
   }
 
   protected ariaLabel(node: TreeNode): string {
