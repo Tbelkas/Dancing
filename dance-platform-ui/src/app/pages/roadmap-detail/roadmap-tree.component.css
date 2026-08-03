@@ -167,6 +167,39 @@
 
 /* --- Legend --- */
 
+/* Collapsed to a single quiet button; the swatches only appear when asked for. */
+.tree__key {
+  margin-top: 8px;
+}
+
+.tree__key-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+
+  &:hover {
+    color: var(--color-text);
+    border-color: var(--color-border-light);
+  }
+}
+
+.tree__key-chevron {
+  font-size: 0.62rem;
+  opacity: 0.7;
+}
+
 .tree__legend {
   display: flex;
   flex-wrap: wrap;

@@ -95,11 +95,23 @@
       </svg>
     </div>
 
-    <ul class="tree__legend" aria-label="Legend">
-      <li><span class="key key--learned"></span>Learned</li>
-      <li><span class="key key--available"></span>Ready</li>
-      <li><span class="key key--locked"></span>Needs an earlier move</li>
-      <li><span class="key key--pending"></span>No video yet</li>
-    </ul>
+    <!-- The key is read once and then never again, so it stays folded away by default and
+         remembers being opened. Four dot colours don't earn permanent space under the tree. -->
+    <div class="tree__key">
+      <button type="button" class="tree__key-toggle" (click)="toggleLegend()"
+              [attr.aria-expanded]="legendOpen()" aria-controls="tree-legend">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i> Key
+        <i class="fa-solid tree__key-chevron" aria-hidden="true"
+           [class.fa-chevron-up]="legendOpen()" [class.fa-chevron-down]="!legendOpen()"></i>
+      </button>
+      @if (legendOpen()) {
+        <ul class="tree__legend" id="tree-legend" aria-label="Legend">
+          <li><span class="key key--learned"></span>Learned</li>
+          <li><span class="key key--available"></span>Ready</li>
+          <li><span class="key key--locked"></span>Needs an earlier move</li>
+          <li><span class="key key--pending"></span>No video yet</li>
+        </ul>
+      }
+    </div>
   </div>
 }

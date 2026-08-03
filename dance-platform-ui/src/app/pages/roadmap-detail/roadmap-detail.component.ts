@@ -14,6 +14,7 @@ import { SignInDialogComponent } from '../../shared/components/sign-in-dialog/si
 
 type RoadmapView = 'tree' | 'list';
 const VIEW_KEY = 'dp_roadmap_view';
+const BRANCHES_KEY = 'dp_roadmap_branches';
 
 @Component({
   selector: 'app-roadmap-detail',
@@ -34,6 +35,12 @@ export class RoadmapDetailComponent implements OnInit {
   collapsed = signal<Set<number>>(new Set());
   /** The sign-in dialog, opened by a signed-out visitor touching anything on the tree. */
   signInOpen = signal(false);
+  /**
+   * The branch blurbs under the detail panel. Closed by default: six titles and six
+   * paragraphs is the tallest block on the page, and open it buries whatever the user just
+   * clicked on the tree. Remembered, so anyone reading the curriculum keeps it open.
+   */
+  branchesOpen = signal(false);
 
   /**
    * Signed out the page is a teaser: the shape of the path and nothing else. The list view,
@@ -65,6 +72,9 @@ export class RoadmapDetailComponent implements OnInit {
     return [...(ready.length > 0 ? ready : unlearned)].sort((a, b) => a.depth - b.depth)[0] ?? null;
   });
 
+  /** Branch titles on one line, so the collapsed row still says what the path covers. */
+  branchSummary = computed(() => (this.roadmap()?.stages ?? []).map(s => s.title).join(' · '));
+
   /** The step behind the tree's detail panel. */
   selectedStep = computed(() => {
     const key = this.selectedKey();
@@ -83,6 +93,7 @@ export class RoadmapDetailComponent implements OnInit {
   ngOnInit(): void {
     const stored = localStorage.getItem(VIEW_KEY);
     if (stored === 'tree' || stored === 'list') this.storedView.set(stored);
+    this.branchesOpen.set(localStorage.getItem(BRANCHES_KEY) === '1');
 
     this.load();
   }
@@ -136,6 +147,11 @@ export class RoadmapDetailComponent implements OnInit {
       if (!next.delete(step.id)) next.add(step.id);
       return next;
     });
+  }
+
+  toggleBranches(): void {
+    this.branchesOpen.update(open => !open);
+    localStorage.setItem(BRANCHES_KEY, this.branchesOpen() ? '1' : '0');
   }
 
   setView(view: RoadmapView): void {

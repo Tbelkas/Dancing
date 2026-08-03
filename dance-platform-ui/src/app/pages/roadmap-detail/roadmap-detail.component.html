@@ -77,19 +77,9 @@
       }
 
       @if (auth.isAuthenticated()) {
-      <!-- Branch names, matching the tree's stage grouping. -->
-      <ol class="branches" aria-label="Branches">
-        @for (stage of r.stages; track stage.id; let si = $index) {
-          <li class="branch">
-            <span class="branch__index" aria-hidden="true">{{ si + 1 }}</span>
-            <div>
-              <h3 class="branch__title">{{ stage.title }}</h3>
-              @if (stage.description) { <p class="branch__desc">{{ stage.description }}</p> }
-            </div>
-          </li>
-        }
-      </ol>
-
+      <!-- The panel sits directly under the tree: clicking a node has to show its answer
+           without a scroll, so nothing goes between them. The branch blurbs read once and
+           then only add distance, so they moved below and fold away. -->
       <section class="detail" data-testid="roadmap-detail-panel" aria-live="polite">
         @if (selectedStep(); as step) {
           <div class="detail__head">
@@ -118,6 +108,35 @@
           <ng-container *ngTemplateOutlet="stepBody; context: { $implicit: step, styleId: r.styleId }" />
         } @else {
           <p class="detail__empty">Pick a move on the tree to see what it is and what teaches it.</p>
+        }
+      </section>
+
+      <!-- Branch names, matching the tree's stage grouping. Collapsed by default and
+           remembered — six paragraphs of curriculum blurb is reference material, not
+           something you re-read every visit. -->
+      <section class="branches-panel">
+        <button type="button" class="branches-panel__toggle" (click)="toggleBranches()"
+                [attr.aria-expanded]="branchesOpen()" aria-controls="roadmap-branches">
+          <i class="fa-solid branches-panel__chevron" aria-hidden="true"
+             [class.fa-chevron-up]="branchesOpen()" [class.fa-chevron-down]="!branchesOpen()"></i>
+          <span class="branches-panel__label">The {{ r.stageCount }} branches</span>
+          @if (!branchesOpen()) {
+            <span class="branches-panel__peek">{{ branchSummary() }}</span>
+          }
+        </button>
+
+        @if (branchesOpen()) {
+          <ol class="branches" id="roadmap-branches" aria-label="Branches">
+            @for (stage of r.stages; track stage.id; let si = $index) {
+              <li class="branch">
+                <span class="branch__index" aria-hidden="true">{{ si + 1 }}</span>
+                <div>
+                  <h3 class="branch__title">{{ stage.title }}</h3>
+                  @if (stage.description) { <p class="branch__desc">{{ stage.description }}</p> }
+                </div>
+              </li>
+            }
+          </ol>
         }
       </section>
       }

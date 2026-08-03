@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Roadmap, RoadmapStep } from '../../models/roadmap.model';
 import { TreeNode, layoutRoadmapTree } from '../../core/utils/roadmap-tree.layout';
 
+const LEGEND_KEY = 'dp_roadmap_legend';
+
 /**
  * The roadmap as a radial skill tree. Presentation only — it owns hover/focus and the geometry,
  * and hands selection back up so the page can render the detail panel and the status controls.
@@ -30,6 +32,18 @@ export class RoadmapTreeComponent {
 
   protected readonly selected = signal<string | null>(null);
   protected readonly hovered = signal<string | null>(null);
+
+  /**
+   * The colour key. Folded away by default — it's a one-time read, and left open it costs the
+   * same vertical space on every visit as the detail panel it pushes down. Remembered so the
+   * people who do want it standing open only have to say so once.
+   */
+  protected readonly legendOpen = signal(localStorage.getItem(LEGEND_KEY) === '1');
+
+  protected toggleLegend(): void {
+    this.legendOpen.update(open => !open);
+    localStorage.setItem(LEGEND_KEY, this.legendOpen() ? '1' : '0');
+  }
 
   protected readonly layout = computed(() => {
     const roadmap = this.roadmapSignal();
