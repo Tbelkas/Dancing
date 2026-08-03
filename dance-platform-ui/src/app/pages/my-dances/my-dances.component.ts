@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ElementRef, HostListener, ViewChild, computed, effect, signal } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, HostListener, ViewChild, WritableSignal, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -148,6 +148,15 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
     return [...groups].map(([styleName, dances]) => ({ styleName, dances }));
   });
 
+  // Cards mid-animation. Kept as id sets rather than a flag on the card because the
+  // cards are recomputed objects — the transition has to survive their identity changing.
+  // Both durations must stay >= the CSS ones in my-dances.component.css.
+  private readonly DISMISS_ANIM_MS = 180;
+  private readonly RESTORE_ANIM_MS = 220;
+  readonly dismissingIds = signal<ReadonlySet<number>>(new Set());
+  readonly restoringIds = signal<ReadonlySet<number>>(new Set());
+  private dismissTimers = new Map<number, ReturnType<typeof setTimeout>>();
+
   toggleHistoryGrouped(): void {
     const grouped = !this.historyGrouped();
     this.historyGrouped.set(grouped);
@@ -269,14 +278,49 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   dismissContinue(danceId: number, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
+    if (this.dismissingIds().has(danceId)) return;
     const name = this.continueLearning().find(d => d.id === danceId)?.name;
     // Purely local, so the removal has already happened and there is nothing to defer —
     // undo just puts the trail back the way it was.
     const before = this.recentDances.snapshot();
-    this.recentDances.remove(danceId);
+
+    // Let the card fade before it leaves the list; the real removal waits out the
+    // transition so the row doesn't close up under a still-visible card.
+    this.setCardFlag(this.dismissingIds, danceId, true);
+    this.dismissTimers.set(danceId, setTimeout(() => {
+      this.dismissTimers.delete(danceId);
+      this.recentDances.remove(danceId);
+      this.setCardFlag(this.dismissingIds, danceId, false);
+    }, this.DISMISS_ANIM_MS));
+
     this.toast.undoable(name ? `Removed "${name}" from Continue learning.` : 'Removed from Continue learning.', {
       commit: () => {},
-      undo: () => this.recentDances.restore(before)
+      undo: () => this.undoDismiss(danceId, before)
+    });
+  }
+
+  /**
+   * Undo can land either mid-fade (card still on screen — just stop fading it) or after
+   * the card is gone, in which case it comes back on a matching fade-in.
+   */
+  private undoDismiss(danceId: number, before: RecentDance[]): void {
+    const pending = this.dismissTimers.get(danceId);
+    if (pending !== undefined) {
+      clearTimeout(pending);
+      this.dismissTimers.delete(danceId);
+      this.setCardFlag(this.dismissingIds, danceId, false);
+      return;
+    }
+    this.recentDances.restore(before);
+    this.setCardFlag(this.restoringIds, danceId, true);
+    setTimeout(() => this.setCardFlag(this.restoringIds, danceId, false), this.RESTORE_ANIM_MS);
+  }
+
+  private setCardFlag(set: WritableSignal<ReadonlySet<number>>, danceId: number, on: boolean): void {
+    set.update(ids => {
+      const next = new Set(ids);
+      if (on) next.add(danceId); else next.delete(danceId);
+      return next;
     });
   }
 

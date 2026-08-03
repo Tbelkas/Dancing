@@ -58,7 +58,9 @@
     </section>
 
     <ng-template #continueCard let-dance>
-      <a class="card continue-card" [routerLink]="dance.slug | dancePath:dance.styleSlug" [queryParams]="dance.resume">
+      <a class="card continue-card" [class.is-dismissing]="dismissingIds().has(dance.id)"
+        [class.is-restoring]="restoringIds().has(dance.id)"
+        [routerLink]="dance.slug | dancePath:dance.styleSlug" [queryParams]="dance.resume">
         <span class="continue-card__media">
           @if (continueThumbnailUrl(dance); as thumb) {
             <img [src]="thumb" alt="" loading="lazy" class="continue-card__thumb" (error)="onContinueThumbError(dance.id)" />

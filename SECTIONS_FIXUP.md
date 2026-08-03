@@ -344,9 +344,17 @@ Goal: maximize chips across as many dance categories as possible.
   (same ytid, now only on video 2026, which is chipped).
 
 <!-- CHIP-QUEUE:START -->
-## Auto-detected chip queue _(last checked 2026-07-13 18:17)_
+## Auto-detected chip queue _(last checked 2026-08-03 09:00)_
 
-No videos awaiting chips. ✅
+3 tutorial video(s) awaiting section chips (0 new since last check):
+
+| VideoDbId | YtId | Dance |
+|---|---|---|
+| 319 | zdbG5BFuBLE | Waacking |
+| 2110 | i6TzP2COtow | Balance & Stretch |
+| 2111 | 1fGERdWc_6Q | Go Down |
+
+_Auto-processed daily at 09:15 by the `DanceChipAuto` task (headless `/find-chips`); or run `/find-chips` manually._
 <!-- CHIP-QUEUE:END -->
 
 ## Chip-everything push (2026-07-13)
