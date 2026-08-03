@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Roadmap, RoadmapStep } from '../../models/roadmap.model';
 import { TreeNode, layoutRoadmapTree } from '../../core/utils/roadmap-tree.layout';
@@ -16,7 +16,7 @@ const LEGEND_KEY = 'dp_roadmap_legend';
   templateUrl: './roadmap-tree.component.html',
   styleUrls: ['./roadmap-tree.component.css']
 })
-export class RoadmapTreeComponent {
+export class RoadmapTreeComponent implements OnInit, OnDestroy {
   private readonly roadmapSignal = signal<Roadmap | null>(null);
 
   @Input({ required: true }) set roadmap(value: Roadmap) {
@@ -43,6 +43,46 @@ export class RoadmapTreeComponent {
   protected toggleLegend(): void {
     this.legendOpen.update(open => !open);
     localStorage.setItem(LEGEND_KEY, this.legendOpen() ? '1' : '0');
+  }
+
+  /**
+   * The tree is the one thing on the page that is always too small — 31 nodes on a fan, capped
+   * by the column width, with the labels suppressed to stop them colliding. Fullscreen gives it
+   * the whole viewport, which is enough room for the lineage highlighting to actually be read.
+   *
+   * The whole `.tree` block goes fullscreen rather than the bare <svg>: a fullscreened <svg> takes
+   * the page background with it (black) and leaves the key behind.
+   */
+  @ViewChild('treeRoot') private treeRoot?: ElementRef<HTMLElement>;
+
+  protected readonly isFullscreen = signal(false);
+
+  /** iOS Safari fullscreens only <video>, so the button is hidden there rather than left dead. */
+  protected get canFullscreen(): boolean {
+    return typeof document !== 'undefined' && document.fullscreenEnabled;
+  }
+
+  protected toggleFullscreen(): void {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen();
+    } else {
+      void this.treeRoot?.nativeElement.requestFullscreen();
+    }
+  }
+
+  /** Esc and the browser's own exit affordance both bypass the button — follow the document. */
+  private readonly fullscreenHandler = () => {
+    this.isFullscreen.set(document.fullscreenElement != null);
+  };
+
+  ngOnInit(): void {
+    document.addEventListener('fullscreenchange', this.fullscreenHandler);
+  }
+
+  ngOnDestroy(): void {
+    document.removeEventListener('fullscreenchange', this.fullscreenHandler);
+    // Navigating away from a fullscreened tree would otherwise leave the next page fullscreen.
+    if (document.fullscreenElement === this.treeRoot?.nativeElement) void document.exitFullscreen();
   }
 
   protected readonly layout = computed(() => {

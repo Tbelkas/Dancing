@@ -61,6 +61,41 @@ test.describe('roadmaps', () => {
     await expect(page.getByTestId('roadmap-tree-hint')).toBeVisible();
   });
 
+  /**
+   * The fullscreen button is on the tree component, so it works signed out too. Asserted through
+   * `document.fullscreenElement` rather than a screenshot: the useful guarantee is that the button
+   * fullscreens *the tree block* and not the bare <svg> or the whole page.
+   *
+   * Exit is driven by the button rather than Escape. Escape works in a real browser, but it exits
+   * fullscreen as browser chrome — a synthesized keypress doesn't trigger it, so asserting on it
+   * here would only ever test Playwright. Both routes out land on the same `fullscreenchange`
+   * listener, which is the part that could actually regress.
+   */
+  test('the tree can be opened full screen and closed again', async ({ page }) => {
+    await page.goto('/roadmaps/house');
+    await expect(page.getByTestId('roadmap-tree')).toBeVisible();
+
+    const button = page.getByTestId('tree-fullscreen');
+    await expect(button).toHaveAttribute('aria-pressed', 'false');
+
+    await button.click();
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
+    await expect(button).toHaveText(/exit full screen/i);
+    expect(
+      await page.evaluate(() => document.fullscreenElement?.getAttribute('data-testid')),
+      'the tree block should be the fullscreen element, not the svg or the body'
+    ).toBe('roadmap-tree');
+
+    // The nodes have to survive the switch — a tree that fullscreens into a blank panel is
+    // the failure mode when the svg loses its height.
+    expect(await page.getByTestId('tree-node').count()).toBeGreaterThan(1);
+
+    await button.click();
+    await expect(button).toHaveAttribute('aria-pressed', 'false');
+    await expect(button).toHaveText(/^\s*full screen\s*$/i);
+    expect(await page.evaluate(() => document.fullscreenElement)).toBeNull();
+  });
+
   test('clicking a move asks a signed-out visitor to sign in', async ({ page }) => {
     await page.goto('/roadmaps/house');
     await expect(page.getByTestId('roadmap-title')).toBeVisible();

@@ -172,6 +172,12 @@
   margin-top: 8px;
 }
 
+.tree__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .tree__key-toggle {
   display: inline-flex;
   align-items: center;
@@ -231,6 +237,37 @@
 .key--available { border: 2px solid var(--color-accent); }
 .key--locked { border: 2px dashed var(--color-border-light); }
 .key--pending { background: var(--color-music); width: 8px; height: 8px; }
+
+/* --- Fullscreen ---
+   Fullscreening the block means it no longer sits in the page's column, so it has to supply the
+   background and padding the page was giving it. The svg then scales to the viewport instead of
+   keeping its 760px floor — preserveAspectRatio letterboxes it, so the fan stays circular. */
+
+.tree:fullscreen {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 16px 20px;
+  background: var(--color-bg);
+}
+
+.tree:fullscreen .tree__scroll {
+  /* min-height:0 lets the flex child shrink; without it the svg's intrinsic height wins
+     and pushes the key row off the bottom of the screen. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tree:fullscreen .tree__svg {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+
+.tree:fullscreen .tree__key {
+  flex: 0 0 auto;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .tree__node,
