@@ -13,8 +13,8 @@
     <section class="continue-learning">
       <div class="continue-learning__head">
         <div class="continue-learning__heading">
-          <h2 class="section-heading continue-learning__title">Continue learning</h2>
-          <p class="continue-learning__sub">Pick up where you left off</p>
+          <h2 class="section-heading continue-learning__title">Recently viewed</h2>
+          <p class="continue-learning__sub">Dances you've opened lately, newest first</p>
         </div>
         <div class="continue-nav">
           <button type="button" class="continue-toggle" [class.is-on]="historyGrouped()"
@@ -76,7 +76,7 @@
           }
         </span>
         <button type="button" class="continue-card__dismiss" (click)="dismissContinue(dance.id, $event)"
-          [attr.aria-label]="'Remove ' + dance.name + ' from Continue learning'">
+          [attr.aria-label]="'Remove ' + dance.name + ' from Recently viewed'">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </a>

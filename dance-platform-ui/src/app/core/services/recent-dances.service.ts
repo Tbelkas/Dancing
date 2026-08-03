@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-/** A dance the user recently opened, remembered locally so we can offer "Continue Learning". */
+/** A dance the user recently opened, remembered locally to build the "Recently viewed" rows. */
 export interface RecentDance {
   id: number;
   name: string;
@@ -15,19 +15,23 @@ export interface RecentDance {
   videoId?: number;
   /** epoch ms of the last time the dance was opened */
   viewedAt: number;
-  /** snapshot of learned status — learned dances are dropped from "Continue Learning" */
+  /** snapshot of learned status — learned dances are dropped from "Recently viewed" */
   learned: boolean;
 }
 
 /**
  * Tracks the dances the user has clicked into, in this browser, so My Dances can surface a
- * "Continue Learning" row of the most recent ones they haven't learned yet. Purely client-side
+ * "Recently viewed" row of the most recent ones they haven't learned yet (and so browse can
+ * fall back to the same row when the user has nothing marked in progress). Purely client-side
  * (localStorage); learned status is kept in sync from the dance-detail page.
+ *
+ * Not to be confused with browse's "Continue learning" rail, which is a server query for
+ * status=inprogress and shares nothing with this trail but the resume link params.
  */
 @Injectable({ providedIn: 'root' })
 export class RecentDancesService {
   private readonly STORAGE_KEY = 'dp_recent_dances';
-  /** The "Continue learning" carousel scrolls through history, so keep a deeper trail. */
+  /** The "Recently viewed" carousel scrolls through history, so keep a deeper trail. */
   private readonly MAX_ENTRIES = 30;
 
   private readonly _recent = signal<RecentDance[]>(this.read());
@@ -68,7 +72,7 @@ export class RecentDancesService {
     this.commit(list.map(d => d.id === danceId ? { ...d, videoId } : d));
   }
 
-  /** Lets the user dismiss a dance from the "Continue Learning" row. */
+  /** Lets the user dismiss a dance from the "Recently viewed" row. */
   remove(id: number): void {
     this.commit(this._recent().filter(d => d.id !== id));
   }

@@ -99,11 +99,11 @@ test.describe('authenticated', () => {
    * ToastService machinery but would write to the production database, so this stands in
    * for all of them — see the file header.
    *
-   * The card is seeded rather than earned by browsing: "Continue learning" is built from
+   * The card is seeded rather than earned by browsing: "Recently viewed" is built from
    * a local trail, so a synthetic entry gives the test a card that is guaranteed present
    * and belongs to no real dance.
    */
-  test('dismissing a Continue learning card offers an undo that puts it back', async ({ authedPage: page }) => {
+  test('dismissing a Recently viewed card offers an undo that puts it back', async ({ authedPage: page }) => {
     const probe = {
       id: 999_001,
       name: 'E2E Undo Probe',
@@ -121,7 +121,7 @@ test.describe('authenticated', () => {
     const card = page.locator('.continue-card', { hasText: probe.name });
     await expect(card).toBeVisible();
 
-    await page.getByLabel(`Remove ${probe.name} from Continue learning`).click();
+    await page.getByLabel(`Remove ${probe.name} from Recently viewed`).click();
     await expect(card, 'the card should go straight away, before any undo window closes').toHaveCount(0);
 
     const undo = page.getByTestId('toast-undo');
@@ -146,7 +146,7 @@ test.describe('authenticated', () => {
     }, probe);
 
     await page.goto('/my-dances');
-    await page.getByLabel(`Remove ${probe.name} from Continue learning`).click();
+    await page.getByLabel(`Remove ${probe.name} from Recently viewed`).click();
 
     // Toast self-closes after its window; the removal must survive it.
     await expect(page.getByTestId('toast-undo')).toHaveCount(0, { timeout: 15_000 });
@@ -158,7 +158,7 @@ test.describe('authenticated', () => {
    * "By style" regroups the same local trail — nothing server-side — so a pair of synthetic
    * entries in two styles is enough to prove the grouping and that the choice is remembered.
    */
-  test('Continue learning can be regrouped by style, and remembers the choice', async ({ authedPage: page }) => {
+  test('Recently viewed can be regrouped by style, and remembers the choice', async ({ authedPage: page }) => {
     const probes = [
       { id: 999_003, name: 'E2E Group Probe House', slug: 'e2e-group-house', styleSlug: 'house', styleName: 'House', viewedAt: Date.now(), learned: false },
       { id: 999_004, name: 'E2E Group Probe Hip-hop', slug: 'e2e-group-hiphop', styleSlug: 'hip-hop', styleName: 'Hip-hop', viewedAt: Date.now() - 1000, learned: false },

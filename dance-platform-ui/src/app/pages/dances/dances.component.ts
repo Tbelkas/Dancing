@@ -597,7 +597,7 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.searchResults.update(list =>
       list.map(d => d.id === dance.id ? { ...d, ...flags } : d)
     );
-    // Keep the local recently-viewed trail in step so "Continue learning" rails don't
+    // Keep the local recently-viewed trail in step so the "Recently viewed" rows don't
     // briefly show a dance that the server then reports as learned (or vice versa).
     this.recentDances.setLearned(dance.id, flags.isLearned);
 

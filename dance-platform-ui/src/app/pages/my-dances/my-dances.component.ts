@@ -96,7 +96,7 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
 
   readonly myStyleIds = computed(() => new Set(this.myStyles().map(ms => ms.styleId)));
 
-  /** Upper bound of "Continue Learning" cards; the carousel scrolls through them. */
+  /** Upper bound of "Recently viewed" cards; the carousel scrolls through them. */
   private readonly CONTINUE_LIMIT = 20;
   private recThumbFailed = signal<Set<number>>(new Set());
 
@@ -106,7 +106,9 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   );
 
   /**
-   * Most-recently-opened dances the user hasn't learned yet — "pick up where you left off".
+   * Most-recently-opened dances the user hasn't learned yet — the local view history, shown as
+   * "Recently viewed". Distinct from the browse page's "Continue learning" rail, which is the
+   * server's in-progress list; only the browse *fallback* rail shares this source.
    * Each card carries the query params that reopen the video they were last watching (when we
    * know it), built here so the objects stay reference-stable across change detection.
    */
@@ -118,7 +120,7 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
       .map(d => ({ ...d, resume: d.videoId ? { v: d.videoId } : {} }));
   });
 
-  // Continue-learning carousel: the track scrolls horizontally; arrows show only
+  // Recently-viewed carousel: the track scrolls horizontally; arrows show only
   // when it overflows and disable once you hit either end.
   @ViewChild('historyTrack') private historyTrack?: ElementRef<HTMLElement>;
   readonly historyOverflow = signal(false);
@@ -293,7 +295,7 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
       this.setCardFlag(this.dismissingIds, danceId, false);
     }, this.DISMISS_ANIM_MS));
 
-    this.toast.undoable(name ? `Removed "${name}" from Continue learning.` : 'Removed from Continue learning.', {
+    this.toast.undoable(name ? `Removed "${name}" from Recently viewed.` : 'Removed from Recently viewed.', {
       commit: () => {},
       undo: () => this.undoDismiss(danceId, before)
     });
