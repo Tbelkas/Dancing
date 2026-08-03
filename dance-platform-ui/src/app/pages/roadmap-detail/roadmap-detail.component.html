@@ -68,19 +68,16 @@
     }
 
     @if (view() === 'tree') {
-      <app-roadmap-tree [roadmap]="r" [selectedKey]="selectedKey()" (stepSelected)="onTreeSelect($event)" />
-
-      @if (!auth.isAuthenticated()) {
-        <p class="tree-hint" data-testid="roadmap-tree-hint">
-          Pick any move to see what teaches it — you'll need an account to follow the path.
-        </p>
-      }
-
-      @if (auth.isAuthenticated()) {
       <!-- The panel sits directly under the tree: clicking a node has to show its answer
            without a scroll, so nothing goes between them. The branch blurbs read once and
-           then only add distance, so they moved below and fold away. -->
-      <section class="detail" data-testid="roadmap-detail-panel" aria-live="polite">
+           then only add distance, so they moved below and fold away.
+
+           It's projected into the tree rather than written after it so that fullscreening the
+           tree takes the panel with it — see .tree__aside. Nothing about the normal layout
+           changes; the projection wrapper is display:contents until fullscreen. -->
+      <app-roadmap-tree [roadmap]="r" [selectedKey]="selectedKey()" (stepSelected)="onTreeSelect($event)">
+        @if (auth.isAuthenticated()) {
+        <section class="detail" data-testid="roadmap-detail-panel" aria-live="polite">
         @if (selectedStep(); as step) {
           <div class="detail__head">
             <span class="detail__state detail__state--{{ step.state }}">
@@ -109,8 +106,17 @@
         } @else {
           <p class="detail__empty">Pick a move on the tree to see what it is and what teaches it.</p>
         }
-      </section>
+        </section>
+        }
+      </app-roadmap-tree>
 
+      @if (!auth.isAuthenticated()) {
+        <p class="tree-hint" data-testid="roadmap-tree-hint">
+          Pick any move to see what teaches it — you'll need an account to follow the path.
+        </p>
+      }
+
+      @if (auth.isAuthenticated()) {
       <!-- Branch names, matching the tree's stage grouping. Collapsed by default and
            remembered — six paragraphs of curriculum blurb is reference material, not
            something you re-read every visit. -->

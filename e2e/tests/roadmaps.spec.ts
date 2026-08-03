@@ -90,6 +90,13 @@ test.describe('roadmaps', () => {
     // the failure mode when the svg loses its height.
     expect(await page.getByTestId('tree-node').count()).toBeGreaterThan(1);
 
+    // Signed in the right-hand column holds the detail panel. There is no panel signed out, so
+    // the column has to collapse rather than hold a third of the screen open for nothing.
+    const svg = (await page.locator('.tree__svg').boundingBox())!;
+    const viewport = page.viewportSize()!;
+    expect(svg.width, 'the tree should get the whole screen when there is no panel')
+      .toBeGreaterThan(viewport.width * 0.9);
+
     await button.click();
     await expect(button).toHaveAttribute('aria-pressed', 'false');
     await expect(button).toHaveText(/^\s*full screen\s*$/i);

@@ -1,5 +1,6 @@
 @if (layout(); as l) {
   <div class="tree" #treeRoot data-testid="roadmap-tree">
+   <div class="tree__main">
     <!-- Scrolls horizontally on narrow screens rather than shrinking the nodes to mush. -->
     <div class="tree__scroll">
       <svg
@@ -125,5 +126,11 @@
         </ul>
       }
     </div>
+   </div>
+
+    <!-- The page's detail panel, projected in so it rides along into fullscreen — left in the
+         page it would simply vanish behind the fullscreened tree. Out of fullscreen this is
+         display:contents, so the panel still lays out exactly as if it were a page sibling. -->
+    <div class="tree__aside"><ng-content /></div>
   </div>
 }

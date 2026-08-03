@@ -238,17 +238,36 @@
 .key--locked { border: 2px dashed var(--color-border-light); }
 .key--pending { background: var(--color-music); width: 8px; height: 8px; }
 
+/* The projected detail panel. Out of fullscreen it must not exist as far as layout is
+   concerned — the panel then behaves exactly as the page sibling it used to be. */
+.tree__aside {
+  display: contents;
+}
+
 /* --- Fullscreen ---
    Fullscreening the block means it no longer sits in the page's column, so it has to supply the
    background and padding the page was giving it. The svg then scales to the viewport instead of
-   keeping its 760px floor — preserveAspectRatio letterboxes it, so the fan stays circular. */
+   keeping its 760px floor — preserveAspectRatio letterboxes it, so the fan stays circular.
+
+   Two columns: tree on the left, the detail panel on the right. Stacking them the way the page
+   does would give the tree a fraction of the height, which is the whole reason to fullscreen it. */
 
 .tree:fullscreen {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 20px;
   margin: 0;
   padding: 16px 20px;
   background: var(--color-bg);
+}
+
+.tree:fullscreen .tree__main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  /* Without min-width the svg's 760px floor stops the column ever giving ground to the panel. */
+  min-width: 0;
 }
 
 .tree:fullscreen .tree__scroll {
@@ -267,6 +286,22 @@
 
 .tree:fullscreen .tree__key {
   flex: 0 0 auto;
+}
+
+/* Wide enough for the video rows inside the panel, capped so the tree keeps most of the screen.
+   Scrolls on its own — a long step (videos + prerequisites) must not stretch the tree column. */
+.tree:fullscreen .tree__aside {
+  display: block;
+  flex: 0 0 clamp(300px, 26vw, 420px);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Signed out no panel is projected, and the empty column would otherwise hold 300px of the
+   screen open for nothing. (Comment anchors left by @if don't count against :empty.) */
+.tree:fullscreen .tree__aside:empty {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

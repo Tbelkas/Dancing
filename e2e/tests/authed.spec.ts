@@ -230,6 +230,53 @@ test.describe('authenticated', () => {
     await expect(page.getByTestId('roadmap-detail-panel').locator('.detail__title')).not.toBeEmpty();
   });
 
+  /**
+   * Fullscreen moves the detail panel from under the tree to beside it. The panel is projected
+   * into the tree component precisely so it ends up inside the fullscreen element — left as a
+   * page sibling it would still exist, still pass a visibility check, and be invisible behind
+   * the fullscreened tree. So this asserts containment as well as position.
+   *
+   * Read-only: it picks a node and toggles fullscreen, and touches no status chip.
+   */
+  test('fullscreen moves the detail panel beside the tree', async ({ authedPage: page }) => {
+    await blockEmbeds(page);
+    await page.goto('/roadmaps/house');
+    await expect(page.getByTestId('roadmap-tree')).toBeVisible();
+
+    await page.getByTestId('tree-node').nth(3).click();
+    const panel = page.getByTestId('roadmap-detail-panel');
+    await expect(panel).toBeVisible();
+
+    // Stacked to begin with — the panel starts below the tree.
+    const svgBefore = (await page.locator('.tree__svg').boundingBox())!;
+    const panelBefore = (await panel.boundingBox())!;
+    expect(panelBefore.y).toBeGreaterThan(svgBefore.y + svgBefore.height - 1);
+
+    const button = page.getByTestId('tree-fullscreen');
+    await button.click();
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
+
+    expect(
+      await page.evaluate(() => document.fullscreenElement!.contains(
+        document.querySelector('[data-testid="roadmap-detail-panel"]'))),
+      'the panel must be inside the fullscreen element or it is not on screen at all'
+    ).toBe(true);
+
+    const svgAfter = (await page.locator('.tree__svg').boundingBox())!;
+    const panelAfter = (await panel.boundingBox())!;
+    expect(panelAfter.x, 'the panel should sit to the right of the tree')
+      .toBeGreaterThan(svgAfter.x + svgAfter.width - 1);
+    expect(panelAfter.y, 'and level with the tree, not below it')
+      .toBeLessThan(svgAfter.y + svgAfter.height);
+
+    // Selecting another node has to keep updating the panel in its new home.
+    await page.getByTestId('tree-node').nth(5).click();
+    await expect(panel.locator('.detail__title')).not.toBeEmpty();
+
+    await button.click();
+    await expect(button).toHaveAttribute('aria-pressed', 'false');
+  });
+
   test('the list view is reachable and shows the same steps as branches', async ({ authedPage: page }) => {
     await blockEmbeds(page);
     await page.goto('/roadmaps/house');
