@@ -142,11 +142,16 @@ Composite PK **(StepId, PrerequisiteStepId)**, both FK → RoadmapStep. `Step` s
 `PrerequisiteStep` side is **NoAction** — two cascade paths into one table is more than Postgres
 accepts. Both ends always belong to the same roadmap. *(No `DateAdded`.)*
 
-⚠️ **Anything that rebuilds a roadmap's steps must delete its edges first.** Deleting a step
+⚠️ **Anything that deletes a roadmap's steps must delete its edges first.** Deleting a step
 cascades away the edges that *start* at it, but the NoAction side doesn't, so an edge still
-pointing at a step deleted earlier in the same pass fails its foreign key. Both rebuild paths
-(`RoadmapSeeder.SeedOneAsync` and `RoadmapService.RemoveTreeAsync`) clear the edges up front for
-this reason; `RoadmapServiceTests.Update_ReplacesTheWholeTreeIncludingItsEdges` guards it.
+pointing at a step deleted earlier in the same pass fails its foreign key. `RoadmapSeeder`
+and `RoadmapService.RemoveTreeAsync` both clear the edges up front for this reason — and
+`RemoveTreeAsync` only works if the caller **`Include`d the stages and steps**, or it sees no
+step ids, clears nothing, and the cascade blows up. That was a real bug in `DeleteAsync`.
+
+**The unit tests will not catch this.** SQLite tolerates the ordering Postgres rejects, even
+with `PRAGMA foreign_keys = ON` (measured, not assumed). The e2e `personal skill trees` suite,
+which runs against real Postgres, is what caught it.
 
 There is no roadmap-progress table: progress is read from the existing
 `UserLearnedDances` / `UserInProgressDances` joins via the step's linked dance. A step's

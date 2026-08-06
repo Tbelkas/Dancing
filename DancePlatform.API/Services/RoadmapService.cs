@@ -285,7 +285,11 @@ public class RoadmapService : IRoadmapService
 
     public async Task<bool> DeleteAsync(int userId, int id)
     {
-        var roadmap = await _db.Roadmaps.FirstOrDefaultAsync(r => r.Id == id && r.OwnerUserId == userId);
+        // The stages and steps have to be loaded, or RemoveTreeAsync sees no steps, clears no
+        // edges, and the delete cascades into the NoAction side of RoadmapStepPrerequisites.
+        var roadmap = await _db.Roadmaps
+            .Include(r => r.Stages).ThenInclude(s => s.Steps)
+            .FirstOrDefaultAsync(r => r.Id == id && r.OwnerUserId == userId);
         if (roadmap is null) return false;
 
         // Edges first, for the same reason ApplyAsync does it — see RemoveTreeAsync.

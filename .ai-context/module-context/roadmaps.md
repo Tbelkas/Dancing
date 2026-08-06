@@ -266,9 +266,11 @@ account can't turn the shared table into its own storage.
   doesn't create the tables.
 - The seeder's signature deliberately excludes `danceSlug` (the DB stores the resolved id, not
   the slug, so the two sides can't be compared). Step 3 covers link changes instead.
-- **Clear a roadmap's prerequisite edges before deleting its steps.** The `PrerequisiteStep` FK
-  is NoAction, so an edge still pointing at a step deleted earlier in the same rebuild fails its
-  foreign key. Both rebuild paths do this up front;
-  `RoadmapServiceTests.Update_ReplacesTheWholeTreeIncludingItsEdges` guards it.
+- **Clear a roadmap's prerequisite edges before deleting its steps**, and `Include` the stages
+  and steps in whatever query loaded the roadmap. The `PrerequisiteStep` FK is NoAction, so an
+  edge still pointing at a step deleted earlier in the same pass fails its foreign key — and
+  `RemoveTreeAsync` can only clear the edges it can see step ids for. `DeleteAsync` shipped
+  without the `Include` and 500'd on every delete. **The unit tests can't catch this**: SQLite
+  tolerates the ordering Postgres rejects. The e2e suite is the guard.
 - `/roadmaps/new` must be declared **before** `/roadmaps/:slug` in `app.routes.ts`.
 - The builder has **no unsaved-changes guard** — navigating away mid-edit loses the draft.

@@ -9,10 +9,15 @@ using Xunit;
 namespace DancePlatform.Tests;
 
 /// <summary>
-/// The personal skill tree write path, against a real (SQLite in-memory) relational store so the
-/// foreign keys are actually enforced — the wholesale rebuild in <c>ApplyAsync</c> deletes steps
-/// that other steps' prerequisite rows still point at, and that ordering only fails on a store
-/// that checks.
+/// The personal skill tree write path, against a real (SQLite in-memory) relational store rather
+/// than the in-memory provider, so the projections and foreign keys behave as they do on Postgres.
+///
+/// One known fidelity gap, measured rather than assumed: SQLite enforces the foreign keys here
+/// (the fixture turns the pragma on), but it still **tolerates the cascade ordering Postgres
+/// rejects** — deleting a step while another step's prerequisite row still points at it through
+/// the NoAction side. So the delete/rebuild tests below verify the *outcome* (the right rows are
+/// gone, the wrong caller is refused); they do not guard the ordering. The e2e suite, which runs
+/// against real Postgres, is what catches that — and did.
 /// </summary>
 public class RoadmapServiceTests : IDisposable
 {
@@ -27,6 +32,18 @@ public class RoadmapServiceTests : IDisposable
     {
         _conn = new SqliteConnection("DataSource=:memory:");
         _conn.Open(); // keep it open so the schema/data survive across contexts
+
+        // SQLite enforces foreign keys only when asked, and EF's provider asks on the
+        // connections *it* opens — not one handed to it already open, as here. Without this the
+        // whole point of using a relational store for these tests is lost: the rebuild and
+        // delete paths both step around a NoAction constraint on RoadmapStepPrerequisites, and
+        // an unenforced FK lets a broken ordering pass.
+        using (var pragma = _conn.CreateCommand())
+        {
+            pragma.CommandText = "PRAGMA foreign_keys = ON;";
+            pragma.ExecuteNonQuery();
+        }
+
         _options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(_conn).Options;
 
         using var ctx = new AppDbContext(_options);
@@ -184,9 +201,11 @@ public class RoadmapServiceTests : IDisposable
     // ---- Updating ---------------------------------------------------------------------------
 
     /// <summary>
-    /// The rebuild deletes every step and recreates it. Deleting a step cascades away the edges
-    /// that start at it, but the prerequisite side is NoAction, so an edge still pointing at a
-    /// step deleted earlier in the same pass would fail its foreign key. Regression guard.
+    /// A save replaces the tree wholesale: every step goes and is recreated, and the stored edges
+    /// must end up matching the request rather than accumulating.
+    ///
+    /// (The *ordering* this depends on — edges cleared before the steps they point at — is not
+    /// what this asserts; see the class summary. This asserts the result.)
     /// </summary>
     [Fact]
     public async Task Update_ReplacesTheWholeTreeIncludingItsEdges()

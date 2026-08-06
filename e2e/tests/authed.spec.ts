@@ -432,9 +432,12 @@ test.describe('personal skill trees', () => {
       await steps.nth(2).getByTestId('builder-step-delete').click();
       await expect(steps).toHaveCount(2);
 
-      // Wiring the second behind the first is what makes this a tree rather than a list —
-      // and the dropdown must offer the first move to do it with.
-      await steps.nth(1).getByTestId('builder-requires-add').selectOption({ label: /First move/ });
+      // Wiring the second behind the first is what makes this a tree rather than a list.
+      // By index, not label: index 0 is the placeholder and index 1 is the only legal option
+      // (a move can't come after itself), so this asserts the filtering as well as the wiring.
+      const comesAfter = steps.nth(1).getByTestId('builder-requires-add');
+      await expect(comesAfter.locator('option')).toHaveCount(2);
+      await comesAfter.selectOption({ index: 1 });
       await expect(steps.nth(1).locator('.req-chip')).toContainText('First move');
 
       // Link the first move to something in the catalog. Whatever comes back first — the
