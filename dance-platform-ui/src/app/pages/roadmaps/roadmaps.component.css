@@ -9,6 +9,20 @@
   margin-top: 10px;
 }
 
+.page-header__action {
+  margin-top: 16px;
+}
+
+/* Shown only while the user has no trees of their own, in place of the "My skill trees" grid. */
+.build-prompt {
+  max-width: 62ch;
+  margin-bottom: 28px;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+
+  a { color: var(--color-primary); }
+}
+
 .section-heading--spaced {
   margin-top: 36px;
 }
@@ -84,6 +98,30 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+/* Mirrors the style chip on the opposite corner, in the "yours" colour the detail page uses. */
+.roadmap-card__mine {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  background: rgba(7, 7, 13, 0.82);
+  border: 1px solid color-mix(in srgb, var(--color-music) 45%, transparent);
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-music);
+}
+
+.roadmap-card__edit {
   color: var(--color-primary);
 }
 

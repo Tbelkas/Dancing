@@ -1,13 +1,24 @@
-# Module — Roadmaps (curated learning paths per style)
+# Module — Roadmaps (curated learning paths, and personal skill trees)
 
-> Load alongside core-context.md when the task touches roadmaps, learning paths, or the
-> authored content in `Data/Roadmaps/`.
+> Load alongside core-context.md when the task touches roadmaps, learning paths, the authored
+> content in `Data/Roadmaps/`, or the skill-tree builder.
 
 ## What it is
 
 A roadmap is a **skill tree** through one style: **stages** (branches) holding **steps** (the
 moves), wired together by explicit **prerequisites**. Each step optionally links to a catalog
 `Dance`; when it does, the page shows that move's videos and the user's learned status.
+
+**Two kinds share the same table, DTOs, service and tree renderer**, told apart by
+`Roadmap.OwnerUserId`:
+
+- **Curated** (null owner) — the authored paths. Content, seeded from JSON, read by everyone.
+- **Personal** (owner set) — a tree a user built for themselves in `/roadmaps/:slug/edit`.
+  User data, written over the API, and **private to its owner**.
+
+Keeping them in one table is what makes a personal tree worth having: it renders through the
+same fan, unlocks against the same learned flags, and can be forked from a curated path with
+one button. See [Personal skill trees](#personal-skill-trees) below.
 
 The point is sequencing, and it is deliberately **not linear** — the twists and the travelling
 steps both come off the jack and never touch each other again. Browse answers "what exists in
@@ -25,26 +36,37 @@ view preference is left alone, so signing in restores whichever view they last c
 
 ## Backend
 
-- Controller: `Controllers/RoadmapsController.cs` (both endpoints anonymous, read-only)
-- Service: `IRoadmapService` / `RoadmapService.cs` — `GetAllAsync(userId)`, `GetByIdOrSlugAsync(idOrSlug, userId)`
+- Controller: `Controllers/RoadmapsController.cs` — the two GETs anonymous, the writes `[Authorize]`
+- Service: `IRoadmapService` / `RoadmapService.cs` — `GetAllAsync`, `GetByIdOrSlugAsync`,
+  `CreateAsync`, `UpdateAsync`, `DeleteAsync`, `CopyAsync`
 - Models: `Roadmap`, `RoadmapStage`, `RoadmapStep`
 - DTOs: `DTOs/Roadmap/RoadmapDto.cs` — `RoadmapSummaryDto`, `RoadmapDto`, `RoadmapStageDto`,
-  `RoadmapStepDto`, `RoadmapStepDanceDto`, `RoadmapStepVideoDto`
+  `RoadmapStepDto`, `RoadmapStepDanceDto`, `RoadmapStepVideoDto`;
+  `DTOs/Roadmap/SaveRoadmapRequest.cs` — the builder's payload and `RoadmapSaveResult`
+- Graph rules shared by the seeder and the write path: `Services/RoadmapGraph.cs`
 - Seeder: `Data/RoadmapSeeder.cs`, called from `Program.cs` after `SeedData`
-- Migration: `AddRoadmaps`
+- Migrations: `AddRoadmaps`, `AddRoadmapStepSegment`, `AddRoadmapStepTree`, `AddPersonalRoadmaps`
+- Tests: `DancePlatform.Tests/RoadmapServiceTests.cs` (the write path, on SQLite so the FKs bite)
 - Endpoints: see api-contracts → Roadmaps.
 
 ## Frontend
 
-- Pages: `pages/roadmaps/` (index), `pages/roadmap-detail/` (the path, slug-addressed)
+- Pages: `pages/roadmaps/` (index), `pages/roadmap-detail/` (the path, slug-addressed),
+  `pages/roadmap-builder/` (create and edit a personal tree)
 - Service: `core/services/roadmap.service.ts` (deliberately uncached — the payload is per-user)
-- Model: `models/roadmap.model.ts`
-- Routes: `/roadmaps`, `/roadmaps/:slug`. Both public. Header nav link `nav-roadmaps`.
+- Model: `models/roadmap.model.ts` — read types plus `SaveRoadmap*`
+- Graph rules, client side: `core/utils/roadmap-graph.ts` (`withGraphState`)
+- Routes: `/roadmaps`, `/roadmaps/:slug` public; `/roadmaps/new` and `/roadmaps/:slug/edit`
+  behind `authGuard`. **`/roadmaps/new` must stay ahead of `/roadmaps/:slug`** in `app.routes.ts`
+  or "new" resolves as a slug and 404s. Header nav link `nav-roadmaps`.
 - Sign-in wall: `shared/components/sign-in-dialog/` — the `/login` form as a modal, reusable by
   any page that reads signed out but needs an account to act. It signs in *in place*; sending
   someone to `/login` would land them on `/my-dances` and lose the path they were reading.
 
-## The content lives in JSON, not the database
+## The curated content lives in JSON, not the database
+
+*(Personal trees are the exception — they are written over the API and have no file. The seeder
+matches on `OwnerUserId == null` so it never sees them.)*
 
 `DancePlatform.API/Data/Roadmaps/<slug>.json` is the source of truth. Shape:
 
@@ -124,15 +146,81 @@ prerequisites are. Gate on it directly and its branch locks forever; ignore it e
 branch leaks open early (Lofting, whose only prerequisite is the un-covered Skate, would unlock
 before the Slide). The relaxation loop in `AssignStates` exists for this.
 
-`roadmap-detail.component.ts#withStates` mirrors that logic client-side so ticking a move off
-unlocks the next ring immediately. **If you change one, change both** — a drift shows up as the
-tree disagreeing with itself until reload.
+`core/utils/roadmap-graph.ts#withGraphState` mirrors both computations client-side, for two
+callers: the detail page (so ticking a move off unlocks the next ring without a round trip) and
+the builder's preview (whose draft has never been near the server). **If you change the rules on
+one side, change them on the other** — a drift shows up as the tree disagreeing with itself
+until reload.
 
 Layout is a pure function: `core/utils/roadmap-tree.layout.ts`. Each node gets one *structural*
 parent (its first resolvable prerequisite) which decides its angle; extra prerequisites are drawn
 as faint cross-links, and only while their lineage is focused, since drawn always they turn the
 fan into a web. Labels appear only for the hovered/selected lineage and for learned moves — 31
 names on one fan collide however they're placed.
+
+## Personal skill trees
+
+A signed-in user can build their own tree — same renderer, same unlocking, their own content.
+Entry points: **Build a skill tree** on the index, and **Make my own version** on any curated
+path (a fork, so the curated one is never altered).
+
+### One save replaces the whole tree
+
+`PUT /roadmaps/{id}` takes the entire thing — `SaveRoadmapRequest`, stages → steps → `requires`
+— and `RoadmapService.ApplyAsync` rebuilds the stored stages, steps and edges from it. Same
+approach the seeder takes with a changed file, and for the same reason: **nothing outside a
+roadmap references a stage or step id** (progress hangs off the dance), so recreating them is
+safe and keeps the authored order exact without a diff to reason about.
+
+Consequence: a step's row id changes on every save. Don't add anything that stores one.
+
+### Where it forgives and where it refuses
+
+Deliberately split, because the two failure modes read completely differently to the user:
+
+- **Dropped silently** — a blank step title (a row opened and never filled in), an edge naming a
+  step that no longer exists (a stale tab), a `danceId` or `videoSegmentId` that has since been
+  deleted. None of these are things the user can see or fix, and the seeder treats them the same.
+- **400, with a message the builder shows** — a cycle. The user drew that link seconds ago; a
+  save that quietly threw it away would read as the save not working. The builder also filters
+  cycle-creating options out of the "comes after" dropdown, so it should never come up.
+
+### Keys
+
+The client owns its step keys; the server slugifies and de-duplicates them and **rewrites the
+`requires` through the same mapping**, so a client that reuses a key gets a working tree rather
+than a 400. A blank key never enters the mapping — nothing can name it.
+
+### Privacy and ownership
+
+`RoadmapService` filters every read on `OwnerUserId == null || OwnerUserId == callerId`, and
+every write matches on `OwnerUserId == callerId`. So a curated path and another user's tree both
+just fail to match, and every write answers **404, not 403** — whether a private tree exists at
+that id isn't the caller's business either. There is no sharing: a personal tree is visible only
+to its owner. (Adding sharing means a visibility column and a public-by-slug read path; the
+uniqueness of `Slug` across both kinds already supports the URL.)
+
+### The builder
+
+`pages/roadmap-builder/` — form on the left, **live tree preview on the right**. The preview is
+the point: sequencing is what a skill tree is for, and a form can't show it. It renders through
+the same `app-roadmap-tree` as the real page, via `withGraphState(draft, false)` — *false*
+because nothing in a draft is learned, and the signed-in rules would paint every non-root node
+locked, turning the preview into a wall of padlocks that says nothing about the structure.
+
+The builder deliberately **cannot pin a clip** (`videoSegmentId`) — that needs a segment browser
+— but it carries the value through load and save untouched, so a tree forked from a curated path
+keeps its pinned clips instead of quietly widening every step back to the whole tutorial.
+
+The move picker searches `/search/dances` scoped to the tree's style. Linking is optional, the
+same as in the authored files: a path should name the moves the style needs whether or not the
+catalog covers them.
+
+### Caps
+
+`MaxTreesPerUser = 50`, 30 branches, 250 moves, and length limits on every text field — well
+above any real path (the largest authored one is 6 branches and 31 steps), and enough that one
+account can't turn the shared table into its own storage.
 
 ## Key behaviours / rules
 
@@ -178,3 +266,9 @@ names on one fan collide however they're placed.
   doesn't create the tables.
 - The seeder's signature deliberately excludes `danceSlug` (the DB stores the resolved id, not
   the slug, so the two sides can't be compared). Step 3 covers link changes instead.
+- **Clear a roadmap's prerequisite edges before deleting its steps.** The `PrerequisiteStep` FK
+  is NoAction, so an edge still pointing at a step deleted earlier in the same rebuild fails its
+  foreign key. Both rebuild paths do this up front;
+  `RoadmapServiceTests.Update_ReplacesTheWholeTreeIncludingItsEdges` guards it.
+- `/roadmaps/new` must be declared **before** `/roadmaps/:slug` in `app.routes.ts`.
+- The builder has **no unsaved-changes guard** — navigating away mid-edit loses the draft.

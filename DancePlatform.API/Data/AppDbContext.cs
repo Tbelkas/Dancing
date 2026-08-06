@@ -264,7 +264,9 @@ public class AppDbContext : DbContext
             .HasForeignKey(di => di.InstructorId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Roadmaps are addressed by slug, like dances.
+        // Roadmaps are addressed by slug, like dances. The index stays global rather than
+        // per-owner so /roadmaps/{slug} resolves without knowing whose path it is — the service
+        // uniquifies a personal tree's slug on create instead.
         modelBuilder.Entity<Roadmap>()
             .HasIndex(r => r.Slug)
             .IsUnique();
@@ -274,6 +276,18 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(r => r.StyleId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Null owner = a curated path. Cascade: a personal tree is the user's own data and has
+        // no meaning once the account is gone.
+        modelBuilder.Entity<Roadmap>()
+            .HasOne(r => r.Owner)
+            .WithMany()
+            .HasForeignKey(r => r.OwnerUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // The index's split into "mine" and "everyone's" runs on this every page load.
+        modelBuilder.Entity<Roadmap>()
+            .HasIndex(r => r.OwnerUserId);
 
         modelBuilder.Entity<RoadmapStage>()
             .HasOne(s => s.Roadmap)

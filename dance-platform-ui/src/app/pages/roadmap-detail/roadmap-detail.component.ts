@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { RoadmapService } from '../../core/services/roadmap.service';
 import { DanceService, DanceStatus, statusFlags } from '../../core/services/dance.service';
@@ -8,6 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Roadmap, RoadmapStep, RoadmapStepVideo } from '../../models/roadmap.model';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
+import { withGraphState } from '../../core/utils/roadmap-graph';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
 import { RoadmapTreeComponent } from './roadmap-tree.component';
 import { SignInDialogComponent } from '../../shared/components/sign-in-dialog/sign-in-dialog.component';
@@ -41,6 +42,11 @@ export class RoadmapDetailComponent implements OnInit {
    * clicked on the tree. Remembered, so anyone reading the curriculum keeps it open.
    */
   branchesOpen = signal(false);
+
+  /** Guard on the delete button: a tree is a lot of work to lose to a stray click. */
+  confirmingDelete = signal(false);
+  /** In-flight copy/delete, so the buttons can't be double-fired. */
+  busy = signal(false);
 
   /**
    * Signed out the page is a teaser: the shape of the path and nothing else. The list view,
@@ -83,6 +89,7 @@ export class RoadmapDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private roadmapService: RoadmapService,
     private danceService: DanceService,
     private toast: ToastService,
@@ -130,6 +137,46 @@ export class RoadmapDetailComponent implements OnInit {
     this.loading.set(true);
     this.roadmap.set(null);
     this.load();
+  }
+
+  /**
+   * Forks this path into a tree of the caller's own and opens it in the builder. The way to
+   * personalise a curated path: it stays as authored, and the copy is theirs to cut about.
+   */
+  copyToMine(): void {
+    const roadmap = this.roadmap();
+    if (!roadmap || this.busy()) return;
+
+    this.busy.set(true);
+    this.roadmapService.copy(roadmap.slug).subscribe({
+      next: copy => {
+        this.busy.set(false);
+        this.toast.success('Copied to your skill trees — edit it however you like.');
+        void this.router.navigate(['/roadmaps', copy.slug, 'edit']);
+      },
+      error: err => {
+        this.busy.set(false);
+        this.toast.error(err?.error?.message ?? 'Could not copy that path. Try again.');
+      }
+    });
+  }
+
+  deleteTree(): void {
+    const roadmap = this.roadmap();
+    if (!roadmap || this.busy()) return;
+
+    this.busy.set(true);
+    this.roadmapService.delete(roadmap.id).subscribe({
+      next: () => {
+        this.toast.success(`Deleted “${roadmap.title}”.`);
+        void this.router.navigate(['/roadmaps']);
+      },
+      error: () => {
+        this.busy.set(false);
+        this.confirmingDelete.set(false);
+        this.toast.error('Could not delete that tree. Try again.');
+      }
+    });
   }
 
   /** Running 1-based index of a step across the whole path, for the node markers. */
@@ -228,62 +275,17 @@ export class RoadmapDetailComponent implements OnInit {
    * in more than one stage, and they must not disagree about its status.
    */
   private applyFlags(danceId: number, flags: { isLearned: boolean; isInProgress: boolean }): void {
-    this.roadmap.update(r => r && this.withStates({
+    // withGraphState re-locks and re-unlocks the rest of the tree around the change: the whole
+    // point of the tree is that ticking a move off opens what it leads to, and waiting for a
+    // reload to show that would make it feel dead.
+    this.roadmap.update(r => r && withGraphState({
       ...r,
       stages: r.stages.map(stage => ({
         ...stage,
         steps: stage.steps.map(step =>
           step.dance?.id === danceId ? { ...step, dance: { ...step.dance, ...flags } } : step)
       }))
-    }));
-  }
-
-  /**
-   * Recomputes every step's locked/available/learned state after a status change, mirroring
-   * `RoadmapService.AssignStates`. Without this the tree wouldn't unlock the next branch until
-   * a reload — the whole point of the tree is that ticking a move off opens what it leads to.
-   *
-   * A prerequisite with no catalog move can't be ticked off, so it never gates.
-   */
-  private withStates(roadmap: Roadmap): Roadmap {
-    const steps = roadmap.stages.flatMap(s => s.steps);
-    const known = new Set(steps.map(s => s.key));
-    const authed = this.auth.isAuthenticated();
-
-    // Mirrors RoadmapService.AssignStates. A step with no catalog move can't be ticked off, so it
-    // passes through: satisfied exactly when its own prerequisites are.
-    const satisfied = new Map(steps.map(s => [s.key, !!s.dance?.isLearned]));
-    if (authed) {
-      for (let pass = 0; pass < steps.length; pass++) {
-        let changed = false;
-        for (const step of steps) {
-          if (step.dance) continue;
-          const ok = (step.requires ?? []).every(key => !known.has(key) || satisfied.get(key) === true);
-          if (ok !== satisfied.get(step.key)) { satisfied.set(step.key, ok); changed = true; }
-        }
-        if (!changed) break;
-      }
-    }
-
-    let available = 0;
-    const stages = roadmap.stages.map(stage => ({
-      ...stage,
-      steps: stage.steps.map(step => {
-        let state: RoadmapStep['state'];
-        if (step.dance?.isLearned) {
-          state = 'learned';
-        } else if (!authed) {
-          state = 'available';
-        } else {
-          const blocked = (step.requires ?? []).some(key => known.has(key) && satisfied.get(key) !== true);
-          state = blocked ? 'locked' : 'available';
-        }
-        if (state === 'available') available++;
-        return step.state === state ? step : { ...step, state };
-      })
-    }));
-
-    return { ...roadmap, stages, availableCount: available };
+    }, this.auth.isAuthenticated()));
   }
 
   videoThumb(videoId: string, platform: string, key: number): string | null {

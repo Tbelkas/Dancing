@@ -77,6 +77,12 @@ using the throwaway account in `.env`.
 Every authed test is therefore **either read-only or restores what it changed** — the
 favourite-toggle test flips a favourite and flips it back in a `finally` block.
 
+The `personal skill trees` block is the one that genuinely creates rows. It follows two rules
+worth copying for anything else that has to: the tree's name carries `Date.now()`, so two
+overlapping runs can't fight over one slug; and cleanup goes over the **API**, in a `finally`,
+rather than through the UI — a test that only tidies up when the UI still works would leave
+its rows behind on exactly the run that found a bug.
+
 **Do not add a test that creates a dance, video, or practice session without deleting it
 again.** A scheduled run repeats forever; anything it leaves behind accumulates in the real
 catalog. This is not hypothetical: an early version of `api.spec.ts` asserted that a
@@ -93,7 +99,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 47 attributes are a contract. Treat them like a public API.**
+**These 67 attributes are a contract. Treat them like a public API.**
 
 | Test id | Lives in | Anchors |
 |---|---|---|
@@ -105,10 +111,14 @@ anchors on a small, deliberate set of `data-testid` attributes.
 | `dance-card`, `dance-card-link` | `dances.component.html` | Result cards — **on both the grid card and the list row** |
 | `dance-title`, `favorite-button`, `progress-learned` | `dance-detail.component.html` | Detail page |
 | `roadmap-card`, `roadmap-card-link` | `roadmaps.component.html` | Roadmap index cards |
+| `roadmap-new`, `my-roadmaps` | `roadmaps.component.html` | The "Build a skill tree" button and the grid of the user's own trees. **Both signed-in only** |
+| `roadmap-owned-badge`, `roadmap-edit`, `roadmap-delete`, `roadmap-delete-confirm`, `roadmap-copy` | `roadmap-detail.component.html` | Owner controls. `roadmap-edit`/`roadmap-delete` appear only on a tree the viewer owns; `roadmap-copy` only on one they don't. Their **absence** is the assertion that a curated path can't be edited in place |
+| `builder-title`, `builder-name`, `builder-style`, `builder-save`, `builder-error` | `roadmap-builder.component.html` | The builder's heading, the two required fields, Save, and the validation message |
+| `builder-add-branch`, `builder-add-step`, `builder-step`, `builder-step-delete`, `builder-step-link`, `builder-step-move`, `builder-requires-add` | `roadmap-builder.component.html` | Structure editing: add a branch/move, each move row, its delete, the catalog-link button, the linked move chip, and the "comes after" dropdown. `builder-add-step` is **per branch** — use `.last()`, not the bare locator |
 | `roadmap-title`, `roadmap-progress`, `roadmap-step`, `roadmap-step-videos`, `roadmap-step-learned` | `roadmap-detail.component.html` | A path: its title, the progress bar, each step row (list view), a step's video list, and the Learned chip (signed-in only) |
 | `roadmap-view-tree`, `roadmap-view-list`, `roadmap-detail-panel` | `roadmap-detail.component.html` | The view toggle and the tree's detail panel. **All three are signed-in only** — signed out the page renders the bare tree, so a test that needs the list view or a step's videos must use the `authed` project |
 | `roadmap-tree-hint` | `roadmap-detail.component.html` | The signed-out line under the tree. Its presence is how the anon suite proves the teaser state is still the teaser state |
-| `roadmap-tree`, `tree-node` | `roadmap-tree.component.html` | The skill-tree SVG and each node `<g>` in it |
+| `roadmap-tree`, `tree-node` | `roadmap-tree.component.html` | The skill-tree SVG and each node `<g>` in it. The component is reused as the builder's live preview, so these also match on `/roadmaps/new` and `/roadmaps/:slug/edit` |
 | `signin-dialog`, `signin-username`, `signin-password`, `signin-submit`, `signin-error` | `sign-in-dialog.component.html` | The in-place sign-in modal a signed-out visitor gets when they touch a roadmap node — distinct ids from `login-*`, which anchor the `/login` page |
 | `camera-toggle`, `stage-fullscreen` | `video-player` + `local-video-player` templates | The Camera tool button and the stage-fullscreen button — **on both players** |
 | `camera-pane`, `camera-close`, `camera-error`, `camera-notice`, `camera-replay`, `camera-exit-fullscreen` | `camera-pane.component.html` | The camera pane, its close button, its failure panel, its fallback notice, the delayed-replay `<video>`, and the fullscreen exit it carries |

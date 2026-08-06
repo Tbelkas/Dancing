@@ -17,6 +17,45 @@
   max-width: 68ch;
 }
 
+/* Says whose tree this is before the title does — a personal one and a curated one otherwise
+   look identical, and the edit controls further down are the only other tell. */
+.owner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-music);
+  border: 1px solid color-mix(in srgb, var(--color-music) 40%, transparent);
+  border-radius: var(--radius);
+  padding: 3px 9px;
+  margin-bottom: 12px;
+}
+
+.roadmap-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.roadmap-actions__confirm {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
 .roadmap-subtitle {
   font-family: var(--font-ui);
   font-size: 0.95rem;

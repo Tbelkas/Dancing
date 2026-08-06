@@ -13,6 +13,12 @@ public class RoadmapSummaryDto
     public string StyleName { get; set; } = string.Empty;
     public string StyleSlug { get; set; } = string.Empty;
 
+    /// <summary>
+    /// True when this is the caller's own skill tree rather than a curated path — the UI keys
+    /// its edit/delete affordances off this, and only the owner is ever sent one.
+    /// </summary>
+    public bool IsOwned { get; set; }
+
     public int StageCount { get; set; }
     public int StepCount { get; set; }
 

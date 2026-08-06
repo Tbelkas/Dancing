@@ -1,4 +1,4 @@
-/** A curated learning path through one style. Mirrors DTOs/Roadmap/RoadmapDto.cs. */
+/** A learning path through one style. Mirrors DTOs/Roadmap/RoadmapDto.cs. */
 export interface RoadmapSummary {
   id: number;
   slug: string;
@@ -9,6 +9,12 @@ export interface RoadmapSummary {
   styleId: number;
   styleName: string;
   styleSlug: string;
+
+  /**
+   * True when this is the viewer's own skill tree rather than a curated path. The server only
+   * ever sends someone their own, so this doubles as "may I edit it?".
+   */
+  isOwned: boolean;
 
   stageCount: number;
   stepCount: number;
@@ -93,4 +99,34 @@ export interface RoadmapStepVideo {
   viewCount: number;
   averageRating: number;
   ratingCount: number;
+}
+
+/**
+ * A whole personal tree as the builder submits it. Mirrors DTOs/Roadmap/SaveRoadmapRequest.cs.
+ * Both create and update take the full shape — the server replaces the stored tree with it
+ * rather than diffing, so anything the builder leaves out is deleted.
+ */
+export interface SaveRoadmap {
+  title: string;
+  subtitle?: string;
+  description?: string;
+  styleId: number;
+  stages: SaveRoadmapStage[];
+}
+
+export interface SaveRoadmapStage {
+  title: string;
+  description?: string;
+  steps: SaveRoadmapStep[];
+}
+
+export interface SaveRoadmapStep {
+  /** The step's id within the request — what other steps' `requires` name. */
+  key: string;
+  title: string;
+  description?: string;
+  /** A catalog move, by id (the picker searches, so it always has one). */
+  danceId?: number | null;
+  videoSegmentId?: number | null;
+  requires: string[];
 }

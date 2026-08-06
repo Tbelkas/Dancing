@@ -64,16 +64,32 @@ some client-side filtering; see module-context/dances-catalog.md.)
 | DELETE | `/styles/{id}` | Admin |
 | POST | `/styles/{id}/mystyle` | Auth | toggle style in user's "my styles" |
 
-## Roadmaps — `/api/roadmaps`  (curated learning paths)
+## Roadmaps — `/api/roadmaps`  (curated learning paths + personal skill trees)
 | Method | Path | Auth | Notes |
 |--------|------|------|-------|
-| GET | `/roadmaps` | — | `RoadmapSummaryDto[]`, authored order |
+| GET | `/roadmaps` | — | `RoadmapSummaryDto[]`; curated paths **plus the caller's own trees** |
 | GET | `/roadmaps/{idOrSlug}` | — | `RoadmapDto` (stages → steps → dance → videos); 404 if missing |
+| POST | `/roadmaps` | User | `SaveRoadmapRequest` → 201 `RoadmapDto`; creates a personal tree |
+| PUT | `/roadmaps/{id}` | User | `SaveRoadmapRequest` → `RoadmapDto`; **replaces the whole tree** |
+| DELETE | `/roadmaps/{id}` | User | 204; own trees only |
+| POST | `/roadmaps/{idOrSlug}/copy` | User | 201 `RoadmapDto`; forks any readable path into one of the caller's own |
 
-Read-only: roadmaps are authored content seeded from `Data/Roadmaps/*.json`, not API-editable.
-Both endpoints are anonymous but **not** response-cached — `learnedCount` / `inProgressCount`,
+The two GETs are anonymous but **not** response-cached — `learnedCount` / `inProgressCount`,
 `availableCount` and each step's `isLearned` / `isInProgress` / `state` are per current user.
 Progress is written through the existing `PUT /dances/{id}/status`, not a roadmap endpoint.
+
+`isOwned` on both DTOs distinguishes a personal tree from a curated path, and is what the UI
+gates its edit/delete affordances on. **Curated paths are not API-editable** — they are seeded
+from `Data/Roadmaps/*.json`, and the write endpoints match on `OwnerUserId == callerId`, so a
+curated path and another user's tree both simply fail to match. Every write therefore answers
+**404, not 403**: whether a private tree exists at that id isn't the caller's business either.
+
+A save is all-or-nothing and takes the whole tree (`SaveRoadmapRequest`: stages → steps, each
+step carrying `key`, `requires`, optional `danceId` / `videoSegmentId`). The service replaces
+the stored stages, steps and edges wholesale. It is forgiving about stale input — a blank step
+title, an edge naming a step that no longer exists, or a `danceId` that has since been deleted
+are dropped — but **refuses a cycle with a 400** and `{ message }`, since the user drew that
+link deliberately and dropping it silently would read as the save not working.
 
 A step carries the skill tree: `key`, `requires` (keys of earlier steps), `stageIndex`, `depth`
 (ring) and `state` (`learned` / `available` / `locked`). `depth` and `state` are **computed

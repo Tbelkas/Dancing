@@ -71,12 +71,24 @@ public static class RoadmapSeeder
     private static async Task SeedOneAsync(AppDbContext db, RoadmapFile file, int styleId, ILogger logger)
     {
 
+        // Curated only. A personal skill tree is user data that happens to share this table, and
+        // rebuilding one from a file would silently overwrite what its owner built.
         var roadmap = await db.Roadmaps
             .Include(r => r.Stages).ThenInclude(s => s.Steps)
-            .FirstOrDefaultAsync(r => r.Slug == file.Slug);
+            .FirstOrDefaultAsync(r => r.Slug == file.Slug && r.OwnerUserId == null);
 
         if (roadmap is null)
         {
+            // Slugs are unique across both kinds, so a user's tree can be sitting on the one this
+            // file wants. RoadmapService reserves the style slugs to make that unlikely; if it
+            // happens anyway, skip the file rather than let SaveChanges throw and fail the boot.
+            if (await db.Roadmaps.AnyAsync(r => r.Slug == file.Slug))
+            {
+                logger.LogError("Roadmap '{Slug}': that slug is taken by a personal skill tree; skipping the file.",
+                    file.Slug);
+                return;
+            }
+
             roadmap = new Roadmap { Slug = file.Slug };
             db.Roadmaps.Add(roadmap);
         }
@@ -95,6 +107,22 @@ public static class RoadmapSeeder
             // Wholesale rebuild rather than a diff: nothing outside the file references a stage or
             // step id (progress hangs off the dance), so recreating them is safe and keeps the
             // authored order exact.
+            //
+            // The edges have to go first. Deleting a step cascades away the edges that start at
+            // it, but the prerequisite side is NoAction (AppDbContext: Postgres won't take two
+            // cascade paths into one table), so an edge still pointing at a step deleted earlier
+            // in the same rebuild fails its foreign key. SyncPrerequisitesAsync clears them too,
+            // but it runs after the save below — too late to help.
+            var stepIds = roadmap.Stages.SelectMany(s => s.Steps).Select(s => s.Id).ToList();
+            if (stepIds.Count > 0)
+            {
+                var stale = await db.RoadmapStepPrerequisites
+                    .Where(p => stepIds.Contains(p.StepId) || stepIds.Contains(p.PrerequisiteStepId))
+                    .ToListAsync();
+                db.RoadmapStepPrerequisites.RemoveRange(stale);
+                await db.SaveChangesAsync();
+            }
+
             db.RoadmapStages.RemoveRange(roadmap.Stages);
             roadmap.Stages.Clear();
             foreach (var (stage, si) in file.Stages.Select((s, i) => (s, i)))
@@ -198,7 +226,7 @@ public static class RoadmapSeeder
             foreach (var required in deps)
             {
                 // A cycle would make every node in it unreachable and hang any depth walk.
-                if (CreatesCycle(authored, from: required, to: key))
+                if (Services.RoadmapGraph.CreatesCycle(authored, from: required, to: key))
                 {
                     logger.LogError("Roadmap '{Slug}': '{Step}' requires '{Key}' but that closes a cycle; edge dropped.",
                         file.Slug, key, required);
@@ -215,22 +243,6 @@ public static class RoadmapSeeder
 
         await db.SaveChangesAsync();
         return added;
-    }
-
-    /// <summary>True when <paramref name="to"/> is already reachable from <paramref name="from"/>.</summary>
-    private static bool CreatesCycle(Dictionary<string, List<string>> authored, string from, string to)
-    {
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var stack = new Stack<string>([from]);
-        while (stack.Count > 0)
-        {
-            var current = stack.Pop();
-            if (string.Equals(current, to, StringComparison.OrdinalIgnoreCase)) return true;
-            if (!seen.Add(current)) continue;
-            if (authored.TryGetValue(current, out var deps))
-                foreach (var d in deps) stack.Push(d);
-        }
-        return false;
     }
 
     private static string StepKey(StepFile step) =>

@@ -8,6 +8,9 @@ export const routes: Routes = [
   { path: 'register', title: 'Create account · Dance Platform', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
   { path: 'dances', title: 'Browse Dances · Dance Platform', loadComponent: () => import('./pages/dances/dances.component').then(m => m.DancesComponent) },
   { path: 'roadmaps', title: 'Roadmaps · Dance Platform', loadComponent: () => import('./pages/roadmaps/roadmaps.component').then(m => m.RoadmapsComponent) },
+  // Ahead of ':slug', or "new" resolves as a roadmap slug and 404s.
+  { path: 'roadmaps/new', title: 'New skill tree · Dance Platform', loadComponent: () => import('./pages/roadmap-builder/roadmap-builder.component').then(m => m.RoadmapBuilderComponent), canActivate: [authGuard] },
+  { path: 'roadmaps/:slug/edit', loadComponent: () => import('./pages/roadmap-builder/roadmap-builder.component').then(m => m.RoadmapBuilderComponent), canActivate: [authGuard] },
   { path: 'roadmaps/:slug', loadComponent: () => import('./pages/roadmap-detail/roadmap-detail.component').then(m => m.RoadmapDetailComponent) },
   { path: 'dances/:style/:slug', loadComponent: () => import('./pages/dance-detail/dance-detail.component').then(m => m.DanceDetailComponent) },
   { path: 'dances/:slug', loadComponent: () => import('./pages/dance-detail/dance-detail.component').then(m => m.DanceDetailComponent) },

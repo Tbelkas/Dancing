@@ -5,6 +5,11 @@
       Ordered paths through a style — the moves in the order they actually build on each other,
       with every video we have for them attached.
     </p>
+    @if (auth.isAuthenticated()) {
+      <a class="btn btn--primary btn--sm page-header__action" routerLink="/roadmaps/new" data-testid="roadmap-new">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i> Build a skill tree
+      </a>
+    }
   </div>
 
   @if (loading()) {
@@ -32,6 +37,28 @@
       <p>Paths are being written style by style. <a routerLink="/dances">Browse the catalog</a> in the meantime.</p>
     </div>
   } @else {
+    @if (mine().length > 0) {
+      <h2 class="section-heading">My skill trees</h2>
+      <div class="roadmap-grid" data-testid="my-roadmaps">
+        @for (r of mine(); track r.id) {
+          <ng-container *ngTemplateOutlet="card; context: { $implicit: r }" />
+        }
+      </div>
+      <!-- Only when nothing follows it would carry a heading of its own — "Picked up" already
+           separates the curated block, and two headings in a row reads as a mistake. -->
+      @if (started().length === 0) {
+        <h2 class="section-heading section-heading--spaced">Curated paths</h2>
+      }
+    } @else if (auth.isAuthenticated()) {
+      <!-- One line rather than a card: the button is already in the header, and an empty-state
+           panel for a thing nobody has asked for yet would outweigh the paths below it. -->
+      <p class="build-prompt">
+        Following a path someone else laid out is one way in.
+        <a routerLink="/roadmaps/new">Build your own skill tree</a> if you'd rather sequence the
+        moves yourself — or open a path below and make your own version of it.
+      </p>
+    }
+
     @if (started().length > 0) {
       <h2 class="section-heading">Picked up</h2>
       <div class="roadmap-grid">
@@ -62,6 +89,9 @@
         </div>
       }
       <span class="roadmap-card__style">{{ r.styleName }}</span>
+      @if (r.isOwned) {
+        <span class="roadmap-card__mine"><i class="fa-solid fa-user-pen" aria-hidden="true"></i> Mine</span>
+      }
     </div>
 
     <div class="roadmap-card__body">
@@ -74,6 +104,9 @@
         <li><strong>{{ r.stageCount }}</strong> stages</li>
         <li><strong>{{ r.stepCount }}</strong> moves</li>
         <li><strong>{{ r.videoCount }}</strong> videos</li>
+        @if (r.isOwned) {
+          <li><a [routerLink]="['/roadmaps', r.slug, 'edit']" class="roadmap-card__edit">Edit</a></li>
+        }
       </ul>
 
       @if (auth.isAuthenticated() && r.moveCount > 0) {

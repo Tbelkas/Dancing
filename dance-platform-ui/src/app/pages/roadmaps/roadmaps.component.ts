@@ -20,9 +20,18 @@ export class RoadmapsComponent implements OnInit {
   failed = signal(false);
   private readonly thumbs = new ThumbFallback();
 
-  /** Paths the user has already started, surfaced above the rest. */
-  started = computed(() => this.roadmaps().filter(r => r.learnedCount + r.inProgressCount > 0));
-  rest = computed(() => this.roadmaps().filter(r => r.learnedCount + r.inProgressCount === 0));
+  /**
+   * The user's own trees come first and are never mixed into the curated sections — a path
+   * someone built is theirs, and burying it under "everything else" would make it feel like
+   * the app's content rather than their own work.
+   */
+  mine = computed(() => this.roadmaps().filter(r => r.isOwned));
+
+  private readonly curated = computed(() => this.roadmaps().filter(r => !r.isOwned));
+
+  /** Curated paths the user has already started, surfaced above the rest. */
+  started = computed(() => this.curated().filter(r => r.learnedCount + r.inProgressCount > 0));
+  rest = computed(() => this.curated().filter(r => r.learnedCount + r.inProgressCount === 0));
 
   constructor(private roadmapService: RoadmapService, public auth: AuthService) {}
 

@@ -91,20 +91,33 @@ the ratings across all of its videos (recomputed on rate, video delete, and vide
 | Notes | string? | |
 | DateAdded | datetime | |
 
-### Roadmap  (curated learning path through one style)
+### Roadmap  (a learning path through one style — curated, or a user's own skill tree)
 | Column | Type | Notes |
 |--------|------|-------|
 | Id | int PK | |
-| Slug | string | **unique index**; usually the style slug (`house`, `waacking`) |
+| Slug | string | **unique index across both kinds**; curated ones are the style slug (`house`) |
 | Title | string | |
 | Subtitle | string | one-line pitch |
 | Description | string? | intro paragraph |
 | StyleId | int FK → Style | cascade |
+| OwnerUserId | int? FK → User | **null = curated**; set = a personal tree, cascade, indexed |
 | SortOrder | int | position on the index |
 | DateAdded | datetime | |
+| DateModified | datetime? | last builder save; null for curated paths |
 
-Nav: Stages. **Content, not user data** — authored in `Data/Roadmaps/*.json` and upserted on
-every boot by `Data/RoadmapSeeder.cs` (not gated on an empty DB, unlike `SeedData`).
+Nav: Stages. **Two kinds share this table, told apart by `OwnerUserId`:**
+
+- **Curated** (null owner) — content, authored in `Data/Roadmaps/*.json` and upserted on every
+  boot by `Data/RoadmapSeeder.cs` (not gated on an empty DB, unlike `SeedData`). The seeder
+  matches on `OwnerUserId == null`, so it never touches a personal tree.
+- **Personal** (owner set) — user data, written through `POST`/`PUT /roadmaps` by the builder.
+  Private to its owner: `RoadmapService` filters every read on
+  `OwnerUserId == null || OwnerUserId == callerId`.
+
+The unique index stays **global** rather than per-owner so `/roadmaps/{slug}` resolves without
+knowing whose path it is. `RoadmapService.UniqueSlugAsync` therefore uniquifies a new personal
+slug against both the existing roadmap slugs *and* the style slugs — otherwise a user naming a
+tree "Hip Hop" today would sit on the slug tomorrow's authored hip-hop file wants.
 
 ### RoadmapStage  (one-to-many: Roadmap → Stages, cascade)
 Id PK · RoadmapId FK · Title · Description? · SortOrder · DateAdded. Nav: Steps.
@@ -127,8 +140,13 @@ Nav: Prerequisites (`RoadmapStepPrerequisite`).
 ### RoadmapStepPrerequisite  (the skill tree's edges)
 Composite PK **(StepId, PrerequisiteStepId)**, both FK → RoadmapStep. `Step` side cascades;
 `PrerequisiteStep` side is **NoAction** — two cascade paths into one table is more than Postgres
-accepts, and it isn't needed (the seeder drops all edges before rebuilding, and deleting a
-roadmap cascades its steps). Both ends always belong to the same roadmap. *(No `DateAdded`.)*
+accepts. Both ends always belong to the same roadmap. *(No `DateAdded`.)*
+
+⚠️ **Anything that rebuilds a roadmap's steps must delete its edges first.** Deleting a step
+cascades away the edges that *start* at it, but the NoAction side doesn't, so an edge still
+pointing at a step deleted earlier in the same pass fails its foreign key. Both rebuild paths
+(`RoadmapSeeder.SeedOneAsync` and `RoadmapService.RemoveTreeAsync`) clear the edges up front for
+this reason; `RoadmapServiceTests.Update_ReplacesTheWholeTreeIncludingItsEdges` guards it.
 
 There is no roadmap-progress table: progress is read from the existing
 `UserLearnedDances` / `UserInProgressDances` joins via the step's linked dance. A step's

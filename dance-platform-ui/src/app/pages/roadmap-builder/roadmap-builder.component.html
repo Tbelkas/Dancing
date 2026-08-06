@@ -1,0 +1,266 @@
+<div class="container">
+  <nav class="crumb">
+    <a routerLink="/roadmaps">Roadmaps</a> <span aria-hidden="true">/</span>
+    {{ isNew() ? 'New skill tree' : 'Editing' }}
+  </nav>
+
+  @if (loading()) {
+    <div class="page-header" aria-busy="true">
+      <div class="skeleton skeleton-line skeleton-line--page-title"></div>
+      <div class="skeleton skeleton-line skeleton-line--short"></div>
+    </div>
+  } @else if (denied()) {
+    <div class="empty-state card">
+      <div class="empty-state__icon"><i class="fa-solid fa-lock"></i></div>
+      <h2>Not yours to edit</h2>
+      <p>
+        That path either doesn't exist or belongs to someone else. The curated paths are edited
+        by the people who wrote them — open one and make your own version of it instead.
+      </p>
+      <a routerLink="/roadmaps" class="btn btn--primary">All roadmaps</a>
+    </div>
+  } @else {
+    <div class="page-header">
+      <h1 class="page-title" data-testid="builder-title">
+        {{ isNew() ? 'Build a skill tree' : 'Edit skill tree' }}
+      </h1>
+      <p class="page-subtitle">
+        Branches group the moves; a move's prerequisites decide where it lands on the tree. Nothing
+        here is locked in — the tree redraws as you type, and you can re-cut it whenever.
+      </p>
+    </div>
+
+    @if (error()) {
+      <div class="error-message" role="alert" data-testid="builder-error">{{ error() }}</div>
+    }
+
+    <div class="builder">
+      <div class="builder__form">
+        <section class="card builder__card">
+          <h2 class="builder__heading">The tree</h2>
+
+          <div class="form-group">
+            <label for="tree-title">Name</label>
+            <input id="tree-title" type="text" data-testid="builder-name" maxlength="120"
+                   [ngModel]="title()" (ngModelChange)="title.set($event)"
+                   placeholder="My House path" />
+          </div>
+
+          <div class="form-group">
+            <label for="tree-style">Style</label>
+            <select id="tree-style" data-testid="builder-style"
+                    [ngModel]="styleId()" (ngModelChange)="styleId.set($event)">
+              <option [ngValue]="null">Pick a style…</option>
+              @for (s of styles(); track s.id) {
+                <option [ngValue]="s.id">{{ s.name }}</option>
+              }
+            </select>
+            <p class="field-hint">Scopes the move search, and links the tree to that part of the catalog.</p>
+          </div>
+
+          <div class="form-group">
+            <label for="tree-subtitle">One-line pitch <span class="optional">(optional)</span></label>
+            <input id="tree-subtitle" type="text" maxlength="200"
+                   [ngModel]="subtitle()" (ngModelChange)="subtitle.set($event)"
+                   placeholder="Everything I want off the jack, in order" />
+          </div>
+
+          <div class="form-group">
+            <label for="tree-description">Intro <span class="optional">(optional)</span></label>
+            <textarea id="tree-description" rows="3" maxlength="2000"
+                      [ngModel]="description()" (ngModelChange)="description.set($event)"
+                      placeholder="What this path is for, and how you mean to work through it."></textarea>
+          </div>
+        </section>
+
+        @for (stage of stages(); track stage.id; let si = $index) {
+          <section class="card builder__card builder__branch" [attr.data-branch]="si">
+            <header class="builder__branch-head">
+              <span class="builder__branch-index" aria-hidden="true">{{ si + 1 }}</span>
+              <input type="text" class="builder__branch-title" maxlength="120"
+                     [attr.aria-label]="'Branch ' + (si + 1) + ' name'"
+                     [ngModel]="stage.title" (ngModelChange)="setStage(si, { title: $event })"
+                     placeholder="Branch name — e.g. Find the pulse" />
+              <div class="builder__branch-tools">
+                <button type="button" class="icon-btn" (click)="moveStage(si, -1)" [disabled]="si === 0"
+                        title="Move branch up" aria-label="Move branch up">
+                  <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="icon-btn" (click)="moveStage(si, 1)" [disabled]="si === stages().length - 1"
+                        title="Move branch down" aria-label="Move branch down">
+                  <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="icon-btn icon-btn--danger" (click)="removeStage(si)"
+                        title="Delete branch" aria-label="Delete branch">
+                  <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                </button>
+              </div>
+            </header>
+
+            <div class="form-group">
+              <textarea rows="2" maxlength="2000" class="builder__branch-desc"
+                        [attr.aria-label]="'Branch ' + (si + 1) + ' description'"
+                        [ngModel]="stage.description" (ngModelChange)="setStage(si, { description: $event })"
+                        placeholder="What this branch is for, in a sentence (optional)."></textarea>
+            </div>
+
+            <ol class="builder__steps">
+              @for (step of stage.steps; track step.key; let pi = $index) {
+                <li class="builder__step" [id]="'draft-' + step.key"
+                    [class.is-selected]="selectedKey() === step.key"
+                    data-testid="builder-step">
+                  <div class="builder__step-row">
+                    <input type="text" class="builder__step-title" maxlength="120"
+                           [attr.aria-label]="'Move name'"
+                           [ngModel]="step.title" (ngModelChange)="setStep(step.key, { title: $event })"
+                           placeholder="Move name — e.g. The jack" />
+                    <div class="builder__branch-tools">
+                      <button type="button" class="icon-btn" (click)="moveStep(si, pi, -1)" [disabled]="pi === 0"
+                              title="Move up" aria-label="Move move up">
+                        <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+                      </button>
+                      <button type="button" class="icon-btn" (click)="moveStep(si, pi, 1)"
+                              [disabled]="pi === stage.steps.length - 1" title="Move down" aria-label="Move move down">
+                        <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+                      </button>
+                      <button type="button" class="icon-btn icon-btn--danger" (click)="removeStep(si, step.key)"
+                              title="Delete move" aria-label="Delete move" data-testid="builder-step-delete">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <textarea rows="2" maxlength="2000" class="builder__step-desc"
+                            [attr.aria-label]="'What to work on'"
+                            [ngModel]="step.description" (ngModelChange)="setStep(step.key, { description: $event })"
+                            placeholder="What to work on, in your own words (optional)."></textarea>
+
+                  <!-- The catalog link. Optional on purpose: a path should name the moves the
+                       style needs whether or not the catalog covers them yet, exactly like the
+                       curated ones. An unlinked step renders as "no video yet". -->
+                  <div class="builder__link">
+                    @if (step.danceId !== null) {
+                      <span class="builder__linked" data-testid="builder-step-move">
+                        <i class="fa-solid fa-clapperboard" aria-hidden="true"></i> {{ step.danceName }}
+                      </span>
+                      @if (step.videoSegmentId !== null) {
+                        <span class="builder__clip" title="This step is pinned to one section of a video">
+                          <i class="fa-solid fa-scissors" aria-hidden="true"></i> clip
+                        </span>
+                      }
+                      <button type="button" class="link-btn" (click)="clearDance(step)">Unlink</button>
+                    } @else if (pickerFor() !== step.key) {
+                      <button type="button" class="link-btn" (click)="openPicker(step)"
+                              data-testid="builder-step-link">
+                        <i class="fa-solid fa-link" aria-hidden="true"></i> Link a move from the catalog
+                      </button>
+                    }
+
+                    @if (pickerFor() === step.key) {
+                      <div class="picker">
+                        <input type="text" class="picker__input" autofocus
+                              [attr.aria-label]="'Search moves'"
+                              [ngModel]="danceQuery()" (ngModelChange)="onDanceQuery($event)"
+                              placeholder="Search the catalog…" />
+                        @if (searching()) {
+                          <p class="picker__note">Searching…</p>
+                        } @else if (danceResults().length > 0) {
+                          <ul class="picker__results">
+                            @for (d of danceResults(); track d.id) {
+                              <li>
+                                <button type="button" class="picker__result" (click)="chooseDance(step, d)">
+                                  <span class="picker__result-name">{{ d.name }}</span>
+                                  <span class="picker__result-meta">
+                                    {{ d.videoCount }} {{ d.videoCount === 1 ? 'video' : 'videos' }}
+                                    @if (d.difficulty && d.difficulty !== 'None') { · {{ d.difficulty }} }
+                                  </span>
+                                </button>
+                              </li>
+                            }
+                          </ul>
+                        } @else if (danceQuery().trim()) {
+                          <p class="picker__note">
+                            Nothing in {{ styleName() || 'this style' }} matches. Leave the step unlinked —
+                            it still shows on the tree, with a search link.
+                          </p>
+                        }
+                        <button type="button" class="link-btn" (click)="pickerFor.set(null)">Cancel</button>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Prerequisites are what make this a tree rather than a list: they decide the
+                       ring a move lands on and what unlocks it. -->
+                  <div class="builder__requires">
+                    <span class="builder__requires-label">Comes after</span>
+                    @for (key of step.requires; track key) {
+                      <span class="req-chip">
+                        {{ stepTitle(key) }}
+                        <button type="button" (click)="removePrerequisite(step, key)"
+                                [attr.aria-label]="'Remove ' + stepTitle(key)">
+                          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                        </button>
+                      </span>
+                    }
+                    @if (prerequisiteOptions(step).length > 0) {
+                      <!-- Only legal options are offered — anything that would loop back on this
+                           step is filtered out, so a cycle can't be drawn in the first place. -->
+                      <!-- Plain change handler, not ngModel: the select is a command, not a
+                           field, and has to snap back to its placeholder after each pick. -->
+                      <select class="req-add" (change)="addPrerequisiteFrom(step, $any($event.target))"
+                              data-testid="builder-requires-add"
+                              [attr.aria-label]="'Add a move this one comes after'">
+                        <option value="">+ comes after…</option>
+                        @for (option of prerequisiteOptions(step); track option.key) {
+                          <option [value]="option.key">{{ option.label }}</option>
+                        }
+                      </select>
+                    } @else if (step.requires.length === 0) {
+                      <span class="builder__requires-empty">nothing — it's a root of the tree</span>
+                    }
+                  </div>
+                </li>
+              }
+            </ol>
+
+            <button type="button" class="btn btn--ghost btn--sm" (click)="addStep(si)" data-testid="builder-add-step">
+              <i class="fa-solid fa-plus" aria-hidden="true"></i> Add a move
+            </button>
+          </section>
+        }
+
+        <button type="button" class="btn btn--ghost" (click)="addStage()" data-testid="builder-add-branch">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i> Add a branch
+        </button>
+      </div>
+
+      <aside class="builder__preview">
+        <div class="builder__preview-inner">
+          <h2 class="builder__heading">Preview</h2>
+          @if (preview(); as p) {
+            <app-roadmap-tree [roadmap]="p" [selectedKey]="selectedKey()" (stepSelected)="onPreviewSelect($event)" />
+            <p class="builder__preview-note">
+              {{ stepCount() }} {{ stepCount() === 1 ? 'move' : 'moves' }},
+              {{ linkedCount() }} linked to the catalog. Click a node to jump to it.
+              Everything reads as ready here — locks only mean something once there's progress against it.
+            </p>
+          } @else {
+            <p class="builder__preview-note">Name a move and it appears here.</p>
+          }
+
+          <div class="builder__actions">
+            <button type="button" class="btn btn--primary" (click)="save()" [disabled]="saving()"
+                    data-testid="builder-save">
+              {{ saving() ? 'Saving…' : isNew() ? 'Create tree' : 'Save changes' }}
+            </button>
+            @if (slug(); as s) {
+              <a class="btn btn--ghost" [routerLink]="['/roadmaps', s]">View tree</a>
+            } @else {
+              <a class="btn btn--ghost" routerLink="/roadmaps">Cancel</a>
+            }
+          </div>
+        </div>
+      </aside>
+    </div>
+  }
+</div>

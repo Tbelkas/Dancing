@@ -1,0 +1,445 @@
+/* ---- Page chrome (matching roadmap-detail, which this page is the other half of) ---- */
+
+.crumb {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 14px;
+
+  span { margin: 0 6px; }
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-subtitle {
+  max-width: 64ch;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  margin-top: 10px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.empty-state__icon {
+  font-size: 2rem;
+  color: var(--color-border-light);
+  margin-bottom: 4px;
+}
+
+.empty-state h2 { color: var(--color-text); }
+
+.empty-state p {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  max-width: 52ch;
+}
+
+/* ---- Layout ----
+   Form and preview side by side, because the whole reason to draw a tree rather than write a
+   list is to see the shape — scrolling to check it after every edit would defeat the point.
+   The preview sticks; the form is the tall column. */
+
+.builder {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .builder { grid-template-columns: minmax(0, 1fr); }
+  /* Above the form on narrow screens: sticking it would eat most of a phone viewport. */
+  .builder__preview { order: -1; }
+  .builder__preview-inner { position: static; }
+}
+
+.builder__form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.builder__preview-inner {
+  position: sticky;
+  top: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.builder__preview-note {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.builder__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+/* ---- Cards ---- */
+
+.builder__card {
+  padding: 20px 22px;
+}
+
+.builder__heading {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+}
+
+/* ---- A branch ---- */
+
+.builder__branch-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.builder__branch-index {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-light);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* The branch name is the heading of its own card, so it is styled as one rather than as a
+   field — a boxed input here made every branch look like a form inside a form. */
+.builder__branch-title {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  padding: 6px 2px;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  outline: none;
+
+  &:focus { border-bottom-color: var(--color-primary); }
+  &::placeholder { color: var(--color-text-muted); font-style: italic; font-weight: 400; }
+}
+
+.builder__branch-tools {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
+
+.builder__branch-desc,
+.builder__step-desc {
+  width: 100%;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  resize: vertical;
+  outline: none;
+
+  &:focus { border-color: var(--color-primary); }
+  &::placeholder { color: var(--color-text-muted); font-style: italic; }
+}
+
+/* ---- A move ---- */
+
+.builder__steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.builder__step {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-left: 2px solid var(--color-border-light);
+  border-radius: var(--radius);
+  background: var(--color-surface-2);
+  transition: border-color var(--transition);
+}
+
+/* Where a click on the preview lands. */
+.builder__step.is-selected {
+  border-left-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary-glow);
+}
+
+.builder__step-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.builder__step-title {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  padding: 5px 2px;
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  outline: none;
+
+  &:focus { border-bottom-color: var(--color-primary); }
+  &::placeholder { color: var(--color-text-muted); font-style: italic; font-weight: 400; }
+}
+
+/* ---- The catalog link ---- */
+
+.builder__link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+}
+
+.builder__linked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 40%, transparent);
+  border-radius: var(--radius);
+  color: var(--color-primary);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.builder__clip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-music);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.picker {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.picker__input {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  outline: none;
+
+  &:focus { border-color: var(--color-primary); }
+}
+
+.picker__results {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.picker__result {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-align: left;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+
+  &:hover {
+    background: var(--color-surface-2);
+    border-color: var(--color-border-light);
+  }
+}
+
+.picker__result-name {
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.picker__result-meta {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.picker__note {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+/* ---- Prerequisites ---- */
+
+.builder__requires {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.builder__requires-label,
+.builder__requires-empty {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.builder__requires-empty {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-style: italic;
+}
+
+.req-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 4px 3px 9px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text);
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 17px;
+    height: 17px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    cursor: pointer;
+
+    &:hover { color: var(--color-accent); }
+  }
+}
+
+.req-add {
+  background: transparent;
+  border: 1px dashed var(--color-border-light);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  cursor: pointer;
+  outline: none;
+
+  &:focus { border-color: var(--color-primary); color: var(--color-primary); }
+  option { background: var(--color-surface-2); color: var(--color-text); }
+}
+
+/* ---- Small controls ---- */
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition);
+
+  &:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-primary); }
+  &:disabled { opacity: 0.3; cursor: not-allowed; }
+}
+
+.icon-btn--danger:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.link-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:hover { color: var(--color-primary); }
+}

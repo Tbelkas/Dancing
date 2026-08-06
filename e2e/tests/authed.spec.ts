@@ -367,6 +367,153 @@ test.describe('authenticated', () => {
 });
 
 /**
+ * Personal skill trees — the one part of roadmaps that writes.
+ *
+ * ⚠️ These create rows in the real database, so every one deletes what it made, in a `finally`
+ * that runs even when an assertion fails. The cleanup goes over the API rather than through the
+ * UI: a test that only tidies up when the UI still works would leave a tree behind on exactly
+ * the run that found a bug.
+ */
+test.describe('personal skill trees', () => {
+  /** The bearer token the app is holding, so cleanup can call the API as the same user. */
+  async function tokenOf(page: import('@playwright/test').Page): Promise<string> {
+    const token = await page.evaluate(() => localStorage.getItem('dp_token'));
+    expect(token, 'the auth fixture should have planted a token').toBeTruthy();
+    return token!;
+  }
+
+  /** Deletes a tree by slug if it still exists. Safe to call twice. */
+  async function destroy(page: import('@playwright/test').Page, slug: string): Promise<void> {
+    const token = await tokenOf(page);
+    const headers = { Authorization: `Bearer ${token}` };
+    const found = await page.request.get(`${API_URL}/roadmaps/${slug}`, { headers });
+    if (!found.ok()) return;
+    await page.request.delete(`${API_URL}/roadmaps/${(await found.json()).id}`, { headers });
+  }
+
+  test('a tree can be built through the form, opened, and deleted again', async ({ authedPage: page }) => {
+    await blockEmbeds(page);
+    // Unique per run: two runs overlapping would otherwise fight over one slug, and the
+    // second would silently be handed "…-2".
+    const name = `E2E tree ${Date.now()}`;
+    let slug = '';
+
+    try {
+      // In through the index, so the entry point is covered too.
+      await page.goto('/roadmaps');
+      await page.getByTestId('roadmap-new').click();
+      await expect(page).toHaveURL(/\/roadmaps\/new$/);
+      await expect(page.getByTestId('builder-title')).toBeVisible();
+
+      // Validation happens before anything is sent, so a nameless tree never reaches the API.
+      await page.getByTestId('builder-save').click();
+      await expect(page.getByTestId('builder-error')).toBeVisible();
+
+      await page.getByTestId('builder-name').fill(name);
+      // House, because the move picker below is scoped to the tree's style and this one is
+      // known to have a catalog behind it. No test here names a specific move — the paths are
+      // authored content that can be re-cut.
+      await page.getByTestId('builder-style').selectOption({ label: 'House' });
+
+      // The blank form opens with one branch holding one move.
+      const steps = page.getByTestId('builder-step');
+      await expect(steps).toHaveCount(1);
+      await steps.nth(0).getByRole('textbox', { name: 'Move name' }).fill('First move');
+
+      // A second branch, so the saved tree exercises the branch grouping rather than being one
+      // flat run of moves. It arrives with a blank move of its own.
+      await page.getByTestId('builder-add-branch').click();
+      await expect(steps).toHaveCount(2);
+      await steps.nth(1).getByRole('textbox', { name: 'Move name' }).fill('Second move');
+
+      // A third, deleted again: removing a move must take its row with it, not blank it.
+      await page.getByTestId('builder-add-step').last().click();
+      await expect(steps).toHaveCount(3);
+      await steps.nth(2).getByTestId('builder-step-delete').click();
+      await expect(steps).toHaveCount(2);
+
+      // Wiring the second behind the first is what makes this a tree rather than a list —
+      // and the dropdown must offer the first move to do it with.
+      await steps.nth(1).getByTestId('builder-requires-add').selectOption({ label: /First move/ });
+      await expect(steps.nth(1).locator('.req-chip')).toContainText('First move');
+
+      // Link the first move to something in the catalog. Whatever comes back first — the
+      // assertion is that the picker resolves to *a* move, not to a named one.
+      await steps.nth(0).getByTestId('builder-step-link').click();
+      await steps.nth(0).getByRole('textbox', { name: 'Search moves' }).fill('a');
+      await steps.nth(0).locator('.picker__result').first().click();
+      await expect(steps.nth(0).getByTestId('builder-step-move')).toBeVisible();
+
+      // The preview renders from the draft, before anything is saved.
+      await expect(page.getByTestId('roadmap-tree')).toBeVisible();
+      await expect(page.getByTestId('tree-node')).toHaveCount(2);
+
+      await page.getByTestId('builder-save').click();
+
+      // A save lands on the tree itself, not back on the form.
+      await expect(page).toHaveURL(/\/roadmaps\/[a-z0-9-]+$/, { timeout: 15_000 });
+      slug = page.url().split('/').pop()!;
+
+      await expect(page.getByTestId('roadmap-title')).toHaveText(name);
+      await expect(page.getByTestId('roadmap-owned-badge')).toBeVisible();
+      await expect(page.getByTestId('tree-node')).toHaveCount(2);
+      // Editing is the owner's, and only the owner's.
+      await expect(page.getByTestId('roadmap-edit')).toBeVisible();
+      await expect(page.getByTestId('roadmap-copy')).toHaveCount(0);
+
+      // It shows up on the index under the user's own section.
+      await page.goto('/roadmaps');
+      await expect(page.getByTestId('my-roadmaps')).toContainText(name);
+
+      // Delete through the UI, which is the only place a user can do it. The confirm step
+      // exists so a stray click can't cost a tree — assert it's actually there.
+      await page.goto(`/roadmaps/${slug}`);
+      await page.getByTestId('roadmap-delete').click();
+      await page.getByTestId('roadmap-delete-confirm').click();
+
+      await expect(page).toHaveURL(/\/roadmaps$/, { timeout: 15_000 });
+      await expect(page.getByTestId('roadmap-card').first()).toBeVisible();
+      await expect(page.locator('body')).not.toContainText(name);
+    } finally {
+      if (slug) await destroy(page, slug);
+    }
+  });
+
+  test('a curated path can be forked into an editable copy', async ({ authedPage: page }) => {
+    await blockEmbeds(page);
+    let slug = '';
+
+    try {
+      await page.goto('/roadmaps/house');
+      await expect(page.getByTestId('roadmap-title')).toBeVisible();
+      // A curated path is never editable in place, however you are signed in.
+      await expect(page.getByTestId('roadmap-edit')).toHaveCount(0);
+
+      await page.getByTestId('roadmap-copy').click();
+
+      // The fork opens in the builder, ready to cut about.
+      await expect(page).toHaveURL(/\/roadmaps\/[a-z0-9-]+\/edit$/, { timeout: 15_000 });
+      slug = page.url().split('/').slice(-2)[0];
+      expect(slug, 'the copy must get its own slug, not the curated one').not.toBe('house');
+
+      await expect(page.getByTestId('builder-name')).toHaveValue(/House/);
+      // The structure comes with it — a fork that arrived empty would be a blank page with
+      // extra steps.
+      expect(await page.getByTestId('builder-step').count()).toBeGreaterThan(1);
+    } finally {
+      if (slug) await destroy(page, slug);
+    }
+  });
+
+  test('the builder refuses a path the user does not own', async ({ authedPage: page }) => {
+    // Read-only: nothing is created, so there is nothing to clean up.
+    await page.goto('/roadmaps/house/edit');
+    await expect(page.getByRole('heading', { name: /not yours to edit/i })).toBeVisible();
+    await expect(page.getByTestId('builder-name')).toHaveCount(0);
+  });
+});
+
+/**
  * The login form itself — driven through the UI rather than the API fixture, because the
  * form is what a real user touches and it has its own failure modes (validation, error
  * display, redirect-after-login).

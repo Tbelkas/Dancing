@@ -4,6 +4,11 @@
     <nav class="crumb"><a routerLink="/roadmaps">Roadmaps</a> <span aria-hidden="true">/</span> {{ r.styleName }}</nav>
 
     <div class="page-header">
+      @if (r.isOwned) {
+        <span class="owner-badge" data-testid="roadmap-owned-badge">
+          <i class="fa-solid fa-user-pen" aria-hidden="true"></i> Your skill tree
+        </span>
+      }
       <h1 class="page-title" data-testid="roadmap-title">{{ r.title }}</h1>
       <p class="roadmap-subtitle">{{ r.subtitle }}</p>
       @if (r.description) { <p class="roadmap-intro">{{ r.description }}</p> }
@@ -14,6 +19,38 @@
         <li><strong>{{ r.videoCount }}</strong> videos</li>
         <li><a [routerLink]="['/dances']" [queryParams]="{ style: r.styleId }">All {{ r.styleName }} in the catalog</a></li>
       </ul>
+
+      <!-- Owning a tree is the only thing that unlocks editing it; the curated paths are
+           authored content and are changed by changing their JSON file. Everyone signed in can
+           fork one, which is how a curated path gets personalised without being altered. -->
+      @if (auth.isAuthenticated()) {
+        <div class="roadmap-actions">
+          @if (r.isOwned) {
+            <a class="btn btn--ghost btn--sm" [routerLink]="['/roadmaps', r.slug, 'edit']" data-testid="roadmap-edit">
+              <i class="fa-solid fa-pen" aria-hidden="true"></i> Edit tree
+            </a>
+            @if (confirmingDelete()) {
+              <span class="roadmap-actions__confirm">
+                Delete this tree?
+                <button type="button" class="btn btn--danger btn--sm" (click)="deleteTree()" [disabled]="busy()"
+                        data-testid="roadmap-delete-confirm">Delete</button>
+                <button type="button" class="btn btn--ghost btn--sm" (click)="confirmingDelete.set(false)">Keep it</button>
+              </span>
+            } @else {
+              <button type="button" class="btn btn--ghost btn--sm" (click)="confirmingDelete.set(true)"
+                      data-testid="roadmap-delete">
+                <i class="fa-solid fa-trash" aria-hidden="true"></i> Delete
+              </button>
+            }
+          } @else {
+            <button type="button" class="btn btn--ghost btn--sm" (click)="copyToMine()" [disabled]="busy()"
+                    data-testid="roadmap-copy">
+              <i class="fa-solid fa-code-branch" aria-hidden="true"></i>
+              {{ busy() ? 'Copying…' : 'Make my own version' }}
+            </button>
+          }
+        </div>
+      }
 
       @if (auth.isAuthenticated() && moveCount() > 0) {
         <div class="roadmap-progress" data-testid="roadmap-progress">
