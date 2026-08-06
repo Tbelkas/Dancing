@@ -453,8 +453,10 @@ test.describe('personal skill trees', () => {
 
       await page.getByTestId('builder-save').click();
 
-      // A save lands on the tree itself, not back on the form.
-      await expect(page).toHaveURL(/\/roadmaps\/[a-z0-9-]+$/, { timeout: 15_000 });
+      // A save lands on the tree itself, not back on the form. The `(?!new$)` matters: without
+      // it the pattern matches the builder's own /roadmaps/new, so the assertion passes before
+      // the save has navigated anywhere and `slug` below comes out as "new".
+      await expect(page).toHaveURL(/\/roadmaps\/(?!new$)[a-z0-9-]+$/, { timeout: 15_000 });
       slug = page.url().split('/').pop()!;
 
       await expect(page.getByTestId('roadmap-title')).toHaveText(name);
@@ -471,6 +473,9 @@ test.describe('personal skill trees', () => {
       // Delete through the UI, which is the only place a user can do it. The confirm step
       // exists so a stray click can't cost a tree — assert it's actually there.
       await page.goto(`/roadmaps/${slug}`);
+      // The owner controls only render once the roadmap has loaded and come back as theirs;
+      // clicking straight after the navigation races that fetch.
+      await expect(page.getByTestId('roadmap-owned-badge')).toBeVisible();
       await page.getByTestId('roadmap-delete').click();
       await page.getByTestId('roadmap-delete-confirm').click();
 
