@@ -77,11 +77,22 @@ using the throwaway account in `.env`.
 Every authed test is therefore **either read-only or restores what it changed** — the
 favourite-toggle test flips a favourite and flips it back in a `finally` block.
 
-The `personal skill trees` block is the one that genuinely creates rows. It follows two rules
-worth copying for anything else that has to: the tree's name carries `Date.now()`, so two
-overlapping runs can't fight over one slug; and cleanup goes over the **API**, in a `finally`,
-rather than through the UI — a test that only tidies up when the UI still works would leave
-its rows behind on exactly the run that found a bug.
+The `personal skill trees` block is the one that genuinely creates rows. It follows three rules
+worth copying for anything else that has to:
+
+- the tree's name carries `Date.now()`, so two overlapping runs can't fight over one slug;
+- cleanup goes over the **API**, in a `finally`, rather than through the UI — a test that only
+  tidies up when the UI still works would leave its rows behind on exactly the run that found
+  a bug;
+- the cleanup uses a 30s timeout and one retry, and **throws if it gives up**. The Pi has
+  exceeded the default 10s under load, and a cleanup that silently times out is worse than none
+  because the run still looks green.
+
+⚠️ **The builder registers a `beforeunload` handler while it has unsaved edits.** Playwright
+auto-dismisses that dialog, which *cancels* the navigation — so a `page.goto()` away from a
+dirty builder hangs until the 20s timeout instead of failing usefully. Save first, or drive the
+navigation through a link click and handle the dialog with `page.once('dialog', …)`, which is
+what the unsaved-changes test does.
 
 **Do not add a test that creates a dance, video, or practice session without deleting it
 again.** A scheduled run repeats forever; anything it leaves behind accumulates in the real

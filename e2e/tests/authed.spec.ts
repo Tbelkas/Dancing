@@ -382,13 +382,34 @@ test.describe('personal skill trees', () => {
     return token!;
   }
 
-  /** Deletes a tree by slug if it still exists. Safe to call twice. */
+  /**
+   * Deletes a tree by slug if it still exists. Safe to call twice.
+   *
+   * Generous timeouts and a retry, unlike anything else here: this is the only code standing
+   * between a slow API and a row left in the production database forever. A cleanup that gives
+   * up after the default 10s — which the Pi has exceeded under load — is worse than no cleanup,
+   * because it looks like it worked.
+   */
   async function destroy(page: import('@playwright/test').Page, slug: string): Promise<void> {
-    const token = await tokenOf(page);
-    const headers = { Authorization: `Bearer ${token}` };
-    const found = await page.request.get(`${API_URL}/roadmaps/${slug}`, { headers });
-    if (!found.ok()) return;
-    await page.request.delete(`${API_URL}/roadmaps/${(await found.json()).id}`, { headers });
+    const headers = { Authorization: `Bearer ${await tokenOf(page)}` };
+    const timeout = 30_000;
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const found = await page.request.get(`${API_URL}/roadmaps/${slug}`, { headers, timeout });
+        if (!found.ok()) return; // already gone
+        const deleted = await page.request.delete(
+          `${API_URL}/roadmaps/${(await found.json()).id}`, { headers, timeout });
+        if (deleted.ok()) return;
+      } catch {
+        // Fall through to the retry; the throw below reports the give-up.
+      }
+    }
+
+    throw new Error(
+      `Could not clean up the test skill tree "${slug}". Delete it by hand — a scheduled run ` +
+      'would otherwise leave one behind every time.'
+    );
   }
 
   /**
@@ -583,8 +604,12 @@ test.describe('personal skill trees', () => {
       // Copying the link is the point of sharing. Clipboard access can be refused (plain http,
       // embedded browsers), in which case the component shows the URL to copy by hand — both
       // paths raise a toast, and either is a working button.
+      // Filtered, not `.toast` bare: the "Shared —" toast from the click above is still on
+      // screen, so the bare locator matches two elements and fails strict mode.
       await page.getByTestId('roadmap-copy-link').click();
-      await expect(page.locator('.toast')).toContainText(new RegExp(`copied|/roadmaps/${slug}`, 'i'));
+      await expect(
+        page.locator('.toast').filter({ hasText: new RegExp(`copied|/roadmaps/${slug}`, 'i') })
+      ).toBeVisible();
 
       // What a stranger actually sees. A fresh context has none of the auth fixture's
       // localStorage, so this is a genuinely signed-out browser rather than a raw request.
@@ -641,6 +666,9 @@ test.describe('personal skill trees', () => {
       await step.getByTestId('builder-step-pin').click();
       const picker = step.getByTestId('builder-clip-picker');
       await expect(picker).toBeVisible();
+      // The videos are fetched on open. Counting before they land reads as "no sections" and
+      // sends the branch below down the wrong path.
+      await expect(picker).not.toContainText(/loading/i);
 
       const sections = picker.locator('.picker__result');
       // The linked move may have no chipped video, in which case the picker says so — that is a
