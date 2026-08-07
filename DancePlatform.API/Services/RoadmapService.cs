@@ -18,13 +18,17 @@ public class RoadmapService : IRoadmapService
 
         // One projection, no stage/step materialisation — the index only needs counts.
         var rows = await _db.Roadmaps
-            // Curated paths plus the caller's own trees. Someone else's personal tree is private,
-            // and filtering here rather than in the caller means no endpoint can forget to.
+            // Curated paths plus the caller's own trees — and deliberately *not* other people's
+            // shared ones. The index is the curated shelf; a shared tree is reachable by link and
+            // from its owner's profile. Nothing here is moderated, so it must not be pushed at
+            // people who didn't go looking for it.
             .Where(r => r.OwnerUserId == null || (hasUser && r.OwnerUserId == uid))
             .OrderBy(r => r.SortOrder).ThenBy(r => r.Title)
             .Select(r => new
             {
-                r.Id, r.Slug, r.Title, r.Subtitle, r.Description, r.StyleId, r.OwnerUserId,
+                r.Id, r.Slug, r.Title, r.Subtitle, r.Description, r.StyleId, r.OwnerUserId, r.IsPublic,
+                OwnerUsername = r.Owner == null ? null : r.Owner.Username,
+                OwnerNickname = r.Owner == null ? null : (r.Owner.Nickname == "" ? r.Owner.Username : r.Owner.Nickname),
                 StyleName = r.Style.Name,
                 StageCount = r.Stages.Count,
                 StepCount = r.Stages.SelectMany(s => s.Steps).Count(),
@@ -64,7 +68,10 @@ public class RoadmapService : IRoadmapService
             StyleId = r.StyleId,
             StyleName = r.StyleName,
             StyleSlug = SlugGenerator.Slugify(r.StyleName),
-            IsOwned = r.OwnerUserId != null,
+            IsOwned = hasUser && r.OwnerUserId == uid,
+            IsPublic = r.IsPublic,
+            OwnerUsername = r.OwnerUsername,
+            OwnerNickname = r.OwnerNickname,
             StageCount = r.StageCount,
             StepCount = r.StepCount,
             MoveCount = r.MoveCount,
@@ -85,14 +92,17 @@ public class RoadmapService : IRoadmapService
             ? _db.Roadmaps.Where(r => r.Id == id)
             : _db.Roadmaps.Where(r => r.Slug == idOrSlug);
 
-        // Another user's tree reads as "not found" rather than "forbidden": whether someone else
-        // has a path at this slug isn't the caller's business either.
-        query = query.Where(r => r.OwnerUserId == null || (hasUser && r.OwnerUserId == uid));
+        // Curated, the caller's own, or one its owner has shared. An unshared tree belonging to
+        // someone else reads as "not found" rather than "forbidden": whether they have a path at
+        // this slug isn't the caller's business either.
+        query = query.Where(r => r.OwnerUserId == null || (hasUser && r.OwnerUserId == uid) || r.IsPublic);
 
         var roadmap = await query
             .Select(r => new
             {
-                r.Id, r.Slug, r.Title, r.Subtitle, r.Description, r.StyleId, r.OwnerUserId,
+                r.Id, r.Slug, r.Title, r.Subtitle, r.Description, r.StyleId, r.OwnerUserId, r.IsPublic,
+                OwnerUsername = r.Owner == null ? null : r.Owner.Username,
+                OwnerNickname = r.Owner == null ? null : (r.Owner.Nickname == "" ? r.Owner.Username : r.Owner.Nickname),
                 StyleName = r.Style.Name,
                 Stages = r.Stages.OrderBy(s => s.SortOrder).Select(s => new
                 {
@@ -210,7 +220,10 @@ public class RoadmapService : IRoadmapService
             StyleId = roadmap.StyleId,
             StyleName = roadmap.StyleName,
             StyleSlug = SlugGenerator.Slugify(roadmap.StyleName),
-            IsOwned = roadmap.OwnerUserId != null,
+            IsOwned = hasUser && roadmap.OwnerUserId == uid,
+            IsPublic = roadmap.IsPublic,
+            OwnerUsername = roadmap.OwnerUsername,
+            OwnerNickname = roadmap.OwnerNickname,
             StageCount = stages.Count,
             StepCount = allSteps.Count,
             MoveCount = moves.Count,
@@ -299,12 +312,25 @@ public class RoadmapService : IRoadmapService
         return true;
     }
 
+    public async Task<RoadmapDto?> SetSharedAsync(int userId, int id, bool shared)
+    {
+        var roadmap = await _db.Roadmaps.FirstOrDefaultAsync(r => r.Id == id && r.OwnerUserId == userId);
+        if (roadmap is null) return null;
+
+        roadmap.IsPublic = shared;
+        await _db.SaveChangesAsync();
+        return await GetByIdOrSlugAsync(id.ToString(), userId);
+    }
+
     public async Task<RoadmapSaveResult> CopyAsync(int userId, string idOrSlug)
     {
-        // Read through the normal reader, so the visibility rule is the one already tested: you
-        // can fork a curated path or one of your own, never someone else's.
+        // Read through the normal reader, so the visibility rule is the one already tested: a
+        // curated path, one of your own, or one someone shared — never an unshared private tree.
         var source = await GetByIdOrSlugAsync(idOrSlug, userId);
         if (source is null) return RoadmapSaveResult.NotFound;
+
+        // The copy is private whatever the original was: CreateAsync leaves IsPublic false, and
+        // inheriting it would republish someone else's tree under a new owner by accident.
 
         return await CreateAsync(userId, new SaveRoadmapRequest
         {

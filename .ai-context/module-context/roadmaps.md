@@ -191,14 +191,33 @@ The client owns its step keys; the server slugifies and de-duplicates them and *
 `requires` through the same mapping**, so a client that reuses a key gets a working tree rather
 than a 400. A blank key never enters the mapping — nothing can name it.
 
-### Privacy and ownership
+### Privacy, ownership and sharing
 
-`RoadmapService` filters every read on `OwnerUserId == null || OwnerUserId == callerId`, and
-every write matches on `OwnerUserId == callerId`. So a curated path and another user's tree both
-just fail to match, and every write answers **404, not 403** — whether a private tree exists at
-that id isn't the caller's business either. There is no sharing: a personal tree is visible only
-to its owner. (Adding sharing means a visibility column and a public-by-slug read path; the
-uniqueness of `Slug` across both kinds already supports the URL.)
+Every **write** matches on `OwnerUserId == callerId`, so a curated path and another user's tree
+both just fail to match, and every write answers **404, not 403** — whether a private tree
+exists at that id isn't the caller's business either.
+
+**Reads have two different rules, deliberately:**
+
+| | rule |
+|---|---|
+| `GetByIdOrSlugAsync` (one tree, by URL) | curated **or** mine **or** `IsPublic` |
+| `GetAllAsync` (the index) | curated **or** mine — *never* other people's shared trees |
+
+A personal tree is private (`IsPublic = false`) until its owner shares it. Sharing is
+**link-and-profile discovery, not a feed**: a shared tree resolves at its own URL for anyone
+(signed out included, who get the usual teaser) and is listed on its owner's public profile
+(`PublicProfileDto.SharedRoadmaps`), but it never joins the roadmap index. The index is the
+curated shelf, nothing here is moderated, and it must not be pushed at people who didn't go
+looking for it. If that ever changes, moderation is the thing to build first.
+
+Two rules that keep sharing from leaking:
+
+- **Sharing is its own endpoint** (`PUT /roadmaps/{id}/share`), not a field on
+  `SaveRoadmapRequest`. A save replaces the whole tree, so carrying the flag in the payload
+  would let a builder tab opened before the toggle silently unshare it again.
+- **A fork is always private.** `CopyAsync` goes through `CreateAsync`, which leaves `IsPublic`
+  false; inheriting it would republish someone else's work under a new owner by accident.
 
 ### The builder
 
@@ -208,13 +227,23 @@ the same `app-roadmap-tree` as the real page, via `withGraphState(draft, false)`
 because nothing in a draft is learned, and the signed-in rules would paint every non-root node
 locked, turning the preview into a wall of padlocks that says nothing about the structure.
 
-The builder deliberately **cannot pin a clip** (`videoSegmentId`) — that needs a segment browser
-— but it carries the value through load and save untouched, so a tree forked from a curated path
-keeps its pinned clips instead of quietly widening every step back to the whole tutorial.
-
 The move picker searches `/search/dances` scoped to the tree's style. Linking is optional, the
 same as in the authored files: a path should name the moves the style needs whether or not the
 catalog covers them.
+
+Once a step is linked, **"Pin to a section"** narrows it to one `VideoSegment` — the same
+`videoSegmentId` the authored files reach through `segmentLabel`. It reads the dance's videos
+from `GET /videos/dance/{danceId}` (which already carries `segments`, so there's no new
+endpoint) and caches them per dance, since a sliced-up class video usually backs several steps.
+Changing the linked move clears the pin: a clip pinned against the old dance means nothing
+against a new one. Not every dance has chipped videos, and the picker says so rather than
+looking broken — sections come from the `find-chips` skill.
+
+**Unsaved changes are guarded.** `core/guards/unsaved-changes.guard.ts` (`canDeactivate`) plus a
+`beforeunload` listener for tab closes, which the router never sees. Dirtiness is a comparison
+of a JSON snapshot against the last saved one, not a flag each edit handler sets — there are a
+dozen ways to mutate the draft and the thirteenth would forget. Anything that navigates after a
+successful save must `hydrate()` first, or the guard challenges its own save on the way out.
 
 ### Caps
 
@@ -273,4 +302,5 @@ account can't turn the shared table into its own storage.
   without the `Include` and 500'd on every delete. **The unit tests can't catch this**: SQLite
   tolerates the ordering Postgres rejects. The e2e suite is the guard.
 - `/roadmaps/new` must be declared **before** `/roadmaps/:slug` in `app.routes.ts`.
-- The builder has **no unsaved-changes guard** — navigating away mid-edit loses the draft.
+- Both builder routes carry `canDeactivate: [unsavedChangesGuard]`. A new page that navigates
+  away from the builder must leave it clean first (see the builder notes above).

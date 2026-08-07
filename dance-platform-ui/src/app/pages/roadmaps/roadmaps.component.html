@@ -90,7 +90,10 @@
       }
       <span class="roadmap-card__style">{{ r.styleName }}</span>
       @if (r.isOwned) {
-        <span class="roadmap-card__mine"><i class="fa-solid fa-user-pen" aria-hidden="true"></i> Mine</span>
+        <span class="roadmap-card__mine">
+          <i class="fa-solid" [class.fa-user-pen]="!r.isPublic" [class.fa-globe]="r.isPublic" aria-hidden="true"></i>
+          {{ r.isPublic ? 'Shared' : 'Mine' }}
+        </span>
       }
     </div>
 

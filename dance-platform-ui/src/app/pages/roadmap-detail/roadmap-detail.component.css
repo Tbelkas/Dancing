@@ -35,6 +35,25 @@
   margin-bottom: 12px;
 }
 
+/* Sharing is the one state worth a second badge — it changes who can read the page. */
+.owner-badge--shared {
+  color: var(--color-primary);
+  border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+  margin-left: 6px;
+}
+
+.owner-badge--theirs {
+  color: var(--color-text-muted);
+  border-color: var(--color-border-light);
+  text-transform: none;
+  letter-spacing: 0.04em;
+
+  a {
+    color: var(--color-primary);
+    margin-left: 4px;
+  }
+}
+
 .roadmap-actions {
   display: flex;
   flex-wrap: wrap;

@@ -99,7 +99,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 67 attributes are a contract. Treat them like a public API.**
+**These 76 attributes are a contract. Treat them like a public API.**
 
 | Test id | Lives in | Anchors |
 |---|---|---|
@@ -113,8 +113,11 @@ anchors on a small, deliberate set of `data-testid` attributes.
 | `roadmap-card`, `roadmap-card-link` | `roadmaps.component.html` | Roadmap index cards |
 | `roadmap-new`, `my-roadmaps` | `roadmaps.component.html` | The "Build a skill tree" button and the grid of the user's own trees. **Both signed-in only** |
 | `roadmap-owned-badge`, `roadmap-edit`, `roadmap-delete`, `roadmap-delete-confirm`, `roadmap-copy` | `roadmap-detail.component.html` | Owner controls. `roadmap-edit`/`roadmap-delete` appear only on a tree the viewer owns; `roadmap-copy` only on one they don't. Their **absence** is the assertion that a curated path can't be edited in place |
-| `builder-title`, `builder-name`, `builder-style`, `builder-save`, `builder-error` | `roadmap-builder.component.html` | The builder's heading, the two required fields, Save, and the validation message |
+| `roadmap-share`, `roadmap-shared-badge`, `roadmap-copy-link`, `roadmap-shared-by` | `roadmap-detail.component.html` | Sharing. The first three are owner-only; `roadmap-shared-by` is the opposite — it renders for everyone *except* the owner, so asserting it needs a fresh signed-out context, not the authed fixture |
+| `profile-shared-roadmaps` | `user-profile.component.html` | A user's shared trees on their public profile — the only place one is listed, since they never join the roadmap index. **Absent** when they've shared none |
+| `builder-title`, `builder-name`, `builder-style`, `builder-save`, `builder-error`, `builder-dirty` | `roadmap-builder.component.html` | The builder's heading, the two required fields, Save, the validation message, and the unsaved-changes marker |
 | `builder-add-branch`, `builder-add-step`, `builder-step`, `builder-step-delete`, `builder-step-link`, `builder-step-move`, `builder-requires-add` | `roadmap-builder.component.html` | Structure editing: add a branch/move, each move row, its delete, the catalog-link button, the linked move chip, and the "comes after" dropdown. `builder-add-step` is **per branch** — use `.last()`, not the bare locator |
+| `builder-step-pin`, `builder-clip-picker`, `builder-step-clip` | `roadmap-builder.component.html` | Pinning a step to one section of a video: the button, the picker, and the resulting clip chip. All three need the step to have a linked move first |
 | `roadmap-title`, `roadmap-progress`, `roadmap-step`, `roadmap-step-videos`, `roadmap-step-learned` | `roadmap-detail.component.html` | A path: its title, the progress bar, each step row (list view), a step's video list, and the Learned chip (signed-in only) |
 | `roadmap-view-tree`, `roadmap-view-list`, `roadmap-detail-panel` | `roadmap-detail.component.html` | The view toggle and the tree's detail panel. **All three are signed-in only** — signed out the page renders the bare tree, so a test that needs the list view or a step's videos must use the `authed` project |
 | `roadmap-tree-hint` | `roadmap-detail.component.html` | The signed-out line under the tree. Its presence is how the anon suite proves the teaser state is still the teaser state |

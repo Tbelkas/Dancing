@@ -398,5 +398,106 @@ public class RoadmapServiceTests : IDisposable
         Assert.Null(result.Error);
     }
 
+    // ---- Sharing ----------------------------------------------------------------------------
+
+    [Fact]
+    public async Task Create_MakesAPrivateTree()
+    {
+        await using var ctx = NewCtx();
+        var tree = (await Svc(ctx).CreateAsync(Owner, Request("Mine", Step("a", "The jack")))).Roadmap!;
+
+        Assert.False(tree.IsPublic);
+        Assert.Equal("owner", tree.OwnerUsername);
+    }
+
+    /// <summary>
+    /// Sharing widens the read to everyone with the link — signed out included, who get the same
+    /// teaser the curated paths give. It stays off the roadmap index either way; that is the
+    /// curated shelf, and nothing here is moderated.
+    /// </summary>
+    [Fact]
+    public async Task SetShared_OpensTheTreeToEveryoneWithTheLinkButNotTheIndex()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var tree = (await svc.CreateAsync(Owner, Request("Mine", Step("a", "The jack")))).Roadmap!;
+
+        Assert.Null(await svc.GetByIdOrSlugAsync(tree.Slug, Stranger));
+
+        var shared = await svc.SetSharedAsync(Owner, tree.Id, true);
+        Assert.True(shared!.IsPublic);
+
+        var asStranger = await svc.GetByIdOrSlugAsync(tree.Slug, Stranger);
+        Assert.NotNull(asStranger);
+        Assert.False(asStranger!.IsOwned);            // readable, not editable
+        Assert.Equal("owner", asStranger.OwnerUsername);
+        Assert.NotNull(await svc.GetByIdOrSlugAsync(tree.Slug, null));
+
+        Assert.DoesNotContain(await svc.GetAllAsync(Stranger), r => r.Slug == tree.Slug);
+        Assert.DoesNotContain(await svc.GetAllAsync(null), r => r.Slug == tree.Slug);
+        // The owner still sees their own, shared or not.
+        Assert.Contains(await svc.GetAllAsync(Owner), r => r.Slug == tree.Slug);
+    }
+
+    [Fact]
+    public async Task SetShared_ClosesTheTreeAgain()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var tree = (await svc.CreateAsync(Owner, Request("Mine", Step("a", "The jack")))).Roadmap!;
+
+        await svc.SetSharedAsync(Owner, tree.Id, true);
+        var closed = await svc.SetSharedAsync(Owner, tree.Id, false);
+
+        Assert.False(closed!.IsPublic);
+        Assert.Null(await svc.GetByIdOrSlugAsync(tree.Slug, Stranger));
+    }
+
+    [Fact]
+    public async Task SetShared_RefusesATreeThatIsNotTheCallersOwn()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var tree = (await svc.CreateAsync(Owner, Request("Mine", Step("a", "The jack")))).Roadmap!;
+
+        Assert.Null(await svc.SetSharedAsync(Stranger, tree.Id, true));
+        Assert.Null(await svc.GetByIdOrSlugAsync(tree.Slug, Stranger));
+    }
+
+    /// <summary>A save must not be able to unshare a tree — sharing is its own endpoint.</summary>
+    [Fact]
+    public async Task Update_LeavesSharingAlone()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var tree = (await svc.CreateAsync(Owner, Request("Mine", Step("a", "The jack")))).Roadmap!;
+        await svc.SetSharedAsync(Owner, tree.Id, true);
+
+        var updated = await svc.UpdateAsync(Owner, tree.Id, Request("Mine, re-cut", Step("a", "The jack")));
+
+        Assert.True(updated.Roadmap!.IsPublic);
+    }
+
+    /// <summary>
+    /// A fork of a shared tree is private. Inheriting the flag would republish someone else's
+    /// work under a new owner without them ever choosing to.
+    /// </summary>
+    [Fact]
+    public async Task Copy_OfASharedTreeIsPrivateAndOwnedByTheForker()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var theirs = (await svc.CreateAsync(Stranger, Request("Theirs", Step("a", "The jack")))).Roadmap!;
+        await svc.SetSharedAsync(Stranger, theirs.Id, true);
+
+        var fork = (await svc.CopyAsync(Owner, theirs.Slug)).Roadmap!;
+
+        Assert.False(fork.IsPublic);
+        Assert.True(fork.IsOwned);
+        Assert.Equal("owner", fork.OwnerUsername);
+        // And the original is untouched.
+        Assert.True((await svc.GetByIdOrSlugAsync(theirs.Slug, Stranger))!.IsPublic);
+    }
+
     public void Dispose() => _conn.Dispose();
 }

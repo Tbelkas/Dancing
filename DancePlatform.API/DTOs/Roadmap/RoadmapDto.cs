@@ -15,9 +15,21 @@ public class RoadmapSummaryDto
 
     /// <summary>
     /// True when this is the caller's own skill tree rather than a curated path — the UI keys
-    /// its edit/delete affordances off this, and only the owner is ever sent one.
+    /// its edit/delete affordances off this.
     /// </summary>
     public bool IsOwned { get; set; }
+
+    /// <summary>
+    /// True when this is a personal tree its owner has shared. Only ever true alongside
+    /// <see cref="OwnerUsername"/>; always false on a curated path, which is public by nature.
+    /// </summary>
+    public bool IsPublic { get; set; }
+
+    /// <summary>Who built it — null on a curated path. Set on every personal tree the caller can see.</summary>
+    public string? OwnerUsername { get; set; }
+
+    /// <summary>Their display name, for "Shared by …". Falls back to the username server-side.</summary>
+    public string? OwnerNickname { get; set; }
 
     public int StageCount { get; set; }
     public int StepCount { get; set; }

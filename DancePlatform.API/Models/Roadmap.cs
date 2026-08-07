@@ -39,6 +39,17 @@ public class Roadmap
     public int? OwnerUserId { get; set; }
     public User? Owner { get; set; }
 
+    /// <summary>
+    /// Only meaningful on a personal tree. Off by default; when its owner turns it on, anyone
+    /// with the link can read the tree and fork it.
+    ///
+    /// Deliberately **link-and-profile discovery, not a feed**: a shared tree shows on its
+    /// owner's public profile and resolves at its own URL, but never joins the roadmap index,
+    /// which is the curated shelf. Nothing here is moderated, so it must not be pushed at
+    /// people who didn't go looking for it.
+    /// </summary>
+    public bool IsPublic { get; set; }
+
     /// <summary>Position on the roadmap index; ties break on Title.</summary>
     public int SortOrder { get; set; }
 

@@ -30,6 +30,15 @@ public interface IRoadmapService
     Task<bool> DeleteAsync(int userId, int id);
 
     /// <summary>
+    /// Shares one of the caller's own trees, or stops sharing it. Null when it isn't theirs.
+    ///
+    /// Kept off <see cref="SaveRoadmapRequest"/> on purpose: a save replaces the whole tree, so
+    /// carrying the flag there would let a builder tab opened before the toggle silently unshare
+    /// it again.
+    /// </summary>
+    Task<RoadmapDto?> SetSharedAsync(int userId, int id, bool shared);
+
+    /// <summary>
     /// Copies any roadmap the caller can see into a personal tree of their own, so a curated
     /// path can be the starting point for a personalised one rather than a blank page.
     /// </summary>

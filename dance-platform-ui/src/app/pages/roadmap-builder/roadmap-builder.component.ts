@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -7,11 +7,14 @@ import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { RoadmapService } from '../../core/services/roadmap.service';
 import { StyleService } from '../../core/services/style.service';
 import { DanceService } from '../../core/services/dance.service';
+import { VideoService } from '../../core/services/video.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Style } from '../../models/style.model';
 import { Dance } from '../../models/dance.model';
+import { Video, VideoSegment } from '../../models/video.model';
 import { Roadmap, SaveRoadmap } from '../../models/roadmap.model';
 import { withGraphState } from '../../core/utils/roadmap-graph';
+import { HasUnsavedChanges } from '../../core/guards/unsaved-changes.guard';
 import { RoadmapTreeComponent } from '../roadmap-detail/roadmap-tree.component';
 
 /**
@@ -28,11 +31,13 @@ interface DraftStep {
   /** Display only — the picker searched by name, and the payload carries the id. */
   danceName: string;
   /**
-   * Carried through untouched. The builder can't pin a clip (that needs a segment browser), but
-   * a tree copied from a curated path arrives with its clips already pinned, and a save that
-   * dropped them would quietly widen every step back to the whole tutorial.
+   * Narrows the step to one section of one of the dance's videos, or null for the whole move.
+   * A tree copied from a curated path arrives with these already set, so they are also carried
+   * through untouched by anything that doesn't deliberately change them.
    */
   videoSegmentId: number | null;
+  /** Display only — the section's label, so a pinned step reads without a lookup. */
+  segmentLabel: string;
   requires: string[];
 }
 
@@ -51,7 +56,7 @@ interface DraftStage {
   templateUrl: './roadmap-builder.component.html',
   styleUrls: ['./roadmap-builder.component.css']
 })
-export class RoadmapBuilderComponent implements OnInit {
+export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedChanges {
   /** Null while building a new tree; the row id once we're editing a saved one. */
   roadmapId = signal<number | null>(null);
   slug = signal<string | null>(null);
@@ -75,11 +80,72 @@ export class RoadmapBuilderComponent implements OnInit {
   danceResults = signal<Dance[]>([]);
   searching = signal(false);
 
+  /** Key of the step whose clip picker is open, and the videos behind it. */
+  clipPickerFor = signal<string | null>(null);
+  clipVideos = signal<Video[]>([]);
+  loadingClips = signal(false);
+  /**
+   * Videos by dance id, so reopening a picker (or opening it on a second step backed by the
+   * same tutorial — which is the normal case for a sliced-up class video) doesn't refetch.
+   */
+  private readonly videoCache = new Map<number, Video[]>();
+
   /** Node selected on the preview, mirrored onto the matching row in the form. */
   selectedKey = signal<string | null>(null);
 
   private readonly search$ = new Subject<string>();
   private nextId = 1;
+
+  /**
+   * Everything a save would send, as one string.
+   *
+   * Dirtiness is a comparison against the last saved snapshot rather than a flag set by each
+   * edit handler: there are a dozen ways to mutate the draft, a flag would be forgotten by the
+   * thirteenth, and typing something and typing it back out again would leave the page falsely
+   * dirty. `key` is deliberately included — reordering moves changes the payload.
+   */
+  private readonly snapshot = computed(() => JSON.stringify({
+    title: this.title().trim(),
+    subtitle: this.subtitle().trim(),
+    description: this.description().trim(),
+    styleId: this.styleId(),
+    stages: this.stages().map(stage => ({
+      title: stage.title.trim(),
+      description: stage.description.trim(),
+      steps: stage.steps.map(step => ({
+        key: step.key,
+        title: step.title.trim(),
+        description: step.description.trim(),
+        danceId: step.danceId,
+        videoSegmentId: step.videoSegmentId,
+        requires: step.requires
+      }))
+    }))
+  }));
+
+  /** The snapshot as the server last saw it. Reset on load and after every successful save. */
+  private readonly savedSnapshot = signal('');
+
+  readonly dirty = computed(() => this.snapshot() !== this.savedSnapshot());
+
+  hasUnsavedChanges(): boolean {
+    // Nothing to lose while the save is in flight — it's about to become the saved state.
+    return !this.saving() && this.dirty();
+  }
+
+  unsavedChangesMessage(): string {
+    return 'This skill tree has changes you haven\'t saved. Leave the page and lose them?';
+  }
+
+  /**
+   * A tab close or reload never reaches the router, so the guard can't see it. Browsers ignore
+   * any custom text here and show their own wording — returning a value is the whole API.
+   */
+  private readonly beforeUnload = (event: BeforeUnloadEvent) => {
+    if (!this.hasUnsavedChanges()) return;
+    event.preventDefault();
+    event.returnValue = '';
+  };
 
   readonly isNew = computed(() => this.roadmapId() === null);
 
@@ -113,6 +179,8 @@ export class RoadmapBuilderComponent implements OnInit {
       styleName: this.styleName(),
       styleSlug: '',
       isOwned: true,
+      // A draft is never shared — sharing is toggled on the saved tree, not in here.
+      isPublic: false,
       stageCount: this.stages().length,
       stepCount: rows.length,
       moveCount: this.linkedCount(),
@@ -153,11 +221,13 @@ export class RoadmapBuilderComponent implements OnInit {
     private roadmapService: RoadmapService,
     private styleService: StyleService,
     private danceService: DanceService,
+    private videoService: VideoService,
     private toast: ToastService,
     private titleService: Title
   ) {}
 
   ngOnInit(): void {
+    window.addEventListener('beforeunload', this.beforeUnload);
     this.styleService.getAll().subscribe(s => this.styles.set(s));
 
     this.search$.pipe(
@@ -179,6 +249,9 @@ export class RoadmapBuilderComponent implements OnInit {
       // A blank tree still opens with one branch and one move: an empty form gives no clue that
       // branches are the thing you fill in.
       this.stages.set([this.blankStage('Getting started')]);
+      // The blank form is the baseline, so opening the builder and leaving without typing
+      // anything doesn't count as unsaved work.
+      this.markClean();
       this.loading.set(false);
       this.titleService.setTitle('New skill tree · Dance Platform');
       return;
@@ -216,9 +289,20 @@ export class RoadmapBuilderComponent implements OnInit {
         danceId: step.dance?.id ?? null,
         danceName: step.dance?.name ?? '',
         videoSegmentId: step.segment?.id ?? null,
+        segmentLabel: step.segment?.label ?? '',
         requires: [...step.requires]
       }))
     })));
+    this.markClean();
+  }
+
+  /** Takes what's on screen as the saved state. */
+  private markClean(): void {
+    this.savedSnapshot.set(this.snapshot());
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('beforeunload', this.beforeUnload);
   }
 
   // ---- Branches ---------------------------------------------------------------------------
@@ -228,7 +312,10 @@ export class RoadmapBuilderComponent implements OnInit {
   }
 
   private blankStep(): DraftStep {
-    return { key: this.freshKey(), title: '', description: '', danceId: null, danceName: '', videoSegmentId: null, requires: [] };
+    return {
+      key: this.freshKey(), title: '', description: '',
+      danceId: null, danceName: '', videoSegmentId: null, segmentLabel: '', requires: []
+    };
   }
 
   /**
@@ -382,6 +469,7 @@ export class RoadmapBuilderComponent implements OnInit {
       danceName: dance.name,
       // A clip pinned against the old move means nothing against a new one.
       videoSegmentId: null,
+      segmentLabel: '',
       // An untitled step takes the move's name; a titled one keeps what the author wrote, which
       // is the rule the curated paths follow — the step's title is the teaching, not the label.
       title: step.title.trim() || dance.name
@@ -390,7 +478,55 @@ export class RoadmapBuilderComponent implements OnInit {
   }
 
   clearDance(step: DraftStep): void {
-    this.setStep(step.key, { danceId: null, danceName: '', videoSegmentId: null });
+    this.setStep(step.key, { danceId: null, danceName: '', videoSegmentId: null, segmentLabel: '' });
+  }
+
+  // ---- The clip picker --------------------------------------------------------------------
+
+  /**
+   * Pinning a step to one section of a video is the difference between a curriculum and a
+   * playlist: without it a step backed by an 11-minute class says "watch all of this" — and the
+   * consolidated tutorials mean that is the common case, not the exception (see VIDEO_FIXUP.md).
+   */
+  openClipPicker(step: DraftStep): void {
+    if (step.danceId === null) return;
+    this.clipPickerFor.set(step.key);
+
+    const cached = this.videoCache.get(step.danceId);
+    if (cached) { this.clipVideos.set(cached); return; }
+
+    this.clipVideos.set([]);
+    this.loadingClips.set(true);
+    const danceId = step.danceId;
+    this.videoService.getByDance(danceId).subscribe({
+      next: videos => {
+        this.videoCache.set(danceId, videos);
+        // Still the open one? A fast click through two steps could land these out of order.
+        if (this.clipPickerFor() === step.key) this.clipVideos.set(videos);
+        this.loadingClips.set(false);
+      },
+      error: () => { this.loadingClips.set(false); this.toast.error('Could not load that move’s videos.'); }
+    });
+  }
+
+  /** Videos of the open picker's dance that actually have sections to pin to. */
+  readonly clipVideosWithSections = computed(() => this.clipVideos().filter(v => v.segments.length > 0));
+
+  chooseSegment(step: DraftStep, segment: VideoSegment): void {
+    this.setStep(step.key, { videoSegmentId: segment.id, segmentLabel: segment.label });
+    this.clipPickerFor.set(null);
+  }
+
+  clearSegment(step: DraftStep): void {
+    this.setStep(step.key, { videoSegmentId: null, segmentLabel: '' });
+  }
+
+  /** "4:01 – 5:25", or "from 4:01" for a section with no end. */
+  segmentRange(segment: VideoSegment): string {
+    const clock = (s: number) => `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
+    return segment.endTime == null
+      ? `from ${clock(segment.startTime)}`
+      : `${clock(segment.startTime)} – ${clock(segment.endTime)}`;
   }
 
   // ---- Saving -----------------------------------------------------------------------------
@@ -443,6 +579,12 @@ export class RoadmapBuilderComponent implements OnInit {
     request.subscribe({
       next: saved => {
         this.saving.set(false);
+        // Rehydrate rather than leave the draft as typed: the server rewrites keys, drops empty
+        // rows and prunes stale edges, and the form should show what is actually stored. It also
+        // clears the dirty flag, which the navigation below depends on — otherwise saving a new
+        // tree would immediately be challenged by the unsaved-changes guard on the way out.
+        this.hydrate(saved);
+
         if (id === null) {
           // Straight to the tree on the first save: the payoff for filling the form in is seeing
           // the thing you built, not the form again with a toast over it.
@@ -450,9 +592,6 @@ export class RoadmapBuilderComponent implements OnInit {
           void this.router.navigate(['/roadmaps', saved.slug]);
           return;
         }
-        // Rehydrate rather than leave the draft as typed: the server rewrites keys, drops empty
-        // rows and prunes stale edges, and the form should show what is actually stored.
-        this.hydrate(saved);
         this.toast.success('Saved.');
       },
       error: err => {

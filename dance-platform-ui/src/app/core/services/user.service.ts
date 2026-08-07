@@ -9,6 +9,19 @@ export interface PublicProfile {
   nickname: string;
   avatarUrl?: string;
   learnedDances: { id: number; name: string; slug: string; styleSlug: string }[];
+  /**
+   * Skill trees this user has shared. Shared trees stay off the roadmap index by design, so
+   * this and the tree's own link are the only ways to reach one.
+   */
+  sharedRoadmaps: SharedRoadmapRef[];
+}
+
+export interface SharedRoadmapRef {
+  slug: string;
+  title: string;
+  subtitle: string;
+  styleName: string;
+  stepCount: number;
 }
 
 @Injectable({ providedIn: 'root' })

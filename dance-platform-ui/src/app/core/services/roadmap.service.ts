@@ -34,6 +34,15 @@ export class RoadmapService {
     return this.http.delete<void>(`${this.base}/${id}`);
   }
 
+  /**
+   * Shares a personal tree, or stops sharing it. Its own call rather than part of `update` on
+   * purpose: a save replaces the whole tree, so folding the flag in would let a stale builder
+   * tab unshare it by accident.
+   */
+  setShared(id: number, shared: boolean): Observable<Roadmap> {
+    return this.http.put<Roadmap>(`${this.base}/${id}/share`, { shared });
+  }
+
   /** Forks a path into one of the caller's own, curated ones included. */
   copy(idOrSlug: string): Observable<Roadmap> {
     return this.http.post<Roadmap>(`${this.base}/${idOrSlug}/copy`, {});

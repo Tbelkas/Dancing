@@ -72,14 +72,25 @@ some client-side filtering; see module-context/dances-catalog.md.)
 | POST | `/roadmaps` | User | `SaveRoadmapRequest` → 201 `RoadmapDto`; creates a personal tree |
 | PUT | `/roadmaps/{id}` | User | `SaveRoadmapRequest` → `RoadmapDto`; **replaces the whole tree** |
 | DELETE | `/roadmaps/{id}` | User | 204; own trees only |
+| PUT | `/roadmaps/{id}/share` | User | `{ shared }` → `RoadmapDto`; own trees only |
 | POST | `/roadmaps/{idOrSlug}/copy` | User | 201 `RoadmapDto`; forks any readable path into one of the caller's own |
+
+**Reads use two different visibility rules.** `GET /roadmaps/{idOrSlug}` serves curated paths,
+the caller's own trees, **and** any tree its owner has shared. `GET /roadmaps` (the index) serves
+curated paths and the caller's own **only** — a shared tree is reachable by its link and listed
+on its owner's profile (`GET /users/{username}` → `sharedRoadmaps`), never on the index.
+
+Sharing is its own endpoint rather than a field on `SaveRoadmapRequest`, because a save replaces
+the whole tree and would otherwise let a stale builder tab unshare one. A fork is always private
+regardless of what it was forked from.
 
 The two GETs are anonymous but **not** response-cached — `learnedCount` / `inProgressCount`,
 `availableCount` and each step's `isLearned` / `isInProgress` / `state` are per current user.
 Progress is written through the existing `PUT /dances/{id}/status`, not a roadmap endpoint.
 
-`isOwned` on both DTOs distinguishes a personal tree from a curated path, and is what the UI
-gates its edit/delete affordances on. **Curated paths are not API-editable** — they are seeded
+`isOwned` on both DTOs means "the caller built this" and is what the UI gates its edit / delete /
+share affordances on. `isPublic` + `ownerUsername` / `ownerNickname` carry the sharing state and
+attribution; on a curated path `isOwned` and `isPublic` are false and the owner fields are null. **Curated paths are not API-editable** — they are seeded
 from `Data/Roadmaps/*.json`, and the write endpoints match on `OwnerUserId == callerId`, so a
 curated path and another user's tree both simply fail to match. Every write therefore answers
 **404, not 403**: whether a private tree exists at that id isn't the caller's business either.

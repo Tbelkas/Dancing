@@ -391,6 +391,37 @@ test.describe('personal skill trees', () => {
     await page.request.delete(`${API_URL}/roadmaps/${(await found.json()).id}`, { headers });
   }
 
+  /**
+   * Builds a minimal one-move tree through the form and returns its slug. The tests that are
+   * *about* something else (sharing, clips) go through here rather than repeating the build,
+   * which is covered in full by its own test above.
+   */
+  async function createTree(
+    page: import('@playwright/test').Page,
+    name: string,
+    options: { linkMove?: boolean } = {}
+  ): Promise<string> {
+    await page.goto('/roadmaps/new');
+    await expect(page.getByTestId('builder-title')).toBeVisible();
+    await page.getByTestId('builder-name').fill(name);
+    await page.getByTestId('builder-style').selectOption({ label: 'House' });
+
+    const step = page.getByTestId('builder-step').first();
+    await step.getByRole('textbox', { name: 'Move name' }).fill('First move');
+
+    if (options.linkMove) {
+      await step.getByTestId('builder-step-link').click();
+      await step.getByRole('textbox', { name: 'Search moves' }).fill('a');
+      await step.locator('.picker__result').first().click();
+      await expect(step.getByTestId('builder-step-move')).toBeVisible();
+    }
+
+    await page.getByTestId('builder-save').click();
+    // The `(?!new$)` guard matters — see the build test.
+    await expect(page).toHaveURL(/\/roadmaps\/(?!new$)[a-z0-9-]+$/, { timeout: 15_000 });
+    return page.url().split('/').pop()!;
+  }
+
   test('a tree can be built through the form, opened, and deleted again', async ({ authedPage: page }) => {
     await blockEmbeds(page);
     // Unique per run: two runs overlapping would otherwise fight over one slug, and the
@@ -518,6 +549,143 @@ test.describe('personal skill trees', () => {
     await page.goto('/roadmaps/house/edit');
     await expect(page.getByRole('heading', { name: /not yours to edit/i })).toBeVisible();
     await expect(page.getByTestId('builder-name')).toHaveCount(0);
+  });
+
+  /**
+   * Sharing changes who can read the tree, so the assertion that matters is made *without* the
+   * account: `page.request` carries no Authorization header (the app's interceptor adds it
+   * in-page, not to raw requests), so these calls are what a stranger would get.
+   */
+  test('sharing opens a tree to anyone with the link, and unsharing closes it', async ({ authedPage: page }) => {
+    const name = `E2E share ${Date.now()}`;
+    let slug = '';
+
+    try {
+      slug = await createTree(page, name);
+
+      // Private by default — that is the whole safety property.
+      expect((await page.request.get(`${API_URL}/roadmaps/${slug}`)).status(),
+        'a new tree must not be readable without the owner\'s account').toBe(404);
+
+      await page.goto(`/roadmaps/${slug}`);
+      await expect(page.getByTestId('roadmap-shared-badge')).toHaveCount(0);
+      await page.getByTestId('roadmap-share').click();
+      await expect(page.getByTestId('roadmap-shared-badge')).toBeVisible();
+
+      const shared = await page.request.get(`${API_URL}/roadmaps/${slug}`);
+      expect(shared.ok(), 'a shared tree must be readable by a signed-out visitor').toBe(true);
+      const body = await shared.json();
+      expect(body.isPublic).toBe(true);
+      // A stranger reads it; they never own it.
+      expect(body.isOwned).toBe(false);
+      expect(body.ownerUsername).toBe(USERNAME);
+
+      // Copying the link is the point of sharing. Clipboard access can be refused (plain http,
+      // embedded browsers), in which case the component shows the URL to copy by hand — both
+      // paths raise a toast, and either is a working button.
+      await page.getByTestId('roadmap-copy-link').click();
+      await expect(page.locator('.toast')).toContainText(new RegExp(`copied|/roadmaps/${slug}`, 'i'));
+
+      // What a stranger actually sees. A fresh context has none of the auth fixture's
+      // localStorage, so this is a genuinely signed-out browser rather than a raw request.
+      const origin = new URL(page.url()).origin;
+      const anonContext = await page.context().browser()!.newContext();
+      try {
+        const anonPage = await anonContext.newPage();
+        await anonPage.goto(`${origin}/roadmaps/${slug}`);
+        await expect(anonPage.getByTestId('roadmap-title')).toHaveText(name);
+        // Attributed to its author, and never presented as the reader's own. Asserted on the
+        // link target rather than the text, which is the author's nickname when they have one.
+        await expect(anonPage.getByTestId('roadmap-shared-by')).toContainText(/shared by/i);
+        await expect(anonPage.getByTestId('roadmap-shared-by').locator('a'))
+          .toHaveAttribute('href', `/users/${USERNAME}`);
+        await expect(anonPage.getByTestId('roadmap-edit')).toHaveCount(0);
+        await expect(anonPage.getByTestId('roadmap-share')).toHaveCount(0);
+      } finally {
+        await anonContext.close();
+      }
+
+      // The owner's public profile is the only place a shared tree is listed — it deliberately
+      // never joins the roadmap index.
+      await page.goto(`/users/${USERNAME}`);
+      await expect(page.getByTestId('profile-shared-roadmaps')).toContainText(name);
+
+      await page.goto('/roadmaps');
+      await expect(page.getByTestId('my-roadmaps')).toContainText(name);
+
+      // Unshare, and it closes again.
+      await page.goto(`/roadmaps/${slug}`);
+      await page.getByTestId('roadmap-share').click();
+      await expect(page.getByTestId('roadmap-shared-badge')).toHaveCount(0);
+      expect((await page.request.get(`${API_URL}/roadmaps/${slug}`)).status()).toBe(404);
+    } finally {
+      if (slug) await destroy(page, slug);
+    }
+  });
+
+  /**
+   * Pinning a step to one section of a video. House is used because its catalog has chipped
+   * tutorials; the test asserts that *a* section can be pinned, never which one.
+   */
+  test('a move can be pinned to one section of its video', async ({ authedPage: page }) => {
+    const name = `E2E clip ${Date.now()}`;
+    let slug = '';
+
+    try {
+      slug = await createTree(page, name, { linkMove: true });
+
+      await page.goto(`/roadmaps/${slug}/edit`);
+      const step = page.getByTestId('builder-step').first();
+      await expect(step.getByTestId('builder-step-move')).toBeVisible();
+
+      await step.getByTestId('builder-step-pin').click();
+      const picker = step.getByTestId('builder-clip-picker');
+      await expect(picker).toBeVisible();
+
+      const sections = picker.locator('.picker__result');
+      // The linked move may have no chipped video, in which case the picker says so — that is a
+      // real state, not a failure, so branch on it rather than skipping the test.
+      if (await sections.count() === 0) {
+        await expect(picker).toContainText(/not split into sections/i);
+        return;
+      }
+
+      await sections.first().click();
+      await expect(step.getByTestId('builder-step-clip')).toBeVisible();
+
+      await page.getByTestId('builder-save').click();
+      await expect(page.getByTestId('builder-dirty')).toHaveCount(0);
+
+      // The pin has to survive the round trip — a save that dropped it would silently widen
+      // the step back to the whole tutorial.
+      await page.reload();
+      await expect(page.getByTestId('builder-step').first().getByTestId('builder-step-clip')).toBeVisible();
+    } finally {
+      if (slug) await destroy(page, slug);
+    }
+  });
+
+  test('leaving the builder with unsaved edits asks first', async ({ authedPage: page }) => {
+    // Read-only: the tree is never saved, so nothing reaches the database.
+    await page.goto('/roadmaps/new');
+    await expect(page.getByTestId('builder-title')).toBeVisible();
+
+    // A form nobody has touched must not nag on the way out.
+    await expect(page.getByTestId('builder-dirty')).toHaveCount(0);
+
+    await page.getByTestId('builder-name').fill('Unsaved tree');
+    await expect(page.getByTestId('builder-dirty')).toBeVisible();
+
+    // Dismissed: the navigation is cancelled and the edit survives.
+    page.once('dialog', d => d.dismiss());
+    await page.getByRole('link', { name: 'Cancel' }).click();
+    await expect(page).toHaveURL(/\/roadmaps\/new$/);
+    await expect(page.getByTestId('builder-name')).toHaveValue('Unsaved tree');
+
+    // Accepted: it lets go.
+    page.once('dialog', d => d.accept());
+    await page.getByRole('link', { name: 'Cancel' }).click();
+    await expect(page).toHaveURL(/\/roadmaps$/);
   });
 });
 

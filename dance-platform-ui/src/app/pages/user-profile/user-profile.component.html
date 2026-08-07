@@ -39,6 +39,26 @@
       </div>
 
       <div class="stats-column">
+        <!-- Only rendered when they've shared something — an empty "Skill trees" card on every
+             profile would advertise a feature most people haven't used. -->
+        @if (profile()!.sharedRoadmaps.length > 0) {
+          <div class="card">
+            <h3>Skill Trees <span class="count-badge">{{ profile()!.sharedRoadmaps.length }}</span></h3>
+            <div class="dance-ref-list" data-testid="profile-shared-roadmaps">
+              @for (r of profile()!.sharedRoadmaps; track r.slug) {
+                <a [routerLink]="['/roadmaps', r.slug]" class="dance-ref-item">
+                  <span class="dance-ref-icon"><i class="fa-solid fa-sitemap"></i></span>
+                  <span class="dance-ref-name">
+                    {{ r.title }}
+                    <small>{{ r.styleName }} · {{ r.stepCount }} {{ r.stepCount === 1 ? 'move' : 'moves' }}</small>
+                  </span>
+                  <span class="dance-ref-arrow">→</span>
+                </a>
+              }
+            </div>
+          </div>
+        }
+
         <div class="card">
           <h3>Dances Learned <span class="count-badge">{{ profile()!.learnedDances.length }}</span></h3>
           @if (profile()!.learnedDances.length === 0) {

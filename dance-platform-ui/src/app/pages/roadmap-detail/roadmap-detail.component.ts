@@ -161,6 +161,46 @@ export class RoadmapDetailComponent implements OnInit {
     });
   }
 
+  /**
+   * Shares the tree, or stops. Not optimistic: sharing changes who can read the thing, so the
+   * badge must reflect what the server actually stored rather than what we hoped it would.
+   */
+  toggleShared(): void {
+    const roadmap = this.roadmap();
+    if (!roadmap || this.busy()) return;
+
+    const shared = !roadmap.isPublic;
+    this.busy.set(true);
+    this.roadmapService.setShared(roadmap.id, shared).subscribe({
+      next: saved => {
+        this.busy.set(false);
+        this.roadmap.set(saved);
+        this.toast.success(shared
+          ? 'Shared — anyone with the link can see this tree.'
+          : 'Sharing off. Only you can see this tree now.');
+      },
+      error: () => {
+        this.busy.set(false);
+        this.toast.error('Could not change sharing. Try again.');
+      }
+    });
+  }
+
+  /** Puts the tree's public URL on the clipboard, for the owner to paste wherever. */
+  async copyLink(): Promise<void> {
+    const roadmap = this.roadmap();
+    if (!roadmap) return;
+    const url = `${location.origin}/roadmaps/${roadmap.slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      this.toast.success('Link copied.');
+    } catch {
+      // Clipboard access is refused over plain http and in some embedded browsers. Show the
+      // URL rather than failing silently — they can still select it by hand.
+      this.toast.error(`Copy this link: ${url}`);
+    }
+  }
+
   deleteTree(): void {
     const roadmap = this.roadmap();
     if (!roadmap || this.busy()) return;

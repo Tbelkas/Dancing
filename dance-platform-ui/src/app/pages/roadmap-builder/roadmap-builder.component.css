@@ -89,8 +89,23 @@
 .builder__actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
   padding-top: 4px;
+}
+
+.builder__dirty {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+
+  i { font-size: 0.42rem; }
 }
 
 /* ---- Cards ---- */
@@ -332,6 +347,23 @@
 .picker__note {
   font-size: 0.82rem;
   color: var(--color-text-muted);
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-primary);
+  }
+}
+
+/* Groups a video's sections in the clip picker — a dance can have several sliced videos. */
+.picker__video {
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding-top: 4px;
 }
 
 /* ---- Prerequisites ---- */

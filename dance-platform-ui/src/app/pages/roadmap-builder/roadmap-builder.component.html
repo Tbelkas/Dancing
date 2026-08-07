@@ -144,11 +144,48 @@
                         <i class="fa-solid fa-clapperboard" aria-hidden="true"></i> {{ step.danceName }}
                       </span>
                       @if (step.videoSegmentId !== null) {
-                        <span class="builder__clip" title="This step is pinned to one section of a video">
-                          <i class="fa-solid fa-scissors" aria-hidden="true"></i> clip
+                        <span class="builder__clip" data-testid="builder-step-clip"
+                              title="This step covers one section of a video, not the whole move">
+                          <i class="fa-solid fa-scissors" aria-hidden="true"></i>
+                          {{ step.segmentLabel || 'clip' }}
                         </span>
+                        <button type="button" class="link-btn" (click)="clearSegment(step)">Whole move</button>
+                      } @else if (clipPickerFor() !== step.key) {
+                        <button type="button" class="link-btn" (click)="openClipPicker(step)"
+                                data-testid="builder-step-pin">
+                          <i class="fa-solid fa-scissors" aria-hidden="true"></i> Pin to a section
+                        </button>
                       }
                       <button type="button" class="link-btn" (click)="clearDance(step)">Unlink</button>
+
+                      @if (clipPickerFor() === step.key) {
+                        <div class="picker" data-testid="builder-clip-picker">
+                          @if (loadingClips()) {
+                            <p class="picker__note">Loading this move’s videos…</p>
+                          } @else if (clipVideosWithSections().length === 0) {
+                            <p class="picker__note">
+                              None of this move’s videos are split into sections, so the step covers
+                              the whole thing. Sections come from the chip scripts — see
+                              <code>find-chips</code>.
+                            </p>
+                          } @else {
+                            @for (v of clipVideosWithSections(); track v.id) {
+                              <p class="picker__video">{{ v.title }}</p>
+                              <ul class="picker__results">
+                                @for (seg of v.segments; track seg.id) {
+                                  <li>
+                                    <button type="button" class="picker__result" (click)="chooseSegment(step, seg)">
+                                      <span class="picker__result-name">{{ seg.label }}</span>
+                                      <span class="picker__result-meta">{{ segmentRange(seg) }}</span>
+                                    </button>
+                                  </li>
+                                }
+                              </ul>
+                            }
+                          }
+                          <button type="button" class="link-btn" (click)="clipPickerFor.set(null)">Cancel</button>
+                        </div>
+                      }
                     } @else if (pickerFor() !== step.key) {
                       <button type="button" class="link-btn" (click)="openPicker(step)"
                               data-testid="builder-step-link">
@@ -253,6 +290,13 @@
                     data-testid="builder-save">
               {{ saving() ? 'Saving…' : isNew() ? 'Create tree' : 'Save changes' }}
             </button>
+            <!-- Says why leaving will be challenged, rather than letting the confirm() come
+                 out of nowhere. -->
+            @if (dirty()) {
+              <span class="builder__dirty" data-testid="builder-dirty">
+                <i class="fa-solid fa-circle" aria-hidden="true"></i> Unsaved changes
+              </span>
+            }
             @if (slug(); as s) {
               <a class="btn btn--ghost" [routerLink]="['/roadmaps', s]">View tree</a>
             } @else {

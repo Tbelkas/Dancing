@@ -8,6 +8,18 @@
         <span class="owner-badge" data-testid="roadmap-owned-badge">
           <i class="fa-solid fa-user-pen" aria-hidden="true"></i> Your skill tree
         </span>
+        @if (r.isPublic) {
+          <span class="owner-badge owner-badge--shared" data-testid="roadmap-shared-badge">
+            <i class="fa-solid fa-globe" aria-hidden="true"></i> Shared
+          </span>
+        }
+      } @else if (r.ownerUsername) {
+        <!-- Someone else's tree, which means they shared it. Say whose it is before the title:
+             a personal path carries different authority from a curated one. -->
+        <span class="owner-badge owner-badge--theirs" data-testid="roadmap-shared-by">
+          <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
+          Shared by <a [routerLink]="['/users', r.ownerUsername]">{{ r.ownerNickname || r.ownerUsername }}</a>
+        </span>
       }
       <h1 class="page-title" data-testid="roadmap-title">{{ r.title }}</h1>
       <p class="roadmap-subtitle">{{ r.subtitle }}</p>
@@ -29,6 +41,16 @@
             <a class="btn btn--ghost btn--sm" [routerLink]="['/roadmaps', r.slug, 'edit']" data-testid="roadmap-edit">
               <i class="fa-solid fa-pen" aria-hidden="true"></i> Edit tree
             </a>
+            <button type="button" class="btn btn--ghost btn--sm" (click)="toggleShared()" [disabled]="busy()"
+                    [attr.aria-pressed]="r.isPublic" data-testid="roadmap-share">
+              <i class="fa-solid" [class.fa-globe]="!r.isPublic" [class.fa-lock]="r.isPublic" aria-hidden="true"></i>
+              {{ r.isPublic ? 'Stop sharing' : 'Share' }}
+            </button>
+            @if (r.isPublic) {
+              <button type="button" class="btn btn--ghost btn--sm" (click)="copyLink()" data-testid="roadmap-copy-link">
+                <i class="fa-solid fa-link" aria-hidden="true"></i> Copy link
+              </button>
+            }
             @if (confirmingDelete()) {
               <span class="roadmap-actions__confirm">
                 Delete this tree?

@@ -101,6 +101,7 @@ the ratings across all of its videos (recomputed on rate, video delete, and vide
 | Description | string? | intro paragraph |
 | StyleId | int FK → Style | cascade |
 | OwnerUserId | int? FK → User | **null = curated**; set = a personal tree, cascade, indexed |
+| IsPublic | bool | personal trees only; false = private to the owner, true = readable by anyone with the link |
 | SortOrder | int | position on the index |
 | DateAdded | datetime | |
 | DateModified | datetime? | last builder save; null for curated paths |
@@ -111,8 +112,10 @@ Nav: Stages. **Two kinds share this table, told apart by `OwnerUserId`:**
   boot by `Data/RoadmapSeeder.cs` (not gated on an empty DB, unlike `SeedData`). The seeder
   matches on `OwnerUserId == null`, so it never touches a personal tree.
 - **Personal** (owner set) — user data, written through `POST`/`PUT /roadmaps` by the builder.
-  Private to its owner: `RoadmapService` filters every read on
-  `OwnerUserId == null || OwnerUserId == callerId`.
+  Private to its owner until they set `IsPublic`. Reading one tree allows
+  `OwnerUserId == null || OwnerUserId == callerId || IsPublic`; the **index** deliberately drops
+  the last clause, so a shared tree never appears on the roadmap list (see the roadmaps module
+  context for why).
 
 The unique index stays **global** rather than per-owner so `/roadmaps/{slug}` resolves without
 knowing whose path it is. `RoadmapService.UniqueSlugAsync` therefore uniquifies a new personal

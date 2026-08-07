@@ -10,11 +10,16 @@ export interface RoadmapSummary {
   styleName: string;
   styleSlug: string;
 
-  /**
-   * True when this is the viewer's own skill tree rather than a curated path. The server only
-   * ever sends someone their own, so this doubles as "may I edit it?".
-   */
+  /** True when this is the viewer's own skill tree — i.e. "may I edit it?". */
   isOwned: boolean;
+
+  /** True when it's a personal tree its owner has shared. Always false on a curated path. */
+  isPublic: boolean;
+
+  /** Who built it — absent on a curated path. */
+  ownerUsername?: string;
+  /** Their display name, for "Shared by …". */
+  ownerNickname?: string;
 
   stageCount: number;
   stepCount: number;

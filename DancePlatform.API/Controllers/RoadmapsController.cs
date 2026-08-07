@@ -55,6 +55,18 @@ public class RoadmapsController : AppControllerBase
         await _roadmapService.DeleteAsync(CurrentUserId!.Value, id) ? NoContent() : NotFound();
 
     /// <summary>
+    /// Shares one of the caller's own trees, or stops sharing it. Separate from the save on
+    /// purpose — see <see cref="IRoadmapService.SetSharedAsync"/>.
+    /// </summary>
+    [HttpPut("{id:int}/share")]
+    [Authorize]
+    public async Task<IActionResult> SetShared(int id, [FromBody] SetRoadmapSharedRequest request)
+    {
+        var roadmap = await _roadmapService.SetSharedAsync(CurrentUserId!.Value, id, request.Shared);
+        return roadmap is null ? NotFound() : Ok(roadmap);
+    }
+
+    /// <summary>
     /// Forks any path the caller can read into a tree of their own. The way to personalise a
     /// curated path: the curated one stays untouched, and the copy is theirs to cut about.
     /// </summary>

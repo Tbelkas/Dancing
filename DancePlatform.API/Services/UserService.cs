@@ -88,13 +88,27 @@ public class UserService : IUserService
 
         var learned = await ProjectRefs(_db.UserLearnedDances.Where(l => l.UserId == user.Id).Select(l => l.Dance)).AsNoTracking().ToListAsync();
 
+        // Shared skill trees. This is the only place they surface to other people besides their
+        // own URL — they deliberately stay off the roadmap index (see RoadmapService.GetAllAsync).
+        var shared = await _db.Roadmaps.AsNoTracking()
+            .Where(r => r.OwnerUserId == user.Id && r.IsPublic)
+            .OrderBy(r => r.Title)
+            .Select(r => new SharedRoadmapRef(
+                r.Slug,
+                r.Title,
+                r.Subtitle,
+                r.Style.Name,
+                r.Stages.SelectMany(s => s.Steps).Count()))
+            .ToListAsync();
+
         return new PublicProfileDto
         {
             Id = user.Id,
             Username = user.Username,
             Nickname = user.Nickname,
             AvatarUrl = user.AvatarUrl,
-            LearnedDances = learned.Select(ToRef).ToList()
+            LearnedDances = learned.Select(ToRef).ToList(),
+            SharedRoadmaps = shared
         };
     }
 

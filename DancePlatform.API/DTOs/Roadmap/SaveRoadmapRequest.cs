@@ -54,6 +54,16 @@ public class SaveRoadmapStepRequest
 }
 
 /// <summary>
+/// The body of <c>PUT /roadmaps/{id}/share</c>. Its own request rather than a field on
+/// <see cref="SaveRoadmapRequest"/>, so a builder tab opened before the toggle can't unshare a
+/// tree by saving stale structure over it.
+/// </summary>
+public class SetRoadmapSharedRequest
+{
+    public bool Shared { get; set; }
+}
+
+/// <summary>
 /// A save's outcome. The builder can put a bad tree together in ways the seeder's files can't
 /// (a cycle drawn by hand, a style that was deleted), and silently dropping the edge the user
 /// just added would look like the save failed at random — so a save either lands whole or comes
