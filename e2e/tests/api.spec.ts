@@ -119,12 +119,13 @@ test.describe('api health @smoke', () => {
   });
 
   test('roadmap steps can pin to a video section', async ({ request }) => {
-    // Waacking is the path that still uses segmentLabel: its "weaker arm" step pins to one
-    // section of the long consolidated tutorial rather than serving the whole thing. (It used
-    // to lean on segments far more heavily, before the path was rebuilt around one dance per
-    // step.) If resolution breaks, the step silently widens to "watch the whole 12-minute
-    // video" — which still renders, hence the explicit check.
-    const res = await request.get('roadmaps/waacking');
+    // The "weaker arm" step pins to one section of the long consolidated Waacking tutorial
+    // rather than serving the whole thing. It lives in the *arms module*, not the top-level
+    // path — asserting against 'waacking' would have quietly stopped covering anything the day
+    // that step moved, which is exactly what happened once. If resolution breaks, the step
+    // silently widens to "watch the whole 12-minute video", which still renders, hence the
+    // explicit check.
+    const res = await request.get('roadmaps/waacking-arms');
     expect(res.status()).toBe(200);
     const roadmap = await res.json();
 

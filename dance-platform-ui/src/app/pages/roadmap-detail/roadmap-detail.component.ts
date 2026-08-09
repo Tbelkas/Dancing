@@ -102,11 +102,17 @@ export class RoadmapDetailComponent implements OnInit {
     if (stored === 'tree' || stored === 'list') this.storedView.set(stored);
     this.branchesOpen.set(localStorage.getItem(BRANCHES_KEY) === '1');
 
-    this.load();
+    // Subscribed, not read once from the snapshot: modules made roadmap-to-roadmap navigation
+    // possible (a gateway down, a breadcrumb back up), and Angular reuses this component when
+    // only `:slug` changes — so a snapshot read leaves the previous path on screen under the
+    // new URL.
+    this.route.paramMap.subscribe(params => this.load(params.get('slug') ?? ''));
   }
 
-  private load(): void {
-    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
+  private load(slug: string): void {
+    this.loading.set(true);
+    this.roadmap.set(null);
+    this.selectedKey.set(null);
     this.roadmapService.getBySlug(slug).subscribe({
       next: r => {
         this.roadmap.set(r);
@@ -134,9 +140,7 @@ export class RoadmapDetailComponent implements OnInit {
    */
   onSignedIn(): void {
     this.signInOpen.set(false);
-    this.loading.set(true);
-    this.roadmap.set(null);
-    this.load();
+    this.load(this.route.snapshot.paramMap.get('slug') ?? '');
   }
 
   /**

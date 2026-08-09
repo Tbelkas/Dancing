@@ -352,7 +352,8 @@ test.describe('authenticated', () => {
    */
   test('a step pinned to a video section deep-links to that timestamp', async ({ authedPage: page }) => {
     await blockEmbeds(page);
-    await page.goto('/roadmaps/waacking');
+    // The pinned step lives in the arms module, not the top-level Waacking path.
+    await page.goto('/roadmaps/waacking-arms');
     await expect(page.getByTestId('roadmap-title')).toBeVisible();
     await page.getByTestId('roadmap-view-list').click();
 
