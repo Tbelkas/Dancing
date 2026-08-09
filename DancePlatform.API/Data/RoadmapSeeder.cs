@@ -36,6 +36,7 @@ public static class RoadmapSeeder
         // than pushing a LOWER()/ILIKE comparison per file into SQL.
         var styles = await db.Styles.Select(s => new { s.Id, s.Name }).ToListAsync();
 
+        var seeded = new List<RoadmapFile>();
         foreach (var path in Directory.EnumerateFiles(dir, "*.json").OrderBy(p => p, StringComparer.Ordinal))
         {
             RoadmapFile? file;
@@ -65,7 +66,128 @@ public static class RoadmapSeeder
             }
 
             await SeedOneAsync(db, file, style.Id, logger);
+            seeded.Add(file);
         }
+
+        // Module links are resolved in a second pass, after every file exists as a row. A module
+        // is just another roadmap file, and file order is alphabetical — "waacking.json" is read
+        // before "waacking-posing.json", so a single pass would leave the gateway unlinked until
+        // the *next* boot. That is exactly the kind of "works after a restart" behaviour that
+        // wastes an afternoon during a deploy.
+        await LinkModulesAsync(db, seeded, logger);
+    }
+
+    /// <summary>
+    /// Points each authored <c>module</c> at its child roadmap, and clears links the files no
+    /// longer declare.
+    ///
+    /// Rejects, with a logged error and no link, anything that would make the graph unreadable:
+    /// a module claimed by two different steps (the breadcrumb would have two answers), a chain
+    /// that loops, or one deeper than <see cref="Services.RoadmapGraph.MaxModuleDepth"/>. Same
+    /// contract as a bad prerequisite edge — it costs one link, never the boot.
+    /// </summary>
+    private static async Task LinkModulesAsync(AppDbContext db, List<RoadmapFile> files, ILogger logger)
+    {
+        var curated = await db.Roadmaps
+            .Where(r => r.OwnerUserId == null)
+            .Select(r => new { r.Id, r.Slug })
+            .ToDictionaryAsync(r => r.Slug, r => r.Id, StringComparer.OrdinalIgnoreCase);
+
+        // Every curated step that could carry a link, keyed by (roadmap slug, step key).
+        var steps = await db.RoadmapSteps
+            .Where(s => s.Stage.Roadmap.OwnerUserId == null)
+            .Select(s => new { s.Id, s.Key, s.ChildRoadmapId, RoadmapId = s.Stage.RoadmapId, RoadmapSlug = s.Stage.Roadmap.Slug })
+            .ToListAsync();
+        var stepByAddress = steps
+            .GroupBy(s => (s.RoadmapSlug, s.Key), TupleComparer)
+            .ToDictionary(g => g.Key, g => g.First(), TupleComparer);
+
+        // Work out the whole desired shape before writing anything, so the cycle and depth checks
+        // see the final graph rather than a half-applied one.
+        var desired = new Dictionary<int, int>();          // child roadmap id -> parent roadmap id
+        var wantedByStep = new Dictionary<int, int>();     // step id -> child roadmap id
+        var claimedBy = new Dictionary<int, string>();     // child roadmap id -> the step that claimed it
+
+        foreach (var file in files)
+        {
+            foreach (var authored in file.Stages.SelectMany(s => s.Steps))
+            {
+                if (string.IsNullOrWhiteSpace(authored.Module)) continue;
+                var key = StepKey(authored);
+
+                if (!stepByAddress.TryGetValue((file.Slug, key), out var step))
+                {
+                    logger.LogError("Roadmap '{Slug}': step '{Step}' declares a module but has no stored row.", file.Slug, key);
+                    continue;
+                }
+                if (!curated.TryGetValue(authored.Module!, out var childId))
+                {
+                    logger.LogError("Roadmap '{Slug}': step '{Step}' names unknown module '{Module}'; link dropped.",
+                        file.Slug, key, authored.Module);
+                    continue;
+                }
+                if (!string.IsNullOrWhiteSpace(authored.DanceSlug))
+                {
+                    logger.LogError("Roadmap '{Slug}': step '{Step}' has both a module and a danceSlug; link dropped. " +
+                                    "A step is either a move or a gateway.", file.Slug, key);
+                    continue;
+                }
+                if (claimedBy.TryGetValue(childId, out var already))
+                {
+                    logger.LogError("Roadmap '{Slug}': module '{Module}' is already claimed by '{Other}'; link dropped.",
+                        file.Slug, authored.Module, already);
+                    continue;
+                }
+                if (Services.RoadmapGraph.CreatesModuleCycle(desired, step.RoadmapId, childId))
+                {
+                    logger.LogError("Roadmap '{Slug}': module '{Module}' would close a loop; link dropped.",
+                        file.Slug, authored.Module);
+                    continue;
+                }
+
+                desired[childId] = step.RoadmapId;
+                if (Services.RoadmapGraph.ModuleDepth(desired, childId) >= Services.RoadmapGraph.MaxModuleDepth)
+                {
+                    logger.LogError("Roadmap '{Slug}': module '{Module}' nests deeper than {Max}; link dropped.",
+                        file.Slug, authored.Module, Services.RoadmapGraph.MaxModuleDepth);
+                    desired.Remove(childId);
+                    continue;
+                }
+
+                claimedBy[childId] = $"{file.Slug}#{key}";
+                wantedByStep[step.Id] = childId;
+            }
+        }
+
+        var changed = 0;
+        foreach (var step in steps)
+        {
+            var want = wantedByStep.TryGetValue(step.Id, out var c) ? (int?)c : null;
+            if (want == step.ChildRoadmapId) continue;
+
+            // Tracked entity rather than the projection, so EF writes just this column.
+            var row = await db.RoadmapSteps.FirstAsync(s => s.Id == step.Id);
+            row.ChildRoadmapId = want;
+            changed++;
+        }
+
+        if (changed > 0) await db.SaveChangesAsync();
+        if (wantedByStep.Count > 0 || changed > 0)
+            logger.LogInformation("Roadmap modules: {Linked} gateway(s) linked, {Changed} changed this boot.",
+                wantedByStep.Count, changed);
+    }
+
+    private static readonly RoadmapAddressComparer TupleComparer = new();
+
+    /// <summary>Case-insensitive on both halves — step keys and slugs are matched that way everywhere else.</summary>
+    private sealed class RoadmapAddressComparer : IEqualityComparer<(string RoadmapSlug, string Key)>
+    {
+        public bool Equals((string RoadmapSlug, string Key) a, (string RoadmapSlug, string Key) b) =>
+            string.Equals(a.RoadmapSlug, b.RoadmapSlug, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(a.Key, b.Key, StringComparison.OrdinalIgnoreCase);
+
+        public int GetHashCode((string RoadmapSlug, string Key) x) =>
+            HashCode.Combine(x.RoadmapSlug.ToLowerInvariant(), x.Key.ToLowerInvariant());
     }
 
     private static async Task SeedOneAsync(AppDbContext db, RoadmapFile file, int styleId, ILogger logger)
@@ -401,6 +523,13 @@ public static class RoadmapSeeder
 
         /// <summary>Optional: narrows the step to one section of one of the dance's videos.</summary>
         public string? SegmentLabel { get; set; }
+
+        /// <summary>
+        /// Optional: slug of another authored roadmap that this step opens into — a module.
+        /// Mutually exclusive with <see cref="DanceSlug"/>. Resolved in a second pass once every
+        /// file has a row, so declaration order between files doesn't matter.
+        /// </summary>
+        public string? Module { get; set; }
 
         /// <summary>Keys of steps that come before this one. Empty = a root of the tree.</summary>
         public List<string> Requires { get; set; } = new();

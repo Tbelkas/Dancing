@@ -38,6 +38,19 @@ export interface Roadmap extends RoadmapSummary {
   stages: RoadmapStage[];
   /** Steps whose prerequisites are met but which aren't learned yet — what to do next. */
   availableCount: number;
+  /**
+   * Present only when this path is a *module* of another one. Outermost first, so it renders
+   * straight through as a breadcrumb: Waacking › Posing.
+   */
+  ancestors?: RoadmapCrumb[];
+}
+
+/** One rung of a module's breadcrumb. */
+export interface RoadmapCrumb {
+  slug: string;
+  title: string;
+  /** Title of the step that opens the next rung down. Empty on the outermost crumb. */
+  stepTitle: string;
 }
 
 export type RoadmapStepState = 'learned' | 'available' | 'locked';
@@ -67,6 +80,27 @@ export interface RoadmapStep {
   dance?: RoadmapStepDance;
   /** Set when the step covers one section of one of the dance's videos, not the whole move. */
   segment?: RoadmapStepSegment;
+  /**
+   * Set when this step is a gateway into a nested path rather than a single move. Mutually
+   * exclusive with `dance`. It is learned exactly when the module is complete, so the UI must
+   * not offer a manual tick for it.
+   */
+  module?: RoadmapStepModule;
+}
+
+/** A nested path as seen from the step that opens it — enough to draw the gateway and its progress. */
+export interface RoadmapStepModule {
+  id: number;
+  slug: string;
+  title: string;
+  subtitle: string;
+  /** Every step inside, including ones that can never be ticked off. */
+  stepCount: number;
+  /** Steps that can actually be finished — the denominator in "3 of 7". */
+  completableCount: number;
+  learnedCount: number;
+  /** True when every completable step is done. A module with nothing completable never is. */
+  isComplete: boolean;
 }
 
 export interface RoadmapStepSegment {
@@ -133,5 +167,11 @@ export interface SaveRoadmapStep {
   /** A catalog move, by id (the picker searches, so it always has one). */
   danceId?: number | null;
   videoSegmentId?: number | null;
+  /**
+   * One of the user's own trees, making this step a module gateway instead of a move. Ignored
+   * when `danceId` is set. Clearing it does not delete the child — it becomes a normal
+   * top-level tree the user still owns.
+   */
+  childRoadmapId?: number | null;
   requires: string[];
 }

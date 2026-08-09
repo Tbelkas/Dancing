@@ -46,6 +46,30 @@ public class RoadmapStep
     public VideoSegment? VideoSegment { get; set; }
 
     /// <summary>
+    /// Optional link to a whole nested roadmap — a <b>module</b>. The step stops being one move
+    /// and becomes a gateway: the child renders as its own tree at its own URL, and this step
+    /// counts as learned exactly when the module is complete.
+    ///
+    /// This is what lets a path go deep without the top-level fan turning into a hairball —
+    /// "Posing" stays one node here and unfolds into seven of its own.
+    ///
+    /// A module is a <see cref="Roadmap"/> like any other, which is deliberate: it reuses the
+    /// renderer, the graph rules, the seeder and the builder unchanged. Two constraints keep it
+    /// sane, both enforced above this layer:
+    /// <list type="bullet">
+    /// <item>A roadmap is the child of <b>at most one</b> step (unique index), so the breadcrumb
+    /// and the completion rule are unambiguous.</item>
+    /// <item>The child graph must be acyclic and no deeper than
+    /// <c>RoadmapGraph.MaxModuleDepth</c> — this is read by a public endpoint.</item>
+    /// </list>
+    ///
+    /// Mutually exclusive with <see cref="DanceId"/>: a step is either a move or a module, or
+    /// "learned" would have two competing definitions.
+    /// </summary>
+    public int? ChildRoadmapId { get; set; }
+    public Roadmap? ChildRoadmap { get; set; }
+
+    /// <summary>
     /// Steps that should be learned before this one. Progression through a style is a graph,
     /// not a line — the twists and the travelling steps both come off the jack but don't depend
     /// on each other — so the path renders as a tree rather than a numbered list.

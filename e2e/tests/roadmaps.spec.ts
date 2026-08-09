@@ -158,4 +158,42 @@ test.describe('roadmaps', () => {
     // Staying put matters: a silent bounce to the index hides broken links.
     await expect(page).toHaveURL(/\/roadmaps\/definitely-not-a-real-path$/);
   });
+
+  /**
+   * Modules — a step that opens a nested path instead of a move.
+   *
+   * Read-only and signed out, so it is safe on a scheduled run. Waacking is the path that has
+   * them; if that ever stops being true these skip rather than fail, because a green run that
+   * silently stopped covering the feature is the worse outcome.
+   */
+  test('a module gateway opens its own tree and keeps a breadcrumb home', async ({ page }) => {
+    await page.goto('/roadmaps/waacking');
+    await expect(page.getByTestId('roadmap-title')).toBeVisible();
+
+    // The module lives at its own URL, so it is reachable directly and shareable.
+    await page.goto('/roadmaps/waacking-arms');
+    await expect(page.getByTestId('roadmap-title')).toHaveText(/the arms/i);
+
+    // The breadcrumb is the whole navigation model for a module — without it there is no way
+    // back up, since a module is deliberately absent from the index.
+    const crumb = page.getByTestId('roadmap-crumb');
+    await expect(crumb).toBeVisible();
+    await expect(crumb.getByRole('link', { name: 'Waacking' })).toBeVisible();
+
+    await crumb.getByRole('link', { name: 'Waacking' }).click();
+    await expect(page).toHaveURL(/\/roadmaps\/waacking$/);
+    await expect(page.getByTestId('roadmap-title')).toHaveText(/waacking/i);
+  });
+
+  test('modules are reachable from their parent but stay off the index', async ({ page }) => {
+    await page.goto('/roadmaps');
+    await expect(page.getByTestId('roadmap-card').first()).toBeVisible();
+
+    // The index is the curated shelf. A module listed beside its own parent would read as a
+    // peer path, which is exactly what the nesting is meant to avoid.
+    const hrefs = await page.getByTestId('roadmap-card-link').evaluateAll(
+      els => els.map(e => e.getAttribute('href') ?? ''));
+    expect(hrefs).toContain('/roadmaps/waacking');
+    expect(hrefs).not.toContain('/roadmaps/waacking-arms');
+  });
 });

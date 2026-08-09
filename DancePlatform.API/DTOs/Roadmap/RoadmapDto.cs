@@ -55,6 +55,23 @@ public class RoadmapDto : RoadmapSummaryDto
 
     /// <summary>Steps whose prerequisites are all met but which aren't learned yet — what to do next.</summary>
     public int AvailableCount { get; set; }
+
+    /// <summary>
+    /// Set when this roadmap is a <b>module</b> of another one, i.e. some step points at it.
+    /// Drives the breadcrumb; null on a top-level path. Ordered outermost-first, so it renders
+    /// straight through: Waacking › Posing.
+    /// </summary>
+    public List<RoadmapCrumbDto>? Ancestors { get; set; }
+}
+
+/// <summary>One rung of a module's breadcrumb — the roadmap, and the step in it that opened this one.</summary>
+public class RoadmapCrumbDto
+{
+    public string Slug { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>Title of the step that claims the next rung down. Empty on the outermost crumb.</summary>
+    public string StepTitle { get; set; } = string.Empty;
 }
 
 public class RoadmapStageDto
@@ -102,6 +119,42 @@ public class RoadmapStepDto
     /// move. The UI shows just that clip and deep-links the player to its start.
     /// </summary>
     public RoadmapStepSegmentDto? Segment { get; set; }
+
+    /// <summary>
+    /// Set when this step is a gateway into a nested roadmap rather than a single move. Mutually
+    /// exclusive with <see cref="Dance"/>. The step is learned exactly when the module is
+    /// complete, so the UI must not offer a manual tick for it.
+    /// </summary>
+    public RoadmapStepModuleDto? Module { get; set; }
+}
+
+/// <summary>
+/// A nested roadmap as seen from the step that opens it: enough to render the gateway node and
+/// its progress, without shipping the child's whole tree inside the parent's payload.
+/// </summary>
+public class RoadmapStepModuleDto
+{
+    public int Id { get; set; }
+    public string Slug { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Subtitle { get; set; } = string.Empty;
+
+    /// <summary>Every step in the module, including ones that can never be ticked off.</summary>
+    public int StepCount { get; set; }
+
+    /// <summary>
+    /// Steps that can actually be completed — those with a move, plus any nested modules.
+    /// This is the denominator the UI shows ("3 of 7"), and the one completion is judged on.
+    /// </summary>
+    public int CompletableCount { get; set; }
+
+    public int LearnedCount { get; set; }
+
+    /// <summary>
+    /// True when every completable step is done. A module with nothing completable in it is
+    /// never complete — it passes through instead, like an unlinked step.
+    /// </summary>
+    public bool IsComplete { get; set; }
 }
 
 /// <summary>The slice of a video a step points at, plus which video it lives in.</summary>

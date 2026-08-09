@@ -38,6 +38,14 @@ interface DraftStep {
   videoSegmentId: number | null;
   /** Display only — the section's label, so a pinned step reads without a lookup. */
   segmentLabel: string;
+  /**
+   * Set when this step is a gateway into one of the user's own trees rather than a move.
+   * Mutually exclusive with `danceId`; the UI only offers one of the two at a time.
+   */
+  childRoadmapId: number | null;
+  /** Display only — the module's name and URL, so the row reads without another fetch. */
+  moduleTitle: string;
+  moduleSlug: string;
   requires: string[];
 }
 
@@ -93,6 +101,9 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
   /** Node selected on the preview, mirrored onto the matching row in the form. */
   selectedKey = signal<string | null>(null);
 
+  /** Key of the step whose module is being created, so the button can't be double-fired. */
+  moduleBusy = signal<string | null>(null);
+
   private readonly search$ = new Subject<string>();
   private nextId = 1;
 
@@ -118,6 +129,7 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
         description: step.description.trim(),
         danceId: step.danceId,
         videoSegmentId: step.videoSegmentId,
+        childRoadmapId: step.childRoadmapId,
         requires: step.requires
       }))
     }))
@@ -207,6 +219,13 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
             id: step.danceId, name: step.danceName, slug: '', styleSlug: '',
             difficulty: '', averageRating: 0, ratingCount: 0,
             isLearned: false, isInProgress: false, isFavorite: false, videos: []
+          },
+          // Enough for the preview to draw the gateway glyph. Counts are zero because the draft
+          // has never asked the server what is inside the module — and the preview renders as
+          // signed out anyway, where no progress is shown.
+          module: step.childRoadmapId === null ? undefined : {
+            id: step.childRoadmapId, slug: step.moduleSlug, title: step.moduleTitle,
+            subtitle: '', stepCount: 0, completableCount: 0, learnedCount: 0, isComplete: false
           }
         }))
       }))
@@ -287,6 +306,9 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
         title: step.title,
         description: step.description ?? '',
         danceId: step.dance?.id ?? null,
+        childRoadmapId: step.module?.id ?? null,
+        moduleTitle: step.module?.title ?? '',
+        moduleSlug: step.module?.slug ?? '',
         danceName: step.dance?.name ?? '',
         videoSegmentId: step.segment?.id ?? null,
         segmentLabel: step.segment?.label ?? '',
@@ -314,7 +336,8 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
   private blankStep(): DraftStep {
     return {
       key: this.freshKey(), title: '', description: '',
-      danceId: null, danceName: '', videoSegmentId: null, segmentLabel: '', requires: []
+      danceId: null, danceName: '', videoSegmentId: null, segmentLabel: '',
+      childRoadmapId: null, moduleTitle: '', moduleSlug: '', requires: []
     };
   }
 
@@ -517,6 +540,72 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
     this.clipPickerFor.set(null);
   }
 
+  /**
+   * Turns a step into a module gateway by creating a fresh tree for it and linking the two.
+   *
+   * The child is created and the parent saved in one go, deliberately. The alternative — link
+   * now, save later — leaves a tree on the user's index that nothing points at if they wander
+   * off, and the link itself only means anything once the parent is stored.
+   *
+   * Requires the parent to be saved already: a module is a link between two rows, and a tree
+   * being built for the first time has no row to link from.
+   */
+  makeModule(step: DraftStep): void {
+    const styleId = this.styleId();
+    if (this.roadmapId() === null) {
+      this.error.set('Save the tree once before adding a module to it.');
+      return;
+    }
+    if (!styleId) { this.error.set('Pick a style for the tree first.'); return; }
+    if (this.moduleBusy() !== null) return;
+
+    this.moduleBusy.set(step.key);
+    this.error.set('');
+    this.roadmapService.create({
+      title: step.title.trim() || 'New module',
+      subtitle: `Part of ${this.title().trim() || 'a skill tree'}`,
+      styleId,
+      stages: [{ title: 'First branch', description: '', steps: [] }]
+    }).subscribe({
+      next: created => {
+        this.moduleBusy.set(null);
+        // A module replaces the move — "learned" would otherwise have two definitions.
+        this.setStep(step.key, {
+          childRoadmapId: created.id,
+          moduleTitle: created.title,
+          moduleSlug: created.slug,
+          danceId: null, danceName: '', videoSegmentId: null, segmentLabel: ''
+        });
+        this.save();
+      },
+      error: () => {
+        this.moduleBusy.set(null);
+        this.error.set('Could not create the module. Check you are still signed in.');
+      }
+    });
+  }
+
+  /**
+   * Unlinks a module without deleting it: it becomes a normal tree on the user's index, which
+   * they can open, keep or delete. Silently destroying a subtree on a mis-click would be a far
+   * worse default than an extra row on the shelf.
+   */
+  clearModule(step: DraftStep): void {
+    this.setStep(step.key, { childRoadmapId: null, moduleTitle: '', moduleSlug: '' });
+  }
+
+  /**
+   * Saves the parent, then opens the module's own builder. Saving first is not optional — both
+   * builder routes carry the unsaved-changes guard, so navigating dirty would challenge the user
+   * over changes they are about to keep anyway.
+   */
+  editModule(step: DraftStep): void {
+    if (!step.moduleSlug) return;
+    const go = () => void this.router.navigate(['/roadmaps', step.moduleSlug, 'edit']);
+    if (!this.dirty()) { go(); return; }
+    this.save(go);
+  }
+
   clearSegment(step: DraftStep): void {
     this.setStep(step.key, { videoSegmentId: null, segmentLabel: '' });
   }
@@ -537,7 +626,7 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
     document.getElementById(`draft-${step.key}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  save(): void {
+  save(then?: () => void): void {
     if (this.saving()) return;
 
     const title = this.title().trim();
@@ -566,6 +655,7 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
             description: step.description.trim(),
             danceId: step.danceId,
             videoSegmentId: step.videoSegmentId,
+            childRoadmapId: step.childRoadmapId,
             requires: step.requires
           }))
       }))
@@ -589,10 +679,12 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
           // Straight to the tree on the first save: the payoff for filling the form in is seeing
           // the thing you built, not the form again with a toast over it.
           this.toast.success('Skill tree created.');
+          if (then) { then(); return; }
           void this.router.navigate(['/roadmaps', saved.slug]);
           return;
         }
         this.toast.success('Saved.');
+        then?.();
       },
       error: err => {
         this.saving.set(false);

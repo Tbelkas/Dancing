@@ -1,0 +1,59 @@
+{
+  "slug": "waacking-posing",
+  "styleName": "Waacking",
+  "title": "Posing",
+  "subtitle": "The half of the dance an audience actually remembers.",
+  "description": "Tyrone Proctor put the order as \"posing came first, followed by waacking, then voguing\" — the held shapes are older than the arm work bolted onto them. A pose is not a freeze: it tells a story and carries a personality, and the originators borrowed theirs from the screen icons they grew up watching. This is the cheapest thing on the whole path to get good at, and the most neglected.",
+  "sortOrder": 0,
+  "stages": [
+    {
+      "title": "Shapes",
+      "description": "Start with poses somebody else already made work, then build your own.",
+      "steps": [
+        {
+          "key": "poses",
+          "title": "Screen-icon poses",
+          "description": "Four shapes drawn from old Hollywood glamour — the dress, the over-the-shoulder, the chin-up. Strike from neutral and hold for a full eight counts; the holding is the hard part.",
+          "danceSlug": "waacking-poses"
+        },
+        {
+          "key": "pose-drill",
+          "title": "Four poses, four words",
+          "requires": ["poses"],
+          "description": "Build four poses of your own and give each one a word or a sound. Saying the intention out loud changes what the body does — it is the difference between a shape and a character."
+        },
+        {
+          "key": "gestures",
+          "title": "Hair brushes and face frames",
+          "requires": ["poses"],
+          "description": "The small gestures that carry character between the big shapes. Almost never drilled, and the first thing that makes a freestyle look inhabited rather than assembled.",
+          "danceSlug": "waacking-gestures"
+        }
+      ]
+    },
+    {
+      "title": "Using them",
+      "description": "A pose in a drill is a shape. A pose on a break is a moment.",
+      "steps": [
+        {
+          "key": "levels",
+          "title": "Pose on three levels",
+          "requires": ["pose-drill"],
+          "description": "The same four poses standing, crouched and on the floor. Height is the cheapest variety in the dance and the easiest to forget you have."
+        },
+        {
+          "key": "on-the-break",
+          "title": "Land it on the break",
+          "requires": ["pose-drill", "gestures"],
+          "description": "Hold the shape exactly where the record stops. Landing early reads as a guess and landing late reads as a stumble — this is a listening exercise more than a movement one."
+        },
+        {
+          "key": "hold-the-phrase",
+          "title": "Hold it through the phrase",
+          "requires": ["on-the-break", "levels"],
+          "description": "Stay in the pose for a full eight after you hit it, face and all, without checking whether it worked. Most dancers break the shape a beat early; the audience is still looking."
+        }
+      ]
+    }
+  ]
+}

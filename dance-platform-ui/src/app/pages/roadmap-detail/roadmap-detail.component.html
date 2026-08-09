@@ -1,7 +1,22 @@
 <div class="container">
   <!-- `as` aliasing only binds on @if, not @else if, so the loaded case leads. -->
   @if (roadmap(); as r) {
-    <nav class="crumb"><a routerLink="/roadmaps">Roadmaps</a> <span aria-hidden="true">/</span> {{ r.styleName }}</nav>
+    <!-- A module shows the path it belongs to instead of its style: "which tree am I inside?"
+         is the question you actually have when you've clicked two levels down. -->
+    @if (r.ancestors?.length) {
+      <nav class="crumb" data-testid="roadmap-crumb">
+        <a routerLink="/roadmaps">Roadmaps</a>
+        @for (crumb of r.ancestors; track crumb.slug) {
+          <span aria-hidden="true">/</span>
+          <a [routerLink]="['/roadmaps', crumb.slug]">{{ crumb.title }}</a>
+        }
+        <span aria-hidden="true">/</span> {{ r.title }}
+      </nav>
+    } @else {
+      <nav class="crumb" data-testid="roadmap-crumb">
+        <a routerLink="/roadmaps">Roadmaps</a> <span aria-hidden="true">/</span> {{ r.styleName }}
+      </nav>
+    }
 
     <div class="page-header">
       @if (r.isOwned) {
@@ -145,12 +160,40 @@
             <h2 class="detail__title">
               @if (step.dance; as d) {
                 <a [routerLink]="['/dances', d.styleSlug, d.slug]">{{ step.title }}</a>
+              } @else if (step.module) {
+                <a [routerLink]="['/roadmaps', step.module.slug]">{{ step.title }}</a>
               } @else {
                 {{ step.title }}
               }
             </h2>
             <p class="detail__branch">{{ branchTitle(step) }}</p>
           </div>
+
+          <!-- A module gateway replaces the video list entirely: there is nothing to watch here,
+               only a path to go down. Progress is derived, so there is deliberately no tick. -->
+          @if (step.module; as m) {
+            <div class="module-card" data-testid="roadmap-step-module">
+              <div class="module-card__head">
+                <span class="module-card__tag"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Module</span>
+                <span class="module-card__count" data-testid="roadmap-module-progress">
+                  {{ m.learnedCount }} of {{ m.completableCount }}
+                </span>
+              </div>
+              @if (m.subtitle) { <p class="module-card__subtitle">{{ m.subtitle }}</p> }
+              <div class="module-card__bar" role="presentation">
+                <span [style.width.%]="m.completableCount ? (m.learnedCount / m.completableCount) * 100 : 0"></span>
+              </div>
+              <p class="module-card__note">
+                {{ m.isComplete
+                    ? 'Finished — this node counts as learned.'
+                    : 'Finish everything in the module and this node marks itself.' }}
+              </p>
+              <a class="btn btn--primary btn--sm" [routerLink]="['/roadmaps', m.slug]"
+                 data-testid="roadmap-module-open">
+                Open module <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              </a>
+            </div>
+          }
 
           @if (requiredTitles(step).length > 0) {
             <p class="detail__requires">
@@ -218,13 +261,16 @@
             @for (step of stage.steps; track step.id) {
               <li class="step"
                   [id]="'step-' + step.id"
-                  [class.is-learned]="step.dance?.isLearned"
+                  [class.is-learned]="step.dance?.isLearned || step.module?.isComplete"
                   [class.is-inprogress]="step.dance?.isInProgress"
-                  [class.is-unlinked]="!step.dance"
+                  [class.is-unlinked]="!step.dance && !step.module"
+                  [class.is-module]="!!step.module"
                   data-testid="roadmap-step">
                 <div class="step__marker" aria-hidden="true">
-                  @if (step.dance?.isLearned) {
+                  @if (step.dance?.isLearned || step.module?.isComplete) {
                     <i class="fa-solid fa-check"></i>
+                  } @else if (step.module) {
+                    <i class="fa-solid fa-layer-group"></i>
                   } @else {
                     {{ stepNumber(step) }}
                   }
@@ -235,6 +281,8 @@
                     <h3 class="step__title">
                       @if (step.dance; as d) {
                         <a [routerLink]="['/dances', d.styleSlug, d.slug]">{{ step.title }}</a>
+                      } @else if (step.module) {
+                        <a [routerLink]="['/roadmaps', step.module.slug]">{{ step.title }}</a>
                       } @else {
                         {{ step.title }}
                       }
@@ -300,12 +348,24 @@
           <span class="tag tag--rating"><i class="fa-solid fa-star" aria-hidden="true"></i> {{ d.averageRating | number:'1.1-1' }}</span>
         }
       </div>
+    } @else if (step.module) {
+      <div class="step__tags">
+        <span class="tag tag--module"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Module</span>
+        <span class="tag">{{ step.module.learnedCount }} of {{ step.module.completableCount }}</span>
+      </div>
     } @else {
       <span class="tag tag--pending">No video yet</span>
     }
   </div>
 
   @if (step.description) { <p class="step__desc">{{ step.description }}</p> }
+
+  <!-- List view only: the tree's detail panel renders the fuller module card above. -->
+  @if (step.module; as m) {
+    <a class="step__module-link" [routerLink]="['/roadmaps', m.slug]">
+      Open the {{ m.title }} module <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+    </a>
+  }
 
   @if (step.dance; as d) {
     @if (stepVideos(step).length > 0) {

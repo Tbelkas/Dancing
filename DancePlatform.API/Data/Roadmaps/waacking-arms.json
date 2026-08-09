@@ -1,0 +1,125 @@
+{
+  "slug": "waacking-arms",
+  "styleName": "Waacking",
+  "title": "The arms",
+  "subtitle": "Every shape the style is made of, and the drilling that makes them yours.",
+  "description": "The arms are the part of waacking everyone recognises and the part almost everyone rushes. This module is the long version: the strike, the shapes it travels through, the rolls that join them up, and then the weeks of drilling that turn all of it into something you can throw without thinking. Work it slowly — speed comes from the path being clean, never from throwing harder.",
+  "sortOrder": 0,
+  "stages": [
+    {
+      "title": "First shapes",
+      "description": "Three things, learned at quarter speed. Everything later in this module is a combination of them.",
+      "steps": [
+        {
+          "key": "whack",
+          "title": "The whack",
+          "description": "The move the style is named for, and the one most often taught wrong. It is a strike: the arm drives out from the centre of the chest with force, the chest activating behind it. Not a circle — circles are rolls, and they come later.",
+          "danceSlug": "the-whack"
+        },
+        {
+          "key": "lines",
+          "title": "Lines",
+          "requires": ["whack"],
+          "description": "The arm travelling point to point — up, out, down — fully extended and parallel to the floor. Strike each point rather than placing it; imagine a wall just behind you to push against. The lesson assumes you can already whack: a line is struck, not placed.",
+          "danceSlug": "waacking-lines"
+        },
+        {
+          "key": "overheads",
+          "title": "Overheads",
+          "requires": ["whack"],
+          "description": "Hands start at the chest, travel over the head to between the shoulder blades, and snap back like a rubber band. Elbows lift with the arms, and the hands go over the head — not past your ears.",
+          "danceSlug": "overheads"
+        }
+      ]
+    },
+    {
+      "title": "Rolls",
+      "description": "The connective tissue. Without these the dance is a series of unrelated shapes.",
+      "steps": [
+        {
+          "key": "arm-rolls",
+          "title": "Arm rolls",
+          "requires": ["whack"],
+          "description": "Continuous rotation that never stops at the top. Trace the circle slowly until the path is identical every time.",
+          "danceSlug": "arm-rolls"
+        },
+        {
+          "key": "outside-rolls",
+          "title": "Outside rolls",
+          "requires": ["arm-rolls", "overheads"],
+          "description": "Bolos rolled outward so the audience reads the whole circle: front of the shoulder, rotate, back, over the head, down the other side. Singles first, then doubles.",
+          "danceSlug": "outside-rolls"
+        },
+        {
+          "key": "inside-rolls",
+          "title": "Inside rolls",
+          "requires": ["arm-rolls"],
+          "description": "The same bolo taken on the inside line, pulling back instead of showing the shape. A completely different dynamic from the outside roll, and the one that reads as kung fu.",
+          "danceSlug": "inside-rolls"
+        }
+      ]
+    },
+    {
+      "title": "Drilling it in",
+      "description": "Same paths, more of them, on both sides. Tempo is something you apply to everything above — not a skill of its own.",
+      "steps": [
+        {
+          "key": "arm-drills",
+          "title": "Arm drills",
+          "requires": ["arm-rolls", "lines"],
+          "description": "Repeatable drills that build control, stamina and muscle memory. Work them slowly and consistently; this is the stage that separates people who can waack from people who know what waacking is.",
+          "danceSlug": "waacking-arm-drills"
+        },
+        {
+          "key": "extensions",
+          "title": "Extensions and grooves",
+          "requires": ["lines"],
+          "description": "Reach the arm all the way out of the body while a groove keeps running underneath. This is what stops a clean line from looking like a mannequin.",
+          "danceSlug": "extensions-and-grooves"
+        },
+        {
+          "key": "weak-side",
+          "title": "Your weaker arm",
+          "requires": ["arm-drills"],
+          "description": "The same material on the side you have been avoiding. Do not skip it — waacking reads as lopsided the moment one arm is behind the other.",
+          "danceSlug": "waacking",
+          "segmentLabel": "Single arm roll — left"
+        },
+        {
+          "key": "power-speed",
+          "title": "Power and speed",
+          "requires": ["arm-drills"],
+          "description": "Tighten the paths you already own until they snap. The circle gets smaller, not sloppier — if the elbow starts leading the shoulder, drop back to the drills.",
+          "danceSlug": "power-and-speed"
+        }
+      ]
+    },
+    {
+      "title": "The hard ones",
+      "description": "Nothing here works before the drilling above is genuinely automatic.",
+      "steps": [
+        {
+          "key": "three-point",
+          "title": "Three-point waack attack",
+          "requires": ["power-speed"],
+          "description": "Three hits aimed at three separate points, so a phrase of whips has somewhere definite to land instead of trailing off.",
+          "danceSlug": "three-point-waack-attack"
+        },
+        {
+          "key": "propeller",
+          "title": "Propeller",
+          "requires": ["power-speed", "inside-rolls"],
+          "description": "Vertical and horizontal swings carried by the arm's own momentum rather than thrown afresh each time. Cheaper on the shoulder than it looks, once the timing is right.",
+          "danceSlug": "propeller"
+        },
+        {
+          "key": "butterfly",
+          "title": "The butterfly",
+          "requires": ["arm-drills", "extensions"],
+          "description": "Both arms mirroring each other open and closed across the body. A symmetrical pattern that reads from the far side of a battle floor.",
+          "danceSlug": "the-butterfly"
+        }
+      ]
+    }
+  ]
+}

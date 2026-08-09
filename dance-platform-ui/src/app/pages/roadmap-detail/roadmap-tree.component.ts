@@ -201,7 +201,12 @@ export class RoadmapTreeComponent implements OnInit, AfterViewInit, OnDestroy {
       : 'ready to learn';
     const requires = node.step.requires ?? [];
     const after = requires.length > 0 ? `, follows ${requires.length} earlier ${requires.length === 1 ? 'move' : 'moves'}` : '';
-    return `${node.step.title} — ${state}${after}`;
+    // A gateway is a different kind of thing from a move, and the glyph that says so is
+    // decorative — so the distinction has to be in the label for anyone not looking at it.
+    const module = node.step.module
+      ? `, module, ${node.step.module.learnedCount} of ${node.step.module.completableCount} done`
+      : '';
+    return `${node.step.title} — ${state}${module}${after}`;
   }
 }
 

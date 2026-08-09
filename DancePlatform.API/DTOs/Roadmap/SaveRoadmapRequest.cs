@@ -49,6 +49,18 @@ public class SaveRoadmapStepRequest
     /// <summary>Optional narrowing to one section of one of that dance's videos.</summary>
     public int? VideoSegmentId { get; set; }
 
+    /// <summary>
+    /// Optional link to one of the caller's own roadmaps, making this step a module gateway
+    /// instead of a move. Ignored when <see cref="DanceId"/> is also set — a step is one or the
+    /// other — and dropped rather than rejected when it names a tree the caller doesn't own, is
+    /// already claimed by another step, or would close a loop.
+    ///
+    /// Unlinking here does <b>not</b> delete the child: it becomes a normal top-level tree the
+    /// user still owns and can see on their index. Losing a subtree to a mis-click would be far
+    /// worse than an extra row on the shelf.
+    /// </summary>
+    public int? ChildRoadmapId { get; set; }
+
     /// <summary>Keys of the steps that come before this one. Empty = a root of the tree.</summary>
     public List<string> Requires { get; set; } = new();
 }

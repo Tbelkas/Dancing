@@ -277,6 +277,20 @@
   font-size: 0.72rem;
 }
 
+/* Mirrors .builder__linked, in the module violet — a gateway sits in the same slot a linked
+   move would, because it is the same decision made differently. */
+.builder__module {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border: 1px solid color-mix(in srgb, var(--color-module) 40%, transparent);
+  border-radius: var(--radius);
+  color: var(--color-module);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
 .picker {
   flex: 1 1 100%;
   display: flex;

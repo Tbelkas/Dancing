@@ -499,5 +499,178 @@ public class RoadmapServiceTests : IDisposable
         Assert.True((await svc.GetByIdOrSlugAsync(theirs.Slug, Stranger))!.IsPublic);
     }
 
+    // ---- Modules ----------------------------------------------------------------------------
+
+    /// <summary>Links `child` as the module of the first step of `parent`.</summary>
+    private static SaveRoadmapRequest WithModule(string title, int childId, params SaveRoadmapStepRequest[] steps)
+    {
+        var request = Request(title, steps);
+        request.Stages[0].Steps[0].ChildRoadmapId = childId;
+        return request;
+    }
+
+    [Fact]
+    public async Task Module_GatewayIsLearnedOnlyWhenEveryCompletableStepInItIs()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+
+        // The module has one completable step (a linked move) and one that can never be ticked.
+        var module = (await svc.CreateAsync(Owner, Request("Posing",
+            Step("pose", "Basic pose"), Step("drill", "A drill with no video")))).Roadmap!;
+        await svc.UpdateAsync(Owner, module.Id, Request("Posing",
+            new SaveRoadmapStepRequest { Key = "pose", Title = "Basic pose", DanceId = 100 },
+            Step("drill", "A drill with no video")));
+
+        var parent = (await svc.CreateAsync(Owner, WithModule("Waacking", module.Id,
+            Step("gateway", "Posing")))).Roadmap!;
+
+        var gateway = parent.Stages[0].Steps[0];
+        Assert.NotNull(gateway.Module);
+        Assert.Equal(module.Id, gateway.Module!.Id);
+        Assert.Equal(1, gateway.Module.CompletableCount);   // the unlinked step doesn't count
+        Assert.Equal(0, gateway.Module.LearnedCount);
+        Assert.False(gateway.Module.IsComplete);
+        Assert.Equal("available", gateway.State);
+
+        // Learn the move the module hangs on, and the gateway marks itself.
+        ctx.UserLearnedDances.Add(new UserLearnedDance { UserId = Owner, DanceId = 100 });
+        await ctx.SaveChangesAsync();
+
+        var after = (await Svc(NewCtx()).GetByIdOrSlugAsync(parent.Slug, Owner))!;
+        var done = after.Stages[0].Steps[0];
+        Assert.True(done.Module!.IsComplete);
+        Assert.Equal("learned", done.State);
+        Assert.Equal(1, after.LearnedCount);
+    }
+
+    [Fact]
+    public async Task Module_WithNothingCompletableNeverReportsItselfComplete()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var module = (await svc.CreateAsync(Owner, Request("Empty", Step("a", "No video")))).Roadmap!;
+        var parent = (await svc.CreateAsync(Owner, WithModule("Parent", module.Id, Step("g", "Gateway")))).Roadmap!;
+
+        var gateway = parent.Stages[0].Steps[0];
+        Assert.Equal(0, gateway.Module!.CompletableCount);
+        Assert.False(gateway.Module.IsComplete);
+    }
+
+    [Fact]
+    public async Task Module_IsKeptOffTheIndexButItsCountsRollUpIntoItsParent()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var module = (await svc.CreateAsync(Owner, Request("Posing",
+            new SaveRoadmapStepRequest { Key = "p", Title = "Basic pose", DanceId = 100 }))).Roadmap!;
+        var parent = (await svc.CreateAsync(Owner, WithModule("Waacking", module.Id, Step("g", "Posing")))).Roadmap!;
+
+        var index = await svc.GetAllAsync(Owner);
+
+        Assert.DoesNotContain(index, r => r.Id == module.Id);
+        var row = Assert.Single(index, r => r.Id == parent.Id);
+        // 1 gateway + 1 step inside it.
+        Assert.Equal(2, row.StepCount);
+    }
+
+    /// <summary>
+    /// The one that actually matters for privacy. A fork that re-linked the original's module
+    /// would leave one user's tree containing a roadmap another user owns, can edit, and can
+    /// delete underneath them — and would expose it to anyone the fork is later shared with.
+    /// </summary>
+    [Fact]
+    public async Task Copy_DeepCopiesModulesRatherThanPointingAtTheOriginals()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var theirModule = (await svc.CreateAsync(Stranger, Request("Their posing",
+            new SaveRoadmapStepRequest { Key = "p", Title = "Basic pose", DanceId = 100 }))).Roadmap!;
+        var theirs = (await svc.CreateAsync(Stranger, WithModule("Theirs", theirModule.Id,
+            Step("g", "Posing")))).Roadmap!;
+        await svc.SetSharedAsync(Stranger, theirs.Id, true);
+
+        var fork = (await svc.CopyAsync(Owner, theirs.Slug)).Roadmap!;
+
+        var gateway = fork.Stages[0].Steps[0];
+        Assert.NotNull(gateway.Module);
+        Assert.NotEqual(theirModule.Id, gateway.Module!.Id);
+
+        // The copy is the forker's, and private.
+        var copied = (await svc.GetByIdOrSlugAsync(gateway.Module.Id.ToString(), Owner))!;
+        Assert.True(copied.IsOwned);
+        Assert.False(copied.IsPublic);
+        Assert.Equal("Their posing", copied.Title);   // modules keep their name; only the root is renamed
+        Assert.Equal(100, copied.Stages[0].Steps[0].Dance!.Id);
+    }
+
+    /// <summary>A module inherits its parent's visibility, or half a shared tree 404s.</summary>
+    [Fact]
+    public async Task Module_OfASharedTreeIsReadableByAStranger()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var module = (await svc.CreateAsync(Owner, Request("Posing", Step("p", "Basic pose")))).Roadmap!;
+        var parent = (await svc.CreateAsync(Owner, WithModule("Mine", module.Id, Step("g", "Posing")))).Roadmap!;
+
+        // Private to start with: the module is as invisible as its parent.
+        Assert.Null(await svc.GetByIdOrSlugAsync(module.Slug, Stranger));
+
+        await svc.SetSharedAsync(Owner, parent.Id, true);
+
+        var seen = await svc.GetByIdOrSlugAsync(module.Slug, Stranger);
+        Assert.NotNull(seen);
+        // …and it knows where it came from, so the reader gets a breadcrumb rather than a
+        // context-free tree.
+        Assert.Equal(["Mine"], seen!.Ancestors!.Select(a => a.Title));
+    }
+
+    [Fact]
+    public async Task Delete_TakesTheTreesModulesWithIt()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var module = (await svc.CreateAsync(Owner, Request("Posing", Step("p", "Basic pose")))).Roadmap!;
+        var parent = (await svc.CreateAsync(Owner, WithModule("Mine", module.Id, Step("g", "Posing")))).Roadmap!;
+
+        Assert.True(await svc.DeleteAsync(Owner, parent.Id));
+
+        await using var check = NewCtx();
+        Assert.Null(await check.Roadmaps.FindAsync(parent.Id));
+        Assert.Null(await check.Roadmaps.FindAsync(module.Id));
+    }
+
+    [Fact]
+    public async Task Module_CannotBeAnotherUsersTreeAndCannotLoop()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var theirs = (await svc.CreateAsync(Stranger, Request("Theirs", Step("a", "The jack")))).Roadmap!;
+        var mine = (await svc.CreateAsync(Owner, Request("Mine", Step("g", "Gateway")))).Roadmap!;
+
+        // Someone else's tree is dropped, not linked.
+        var grabbed = (await svc.UpdateAsync(Owner, mine.Id,
+            WithModule("Mine", theirs.Id, Step("g", "Gateway")))).Roadmap!;
+        Assert.Null(grabbed.Stages[0].Steps[0].Module);
+
+        // And a tree cannot be its own module.
+        var selfish = (await svc.UpdateAsync(Owner, mine.Id,
+            WithModule("Mine", mine.Id, Step("g", "Gateway")))).Roadmap!;
+        Assert.Null(selfish.Stages[0].Steps[0].Module);
+    }
+
+    [Fact]
+    public async Task Module_IsDroppedWhenAnotherStepAlreadyClaimsIt()
+    {
+        await using var ctx = NewCtx();
+        var svc = Svc(ctx);
+        var module = (await svc.CreateAsync(Owner, Request("Posing", Step("p", "Basic pose")))).Roadmap!;
+        await svc.CreateAsync(Owner, WithModule("First", module.Id, Step("g", "Gateway")));
+
+        var second = (await svc.CreateAsync(Owner, WithModule("Second", module.Id, Step("g", "Gateway")))).Roadmap!;
+
+        Assert.Null(second.Stages[0].Steps[0].Module);
+    }
+
     public void Dispose() => _conn.Dispose();
 }

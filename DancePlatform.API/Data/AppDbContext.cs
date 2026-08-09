@@ -335,5 +335,24 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(s => s.VideoSegmentId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // A step can point at a whole nested roadmap (a "module"). SetNull, not Cascade: if the
+        // module is deleted the gateway step survives as a plain unlinked step, the same way a
+        // step outlives its dance. Cascade here would also be a second cascade path from
+        // Roadmap into RoadmapSteps (the first runs through RoadmapStages), which Postgres
+        // rejects outright.
+        modelBuilder.Entity<RoadmapStep>()
+            .HasOne(s => s.ChildRoadmap)
+            .WithMany()
+            .HasForeignKey(s => s.ChildRoadmapId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // At most one step may claim a given module. Filtered, because the overwhelming majority
+        // of steps have no child and NULLs must not collide. This is what makes "which path does
+        // this module belong to?" — the breadcrumb — a single unambiguous answer.
+        modelBuilder.Entity<RoadmapStep>()
+            .HasIndex(s => s.ChildRoadmapId)
+            .IsUnique()
+            .HasFilter("\"ChildRoadmapId\" IS NOT NULL");
     }
 }

@@ -28,4 +28,57 @@ public static class RoadmapGraph
         }
         return false;
     }
+
+    /// <summary>
+    /// How many roadmaps a module chain may span, counting the top-level path as 1. Three means
+    /// "Waacking › Posing › Screen icons" and no further.
+    ///
+    /// A cap and not just cycle detection, because the two failures are different: a cycle is a
+    /// bug, but a legitimately 40-deep chain would still be a public endpoint doing 40 rounds of
+    /// queries per request. Depth is checked where modules are linked, and again where they are
+    /// read, since a chain can also get too deep from the *other* end — attaching a module to a
+    /// path that is already itself a module three levels down.
+    /// </summary>
+    public const int MaxModuleDepth = 3;
+
+    /// <summary>
+    /// True when making <paramref name="childId"/> a module of a step inside
+    /// <paramref name="parentId"/> would close a loop — either directly (a path claiming itself)
+    /// or through an existing chain.
+    ///
+    /// <paramref name="childToParent"/> maps a module roadmap id to the id of the roadmap whose
+    /// step claims it, i.e. it walks *upwards*. Walking up from the proposed parent must never
+    /// reach the proposed child.
+    /// </summary>
+    public static bool CreatesModuleCycle(IReadOnlyDictionary<int, int> childToParent, int parentId, int childId)
+    {
+        if (parentId == childId) return true;
+
+        var seen = new HashSet<int>();
+        var current = parentId;
+        while (seen.Add(current) && childToParent.TryGetValue(current, out var up))
+        {
+            if (up == childId) return true;
+            current = up;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// How many roadmaps sit above <paramref name="roadmapId"/> in the module chain, so 0 for a
+    /// top-level path. Bounded by <see cref="MaxModuleDepth"/> rather than trusting the data:
+    /// this runs on the read path, where a bad row must degrade rather than hang.
+    /// </summary>
+    public static int ModuleDepth(IReadOnlyDictionary<int, int> childToParent, int roadmapId)
+    {
+        var depth = 0;
+        var seen = new HashSet<int>();
+        var current = roadmapId;
+        while (depth <= MaxModuleDepth && seen.Add(current) && childToParent.TryGetValue(current, out var up))
+        {
+            depth++;
+            current = up;
+        }
+        return depth;
+    }
 }

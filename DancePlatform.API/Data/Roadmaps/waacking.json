@@ -3,7 +3,7 @@
   "styleName": "Waacking",
   "title": "Waacking",
   "subtitle": "Posing came first and the arms came later. Learn it in that order.",
-  "description": "Waacking was made in the early-1970s Los Angeles disco underground by Black, Latino and Asian LGBTQ+ dancers, and reached the rest of the world through Soul Train. It nearly disappeared in the 1980s and was carried back by a handful of survivors and students. The dance is also called punking — its originators did not all agree about the two names, and this path does not take a side. What they did agree on is the order: Tyrone Proctor put it as \"posing came first, followed by waacking, then voguing\", and every teacher since has led with the music and the character before the arm technique. So does this path. The whack itself is a strike, not a circle — the circles are rolls, and they come after.",
+  "description": "Waacking was made in the early-1970s Los Angeles disco underground by Black, Latino and Asian LGBTQ+ dancers, and reached the rest of the world through Soul Train. It nearly disappeared in the 1980s and was carried back by a handful of survivors and students. The dance is also called punking — its originators did not all agree about the two names, and this path does not take a side. What they did agree on is the order: Tyrone Proctor put it as \"posing came first, followed by waacking, then voguing\", and every teacher since has led with the music and the character before the arm technique. So does this path. Two nodes here open into modules of their own: the arms and the posing are each a path's worth of work, and burying them in one fan would hide how much is in them.",
   "sortOrder": 20,
   "stages": [
     {
@@ -19,221 +19,61 @@
         {
           "key": "show-music",
           "title": "Show the music",
-          "requires": [
-            "overview"
-          ],
+          "requires": ["overview"],
           "description": "The founding instruction: the arms exist to show what the record is doing. Drag performers sold a song through the body, face and hands without singing a note — that is the job.",
           "danceSlug": "show-the-music"
         },
         {
           "key": "posture",
           "title": "Conductor's form",
-          "requires": [
-            "overview"
-          ],
+          "requires": ["overview"],
           "description": "Upright, head straight, shoulders down and quiet. Stand where an audience can read your frame and your face, so a thrown arm has something still to read against. Drill it in a mirror with the arms hanging dead."
         },
         {
           "key": "hands",
           "title": "What the hands do",
-          "requires": [
-            "overview"
-          ],
+          "requires": ["overview"],
           "description": "Blades, a loose fist, a blossomed flower, one or two fingers out. There is no correct answer — pick what feels like you, and keep it relaxed no matter how fast the arm is moving.",
           "danceSlug": "waacking-hand-positions"
         },
         {
           "key": "warmup",
           "title": "Warm the wrists and shoulders",
-          "requires": [
-            "overview"
-          ],
+          "requires": ["overview"],
           "description": "Not optional. The arms carry the entire load in this style and cold shoulders are how waackers get hurt. Two minutes before every session.",
           "danceSlug": "waacking-warm-up"
         },
         {
           "key": "punking-character",
           "title": "Punking — the character",
-          "requires": [
-            "overview"
-          ],
+          "requires": ["overview"],
           "description": "The theatrical half: take an image and bring it to life. Pick a persona, give it a want, and let the movement be that person rather than a shape you are making.",
           "danceSlug": "punking"
         }
       ]
     },
     {
-      "title": "The arms",
-      "description": "Learned slowly. Speed comes from the path being clean, never from throwing harder.",
+      "title": "The vocabulary",
+      "description": "Two of these open into paths of their own. They are the bulk of the style, and they are meant to take months rather than an evening.",
       "steps": [
         {
-          "key": "whack",
-          "title": "The whack",
-          "requires": [
-            "posture",
-            "hands"
-          ],
-          "description": "The move the style is named for, and the one most often taught wrong. It is a strike: the arm drives out from the centre of the chest with force, the chest activating behind it. Not a circle — circles are rolls, and they come next.",
-          "danceSlug": "the-whack"
+          "key": "arms",
+          "title": "The arms",
+          "requires": ["posture", "hands"],
+          "description": "The strike, the shapes it travels through, the rolls that join them up, and the drilling that makes all of it automatic. Thirteen steps of their own — finish them and this node marks itself.",
+          "module": "waacking-arms"
         },
         {
-          "key": "lines",
-          "title": "Lines",
-          "requires": [
-            "posture",
-            "hands"
-          ],
-          "description": "The arm travelling point to point — up, out, down — fully extended and parallel to the floor. Strike each point rather than placing it; imagine a wall just behind you to push against.",
-          "danceSlug": "waacking-lines"
-        },
-        {
-          "key": "overheads",
-          "title": "Overheads",
-          "requires": [
-            "whack"
-          ],
-          "description": "Hands start at the chest, travel over the head to between the shoulder blades, and snap back like a rubber band. Elbows lift with the arms, and the hands go over the head — not past your ears.",
-          "danceSlug": "overheads"
-        },
-        {
-          "key": "arm-rolls",
-          "title": "Arm rolls",
-          "requires": [
-            "whack"
-          ],
-          "description": "Continuous rotation that never stops at the top. This is the connective tissue — without it the dance is a series of unrelated shapes.",
-          "danceSlug": "arm-rolls"
-        },
-        {
-          "key": "outside-rolls",
-          "title": "Outside rolls",
-          "requires": [
-            "arm-rolls"
-          ],
-          "description": "Bolos rolled outward so the audience reads the whole circle: front of the shoulder, rotate, back, over the head, down the other side. Singles first, then doubles.",
-          "danceSlug": "outside-rolls"
-        },
-        {
-          "key": "inside-rolls",
-          "title": "Inside rolls",
-          "requires": [
-            "arm-rolls"
-          ],
-          "description": "The same bolo taken on the inside line, pulling back instead of showing the shape. A completely different dynamic from the outside roll, and the one that reads as kung fu.",
-          "danceSlug": "inside-rolls"
-        },
-        {
-          "key": "extensions",
-          "title": "Extensions and grooves",
-          "requires": [
-            "lines"
-          ],
-          "description": "Reach the arm all the way out of the body while a groove keeps running underneath. This is what stops a clean line from looking like a mannequin.",
-          "danceSlug": "extensions-and-grooves"
-        }
-      ]
-    },
-    {
-      "title": "Drilling it in",
-      "description": "Same paths, more of them, on both sides. Tempo is something you apply to everything above — not a skill of its own.",
-      "steps": [
-        {
-          "key": "arm-drills",
-          "title": "Arm drills",
-          "requires": [
-            "arm-rolls",
-            "lines"
-          ],
-          "description": "Repeatable drills that build control, stamina and muscle memory. Work them slowly and consistently; this is the stage that separates people who can waack from people who know what waacking is.",
-          "danceSlug": "waacking-arm-drills"
-        },
-        {
-          "key": "weak-side",
-          "title": "Your weaker arm",
-          "requires": [
-            "arm-drills"
-          ],
-          "description": "The same material on the side you have been avoiding. Do not skip it — waacking reads as lopsided the moment one arm is behind the other.",
-          "danceSlug": "waacking",
-          "segmentLabel": "Single arm roll — left"
-        },
-        {
-          "key": "power-speed",
-          "title": "Power and speed",
-          "requires": [
-            "arm-drills"
-          ],
-          "description": "Tighten the paths you already own until they snap. The circle gets smaller, not sloppier — if the elbow starts leading the shoulder, drop back to the drills.",
-          "danceSlug": "power-and-speed"
-        },
-        {
-          "key": "three-point",
-          "title": "Three-point waack attack",
-          "requires": [
-            "power-speed"
-          ],
-          "description": "Three hits aimed at three separate points, so a phrase of whips has somewhere definite to land instead of trailing off.",
-          "danceSlug": "three-point-waack-attack"
-        },
-        {
-          "key": "propeller",
-          "title": "Propeller",
-          "requires": [
-            "arm-rolls",
-            "power-speed"
-          ],
-          "description": "Vertical and horizontal swings carried by the arm's own momentum rather than thrown afresh each time. Cheaper on the shoulder than it looks, once the timing is right.",
-          "danceSlug": "propeller"
-        },
-        {
-          "key": "butterfly",
-          "title": "The butterfly",
-          "requires": [
-            "arm-drills",
-            "extensions"
-          ],
-          "description": "Both arms mirroring each other open and closed across the body. A symmetrical pattern that reads from the far side of a battle floor.",
-          "danceSlug": "the-butterfly"
-        }
-      ]
-    },
-    {
-      "title": "Character and pose",
-      "description": "The half of the dance that is decided by who you are being. Cheaper to get good at than the arms, and it is what an audience actually remembers.",
-      "steps": [
-        {
-          "key": "poses",
+          "key": "posing",
           "title": "Posing",
-          "requires": [
-            "punking-character"
-          ],
-          "description": "Every phrase ends on a held shape. Posing is not freezing — it tells a story and carries a personality, and the originals borrowed theirs from Hollywood screen icons.",
-          "danceSlug": "waacking-poses"
-        },
-        {
-          "key": "pose-drill",
-          "title": "Four poses, four words",
-          "requires": [
-            "poses"
-          ],
-          "description": "Build four poses of your own and give each one a word or a sound. Saying the intention out loud changes what the body does — it is the difference between a shape and a character."
-        },
-        {
-          "key": "gestures",
-          "title": "Hair brushes and face frames",
-          "requires": [
-            "poses"
-          ],
-          "description": "The small gestures that carry character between the big arm movements. Almost never drilled, and the first thing that makes a freestyle look inhabited rather than assembled.",
-          "danceSlug": "waacking-gestures"
+          "requires": ["punking-character"],
+          "description": "Held shapes, gestures, and landing them where the record stops. Older than the arm work and cheaper to get good at, which is exactly why it is usually skipped.",
+          "module": "waacking-posing"
         },
         {
           "key": "martial-arts",
           "title": "The martial arts influence",
-          "requires": [
-            "punking-character",
-            "whack"
-          ],
+          "requires": ["punking-character", "arms"],
           "description": "The kung fu and nunchuck dynamics the originators pulled out of 1970s martial arts films, and how they change the paths the arms take.",
           "danceSlug": "martial-arts-influence"
         }
@@ -246,37 +86,27 @@
         {
           "key": "footwork-basics",
           "title": "Feet under the arms",
-          "requires": [
-            "whack",
-            "posture"
-          ],
+          "requires": ["arms", "posture"],
           "description": "Feet and arm placement landing together on the bass line, travelling forward, back and side to side. The section to rewatch when your arms look right but the dance looks static.",
           "danceSlug": "feet-and-arm-placement"
         },
         {
           "key": "walks",
           "title": "Walks and struts",
-          "requires": [
-            "footwork-basics"
-          ],
+          "requires": ["footwork-basics"],
           "description": "Crossing the floor in character. The runway walk is half the performance in a battle and it is almost never practised."
         },
         {
           "key": "turns",
           "title": "Turning on one foot",
-          "requires": [
-            "footwork-basics"
-          ],
+          "requires": ["footwork-basics"],
           "description": "Rotation on a fixed axis with the other leg extended, so an arm shape can hold all the way through. Spot it properly before adding any arm.",
           "danceSlug": "inverted-turn"
         },
         {
           "key": "flicks",
           "title": "Whip out of a turn",
-          "requires": [
-            "turns",
-            "whack"
-          ],
+          "requires": ["turns", "arms"],
           "description": "Land the rotation and throw on the exit, not during. Turning and whipping at once reads as a stumble; turning then whipping reads as a hit.",
           "danceSlug": "flicks-with-rotation"
         }
@@ -289,30 +119,21 @@
         {
           "key": "accents",
           "title": "Loops and musical accents",
-          "requires": [
-            "show-music",
-            "arm-drills"
-          ],
+          "requires": ["show-music", "arms"],
           "description": "Catch the repeating figures in a disco record and hit the accents on top of them, instead of laying an eight-count over the song. Disco runs fast — roughly 127 to 145 BPM.",
           "danceSlug": "loops-and-musical-accents"
         },
         {
           "key": "combo",
           "title": "Put it together",
-          "requires": [
-            "poses",
-            "arm-drills"
-          ],
+          "requires": ["posing", "arms"],
           "description": "Arms, poses and travel strung into one phrase over a real track. The first thing on this path that looks like dancing rather than drilling.",
           "danceSlug": "waacking-combo"
         },
         {
           "key": "cypher",
           "title": "Freestyle rounds",
-          "requires": [
-            "accents",
-            "combo"
-          ],
+          "requires": ["accents", "combo"],
           "description": "Ninety seconds of disco, no plan. Notice how much of your timing was coming from the count rather than the song — then throw the count away."
         }
       ]

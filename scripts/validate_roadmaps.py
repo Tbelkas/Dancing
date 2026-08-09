@@ -17,6 +17,14 @@ Checks, per file:
   - flags dances backing more than one step (progress is stored per dance, so ticking one
     such step off flips all of them at once)
 
+And across files, for module gateways (a step's `module` naming another roadmap):
+  - the named module is a roadmap file that exists
+  - no step declares both a module and a danceSlug (a step is one or the other)
+  - no module is claimed by two different steps (the breadcrumb needs one answer)
+  - no module chain loops, and none nests deeper than MAX_MODULE_DEPTH
+  - flags a module with nothing completable in it: it can never be finished, so its gateway
+    would sit unlearnable forever
+
 Detection only — never writes. Exit code 1 if anything is an error.
 """
 import glob
@@ -160,6 +168,58 @@ def check(path, styles):
     return errs, warns, rm, len(steps), linked
 
 
+# Mirrors RoadmapGraph.MaxModuleDepth. Counts the top-level path as 1, so 3 allows
+# "Waacking > Posing > Screen icons" and no further.
+MAX_MODULE_DEPTH = 3
+
+
+def check_modules(loaded):
+    """Cross-file checks for module gateways. `loaded` maps slug -> parsed roadmap."""
+    errs, warns = [], []
+    parent_of = {}       # module slug -> slug of the roadmap whose step claims it
+    claimed_by = {}      # module slug -> "roadmap#step" that claimed it
+
+    for slug, rm in sorted(loaded.items()):
+        for step in (s for st in rm["stages"] for s in st["steps"]):
+            mod = step.get("module")
+            if not mod:
+                continue
+            where = f"{slug}#{step['key']}"
+            if step.get("danceSlug"):
+                errs.append(f"{where}: has both a module and a danceSlug — a step is one or the other")
+                continue
+            if mod not in loaded:
+                errs.append(f"{where}: names module {mod!r}, which is not a roadmap file")
+                continue
+            if mod in claimed_by:
+                errs.append(f"{where}: module {mod!r} is already claimed by {claimed_by[mod]}")
+                continue
+            claimed_by[mod] = where
+            parent_of[mod] = slug
+
+    # Cycles and depth, walking upwards from each module.
+    for mod in sorted(parent_of):
+        seen, depth, cur = {mod}, 0, mod
+        while cur in parent_of:
+            cur = parent_of[cur]
+            depth += 1
+            if cur in seen:
+                errs.append(f"module chain loops at {mod!r}")
+                break
+            seen.add(cur)
+            if depth >= MAX_MODULE_DEPTH:
+                errs.append(f"module {mod!r} nests deeper than {MAX_MODULE_DEPTH}")
+                break
+
+    # A module with nothing completable in it can never be finished, so its gateway is stuck.
+    for mod in sorted(claimed_by):
+        steps = [s for st in loaded[mod]["stages"] for s in st["steps"]]
+        if not any(s.get("danceSlug") or s.get("module") for s in steps):
+            warns.append(f"module {mod!r} has no completable step — {claimed_by[mod]} can never be finished")
+
+    return errs, warns, claimed_by
+
+
 def main():
     styles = {n.lower(): int(i) for i, n in psql('select "Id","Name" from "Styles";')}
     files = sorted(glob.glob(os.path.join(RMDIR, "*.json")))
@@ -167,14 +227,28 @@ def main():
         raise SystemExit(f"no roadmap files in {RMDIR}")
 
     total_errs = 0
+    loaded = {}
     for path in files:
         errs, warns, rm, n, linked = check(path, styles)
+        loaded[rm.get("slug", os.path.basename(path))] = rm
         total_errs += len(errs)
-        head = f"{os.path.basename(path):<16} {n:>3} steps, {linked:>3} linked"
+        head = f"{os.path.basename(path):<22} {n:>3} steps, {linked:>3} linked"
         print(f"{head}  {'FAIL' if errs else 'ok'}")
         for w in warns:
             print(f"    warn  {w}")
         for e in errs:
+            print(f"    ERROR {e}")
+
+    merrs, mwarns, claimed = check_modules(loaded)
+    total_errs += len(merrs)
+    if claimed or merrs or mwarns:
+        print(f"\nmodules: {len(claimed)} gateway(s)  {'FAIL' if merrs else 'ok'}")
+        for m, where in sorted(claimed.items()):
+            n = sum(len(st["steps"]) for st in loaded[m]["stages"])
+            print(f"    {where} -> {m} ({n} steps)")
+        for w in mwarns:
+            print(f"    warn  {w}")
+        for e in merrs:
             print(f"    ERROR {e}")
 
     print(f"\n{len(files)} roadmap(s), {total_errs} error(s)")

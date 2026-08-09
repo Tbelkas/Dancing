@@ -43,22 +43,41 @@ function depths(steps: RoadmapStep[]): Map<string, number> {
 }
 
 /**
+ * Finished, by either definition — the move is learned, or the module is complete.
+ * Mirrors `RoadmapService.IsDone`.
+ */
+function isDone(step: RoadmapStep): boolean {
+  return step.dance?.isLearned === true || step.module?.isComplete === true;
+}
+
+/**
+ * A step whose completion is its own business rather than inherited from its prerequisites.
+ * Mirrors `RoadmapService.IsSelfDetermined`.
+ */
+function isSelfDetermined(step: RoadmapStep): boolean {
+  return !!step.dance || !!step.module;
+}
+
+/**
  * Which steps count as done, for the purpose of unlocking what comes after them.
  *
  * "Satisfied" is not the same as "learned". A step with no catalog move behind it can never be
  * ticked off, so it passes through: it counts as satisfied exactly when the things IT depends on
  * are. Without the pass-through, one un-covered concept would either lock its whole branch
  * forever (if it gated) or leak the branch open early (if it didn't).
+ *
+ * A module gateway is the third kind of step and behaves like a move, not like a bare concept:
+ * it *can* be finished, by finishing the module, so it gates its branch on that.
  */
 function satisfied(steps: RoadmapStep[], signedIn: boolean): Map<string, boolean> {
   const byKey = new Map(steps.map(s => [s.key, s]));
-  const done = new Map(steps.map(s => [s.key, !!s.dance?.isLearned]));
+  const done = new Map(steps.map(s => [s.key, isDone(s)]));
   if (!signedIn) return done;
 
   for (let pass = 0; pass < steps.length; pass++) {
     let changed = false;
     for (const step of steps) {
-      if (step.dance) continue; // fixed by its own learned flag
+      if (isSelfDetermined(step)) continue; // fixed by its own learned/complete flag
       const ok = (step.requires ?? []).every(key => !byKey.has(key) || done.get(key) === true);
       if (ok !== done.get(step.key)) { done.set(step.key, ok); changed = true; }
     }
@@ -86,7 +105,7 @@ export function withGraphState(roadmap: Roadmap, signedIn: boolean): Roadmap {
     ...stage,
     steps: stage.steps.map(step => {
       let state: RoadmapStepState;
-      if (step.dance?.isLearned) {
+      if (isDone(step)) {
         state = 'learned';
       } else if (!signedIn) {
         state = 'available';

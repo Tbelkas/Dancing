@@ -41,7 +41,8 @@
               [class.is-locked]="node.state === 'locked'"
               [class.is-selected]="selected() === node.key"
               [class.is-dimmed]="isDimmed(node)"
-              [class.is-unlinked]="!node.step.dance"
+              [class.is-unlinked]="!node.step.dance && !node.step.module"
+              [class.is-module]="!!node.step.module"
               [attr.data-stage]="node.stageIndex"
               data-testid="tree-node"
               role="treeitem"
@@ -66,6 +67,13 @@
                 <!-- Tick, drawn as a path so it scales with the viewBox instead of needing a font. -->
                 <path class="tree__glyph"
                   [attr.d]="'M ' + (node.x - 6) + ' ' + node.y + ' l 4 4.5 l 8 -9'" />
+              } @else if (node.step.module) {
+                <!-- A gateway reads as stacked layers, so an unfinished module is distinguishable
+                     from an unfinished move at a glance rather than only in the panel. -->
+                <g class="tree__glyph-module" [attr.transform]="'translate(' + (node.x - 6) + ',' + (node.y - 5.5) + ')'">
+                  <path d="M 6 0 L 12 3 L 6 6 L 0 3 Z" />
+                  <path d="M 0 7 L 6 10 L 12 7" />
+                </g>
               } @else if (node.state === 'locked') {
                 <g class="tree__glyph-lock" [attr.transform]="'translate(' + (node.x - 4.5) + ',' + (node.y - 5) + ')'">
                   <rect x="0" y="4" width="9" height="7" rx="1.4" />
@@ -75,8 +83,9 @@
                 <circle class="tree__glyph-dot" [attr.cx]="node.x" [attr.cy]="node.y" r="4" />
               }
 
-              <!-- Marks a step whose move isn't in the catalog yet. -->
-              @if (!node.step.dance) {
+              <!-- Marks a step whose move isn't in the catalog yet. A module gateway is not
+                   pending — it has plenty behind it, just not a video of its own. -->
+              @if (!node.step.dance && !node.step.module) {
                 <circle class="tree__pending" [attr.cx]="node.x + 14" [attr.cy]="node.y - 14" r="3.4" />
               }
 

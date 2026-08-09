@@ -144,6 +144,30 @@
   opacity: 0.9;
 }
 
+/* A gateway into a nested path. Stacked-layers glyph, and a violet ring that survives the
+   learned/available/locked colouring below — the *kind* of node matters as much as its state. */
+.tree__glyph-module {
+  fill: none;
+  stroke: var(--color-module);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.tree__node.is-module .tree__node-ring {
+  stroke: var(--color-module);
+  stroke-width: 2.2;
+}
+
+.tree__node.is-module.is-locked .tree__node-ring {
+  stroke-dasharray: 3 3;
+  opacity: 0.6;
+}
+
+/* Learned wins: a finished module is a solid gold node like any other completed step, so the
+   board still reads "what's done" at a glance before it reads "what kind of thing is this". */
+.tree__node.is-module.is-learned .tree__node-ring { stroke: var(--color-primary); }
+
 .tree__halo {
   fill: none;
   stroke: var(--color-primary);

@@ -586,6 +586,94 @@
   background: transparent;
 }
 
+/* ---- Module gateways ------------------------------------------------------------------ */
+
+.tag--module {
+  color: var(--color-module);
+  border-color: color-mix(in srgb, var(--color-module) 40%, var(--color-border));
+}
+
+/* The detail panel's stand-in for the video list: a module has nothing to watch, only somewhere
+   to go. Sized to sit in the same slot the videos would have occupied so the panel doesn't
+   jump height as you move between a move and a gateway. */
+.module-card {
+  border: 1px solid color-mix(in srgb, var(--color-module) 35%, var(--color-border));
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-module) 7%, var(--color-surface));
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+
+.module-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.module-card__tag {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-module);
+}
+
+.module-card__count {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.module-card__subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin-top: 8px;
+}
+
+.module-card__bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-border);
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.module-card__bar span {
+  display: block;
+  height: 100%;
+  background: var(--color-module);
+  transition: width var(--transition);
+}
+
+.module-card__note {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+  margin: 10px 0 12px;
+}
+
+/* List view — the tree's panel gets the fuller card above. */
+.step__module-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--color-module);
+}
+
+.step__module-link:hover { text-decoration: underline; }
+
+.step.is-module .step__marker {
+  border-color: color-mix(in srgb, var(--color-module) 55%, var(--color-border));
+  color: var(--color-module);
+}
+
 .step__desc {
   color: var(--color-text-muted);
   font-size: 0.94rem;

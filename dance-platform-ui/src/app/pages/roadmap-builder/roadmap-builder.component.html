@@ -186,11 +186,33 @@
                           <button type="button" class="link-btn" (click)="clipPickerFor.set(null)">Cancel</button>
                         </div>
                       }
+                    } @else if (step.childRoadmapId !== null) {
+                      <!-- A gateway instead of a move. The two are mutually exclusive, so the
+                           move picker is hidden entirely while one is set. -->
+                      <span class="builder__module" data-testid="builder-step-module">
+                        <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                        {{ step.moduleTitle || 'Module' }}
+                      </span>
+                      <button type="button" class="link-btn" (click)="editModule(step)"
+                              data-testid="builder-module-edit">
+                        Edit module
+                      </button>
+                      <button type="button" class="link-btn" (click)="clearModule(step)">Unlink</button>
                     } @else if (pickerFor() !== step.key) {
                       <button type="button" class="link-btn" (click)="openPicker(step)"
                               data-testid="builder-step-link">
                         <i class="fa-solid fa-link" aria-hidden="true"></i> Link a move from the catalog
                       </button>
+                      <!-- Only offered on a saved tree: a module is a link between two rows, and
+                           a tree being built for the first time has no row to link from. -->
+                      @if (!isNew()) {
+                        <button type="button" class="link-btn" (click)="makeModule(step)"
+                                [disabled]="moduleBusy() !== null"
+                                data-testid="builder-step-module-add">
+                          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                          {{ moduleBusy() === step.key ? 'Creating…' : 'Make this a module' }}
+                        </button>
+                      }
                     }
 
                     @if (pickerFor() === step.key) {
