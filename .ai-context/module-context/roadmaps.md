@@ -7,7 +7,8 @@
 
 A roadmap is a **skill tree** through one style: **stages** (branches) holding **steps** (the
 moves), wired together by explicit **prerequisites**. Each step optionally links to a catalog
-`Dance`; when it does, the page shows that move's videos and the user's learned status.
+`Dance`; when it does, the page shows that move's videos and the user's learned status. A step
+may instead open a whole nested roadmap — a **module** — see [Modules](#modules--a-step-that-opens-a-whole-nested-path).
 
 **Two kinds share the same table, DTOs, service and tree renderer**, told apart by
 `Roadmap.OwnerUserId`:
@@ -41,11 +42,13 @@ view preference is left alone, so signing in restores whichever view they last c
   `CreateAsync`, `UpdateAsync`, `DeleteAsync`, `CopyAsync`
 - Models: `Roadmap`, `RoadmapStage`, `RoadmapStep`
 - DTOs: `DTOs/Roadmap/RoadmapDto.cs` — `RoadmapSummaryDto`, `RoadmapDto`, `RoadmapStageDto`,
-  `RoadmapStepDto`, `RoadmapStepDanceDto`, `RoadmapStepVideoDto`;
+  `RoadmapStepDto`, `RoadmapStepDanceDto`, `RoadmapStepVideoDto`, `RoadmapStepModuleDto`,
+  `RoadmapCrumbDto`;
   `DTOs/Roadmap/SaveRoadmapRequest.cs` — the builder's payload and `RoadmapSaveResult`
 - Graph rules shared by the seeder and the write path: `Services/RoadmapGraph.cs`
 - Seeder: `Data/RoadmapSeeder.cs`, called from `Program.cs` after `SeedData`
-- Migrations: `AddRoadmaps`, `AddRoadmapStepSegment`, `AddRoadmapStepTree`, `AddPersonalRoadmaps`
+- Migrations: `AddRoadmaps`, `AddRoadmapStepSegment`, `AddRoadmapStepTree`, `AddPersonalRoadmaps`,
+  `AddRoadmapStepModule`
 - Tests: `DancePlatform.Tests/RoadmapServiceTests.cs` (the write path, on SQLite so the FKs bite)
 - Endpoints: see api-contracts → Roadmaps.
 
@@ -100,6 +103,68 @@ admin UI, no SQL. `csproj` copies `Data/Roadmaps/*.json` to the output so it shi
 
 Dance slugs are unique *per style*, not globally, so resolution is scoped to the roadmap's
 style — otherwise `the-heel-toe` in Waacking would match a same-named hip-hop step.
+
+## Modules — a step that opens a whole nested path
+
+A step may point at another roadmap instead of a move (`RoadmapStep.ChildRoadmapId`). The child
+is a **module**: it renders as its own tree at its own URL, and the gateway step counts as
+learned exactly when the module is complete. This is what lets a path go deep without the
+top-level fan turning into a hairball — Waacking's 35 steps sit behind a 16-node tree with two
+gateways.
+
+**A module is just a `Roadmap`.** That is the whole design: same renderer, same graph rules,
+same seeder, same builder — the third kind of row in a table that already holds two, told apart
+by a nullable column. Consequences:
+
+- **A module is the child of at most one step** — a filtered unique index on `ChildRoadmapId`.
+  Two parents would give the breadcrumb and the completion rule two answers each.
+- **`ChildRoadmapId` is `SetNull`, not `Cascade`.** Deleting a module leaves its gateway as a
+  plain unlinked step, the way a step outlives its dance. Cascade would also be a second cascade
+  path from `Roadmap` into `RoadmapSteps` (the first runs via `RoadmapStages`), which Postgres
+  rejects outright.
+- **A step is a move or a gateway, never both.** `DanceId` and `ChildRoadmapId` are mutually
+  exclusive, or "learned" has two competing definitions.
+
+### Completion, and the rule it reuses
+
+A module is complete when **every completable step in it** is done — a step with a move that is
+learned, or a nested module that is complete. A module with *nothing* completable is never
+complete rather than instantly complete, so its gateway falls back to the same pass-through rule
+that already governs steps with no move behind them. `IsSelfDetermined` / `IsDone` in
+`RoadmapService` are the two predicates; `roadmap-graph.ts` mirrors both.
+
+Gateways are **not** manually tickable. Deriving the state is the point of the feature.
+
+### Two bounded walks, because this is a public endpoint
+
+`RoadmapGraph.CreatesModuleCycle` and `ModuleDepth`, capped at `MaxModuleDepth = 3`. Every
+traversal — loading modules, building a breadcrumb, checking visibility, cascading a delete — is
+iterative and bounded, the same reasoning as `AssignDepths`. A cycle is a bug; a legitimately
+40-deep chain would still be 40 rounds of queries per request.
+
+`LoadModulesAsync` does **one query per level, not one per module**, so a path with eight
+gateways costs the same as a path with one.
+
+### The three things that leak if you get them wrong
+
+- **A fork deep-copies modules** (`CopyInternalAsync`). Re-linking the original's would leave one
+  user's tree containing a roadmap another user owns, can edit and can delete underneath them —
+  and expose it to everyone the fork is later shared with.
+- **Visibility inherits downwards** (`IsVisibleAsync` walks ancestors). A shared tree has to open
+  its own modules, or half its nodes 404 for the person it was shared with.
+- **Deleting a tree deletes its modules.** That is what "delete my Waacking tree" plainly means.
+  **Unlinking, though, does not** — the child becomes a normal top-level tree the user still
+  owns. Losing a subtree to a mis-click is worse than an extra row on the shelf.
+
+### Authoring one
+
+Add `"module": "<other-roadmap-slug>"` to a step, and drop the child's JSON file in alongside.
+**The seeder resolves module links in a second pass**, after every file has a row: files are read
+alphabetically, so `waacking.json` is parsed before `waacking-posing.json` and a single pass would
+leave the gateway unlinked until the next boot.
+
+Modules are excluded from `GetAllAsync`, but their counts **roll up into the parent's index card**
+(deepest-first) — otherwise a path with forty steps behind three gateways would advertise six.
 
 ## `segmentLabel` — pointing a step at part of a video
 
