@@ -109,6 +109,12 @@ recording the sub-moves as `VideoSegment`s. So for those styles the curriculum l
 a video, and a step that could only name a whole dance would say "watch the 12-minute
 tutorial" twelve times.
 
+**Prefer a real dance per step where the catalog can support one.** Waacking used to lean on
+this mechanism for ten of its steps, which is what made its whole path a transcription of one
+video's chapter list; seeding the moves properly dropped it to a single pinned step. Reach for
+`segmentLabel` when the only good footage for a move is a section of a longer class — not as a
+substitute for the move existing in the catalog.
+
 `segmentLabel` narrows a step to one section: the UI then shows only that clip, badges its
 time range, and links to `/dances/{style}/{slug}?v={videoId}&t={startTime}`.
 
@@ -248,7 +254,7 @@ successful save must `hydrate()` first, or the guard challenges its own save on 
 ### Caps
 
 `MaxTreesPerUser = 50`, 30 branches, 250 moves, and length limits on every text field — well
-above any real path (the largest authored one is 6 branches and 31 steps), and enough that one
+above any real path (the largest authored one is 7 branches and 46 steps), and enough that one
 account can't turn the shared table into its own storage.
 
 ## Key behaviours / rules
@@ -260,8 +266,8 @@ account can't turn the shared table into its own storage.
   `UserLearnedDances` / `UserInProgressDances` through the step's dance. Ticking a step off
   calls the same `PUT /dances/{id}/status` as the dance page, so the two never disagree.
   The cost is that progress is per *dance*, not per step: where one dance backs several steps,
-  marking it learned flips all of them at once. Waacking is the bad case (the `waacking` dance
-  backs 10 of its 23 steps); hip-hop has one 3-step dance, House none. Fixing it properly means
+  marking it learned flips all of them at once. Hip-hop is now the worst case (`locking` backs
+  3 steps); Waacking backs 2 off `waacking`, House none. Fixing it properly means
   a per-step `UserRoadmapStep` table — not built. Until then, prefer one dance per step, and
   read the validator's warnings as a budget rather than noise.
 - A move may legitimately appear in more than one stage; `applyFlags` in the detail component
