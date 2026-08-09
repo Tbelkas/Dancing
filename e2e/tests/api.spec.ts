@@ -119,9 +119,11 @@ test.describe('api health @smoke', () => {
   });
 
   test('roadmap steps can pin to a video section', async ({ request }) => {
-    // Waacking's tutorials are consolidated onto one dance with their sub-moves as segments,
-    // so its path leans on segmentLabel. If resolution breaks, every step silently widens to
-    // "watch the whole 12-minute video" — which still renders, hence the explicit check.
+    // Waacking is the path that still uses segmentLabel: its "weaker arm" step pins to one
+    // section of the long consolidated tutorial rather than serving the whole thing. (It used
+    // to lean on segments far more heavily, before the path was rebuilt around one dance per
+    // step.) If resolution breaks, the step silently widens to "watch the whole 12-minute
+    // video" — which still renders, hence the explicit check.
     const res = await request.get('roadmaps/waacking');
     expect(res.status()).toBe(200);
     const roadmap = await res.json();

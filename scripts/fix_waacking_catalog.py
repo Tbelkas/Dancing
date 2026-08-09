@@ -20,10 +20,16 @@ Three problems, all found by resolving every Waacking dance's video back to YouT
 
   3. `ololufe` is an Afrobeats choreography routine filed under Waacking.
 
-Deliberately NOT done here (see the notes printed at the end): deleting `gazelle`, and
-restyling `sous-sous` / `en-dehors` to Classical / Ballet. Those two are still linked by
-waacking.json, so moving them now would leave live roadmap steps unresolvable — they go
-in the same commit as the roadmap rewrite.
+`sous-sous` and `en-dehors` move to Classical / Ballet. That was held back on the first run
+because waacking.json still linked them and moving them would have left live roadmap steps
+unresolvable; the rewritten roadmap does not link them, so they can go.
+
+Still deliberately NOT done here: deleting `gazelle`, whose only video is a Zootopia movie
+clip. There is no correct style to move it to, so it needs a delete decision rather than a
+quiet reassignment.
+
+Re-running is safe: descriptions already matching are skipped, and the video and style
+updates are idempotent.
 
 Dry-run unless 'apply'.
 """
@@ -84,7 +90,17 @@ VIDEO_FIXES = {
     319: ("hyxUBMVd0_Y", 40),
 }
 
-RESTYLE = [(989, WAACKING_STYLE_ID, AFROBEATS_STYLE_ID)]  # (danceId, fromStyleId, toStyleId)
+BALLET_STYLE_ID = 4
+
+# (danceId, fromStyleId, toStyleId)
+RESTYLE = [
+    (989, WAACKING_STYLE_ID, AFROBEATS_STYLE_ID),   # ololufe — an Oxlade choreo routine
+    # sous-sous and en-dehors are classical ballet terms whose videos are a beginner pointe
+    # class and a pirouette-tips video. They were held back on the first run because
+    # waacking.json still linked them; the rewritten roadmap does not, so they can move.
+    (1315, WAACKING_STYLE_ID, BALLET_STYLE_ID),
+    (342, WAACKING_STYLE_ID, BALLET_STYLE_ID),
+]
 
 
 def psql(sql, fetch=True):
