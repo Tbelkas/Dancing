@@ -271,7 +271,7 @@
     </div>
   }
 
-  @if (loading()) {
+  @if (showSkeleton()) {
     <!-- Mirror the stats block + insight cards too — if the skeleton only covers the list,
          the whole page shoves down when they land after loading. -->
     <div aria-busy="true" aria-label="Loading sessions">
@@ -292,6 +292,8 @@
         }
       </div>
     </div>
+  } @else if (loading()) {
+    <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
   } @else if (visibleSessions().length === 0) {
     <div class="empty-state">
       <p>No practice sessions yet. Watch a dance video — the clock starts on its own — or hit "Log Session"!</p>

@@ -17,6 +17,7 @@ import { Style } from '../../models/style.model';
 import { Video } from '../../models/video.model';
 import { Dance } from '../../models/dance.model';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
+import { delayedLoading } from '../../core/utils/delayed-loading';
 
 /** A history entry plus the query params that reopen the video it was left on. */
 interface ContinueCard extends RecentDance {
@@ -39,12 +40,14 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   allStyles = signal<Style[]>([]);
   selectedStyleId = signal<number | null>(null);
   loading = signal(true);
+  showSkeleton = delayedLoading(this.loading);
   showStylePicker = signal(false);
 
   /** Sentinel tab id for the cross-style Favorites view. */
   readonly FAVORITES_TAB = -1;
   favoriteDances = signal<Dance[]>([]);
   loadingFavorites = signal(false);
+  showFavoritesSkeleton = delayedLoading(this.loadingFavorites);
   private favoritesLoaded = false;
 
   // Add style form
@@ -78,6 +81,7 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   private readonly RECOMMENDED_SHOWN = 6;
   recommendedDances = signal<Dance[]>([]);
   loadingRecommended = signal(false);
+  showRecommendedSkeleton = delayedLoading(this.loadingRecommended);
   private recCache = new Map<number, Dance[]>();
 
   /** Every dance the user tracks in any style — recommendations must never repeat these. */

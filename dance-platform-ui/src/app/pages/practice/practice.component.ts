@@ -11,6 +11,7 @@ import { ReviewDance } from '../../models/review-dance.model';
 import { toLocalDateString, toPracticeDateString, formatClock } from '../../core/utils/video-url.utils';
 import { computeStreak, computeLongestStreak } from '../../core/utils/practice.utils';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
+import { delayedLoading } from '../../core/utils/delayed-loading';
 
 type Timeframe = 'week' | 'month' | 'all';
 
@@ -69,6 +70,7 @@ export class PracticeComponent implements OnInit {
   sessions = signal<PracticeSession[]>([]);
   dances = signal<{ id: number; name: string }[]>([]);
   loading = signal(true);
+  showSkeleton = delayedLoading(this.loading);
 
   // Review queue: learned dances gone unpracticed for 3+ weeks (server decides the threshold).
   reviewQueue = signal<ReviewDance[]>([]);

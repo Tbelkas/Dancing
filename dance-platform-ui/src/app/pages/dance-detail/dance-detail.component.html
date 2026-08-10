@@ -301,7 +301,7 @@
     <p class="dance-missing__msg">It may have been removed, or the link is a step off. Browse the catalog to find your next one.</p>
     <a routerLink="/dances" class="btn btn--primary">Browse dances</a>
   </div>
-} @else {
+} @else if (showSkeleton()) {
   <div class="container" aria-busy="true" aria-label="Loading dance">
     <div class="detail-skeleton">
       <div class="skeleton skeleton-line skeleton-line--page-title"></div>

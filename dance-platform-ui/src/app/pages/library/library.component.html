@@ -21,7 +21,7 @@
     </div>
   }
 
-  @if (loading()) {
+  @if (showSkeleton()) {
     <!-- Placeholder keeps the count line's slot so the list doesn't jump down when it lands. -->
     <p class="results-count"><span class="skeleton results-count__skeleton"></span></p>
     <div class="video-list" aria-busy="true" aria-label="Loading videos">
@@ -35,6 +35,8 @@
         </div>
       }
     </div>
+  } @else if (loading()) {
+    <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
   } @else if (items().length === 0) {
     <div class="empty-state card">
       <div class="empty-state__icon"><i class="fa-solid fa-film"></i></div>

@@ -2,9 +2,10 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { unsavedChangesGuard } from './core/guards/unsaved-changes.guard';
+import { landingGuard } from './core/guards/landing.guard';
 
 export const routes: Routes = [
-  { path: '', title: 'Dance Platform · Learn any dance, one loop at a time', loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent) },
+  { path: '', title: 'Dance Platform · Learn any dance, one loop at a time', loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent), canActivate: [landingGuard] },
   { path: 'login', title: 'Sign in · Dance Platform', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
   { path: 'register', title: 'Create account · Dance Platform', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
   { path: 'dances', title: 'Browse Dances · Dance Platform', loadComponent: () => import('./pages/dances/dances.component').then(m => m.DancesComponent) },

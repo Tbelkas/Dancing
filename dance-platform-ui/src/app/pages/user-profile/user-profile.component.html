@@ -1,5 +1,5 @@
 <div class="container">
-  @if (loading()) {
+  @if (showSkeleton()) {
     <div class="profile-layout" aria-busy="true" aria-label="Loading profile">
       <div class="card skeleton-card">
         <div class="skeleton skeleton-avatar"></div>
@@ -14,6 +14,8 @@
         </div>
       </div>
     </div>
+  } @else if (loading()) {
+    <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
   } @else if (notFound()) {
     <div class="empty-state">
       <h2>Profile not available</h2>

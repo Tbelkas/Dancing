@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -29,6 +29,7 @@ import { MoveVideoPickerComponent } from '../../shared/components/move-video-pic
 import { DIFFICULTY_LEVELS } from '../../core/constants/dance.constants';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
+import { delayedLoading } from '../../core/utils/delayed-loading';
 
 @Component({
   selector: 'app-dance-detail',
@@ -46,6 +47,9 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
 
   dance = signal<Dance | null>(null);
   notFound = signal(false);
+  // This page has no explicit loading flag — "neither loaded nor missing yet" is the wait.
+  private readonly loading = computed(() => !this.dance() && !this.notFound());
+  showSkeleton = delayedLoading(this.loading);
   videos = signal<Video[]>([]);
   selectedVideo = signal<Video | null>(null);
   // Other dances sharing the selected video, for in-place jump chips in the player.

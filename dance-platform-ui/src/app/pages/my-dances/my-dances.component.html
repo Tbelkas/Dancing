@@ -120,7 +120,7 @@
     </div>
   }
 
-  @if (loading()) {
+  @if (showSkeleton()) {
     <!-- Mirrors the loaded order — progress bar, style tabs, section title, bordered
          dance list — so nothing shoves when the data lands. -->
     <div aria-busy="true" aria-label="Loading your dances">
@@ -143,6 +143,8 @@
         }
       </div>
     </div>
+  } @else if (loading()) {
+    <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
   } @else if (myStyles().length === 0) {
     <div class="empty-state card">
       <div class="empty-state__icon"><i class="fa-solid fa-shoe-prints"></i></div>
@@ -199,12 +201,14 @@
 
     @if (selectedStyleId() === FAVORITES_TAB) {
       <div class="dances-view">
-        @if (loadingFavorites()) {
+        @if (showFavoritesSkeleton()) {
           <div class="skeleton-rows" aria-busy="true" aria-label="Loading favorites">
             @for (i of [0, 1, 2, 3]; track i) {
               <div class="skeleton skeleton-rows__item"></div>
             }
           </div>
+        } @else if (loadingFavorites()) {
+          <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
         } @else if (favoriteDances().length === 0) {
           <div class="card empty-style">
             <p class="empty">No favorites yet.</p>
@@ -441,7 +445,7 @@
         }
 
         <!-- Recommended next moves in this style -->
-        @if (loadingRecommended()) {
+        @if (showRecommendedSkeleton()) {
           <div class="dance-section" aria-busy="true" aria-label="Loading recommendations">
             <h3 class="section-title">
               <span class="section-icon rec-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
@@ -453,6 +457,8 @@
               }
             </div>
           </div>
+        } @else if (loadingRecommended()) {
+          <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
         } @else if (recommendedVisible().length > 0) {
           <div class="dance-section">
             <h3 class="section-title">

@@ -11,6 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { UserProfile } from '../../models/user.model';
 import { PracticeSession } from '../../models/practice-session.model';
 import { computeStreak } from '../../core/utils/practice.utils';
+import { delayedLoading } from '../../core/utils/delayed-loading';
 
 @Component({
   selector: 'app-profile',
@@ -23,6 +24,9 @@ export class ProfileComponent implements OnInit {
   profile = signal<UserProfile | null>(null);
   sessions = signal<PracticeSession[]>([]);
   loadError = signal(false);
+  // No explicit loading flag here either — "neither loaded nor failed yet" is the wait.
+  private readonly loading = computed(() => !this.profile() && !this.loadError());
+  showSkeleton = delayedLoading(this.loading);
   editing = signal(false);
   savingViewerPref = signal(false);
   editName = '';

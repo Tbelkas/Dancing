@@ -16,6 +16,7 @@ import { Roadmap, SaveRoadmap } from '../../models/roadmap.model';
 import { withGraphState } from '../../core/utils/roadmap-graph';
 import { HasUnsavedChanges } from '../../core/guards/unsaved-changes.guard';
 import { RoadmapTreeComponent } from '../roadmap-detail/roadmap-tree.component';
+import { delayedLoading } from '../../core/utils/delayed-loading';
 
 /**
  * The draft a tree is edited as. Deliberately not the read model: a step being written has a
@@ -77,6 +78,7 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
 
   styles = signal<Style[]>([]);
   loading = signal(true);
+  showSkeleton = delayedLoading(this.loading);
   saving = signal(false);
   /** Set when the slug isn't a tree the user owns — a curated path lands here too. */
   denied = signal(false);

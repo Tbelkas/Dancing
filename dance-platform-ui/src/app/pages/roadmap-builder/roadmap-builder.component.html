@@ -4,11 +4,13 @@
     {{ isNew() ? 'New skill tree' : 'Editing' }}
   </nav>
 
-  @if (loading()) {
+  @if (showSkeleton()) {
     <div class="page-header" aria-busy="true">
       <div class="skeleton skeleton-line skeleton-line--page-title"></div>
       <div class="skeleton skeleton-line skeleton-line--short"></div>
     </div>
+  } @else if (loading()) {
+    <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
   } @else if (denied()) {
     <div class="empty-state card">
       <div class="empty-state__icon"><i class="fa-solid fa-lock"></i></div>

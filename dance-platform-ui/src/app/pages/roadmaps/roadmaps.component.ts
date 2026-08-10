@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { RoadmapSummary } from '../../models/roadmap.model';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
+import { delayedLoading } from '../../core/utils/delayed-loading';
 
 @Component({
   selector: 'app-roadmaps',
@@ -17,6 +18,7 @@ import { ThumbFallback } from '../../core/utils/thumb-fallback';
 export class RoadmapsComponent implements OnInit {
   roadmaps = signal<RoadmapSummary[]>([]);
   loading = signal(true);
+  showSkeleton = delayedLoading(this.loading);
   failed = signal(false);
   private readonly thumbs = new ThumbFallback();
 

@@ -66,7 +66,7 @@
   <!-- Continue-learning rail: pick up where you left off before diving into the catalog.
        While the in-progress fetch is pending we hold the slot with a skeleton — painting the
        recently-viewed fallback first and then flipping it reads as a flicker. -->
-  @if (railPending()) {
+  @if (showRailSkeleton()) {
     <section class="rail" aria-hidden="true">
       <h2 class="rail__title"><span class="skeleton rail__title-skeleton"></span></h2>
       <div class="rail__scroller">
@@ -78,6 +78,8 @@
         }
       </div>
     </section>
+  } @else if (railPending()) {
+    <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
   } @else if (railDances().length > 0) {
     <section class="rail" aria-label="Continue learning">
       <h2 class="rail__title"><i class="fa-solid fa-person-running"></i> Continue learning</h2>
@@ -233,8 +235,10 @@
        re-searches) shoves the whole grid up and down. -->
   <div class="results-bar">
       <span class="results-count" data-testid="results-count">
-        @if (!hasLoaded()) {
+        @if (showSkeleton()) {
           <span class="skeleton results-count__skeleton"></span>
+        } @else if (!hasLoaded()) {
+          <!-- Count not in yet, but too early to justify a placeholder bar. -->
         } @else if (hasActiveFilters() && searchTotal() < grandTotal()) {
           <strong>{{ searchTotal() }}</strong> of {{ grandTotal() }} dances
         } @else {
@@ -285,7 +289,7 @@
   <!-- Skeletons only cover the initial load; re-searches keep the old grid dimmed in place
        instead of blank-flashing skeletons on every filter click. The skeleton follows the
        saved view mode so a list-view user doesn't watch a card grid flip into rows. -->
-  @if (loading() && !hasLoaded()) {
+  @if (showSkeleton()) {
     @if (viewMode() === 'list') {
       <ul class="dance-rows" aria-busy="true" aria-label="Loading dances">
         @for (i of skeletonRows; track i) {

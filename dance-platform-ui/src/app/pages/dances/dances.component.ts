@@ -20,6 +20,7 @@ import { DIFFICULTY_FILTER_OPTIONS, DIFFICULTY_LEVELS } from '../../core/constan
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { UrlFilterSync, idFromParam, pageFromParam } from '../../core/utils/url-filter-sync';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
+import { delayedLoading } from '../../core/utils/delayed-loading';
 import { AddStyleFormComponent } from '../../shared/components/add-style-form/add-style-form.component';
 import { AddDanceFormComponent } from '../../shared/components/add-dance-form/add-dance-form.component';
 import { BulkImportFormComponent } from '../../shared/components/bulk-import-form/bulk-import-form.component';
@@ -87,6 +88,10 @@ export class DancesComponent implements OnInit, OnDestroy {
   /** Cards get their staggered entrance only on the first reveal; after that new cards
    *  appear instantly instead of replaying the fade on every filter/page change. */
   cardsReveal = signal(true);
+  /** The initial load, held back so a fast response never flashes the skeleton grid. */
+  private readonly initialLoad = computed(() => this.loading() && !this.hasLoaded());
+  showSkeleton = delayedLoading(this.initialLoad);
+  showRailSkeleton = delayedLoading(this.railPending);
 
   // Filters
   searchQuery = signal('');

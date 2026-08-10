@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-landing',
@@ -10,18 +9,12 @@ import { AuthService } from '../../core/services/auth.service';
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.css']
 })
-export class LandingComponent implements OnInit {
+export class LandingComponent {
   // A few real styles for the hero marquee — purely decorative.
   readonly marquee = ['Bachata', 'Salsa', 'Breakdance', 'Ballet', 'Hip-hop', 'Tango', 'Waacking', 'Popping', 'Contemporary', 'Jive', 'Flamenco', 'House'];
   // Equalizer bar heights (%) — static values, animated via CSS.
   readonly bars = [38, 64, 92, 52, 78, 44, 88, 60, 34, 72, 50, 84, 42, 68];
 
-  constructor(private router: Router, public auth: AuthService) {}
-
-  ngOnInit(): void {
-    // Returning, signed-in dancers skip the pitch and go straight to their dances.
-    if (this.auth.isAuthenticated()) {
-      this.router.navigate(['/my-dances']);
-    }
-  }
+  // Signed-in dancers never reach this component — landingGuard sends them to /my-dances
+  // before it is created, so there is no hero to flash on the way past.
 }

@@ -12,6 +12,7 @@ import { withGraphState } from '../../core/utils/roadmap-graph';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
 import { RoadmapTreeComponent } from './roadmap-tree.component';
 import { SignInDialogComponent } from '../../shared/components/sign-in-dialog/sign-in-dialog.component';
+import { delayedLoading } from '../../core/utils/delayed-loading';
 
 type RoadmapView = 'tree' | 'list';
 const VIEW_KEY = 'dp_roadmap_view';
@@ -27,6 +28,7 @@ const BRANCHES_KEY = 'dp_roadmap_branches';
 export class RoadmapDetailComponent implements OnInit {
   roadmap = signal<Roadmap | null>(null);
   loading = signal(true);
+  showSkeleton = delayedLoading(this.loading);
 
   /** Tree or list. Remembered across visits — it's a strong personal preference either way. */
   private readonly storedView = signal<RoadmapView>('tree');

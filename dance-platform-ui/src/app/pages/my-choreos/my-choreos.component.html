@@ -59,7 +59,7 @@
       </button>
     </div>
 
-    @if (loading()) {
+    @if (showSkeleton()) {
       <div class="choreo-list" aria-busy="true" aria-label="Loading choreos">
         @for (i of [0,1,2]; track i) {
           <div class="choreo-row choreo-row--skeleton">
@@ -71,6 +71,8 @@
           </div>
         }
       </div>
+    } @else if (loading()) {
+      <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
     } @else if (choreos().length === 0) {
       <div class="empty-state card">
         <div class="empty-state__icon"><i class="fa-solid fa-clapperboard"></i></div>

@@ -12,7 +12,7 @@
     }
   </div>
 
-  @if (loading()) {
+  @if (showSkeleton()) {
     <div class="roadmap-grid" aria-busy="true" aria-label="Loading roadmaps">
       @for (i of [0,1]; track i) {
         <div class="roadmap-card roadmap-card--skeleton">
@@ -24,6 +24,8 @@
         </div>
       }
     </div>
+  } @else if (loading()) {
+    <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
   } @else if (failed()) {
     <div class="empty-state card">
       <div class="empty-state__icon"><i class="fa-solid fa-triangle-exclamation"></i></div>

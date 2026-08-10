@@ -10,6 +10,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { VideoLibraryItem } from '../../models/video.model';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
+import { delayedLoading } from '../../core/utils/delayed-loading';
 
 type LibraryScope = 'mine' | 'global';
 
@@ -24,6 +25,7 @@ export class LibraryComponent implements OnInit {
   scope = signal<LibraryScope>('mine');
   items = signal<VideoLibraryItem[]>([]);
   loading = signal(true);
+  showSkeleton = delayedLoading(this.loading);
   private readonly thumbs = new ThumbFallback();
 
   constructor(

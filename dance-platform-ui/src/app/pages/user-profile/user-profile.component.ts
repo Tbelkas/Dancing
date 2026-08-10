@@ -5,6 +5,7 @@ import { EMPTY } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { UserService, PublicProfile } from '../../core/services/user.service';
+import { delayedLoading } from '../../core/utils/delayed-loading';
 
 @Component({
   selector: 'app-user-profile',
@@ -16,6 +17,7 @@ export class UserProfileComponent implements OnInit {
   profile = signal<PublicProfile | null>(null);
   notFound = signal(false);
   loading = signal(true);
+  showSkeleton = delayedLoading(this.loading);
 
   constructor(private route: ActivatedRoute, private userService: UserService) {}
 

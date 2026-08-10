@@ -9,6 +9,7 @@ import { Choreo } from '../../models/choreo.model';
 import { VideoSegment } from '../../models/video.model';
 import { LocalVideoPlayerComponent } from '../../shared/components/local-video-player/local-video-player.component';
 import { formatTimeSecs } from '../../core/utils/video-url.utils';
+import { delayedLoading } from '../../core/utils/delayed-loading';
 
 /**
  * Choreo videos that live on the user's own computer. The server stores only each
@@ -27,6 +28,7 @@ import { formatTimeSecs } from '../../core/utils/video-url.utils';
 export class MyChoreosComponent implements OnInit, OnDestroy {
   choreos = signal<Choreo[]>([]);
   loading = signal(true);
+  showSkeleton = delayedLoading(this.loading);
   selected = signal<Choreo | null>(null);
   videoUrl = signal<string | null>(null);
   /** Set when the re-picked file's name differs from the one saved for the choreo. */
