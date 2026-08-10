@@ -374,42 +374,107 @@ test.describe('authenticated', () => {
  * that runs even when an assertion fails. The cleanup goes over the API rather than through the
  * UI: a test that only tidies up when the UI still works would leave a tree behind on exactly
  * the run that found a bug.
+ *
+ * It also runs off a snapshot of the owned trees taken *before* the test, not off the slug the
+ * test read out of the URL after saving. The slug version had a window — save succeeds, the
+ * navigation assertion times out, `slug` is still '' and the finally does nothing — and under
+ * load that window is where the prod account picked up seven orphans.
  */
 test.describe('personal skill trees', () => {
-  /** The bearer token the app is holding, so cleanup can call the API as the same user. */
-  async function tokenOf(page: import('@playwright/test').Page): Promise<string> {
-    const token = await page.evaluate(() => localStorage.getItem('dp_token'));
-    expect(token, 'the auth fixture should have planted a token').toBeTruthy();
-    return token!;
+  /**
+   * A token of this block's own, rather than the one the fixture plants in localStorage.
+   *
+   * Cleanup must not depend on the page: the snapshot is taken before the first navigation
+   * (localStorage isn't reachable on about:blank), and the `finally` has to work even when the
+   * page is wedged or closed. Logged in once for the whole file and reused.
+   */
+  let apiToken: Promise<string> | null = null;
+  function token(): Promise<string> {
+    apiToken ??= (async () => {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ username: USERNAME, password: PASSWORD }),
+        signal: AbortSignal.timeout(30_000),
+      });
+      if (!res.ok) throw new Error(`cleanup could not sign in (${res.status})`);
+      return (await res.json()).token as string;
+    })();
+    return apiToken;
+  }
+
+  interface RoadmapRow { id: number; isOwned: boolean }
+
+  /** The account's owned trees, or null if the list didn't answer with one. */
+  async function listOwned(): Promise<RoadmapRow[] | null> {
+    try {
+      const res = await fetch(`${API_URL}/roadmaps`, {
+        headers: { Authorization: `Bearer ${await token()}` },
+        signal: AbortSignal.timeout(30_000),
+      });
+      if (!res.ok) return null;
+      const body = await res.json();
+      // The Pi has been seen answering 200 with something that isn't the list.
+      return Array.isArray(body) ? body.filter((r: RoadmapRow) => r.isOwned) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Ids of every tree the account owns right now. */
+  async function ownedTreeIds(): Promise<Set<number>> {
+    const owned = await listOwned();
+    expect(owned, 'the roadmap list is needed to know what cleanup may delete').not.toBeNull();
+    return new Set(owned!.map(r => r.id));
   }
 
   /**
-   * Deletes a tree by slug if it still exists. Safe to call twice.
+   * Deletes every tree the account owns that wasn't there before the test started.
+   *
+   * Cleanup used to key off the slug, which a test can only learn from the URL *after* the save
+   * — so a save that succeeded and then timed out waiting for the navigation left a tree behind
+   * for good. Under load that is exactly what happened: the prod account had accumulated seven
+   * of them. Diffing the owned set has no such window; whatever the test created, however it
+   * failed, is in the difference. Safe because the suite runs serially (workers: 1), so nothing
+   * else is creating trees while a test holds the floor.
    *
    * Generous timeouts and a retry, unlike anything else here: this is the only code standing
    * between a slow API and a row left in the production database forever. A cleanup that gives
    * up after the default 10s — which the Pi has exceeded under load — is worse than no cleanup,
    * because it looks like it worked.
    */
-  async function destroy(page: import('@playwright/test').Page, slug: string): Promise<void> {
-    const headers = { Authorization: `Bearer ${await tokenOf(page)}` };
-    const timeout = 30_000;
+  async function destroyNew(before: Set<number>): Promise<void> {
+    const leaked: number[] = [];
 
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const found = await page.request.get(`${API_URL}/roadmaps/${slug}`, { headers, timeout });
-        if (!found.ok()) return; // already gone
-        const deleted = await page.request.delete(
-          `${API_URL}/roadmaps/${(await found.json()).id}`, { headers, timeout });
-        if (deleted.ok()) return;
-      } catch {
-        // Fall through to the retry; the throw below reports the give-up.
+    /** Ids the account has gained since `before` was taken, or null if the list didn't answer. */
+    const gained = async (): Promise<number[] | null> => {
+      const owned = await listOwned();
+      return owned && owned.filter(r => !before.has(r.id)).map(r => r.id);
+    };
+
+    // Each pass re-lists first, so the previous pass's deletes are confirmed rather than
+    // assumed — a DELETE that returned 200 while the Pi was thrashing has still been seen to
+    // leave the row in place.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const found = await gained();
+      if (found?.length === 0) return;
+      leaked.length = 0;
+      if (found) leaked.push(...found);
+      for (const id of leaked) {
+        try {
+          await fetch(`${API_URL}/roadmaps/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${await token()}` },
+            signal: AbortSignal.timeout(30_000),
+          });
+        } catch { /* the next pass's re-list decides whether it worked */ }
       }
     }
 
+    if ((await gained())?.length === 0) return;
     throw new Error(
-      `Could not clean up the test skill tree "${slug}". Delete it by hand — a scheduled run ` +
-      'would otherwise leave one behind every time.'
+      `Could not clean up test skill tree(s) ${leaked.join(', ')}. Delete them by hand — a ` +
+      'scheduled run would otherwise leave one behind every time.'
     );
   }
 
@@ -449,6 +514,7 @@ test.describe('personal skill trees', () => {
     // Unique per run: two runs overlapping would otherwise fight over one slug, and the
     // second would silently be handed "…-2".
     const name = `E2E tree ${Date.now()}`;
+    const before = await ownedTreeIds();
     let slug = '';
 
     try {
@@ -536,12 +602,13 @@ test.describe('personal skill trees', () => {
       await expect(page.getByTestId('roadmap-card').first()).toBeVisible();
       await expect(page.locator('body')).not.toContainText(name);
     } finally {
-      if (slug) await destroy(page, slug);
+      await destroyNew(before);
     }
   });
 
   test('a curated path can be forked into an editable copy', async ({ authedPage: page }) => {
     await blockEmbeds(page);
+    const before = await ownedTreeIds();
     let slug = '';
 
     try {
@@ -562,7 +629,7 @@ test.describe('personal skill trees', () => {
       // extra steps.
       expect(await page.getByTestId('builder-step').count()).toBeGreaterThan(1);
     } finally {
-      if (slug) await destroy(page, slug);
+      await destroyNew(before);
     }
   });
 
@@ -580,6 +647,7 @@ test.describe('personal skill trees', () => {
    */
   test('sharing opens a tree to anyone with the link, and unsharing closes it', async ({ authedPage: page }) => {
     const name = `E2E share ${Date.now()}`;
+    const before = await ownedTreeIds();
     let slug = '';
 
     try {
@@ -645,7 +713,7 @@ test.describe('personal skill trees', () => {
       await expect(page.getByTestId('roadmap-shared-badge')).toHaveCount(0);
       expect((await page.request.get(`${API_URL}/roadmaps/${slug}`)).status()).toBe(404);
     } finally {
-      if (slug) await destroy(page, slug);
+      await destroyNew(before);
     }
   });
 
@@ -655,6 +723,7 @@ test.describe('personal skill trees', () => {
    */
   test('a move can be pinned to one section of its video', async ({ authedPage: page }) => {
     const name = `E2E clip ${Date.now()}`;
+    const before = await ownedTreeIds();
     let slug = '';
 
     try {
@@ -690,7 +759,7 @@ test.describe('personal skill trees', () => {
       await page.reload();
       await expect(page.getByTestId('builder-step').first().getByTestId('builder-step-clip')).toBeVisible();
     } finally {
-      if (slug) await destroy(page, slug);
+      await destroyNew(before);
     }
   });
 

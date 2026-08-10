@@ -77,16 +77,25 @@ using the throwaway account in `.env`.
 Every authed test is therefore **either read-only or restores what it changed** — the
 favourite-toggle test flips a favourite and flips it back in a `finally` block.
 
-The `personal skill trees` block is the one that genuinely creates rows. It follows three rules
+The `personal skill trees` block is the one that genuinely creates rows. It follows four rules
 worth copying for anything else that has to:
 
 - the tree's name carries `Date.now()`, so two overlapping runs can't fight over one slug;
 - cleanup goes over the **API**, in a `finally`, rather than through the UI — a test that only
   tidies up when the UI still works would leave its rows behind on exactly the run that found
   a bug;
-- the cleanup uses a 30s timeout and one retry, and **throws if it gives up**. The Pi has
-  exceeded the default 10s under load, and a cleanup that silently times out is worse than none
-  because the run still looks green.
+- **cleanup identifies its rows by diffing, not by the id the test read back.** `ownedTreeIds()`
+  snapshots what the account owns before the test; the `finally` deletes anything that wasn't in
+  it. Keying off the slug looks equivalent and isn't: a test can only learn the slug from the URL
+  *after* the save, so a save that succeeded and then timed out waiting for the navigation left
+  `slug` empty and the `finally` did nothing. That window is how the prod account quietly
+  collected 13 orphaned trees. Verified by injecting a throw into exactly that spot — old
+  cleanup leaked two trees over the run and its retry, the diff leaks none;
+- the cleanup uses a 30s timeout and retries, **re-listing before each pass** so the previous
+  pass's deletes are confirmed rather than assumed, and it **throws if it gives up**. It also
+  holds its own API token rather than reading the page's, so it works when the page is on
+  `about:blank`, wedged, or closed. The Pi has exceeded the default 10s under load, and a cleanup
+  that silently times out is worse than none because the run still looks green.
 
 ⚠️ **The builder registers a `beforeunload` handler while it has unsaved edits.** Playwright
 auto-dismisses that dialog, which *cancels* the navigation — so a `page.goto()` away from a
