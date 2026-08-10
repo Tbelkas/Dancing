@@ -20,15 +20,18 @@
 
   <!-- Both of these sit above the stats and the session list, so neither may render until the
        page is done loading — either one appearing on its own shoves everything below it down.
-       ngOnInit holds `loading` until the sessions *and* the review queue have both answered. -->
-  @if (!loading() && streakAtRisk()) {
+       ngOnInit holds `loading` until the sessions *and* the review queue have both answered.
+       The showSkeleton() half matters too: delayedLoading holds the skeleton for 320ms after
+       loading clears, and rendering these into that window shoves the skeleton itself. Same
+       condition as the content branch below, so all three appear on one frame. -->
+  @if (!showSkeleton() && !loading() && streakAtRisk()) {
     <div class="streak-risk">
       <i class="fa-solid fa-fire"></i>
       <span>Your <strong>{{ streak() }}-day streak</strong> is on the line — practice today to keep it alive.</span>
     </div>
   }
 
-  @if (!loading() && reviewQueue().length > 0) {
+  @if (!showSkeleton() && !loading() && reviewQueue().length > 0) {
     <section class="card review-panel" aria-labelledby="review-title">
       <div class="review-panel__head">
         <h2 id="review-title" class="review-panel__title">
