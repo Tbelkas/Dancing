@@ -51,6 +51,11 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   private readonly loading = computed(() => !this.dance() && !this.notFound());
   showSkeleton = delayedLoading(this.loading);
   videos = signal<Video[]>([]);
+  /** Videos are a second request, fired only once the dance lands. Without its own wait the
+   *  template renders "No videos available for this dance yet." in the gap — a page that looks
+   *  finished telling you it has nothing, right before it produces the video. */
+  readonly videosLoading = signal(true);
+  showVideosSkeleton = delayedLoading(this.videosLoading);
   selectedVideo = signal<Video | null>(null);
   // Other dances sharing the selected video, for in-place jump chips in the player.
   chapters = signal<VideoChapter[]>([]);
@@ -154,6 +159,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.dance.set(null);
     this.notFound.set(false);
     this.videos.set([]);
+    this.videosLoading.set(true);
     this.selectedVideo.set(null);
     this.chapters.set([]);
     this.personalLoops.set(new Map());
@@ -194,22 +200,27 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     if (this.location.path().split('?')[0] !== canonical) {
       this.location.replaceState(canonical);
     }
-    this.videoService.getByDance(d.id).subscribe(v => {
-      // Guard against a stale response landing after the user already navigated away.
-      if (this.dance()?.id !== d.id) return;
-      this.videos.set(v);
-      // A ?v= deep link resumes that exact video; otherwise a lone video opens itself.
-      const resume = v.find(x => x.id === this.resumeVideoId);
-      // Pin the ?t= offset to the video it was aimed at, so selecting a different video
-      // afterwards starts from that video's own beginning rather than a stale timestamp.
-      this.resumeTimeVideoId = resume && this.resumeTime !== null ? resume.id : null;
-      this.resumeVideoId = null;
-      const open = resume ?? (v.length === 1 ? v[0] : null);
-      if (open) {
-        this.videoService.recordView(open.id).subscribe();
-        this.revealVideo(open);
-        if (resume && v.length > 1) this.scrollToVideo(open.id);
-      }
+    this.videoService.getByDance(d.id).subscribe({
+      next: v => {
+        // Guard against a stale response landing after the user already navigated away.
+        if (this.dance()?.id !== d.id) return;
+        this.videos.set(v);
+        this.videosLoading.set(false);
+        // A ?v= deep link resumes that exact video; otherwise a lone video opens itself.
+        const resume = v.find(x => x.id === this.resumeVideoId);
+        // Pin the ?t= offset to the video it was aimed at, so selecting a different video
+        // afterwards starts from that video's own beginning rather than a stale timestamp.
+        this.resumeTimeVideoId = resume && this.resumeTime !== null ? resume.id : null;
+        this.resumeVideoId = null;
+        const open = resume ?? (v.length === 1 ? v[0] : null);
+        if (open) {
+          this.videoService.recordView(open.id).subscribe();
+          this.revealVideo(open);
+          if (resume && v.length > 1) this.scrollToVideo(open.id);
+        }
+      },
+      // A failed fetch still has to end the wait, or the section holds a skeleton forever.
+      error: () => { if (this.dance()?.id === d.id) this.videosLoading.set(false); }
     });
     this.danceService.getRecommended(d.id).subscribe(r => {
       if (this.dance()?.id === d.id) this.recommended.set(r);

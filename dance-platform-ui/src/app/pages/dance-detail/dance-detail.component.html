@@ -110,7 +110,16 @@
         }
       }
 
-      @if (videos().length === 0) {
+      <!-- The videos are a second request. Until it answers we must not claim the dance has
+           none — the rest of the page is already painted, so the empty line reads as a fact. -->
+      @if (showVideosSkeleton()) {
+        <div class="videos-skeleton" aria-busy="true" aria-label="Loading videos">
+          <div class="skeleton skeleton-line skeleton-line--title"></div>
+          <div class="skeleton videos-skeleton__player"></div>
+        </div>
+      } @else if (videosLoading()) {
+        <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
+      } @else if (videos().length === 0) {
         <p class="empty">No videos available for this dance yet.</p>
       } @else if (videos().length === 1) {
         <div class="video-item">

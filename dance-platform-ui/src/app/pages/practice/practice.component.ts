@@ -356,14 +356,24 @@ export class PracticeComponent implements OnInit {
   ngOnInit(): void {
     this.newDate = toLocalDateString(new Date());
     this.danceService.getNames().subscribe(d => this.dances.set(d));
+    // Both requests gate the same wait. The review panel renders *above* the stats and the
+    // session list, so letting it land on its own pushed 175px of already-painted page down
+    // whenever it answered second. Waiting for the pair costs the slower of two parallel
+    // calls and paints the page once.
+    let pending = 2;
+    const settled = () => { if (--pending === 0) this.loading.set(false); };
+    // An errored observable never completes, so each failure has to settle its own half or
+    // the page would hold the skeleton forever.
     this.practiceService.getAll().subscribe({
-      next: s => { this.sessions.set(s); this.loading.set(false); },
-      error: () => this.loading.set(false)
+      next: s => this.sessions.set(s),
+      error: settled,
+      complete: settled
     });
     // The queue is a bonus panel — if it fails, the page just renders without it.
     this.practiceService.getReviewQueue().subscribe({
       next: q => this.reviewQueue.set(q),
-      error: () => {}
+      error: settled,
+      complete: settled
     });
   }
 

@@ -464,6 +464,21 @@
   border-radius: var(--radius-lg);
 }
 
+/* The videos section's own wait, for the second request. Same metrics as the page
+   skeleton's player block, so a slow dance *and* a slow video list read as one state
+   rather than a placeholder that swaps for a different placeholder. */
+.videos-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 760px;
+}
+.videos-skeleton__player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+}
+
 /* Recommended ("More like this") */
 .recommended-section { margin-top: 2.5rem; }
 .recommended-section h2 { margin-bottom: 1rem; }
