@@ -89,21 +89,48 @@ for (const slow of [0, SLOW]) {
 }
 
 // ---------------------------------------------------------------- roadmap builder
+// A full editor can't be reserved honestly — the loaded page runs past 8000px. What matters
+// is that the placeholder clears the fold instead of leaving the viewport nearly empty.
 {
   const { log } = await record(browser, creds, {
     url: BASE_URL + '/roadmaps/house-my-copy/edit', settleMs: 5000,
     delays: [{ match: '**/api/roadmaps/**', ms: SLOW }],
     probes: [
-      { name: 'skel', sel: '.page-header [class*=skeleton]', mode: 'exists' },
-      { name: 'skelH', sel: '.page-header', mode: 'height' },
-      { name: 'form', sel: '.builder__card', mode: 'count' },
+      { name: 'skel', sel: '.builder__card--skeleton', mode: 'exists' },
+      { name: 'skelCards', sel: '.builder__card--skeleton', mode: 'count' },
+      { name: 'crumb', sel: '.crumb', mode: 'text' },
+      { name: 'form', sel: '.builder__card:not(.builder__card--skeleton)', mode: 'count' },
     ],
   });
   const { during, after } = phases(log, 'skel');
   report('roadmap builder — /roadmaps/:slug/edit', [
-    `skeleton reserves: ${during ? during.skelH + 'px (page-header only)' : 'skeleton never rendered'}`,
-    `form cards that land: ${after.form}`,
-    `page height ${during ? during.h : '?'} -> ${after.h}  (${during ? after.h - during.h : '?'}px)`,
+    `placeholder cards: ${during ? during.skelCards : 'skeleton never rendered'}`,
+    `real form cards:   ${after.form}`,
+    `breadcrumb while loading: ${during ? JSON.stringify(during.crumb) : '-'}   loaded: ${JSON.stringify(after.crumb)}`,
+    `page height ${during ? during.h : '?'} -> ${after.h}  (fold is 900px)`,
+  ]);
+  await pace();
+}
+
+// ---------------------------------------------------------------- roadmap detail: right view?
+// view() defaults to 'tree' and is forced to 'tree' when signed out, so a list-shaped
+// placeholder here is one almost nobody sees the payoff of.
+{
+  const { log } = await record(browser, creds, {
+    url: BASE_URL + '/roadmaps/house', settleMs: 5000,
+    delays: [{ match: '**/api/roadmaps/house', ms: SLOW }],
+    probes: [
+      { name: 'skel', sel: '.roadmap-skeleton__canvas, .step--skeleton', mode: 'exists' },
+      { name: 'canvas', sel: '.roadmap-skeleton__canvas', mode: 'count' },
+      { name: 'steps', sel: '.step--skeleton', mode: 'count' },
+      { name: 'tree', sel: '.tree__svg', mode: 'count' },
+    ],
+  });
+  const { during, after } = phases(log, 'skel');
+  report('roadmap detail — does the skeleton match the view that loads?', [
+    `placeholder: ${during ? (during.canvas ? 'tree canvas' : `${during.steps} list steps`) : 'skeleton never rendered'}`,
+    `what loads:  ${after.tree ? 'tree (svg)' : 'list'}`,
+    `page height ${during ? during.h : '?'} -> ${after.h}`,
   ]);
   await pace();
 }
