@@ -238,7 +238,9 @@
         @if (showSkeleton()) {
           <span class="skeleton results-count__skeleton"></span>
         } @else if (!hasLoaded()) {
-          <!-- Count not in yet, but too early to justify a placeholder bar. -->
+          <!-- Count not in yet, but too early for a placeholder bar. Still needs to occupy its
+               line: an empty results-count collapses to nothing and the row above jumps. -->
+          &nbsp;
         } @else if (hasActiveFilters() && searchTotal() < grandTotal()) {
           <strong>{{ searchTotal() }}</strong> of {{ grandTotal() }} dances
         } @else {
