@@ -1,6 +1,7 @@
-import { Component, ElementRef, HostListener, signal } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, ElementRef, HostListener, computed, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { filter } from 'rxjs/operators';
 import { AuthService } from './core/services/auth.service';
 import { RoleService } from './core/services/role.service';
 import { PracticeTimerService } from './core/services/practice-timer.service';
@@ -20,12 +21,37 @@ export class AppComponent {
   userMenuOpen = signal(false);
   readonly formatClock = formatClock;
 
+  /**
+   * The current URL, so Browse and Roadmaps can compute their own active state instead of
+   * leaving it to `routerLinkActive`.
+   *
+   * A move opened from a path is a `/dances/...` URL carrying `?roadmap=`, and prefix matching
+   * would light up Browse for it — telling someone three moves into a tree that they are in the
+   * catalog. The rest of the nav still uses `routerLinkActive`; only these two overlap.
+   */
+  private readonly url = signal('/');
+
+  private readonly onPath = computed(() =>
+    new URLSearchParams(this.url().split('?')[1] ?? '').has('roadmap'));
+
+  readonly browseActive = computed(() =>
+    this.url().split('?')[0].startsWith('/dances') && !this.onPath());
+
+  readonly roadmapsActive = computed(() =>
+    this.url().split('?')[0].startsWith('/roadmaps') || this.onPath());
+
   constructor(
     public auth: AuthService,
     public role: RoleService,
     public practiceTimer: PracticeTimerService,
+    private router: Router,
     private host: ElementRef<HTMLElement>
-  ) {}
+  ) {
+    this.url.set(this.router.url);
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(e => this.url.set(e.urlAfterRedirects));
+  }
 
   userInitial(): string {
     return this.auth.currentUsername()?.charAt(0).toUpperCase() ?? '?';

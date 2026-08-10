@@ -13,6 +13,7 @@ import { InstructorService } from '../../core/services/instructor.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RoleService } from '../../core/services/role.service';
 import { RecentDancesService } from '../../core/services/recent-dances.service';
+import { RoadmapService } from '../../core/services/roadmap.service';
 import { PracticeTimerService } from '../../core/services/practice-timer.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -21,6 +22,7 @@ import { Video, VideoChapter, VideoNote, VideoSegment, viewCountBucket } from '.
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
+import { Roadmap, RoadmapStep, segmentRange } from '../../models/roadmap.model';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
 import { AddVideoFormComponent } from '../../shared/components/add-video-form/add-video-form.component';
 import { EditDanceFormComponent } from '../../shared/components/edit-dance-form/edit-dance-form.component';
@@ -30,6 +32,10 @@ import { DIFFICULTY_LEVELS } from '../../core/constants/dance.constants';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
 import { delayedLoading } from '../../core/utils/delayed-loading';
+import { withGraphState } from '../../core/utils/roadmap-graph';
+
+/** How many steps the path rail offers. Four rows sit beside the player without scrolling. */
+const RAIL_STEPS = 4;
 
 @Component({
   selector: 'app-dance-detail',
@@ -65,6 +71,66 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   private personalNotes = signal<Map<number, VideoNote[]>>(new Map());
   recommended = signal<Dance[]>([]);
   private readonly recThumbs = new ThumbFallback();
+
+  // ---- Path context -------------------------------------------------------------------
+  // A move opened from a roadmap (?roadmap=&step=) is not being browsed, it is being walked.
+  // The rail below answers "what's next on the path" instead of "what else is like this",
+  // and the header keeps Roadmaps lit — see AppComponent's browseActive/roadmapsActive.
+
+  /** The path this move was opened from; null when it was reached any other way. */
+  roadmap = signal<Roadmap | null>(null);
+  /** ?roadmap= as it stands right now, for dropping a response that lands after a navigation. */
+  private readonly roadmapSlug = signal<string | null>(null);
+  /** ?step= — which node of the path was clicked. */
+  private readonly roadmapStepKey = signal<string | null>(null);
+  private readonly stepThumbs = new ThumbFallback();
+
+  /** Every step of the path, flattened in author order. */
+  private readonly roadmapSteps = computed(() => this.roadmap()?.stages.flatMap(s => s.steps) ?? []);
+
+  /**
+   * The node this move was opened from. By key normally; by dance as a fallback, so a link
+   * saved before the key was part of the URL still orients the rail rather than blanking it.
+   */
+  readonly currentStep = computed<RoadmapStep | null>(() => {
+    const steps = this.roadmapSteps();
+    const key = this.roadmapStepKey();
+    const byKey = key ? steps.find(s => s.key === key) : undefined;
+    if (byKey) return byKey;
+    const id = this.dance()?.id;
+    return steps.find(s => s.dance?.id === id) ?? null;
+  });
+
+  /** 1-based position of the current step, for "Step 4 of 21". */
+  readonly stepNumber = computed(() => {
+    const cur = this.currentStep();
+    return cur ? this.roadmapSteps().indexOf(cur) + 1 : 0;
+  });
+
+  /** The branch the current step sits in, for the rail's subtitle. */
+  readonly stepBranch = computed(() => {
+    const cur = this.currentStep();
+    return cur ? this.roadmap()?.stages[cur.stageIndex]?.title ?? '' : '';
+  });
+
+  /** A nested path is a "module" everywhere else in the UI, so the rail has to say so too. */
+  readonly inModule = computed(() => (this.roadmap()?.ancestors?.length ?? 0) > 0);
+
+  /**
+   * What the rail offers next: the steps this one unlocks, because that is what finishing it is
+   * *for* — the tree's own answer, not a re-reading of the list top to bottom. A leaf unlocks
+   * nothing, so fall back to the rest of the path that isn't finished yet.
+   */
+  readonly nextSteps = computed<RoadmapStep[]>(() => {
+    const steps = this.roadmapSteps();
+    const cur = this.currentStep();
+    if (!cur) return steps.filter(s => s.state !== 'learned').slice(0, RAIL_STEPS);
+    const unlocks = steps.filter(s => s.requires?.includes(cur.key));
+    const pool = unlocks.length > 0
+      ? unlocks
+      : steps.slice(steps.indexOf(cur) + 1).filter(s => s.state !== 'learned');
+    return pool.slice(0, RAIL_STEPS);
+  });
   // Alphabetical neighbours within this dance's canonical style, for prev/next paging.
   prevDance = signal<Dance | null>(null);
   nextDance = signal<Dance | null>(null);
@@ -111,6 +177,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     private musicalStyleService: MusicalStyleService,
     private instructorService: InstructorService,
     private recentDances: RecentDancesService,
+    private roadmapService: RoadmapService,
     private practiceTimer: PracticeTimerService,
     private confirmSvc: ConfirmService,
     private toast: ToastService,
@@ -172,6 +239,9 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     // ?t= opens that video at a given second — how a roadmap step pointing at one section
     // of a long tutorial lands on the part it is actually about.
     this.resumeTime = Number(this.route.snapshot.queryParamMap.get('t')) || null;
+    this.loadRoadmapContext(
+      this.route.snapshot.queryParamMap.get('roadmap'),
+      this.route.snapshot.queryParamMap.get('step'));
 
     const request$ = style
       ? this.danceService.getByStyleAndSlug(style, slug)
@@ -195,10 +265,13 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.recentDances.record(d);
     this.title.setTitle(`${d.name} · Dance Platform`);
     // Normalise the URL to the canonical /dances/{style}/{slug} form (handles legacy
-    // numeric ids and single-segment slug links) without triggering a reload.
+    // numeric ids and single-segment slug links) without triggering a reload. The query
+    // string rides along: it carries the path context the header reads to decide whether
+    // this is Browse or Roadmaps, and dropping it would relabel the nav mid-load.
+    const [path, query] = this.location.path().split('?');
     const canonical = this.canonicalPath(d);
-    if (this.location.path().split('?')[0] !== canonical) {
-      this.location.replaceState(canonical);
+    if (path !== canonical) {
+      this.location.replaceState(query ? `${canonical}?${query}` : canonical);
     }
     this.videoService.getByDance(d.id).subscribe({
       next: v => {
@@ -250,6 +323,73 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   /** Canonical URL for a dance: /dances/{styleSlug}/{slug}, or /dances/{slug} if it has no style. */
   private canonicalPath(d: Dance): string {
     return d.styleSlug ? `/dances/${d.styleSlug}/${d.slug}` : `/dances/${d.slug}`;
+  }
+
+  /**
+   * Fetches the path named by `?roadmap=`, which turns the right rail from recommendations into
+   * the next steps of that path.
+   *
+   * Refetched per move rather than carried along the rail's own links: learned flags and the
+   * locked/available states are computed per user, and the previous move having just been ticked
+   * off is exactly the change the next rail has to show.
+   */
+  private loadRoadmapContext(slug: string | null, stepKey: string | null): void {
+    this.roadmap.set(null);
+    this.roadmapSlug.set(slug);
+    this.roadmapStepKey.set(stepKey);
+    if (!slug) return;
+    this.roadmapService.getBySlug(slug).subscribe({
+      next: r => { if (this.roadmapSlug() === slug) this.roadmap.set(r); },
+      // A deleted or unshared tree just means no rail; "More like this" takes the space back.
+      error: () => { /* rail simply doesn't render */ }
+    });
+  }
+
+  /** Where a rail step goes: its move, or the path it opens if it's a module gateway. */
+  stepLink(step: RoadmapStep): unknown[] | null {
+    if (step.dance) return ['/dances', step.dance.styleSlug, step.dance.slug];
+    if (step.module) return ['/roadmaps', step.module.slug];
+    return null;
+  }
+
+  /**
+   * Params for a rail step's link. Moves keep the path context so the rail survives the hop —
+   * walking a tree shouldn't dump you back into Browse three moves in — and pick up the clip
+   * deep-link when the step is pinned to a section. A module gateway gets neither: the module's
+   * own page carries its breadcrumb.
+   */
+  stepParams(step: RoadmapStep): Record<string, string | number> {
+    const slug = this.roadmapSlug();
+    if (!step.dance || !slug) return {};
+    const params: Record<string, string | number> = {};
+    if (step.segment) {
+      params['v'] = step.segment.videoId;
+      params['t'] = step.segment.startTime;
+    }
+    params['roadmap'] = slug;
+    params['step'] = step.key;
+    return params;
+  }
+
+  /** Thumbnail for a rail step: the video the step points at, or the move's first. */
+  stepThumbUrl(step: RoadmapStep): string | null {
+    if (this.stepThumbs.has(step.id)) return null;
+    const videos = step.dance?.videos ?? [];
+    const video = (step.segment ? videos.find(v => v.id === step.segment!.videoId) : undefined) ?? videos[0];
+    return video ? youtubeThumbUrl(video.videoId, video.platform) : null;
+  }
+
+  onStepThumbError(stepId: number): void {
+    this.stepThumbs.markFailed(stepId);
+  }
+
+  /** The one line under a rail step's title: how far along it is, and how long its clip runs. */
+  stepMeta(step: RoadmapStep): string {
+    if (step.module) return `Module · ${step.module.learnedCount} of ${step.module.completableCount} done`;
+    const state = step.state === 'learned' ? 'Learned'
+      : step.state === 'locked' ? 'Comes later'
+      : 'Ready now';
+    return step.segment ? `${state} · ${segmentRange(step.segment)}` : state;
   }
 
   /** YouTube thumbnail for a recommended dance, or null if missing/failed to load. */
@@ -439,16 +579,34 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
       learnedCount: cur.learnedCount + learnedDelta
     } : cur);
     this.recentDances.setLearned(d.id, flags.isLearned);
+    this.applyRoadmapFlags(d.id, flags);
 
     this.danceService.setStatus(d.id, status).subscribe({
       error: () => {
         this.dance.update(cur => cur ? { ...cur, ...snap } : cur);
+        this.applyRoadmapFlags(d.id, snap);
         // Revert the carousel's learned flag too, or a failed save would wrongly drop the dance
         // from "Continue Learning" until a hard refresh.
         this.recentDances.setLearned(d.id, snap.isLearned);
         this.actionError.set('Couldn\'t save that. Check your connection and try again.');
       }
     });
+  }
+
+  /**
+   * Mirrors a status change onto the path rail. Ticking a move off is what opens the ones it
+   * leads to, so the rail has to re-lock and re-unlock around it — `withGraphState` is the same
+   * recompute the roadmap page runs, kept in one place so the two can't disagree.
+   */
+  private applyRoadmapFlags(danceId: number, flags: { isLearned: boolean; isInProgress: boolean }): void {
+    this.roadmap.update(r => r && withGraphState({
+      ...r,
+      stages: r.stages.map(stage => ({
+        ...stage,
+        steps: stage.steps.map(step =>
+          step.dance?.id === danceId ? { ...step, dance: { ...step.dance, ...flags } } : step)
+      }))
+    }, this.auth.isAuthenticated()));
   }
 
   // Rating is per video. Whether a given star should render filled: show the live

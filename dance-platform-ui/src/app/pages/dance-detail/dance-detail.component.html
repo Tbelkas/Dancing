@@ -275,10 +275,81 @@
         }
       </div>
 
-      <!-- Recommended: more dances of the same style/type. Below 1500px this falls back
-           into the single column as a card grid; in the wide layout it becomes the sticky
-           right rail and the same cards lay out thumb-beside-title. -->
-      @if (recommended().length > 0) {
+      <!-- Arrived from a path: the rail is the path. "More like this" is the right answer when
+           you're browsing and the wrong one when you're working through a tree — it points away
+           from the thing you're in the middle of. -->
+      @if (roadmap(); as rm) {
+        <aside class="detail-aside">
+          <section class="path-rail" data-testid="roadmap-rail">
+            <a class="path-rail__back" [routerLink]="['/roadmaps', rm.slug]">
+              <i class="fa-solid fa-diagram-project" aria-hidden="true"></i>
+              <span class="path-rail__back-title">{{ rm.title }}</span>
+            </a>
+            @if (currentStep()) {
+              <p class="path-rail__where">
+                Step {{ stepNumber() }} of {{ rm.stepCount }}@if (stepBranch()) { · {{ stepBranch() }} }
+              </p>
+            }
+
+            <h2 class="path-rail__title" data-testid="roadmap-rail-title">
+              {{ inModule() ? 'Next in module' : 'Next in roadmap' }}
+            </h2>
+
+            @if (nextSteps().length > 0) {
+              <ol class="path-next">
+                @for (step of nextSteps(); track step.id) {
+                  <li class="path-step" [class.path-step--learned]="step.state === 'learned'"
+                      [class.path-step--locked]="step.state === 'locked'">
+                    @if (stepLink(step); as link) {
+                      <a class="path-step__row" [routerLink]="link" [queryParams]="stepParams(step)">
+                        <ng-container *ngTemplateOutlet="pathStepBody; context: { $implicit: step }" />
+                      </a>
+                    } @else {
+                      <!-- A step the catalog has nothing for yet: it's still part of the path,
+                           so it's still listed — there's just nowhere to send you. -->
+                      <span class="path-step__row path-step__row--plain">
+                        <ng-container *ngTemplateOutlet="pathStepBody; context: { $implicit: step }" />
+                      </span>
+                    }
+                  </li>
+                }
+              </ol>
+            } @else {
+              <p class="path-rail__done">
+                <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>
+                Nothing left on this branch — everything after it is done.
+              </p>
+            }
+
+            <a class="path-rail__all" [routerLink]="['/roadmaps', rm.slug]">
+              Back to the {{ inModule() ? 'module' : 'path' }}
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </a>
+          </section>
+        </aside>
+
+        <ng-template #pathStepBody let-step>
+          <span class="path-step__thumb">
+            @if (stepThumbUrl(step); as thumb) {
+              <img [src]="thumb" alt="" loading="lazy" (error)="onStepThumbError(step.id)" />
+            } @else {
+              <span class="path-step__thumb-fallback">
+                <i class="fa-solid" [class.fa-layer-group]="step.module" [class.fa-shoe-prints]="!step.module"></i>
+              </span>
+            }
+            @if (step.state === 'learned') {
+              <span class="path-step__tick" aria-label="Learned"><i class="fa-solid fa-check"></i></span>
+            }
+          </span>
+          <span class="path-step__body">
+            <span class="path-step__name">{{ step.title }}</span>
+            <span class="path-step__meta">{{ stepMeta(step) }}</span>
+          </span>
+        </ng-template>
+      } @else if (recommended().length > 0) {
+        <!-- Recommended: more dances of the same style/type. Below 1500px this falls back
+             into the single column as a card grid; in the wide layout it becomes the sticky
+             right rail and the same cards lay out thumb-beside-title. -->
         <aside class="detail-aside">
           <section class="recommended-section">
             <h2>More like this</h2>

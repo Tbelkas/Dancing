@@ -6,7 +6,7 @@ import { RoadmapService } from '../../core/services/roadmap.service';
 import { DanceService, DanceStatus, statusFlags } from '../../core/services/dance.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
-import { Roadmap, RoadmapStep, RoadmapStepVideo } from '../../models/roadmap.model';
+import { Roadmap, RoadmapStep, RoadmapStepVideo, segmentRange } from '../../models/roadmap.model';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { withGraphState } from '../../core/utils/roadmap-graph';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
@@ -360,21 +360,31 @@ export class RoadmapDetailComponent implements OnInit {
     return videos.filter(v => v.id === segment.videoId);
   }
 
-  /** Deep-links the player to this step's clip: the video, and the second it starts at. */
-  stepVideoParams(step: RoadmapStep, video: RoadmapStepVideo): Record<string, number> {
-    const params: Record<string, number> = { v: video.id };
-    if (step.segment && step.segment.videoId === video.id) params['t'] = step.segment.startTime;
+  /**
+   * Query params for a link out of this path into a move.
+   *
+   * `v`/`t` deep-link the player to the step's clip: the video, and the second it starts at.
+   * `roadmap`/`step` say where the click came from, which is what lets the move page offer the
+   * rest of the path instead of unrelated recommendations, and keeps the header on Roadmaps.
+   * Order matters only in that `v` and `t` stay first — they are the readable half of the URL.
+   */
+  stepVideoParams(step: RoadmapStep, video?: RoadmapStepVideo): Record<string, string | number> {
+    const params: Record<string, string | number> = {};
+    if (video) {
+      params['v'] = video.id;
+      if (step.segment && step.segment.videoId === video.id) params['t'] = step.segment.startTime;
+    }
+    const slug = this.roadmap()?.slug;
+    if (slug) {
+      params['roadmap'] = slug;
+      params['step'] = step.key;
+    }
     return params;
   }
 
   /** "4:01 – 5:25" for a segment, so the step says up front how long the clip is. */
   segmentRange(step: RoadmapStep): string | null {
-    const segment = step.segment;
-    if (!segment) return null;
-    const clock = (s: number) => `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
-    return segment.endTime == null
-      ? `from ${clock(segment.startTime)}`
-      : `${clock(segment.startTime)} – ${clock(segment.endTime)}`;
+    return step.segment ? segmentRange(step.segment) : null;
   }
 
   /**

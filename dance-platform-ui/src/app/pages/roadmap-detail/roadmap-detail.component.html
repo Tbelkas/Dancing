@@ -159,7 +159,7 @@
             </span>
             <h2 class="detail__title">
               @if (step.dance; as d) {
-                <a [routerLink]="['/dances', d.styleSlug, d.slug]">{{ step.title }}</a>
+                <a [routerLink]="['/dances', d.styleSlug, d.slug]" [queryParams]="stepVideoParams(step)">{{ step.title }}</a>
               } @else if (step.module) {
                 <a [routerLink]="['/roadmaps', step.module.slug]">{{ step.title }}</a>
               } @else {
@@ -280,7 +280,7 @@
                   <div class="step__head">
                     <h3 class="step__title">
                       @if (step.dance; as d) {
-                        <a [routerLink]="['/dances', d.styleSlug, d.slug]">{{ step.title }}</a>
+                        <a [routerLink]="['/dances', d.styleSlug, d.slug]" [queryParams]="stepVideoParams(step)">{{ step.title }}</a>
                       } @else if (step.module) {
                         <a [routerLink]="['/roadmaps', step.module.slug]">{{ step.title }}</a>
                       } @else {

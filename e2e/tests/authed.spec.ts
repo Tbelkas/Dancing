@@ -346,6 +346,35 @@ test.describe('authenticated', () => {
   });
 
   /**
+   * A move opened from a path is still on the path. Two things have to hold on the move page,
+   * and both are easy to lose because the URL is a plain `/dances/...` one: the right rail must
+   * offer the rest of the tree instead of "More like this", and the header must not relabel the
+   * visit as browsing. The `?roadmap=` param is what carries that, so it's asserted first —
+   * without it the other two can only fail.
+   */
+  test('a move opened from a path shows what comes next, and the nav stays on Roadmaps', async ({ authedPage: page }) => {
+    await blockEmbeds(page);
+    await page.goto('/roadmaps/house');
+    await expect(page.getByTestId('roadmap-title')).toBeVisible();
+    await page.getByTestId('roadmap-view-list').click();
+
+    const videoLists = page.getByTestId('roadmap-step-videos');
+    await expect(videoLists.first()).toBeVisible();
+    await videoLists.first().locator('a.video__link').first().click();
+
+    await expect(page.getByTestId('dance-title')).toBeVisible();
+    await expect(page).toHaveURL(/[?&]roadmap=house/);
+
+    // "Next in roadmap" here; a module path would say "Next in module".
+    await expect(page.getByTestId('roadmap-rail')).toBeVisible();
+    await expect(page.getByTestId('roadmap-rail-title')).toHaveText('Next in roadmap');
+    await expect(page.getByRole('heading', { name: 'More like this' })).toHaveCount(0);
+
+    await expect(page.getByTestId('nav-roadmaps')).toHaveClass(/is-active/);
+    await expect(page.getByTestId('nav-browse')).not.toHaveClass(/is-active/);
+  });
+
+  /**
    * Steps can be pinned to one section of a longer tutorial (`segmentLabel` in the authored
    * JSON). Those must deep-link with a `t=` offset, or the user lands at 0:00 of a 12-minute
    * video and has to hunt for the part the step is about.

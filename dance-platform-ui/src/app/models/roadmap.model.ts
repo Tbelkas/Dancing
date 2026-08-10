@@ -1,3 +1,5 @@
+import { formatTimeSecs } from '../core/utils/video-url.utils';
+
 /** A learning path through one style. Mirrors DTOs/Roadmap/RoadmapDto.cs. */
 export interface RoadmapSummary {
   id: number;
@@ -110,6 +112,17 @@ export interface RoadmapStepSegment {
   endTime?: number;
   /** Row id of the owning video — matches one of the step dance's `videos`. */
   videoId: number;
+}
+
+/**
+ * "4:01 – 5:25" for a step's clip, so a step pinned to one section of a long tutorial says up
+ * front how much of it it means. Lives next to the model (like `viewCountBucket`) because both
+ * the path page and the move page it links into have to say it the same way.
+ */
+export function segmentRange(segment: RoadmapStepSegment): string {
+  return segment.endTime == null
+    ? `from ${formatTimeSecs(segment.startTime)}`
+    : `${formatTimeSecs(segment.startTime)} – ${formatTimeSecs(segment.endTime)}`;
 }
 
 export interface RoadmapStepDance {
