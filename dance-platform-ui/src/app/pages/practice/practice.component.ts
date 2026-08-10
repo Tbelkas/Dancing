@@ -71,6 +71,16 @@ export class PracticeComponent implements OnInit {
   dances = signal<{ id: number; name: string }[]>([]);
   loading = signal(true);
   showSkeleton = delayedLoading(this.loading);
+  /**
+   * Done waiting, and the skeleton has finished its minimum-visible hold.
+   *
+   * Every block above the session list keys off this rather than off `loading` alone, so the
+   * page paints on one frame. Each of them reads a different signal that fills in at its own
+   * time — the stats need the sessions, the review panel needs its own request — and each one
+   * that rendered early pushed the rest of the page down as it arrived, or worse, landed
+   * before the skeleton did and left the skeleton drawn underneath real content.
+   */
+  readonly ready = computed(() => !this.showSkeleton() && !this.loading());
 
   // Review queue: learned dances gone unpracticed for 3+ weeks (server decides the threshold).
   reviewQueue = signal<ReviewDance[]>([]);
