@@ -479,6 +479,22 @@
   border-radius: var(--radius-lg);
 }
 
+/* ---------- WIDE LAYOUT ---------- */
+/* One column by default. Past 1500px the page splits: the player keeps a sane
+   width on the left (a 16:9 embed stretched to a 1680px shell is ~945px tall —
+   taller than the viewport it's meant to sit in) and the recommendations move
+   out of the footer into a rail you can actually see while watching. */
+.detail-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+}
+
+.detail-body__main { min-width: 0; }
+
+/* The wide split itself is at the bottom of this file — it restyles the
+   recommended cards, so it has to win on source order. */
+
 /* Recommended ("More like this") */
 .recommended-section { margin-top: 2.5rem; }
 .recommended-section h2 { margin-bottom: 1rem; }
@@ -591,4 +607,48 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ---------- WIDE LAYOUT (see .detail-body above) ---------- */
+@media (min-width: 1500px) {
+  .detail-body {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 36px;
+    align-items: start;
+  }
+
+  /* 84px clears the 64px sticky header with room to breathe. */
+  .detail-aside {
+    position: sticky;
+    top: 84px;
+    max-height: calc(100vh - 104px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .recommended-section { margin-top: 0; }
+
+  /* In the rail the cards stop being a grid of posters and become an up-next
+     list: thumbnail left, name and badges right. Eight posters would run ~1700px
+     tall; eight rows run ~700px and stay in view beside the player. */
+  .recommended-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+
+  .recommended-card { flex-direction: row; align-items: stretch; }
+  .recommended-card:hover { transform: none; border-color: var(--color-primary); }
+  .recommended-card .dance-card__media { flex: 0 0 132px; }
+  .recommended-card .dance-card__body {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 12px;
+  }
+  .recommended-card .dance-card__name { font-size: 0.92rem; }
+  /* At 132px wide the count pill sits on top of whatever the thumbnail shows. */
+  .recommended-card .dance-card__media-count { display: none; }
+}
+
+@media (min-width: 1860px) {
+  .detail-body { grid-template-columns: minmax(0, 1fr) 380px; gap: 44px; }
+  .recommended-card .dance-card__media { flex: 0 0 152px; }
 }

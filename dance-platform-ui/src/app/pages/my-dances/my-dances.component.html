@@ -270,7 +270,9 @@
     }
 
     @if (selectedStyle()) {
-      <div class="dances-view">
+      <!-- --split: on a wide monitor Learned and In Progress sit side by side (see the
+           :has() rule in the stylesheet — they only pair up when both actually exist). -->
+      <div class="dances-view dances-view--split">
 
         <!-- Add Dance Button + Form -->
         <div class="add-dance-bar">
@@ -337,7 +339,7 @@
 
         <!-- Learned Dances -->
         @if (learnedDances().length > 0) {
-          <div class="dance-section">
+          <div class="dance-section dance-section--learned">
             <h3 class="section-title">
               <span class="section-icon learned-icon"><i class="fa-solid fa-check"></i></span>
               Learned
@@ -388,7 +390,7 @@
 
         <!-- In Progress Dances -->
         @if (inProgressDances().length > 0) {
-          <div class="dance-section">
+          <div class="dance-section dance-section--progress">
             <h3 class="section-title">
               <span class="section-icon progress-icon"><i class="fa-solid fa-circle-half-stroke"></i></span>
               In Progress
@@ -446,7 +448,7 @@
 
         <!-- Recommended next moves in this style -->
         @if (showRecommendedSkeleton()) {
-          <div class="dance-section" aria-busy="true" aria-label="Loading recommendations">
+          <div class="dance-section dance-section--full" aria-busy="true" aria-label="Loading recommendations">
             <h3 class="section-title">
               <span class="section-icon rec-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
               Recommended for you
@@ -460,7 +462,7 @@
         } @else if (loadingRecommended()) {
           <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
         } @else if (recommendedVisible().length > 0) {
-          <div class="dance-section">
+          <div class="dance-section dance-section--full">
             <h3 class="section-title">
               <span class="section-icon rec-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
               Recommended for you

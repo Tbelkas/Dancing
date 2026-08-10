@@ -29,6 +29,26 @@
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   --shadow-glow: 0 0 32px var(--color-primary-glow);
   --transition: 0.14s ease;
+
+  /* The page gutter, as a scale rather than one number. 1200px was sized for a
+     laptop; on a 1440p or 4K monitor it left ~40% of the screen as empty margin.
+     Each tier widens the shell *and* its padding so the content edge stays
+     proportional instead of hugging the glass. Pages opt into real multi-column
+     layouts at the same two breakpoints (1500 / 1860) — see --bp-wide below. */
+  --container-max: 1200px;
+  --container-pad: 28px;
+}
+
+/* 1500: the first width where a 1200px shell is visibly stranded (1440p, scaled
+   1600p, half of an ultrawide). 1860: 1920-wide monitors, minus scrollbar. */
+@media (min-width: 1500px) {
+  :root { --container-max: 1400px; --container-pad: 36px; }
+}
+@media (min-width: 1860px) {
+  :root { --container-max: 1680px; --container-pad: 44px; }
+}
+@media (min-width: 2400px) {
+  :root { --container-max: 1920px; }
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -290,15 +310,42 @@ textarea:focus-visible,
 }
 
 .container {
-  max-width: 1200px;
+  max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 28px;
+  padding: 0 var(--container-pad);
   animation: pageReveal 0.35s ease both;
 }
 
+/* Prose and forms don't get better at 1680px — they get harder to read. Pages
+   whose content is a single column of text opt out of the scale with this. */
+.container--reading {
+  max-width: 1080px;
+}
+
 .grid { display: grid; gap: 20px; }
+/* auto-fill, so the extra width buys more cards rather than fatter ones. The
+   card floor rises slightly at the top tier — at 1920 a 300px floor packs six
+   columns and the thumbnails get too small to read across the room. */
 .grid--2 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 .grid--3 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+
+@media (min-width: 1860px) {
+  .grid { gap: 24px; }
+  .grid--2 { grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+  .grid--3 { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+}
+
+/* An empty state is a sentence and a button. Stretched across the widest shell it
+   becomes a page-wide box holding a thimble of text — the card should be the size
+   of its message. Set globally: every page keeps its own scoped copy of this class,
+   none of which sets a width, so one rule here reaches all of them. */
+@media (min-width: 1500px) {
+  .empty-state {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
 
 @media (max-width: 640px) {
   .container { padding: 0 16px; }

@@ -979,3 +979,38 @@
   letter-spacing: 0.05em;
   margin-left: 10px;
 }
+
+/* ---------- WIDE SCREENS ---------- */
+/* Learned and In Progress are the same kind of list read for the same reason —
+   side by side they're one glance instead of two scrolls. Gated on :has() so a
+   lone section still gets the full width; half a row with nothing beside it just
+   looks like something failed to load. Everything else in the view spans. */
+@media (min-width: 1500px) {
+  .dances-view--split:has(.dance-section--learned):has(.dance-section--progress) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 32px;
+    align-items: start;
+  }
+
+  .dances-view--split .add-dance-bar,
+  .dances-view--split .add-dance-form,
+  .dances-view--split .empty-style,
+  .dances-view--split .dance-section--full { grid-column: 1 / -1; }
+}
+
+/* These two rails hold a capped number of items (RECOMMENDED_SHOWN / CONTINUE_LIMIT),
+   so on a wide shell auto-fill reserved tracks nothing would ever fill and left a
+   void down the right. auto-fit drops the empty tracks and the survivors take the
+   slack, keeping the row to one line.
+
+   The ceiling belongs on the card, not the track: a definite max in minmax() also
+   fixes how many tracks auto-fit repeats, which capped the row at five and orphaned
+   the sixth card onto its own line. 1fr tracks + a card max-width fills the row when
+   the rail is full and still stops two lonely items becoming billboards. */
+@media (min-width: 1500px) {
+  .rec-grid,
+  .continue-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+  .rec-card,
+  .continue-card { max-width: 340px; }
+}

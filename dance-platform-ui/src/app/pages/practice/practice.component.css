@@ -1051,3 +1051,25 @@
   }
   .stat-chip { min-width: 0; }
 }
+
+/* ---------- WIDE SCREENS ---------- */
+/* The trend chart spans the full row below the heatmap and breakdown, and caps
+   its own plot at 680px — at 1500px+ that's a very wide card holding a chart in
+   its left third. Give it a real third column instead, so the three insights
+   read as one row of instruments. */
+@media (min-width: 1500px) {
+  .insights-row,
+  .skeleton-insights { grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); }
+  .insight-card--trend { grid-column: auto; }
+  .trend { max-width: none; }
+}
+
+/* The review queue previews a fixed handful (REVIEW_PREVIEW) — same reason as the
+   my-dances rails: auto-fit so the cards absorb the extra width instead of leaving
+   reserved-but-empty tracks. The ceiling goes on the card rather than the track (a
+   definite max in minmax() would also cap how many tracks repeat), so one due dance
+   isn't a full-width banner. */
+@media (min-width: 1500px) {
+  .review-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .review-card { max-width: 420px; }
+}

@@ -1079,3 +1079,22 @@
 .dance-row-item--skeleton { pointer-events: none; }
 .dance-row-item__name-skeleton { width: 150px; height: 0.98rem; }
 .dance-row-item__meta-skeleton { width: 220px; max-width: 60vw; height: 0.72rem; }
+
+/* ---------- WIDE SCREENS ---------- */
+/* The card grid already gains columns from the container scale (auto-fill), but
+   the compact list is a single stack of 48px rows — at 1500px+ it reads as one
+   thin ribbon down the middle of an empty page. Two columns doubles what fits on
+   a screen without touching the row itself; the DOM order still reads L-to-R,
+   top-to-bottom, so the sort order survives. */
+@media (min-width: 1500px) {
+  .dance-rows {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 16px;
+    align-content: start;
+  }
+}
+
+@media (min-width: 2400px) {
+  .dance-rows { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

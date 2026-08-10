@@ -37,6 +37,19 @@
   gap: 20px;
 }
 
+/* There are a handful of roadmaps, not a catalog of them. On a 1920px shell
+   auto-fill reserved tracks that nothing would ever fill, so three cards shrank
+   to 280px and huddled against a void. auto-fit drops the empty tracks and lets
+   the real cards take the slack up to a 460px ceiling — they stay poster-sized,
+   stay flush with the title's left edge, and still fill the row edge-to-edge
+   once there are enough roadmaps to do it. */
+@media (min-width: 1500px) {
+  .roadmap-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 460px));
+    justify-content: start;
+  }
+}
+
 .roadmap-card {
   display: flex;
   flex-direction: column;
