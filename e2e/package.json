@@ -13,6 +13,8 @@
     "report": "playwright show-report",
     "verify:testids": "node scripts/verify-testids.mjs",
     "flicker:skeletons": "node scripts/flicker/skeleton-timing.mjs",
+    "flicker:empty-state": "node scripts/flicker/empty-state-flash.mjs",
+    "flicker:fidelity": "node scripts/flicker/skeleton-fidelity.mjs",
     "install:browsers": "playwright install chromium",
     "serve:dist": "node scripts/serve-dist.mjs 4300",
     "test:local": "node scripts/run-against-build.mjs"

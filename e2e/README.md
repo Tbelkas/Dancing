@@ -185,19 +185,28 @@ e2e/
 
 ## Checking for flicker
 
-`scripts/flicker/` holds four probes. They are **measuring tools, not tests** — nothing here
+`scripts/flicker/` holds six probes. They are **measuring tools, not tests** — nothing here
 runs in the suite or fails a build. Reach for them when someone says the app "flashes" or
 "blinks", or after touching a loading state.
 
 They all read `e2e/.env` and target the deployed app, same as the suite. They are read-only:
-they type, sort, paginate, hover and navigate, and never write.
+they type, sort, paginate, hover and navigate, and never write. (`probe-lib.mjs` is the shared
+rig — login, a per-frame DOM recorder, and an abort on `POST /videos/:id/view` so probing a
+dance page can't touch prod view counts.)
 
 | Probe | Answers |
 |---|---|
 | `npm run flicker:skeletons` | How many ms is each page's skeleton actually on screen? |
+| `npm run flicker:empty-state` | Does a page claim it has nothing while a request is still in flight? |
+| `npm run flicker:fidelity` | While a skeleton is up, is it the right *shape* for what replaces it? |
 | `node scripts/flicker/redirect-flash.mjs` | Does a redirect paint the wrong page on the way past? |
 | `node scripts/flicker/record-pages.mjs` | Video + CLS + a load/idle/scroll phase timeline per page |
 | `node scripts/flicker/dom-oscillation.mjs` | Does anything go A → B → A while the page is driven? |
+
+The last two of the first three are the pair that catches what `flicker:skeletons` can't: a
+skeleton can be on screen for a perfectly healthy 400ms and still be covering the wrong
+request, or reserving two cards where three land. Both slow one endpoint deliberately, because
+on a warm API most of these states never render at all.
 
 ### Reading the skeleton timings
 
