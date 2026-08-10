@@ -45,25 +45,31 @@ const phases = (log, skelKey) => {
   await pace();
 }
 
-// ---------------------------------------------------------------- practice: the review panel
-for (const slow of [0, SLOW]) {
+// ---------------------------------------------------------------- practice: one paint, or several?
+// The page has three blocks above the session list, each fed by a different signal. The
+// question is not "did the anchor move" — it moves once when the skeleton gives way to
+// content, which is the transition working. It is whether it moved *while content was already
+// painted*, and whether the skeleton was ever drawn underneath content. Both orderings are
+// tried, because which request answers first decides which failure you get.
+for (const [label, delays] of [
+  ['review answers last', [{ match: '**/api/practice/review', ms: SLOW }]],
+  ['sessions answer last', [{ match: '**/api/practice', ms: SLOW }]],
+]) {
   const { log } = await record(browser, creds, {
-    url: BASE_URL + '/practice', settleMs: 4500,
-    delays: slow ? [{ match: '**/api/practice', ms: slow }] : [],
+    url: BASE_URL + '/practice', settleMs: 5000, delays,
     probes: [
       { name: 'skel', sel: '.skeleton-stats', mode: 'exists' },
+      { name: 'content', sel: '.stats-block, .empty-state', mode: 'exists' },
       { name: 'review', sel: '.review-panel', mode: 'exists' },
-      { name: 'bodyTop', sel: '.skeleton-stats, .stats-block', mode: 'top' },
-      { name: 'sessions', sel: '.session-group, .skeleton-session-card', mode: 'count' },
+      { name: 'anchor', sel: '.skeleton-stats, .stats-block, .empty-state', mode: 'top' },
     ],
   });
-  const reviewIn = log.find(r => r.review);
-  const beforeReview = log.filter(r => !r.review).pop();
-  report(`practice — review panel (sessions ${slow ? `slowed ${slow}ms` : 'at real speed'})`, [
-    `review panel appears at:     ${reviewIn ? reviewIn.t + 'ms' : 'never'}`,
-    `skeleton up at that moment:  ${reviewIn ? (reviewIn.skel ? 'yes' : 'no') : '-'}`,
-    `content below it moves:      ${beforeReview && reviewIn ? `${beforeReview.bodyTop}px -> ${reviewIn.bodyTop}px (+${reviewIn.bodyTop - beforeReview.bodyTop}px)` : '-'}`,
-    `page height:                 ${beforeReview ? beforeReview.h : '?'} -> ${log[log.length - 1].h}`,
+  const tops = [...new Set(log.filter(r => r.content).map(r => r.anchor))];
+  const overlap = log.filter(r => r.skel && r.content).length;
+  report(`practice — ${label}`, [
+    `anchor while content was painted: ${tops.join(', ') || '-'}  ${tops.length > 1 ? '<- SHOVE' : 'one position, no shove'}`,
+    `frames with the skeleton drawn under content: ${overlap}${overlap ? '  <- BAD' : ''}`,
+    `page height: ${log.length ? log[log.length - 1].h : '?'}px`,
   ]);
   await pace();
 }
