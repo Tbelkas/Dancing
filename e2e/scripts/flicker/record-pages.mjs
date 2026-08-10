@@ -1,15 +1,25 @@
 // Records every page loading cold, then sitting idle, then being scrolled — and writes a
 // phase timeline so the frames can be diffed per phase. Idle flicker (content changing
 // while nothing is happening) is the signal we care most about.
+//
+// Also collects the layout-shift entries, so the printed CLS says whether anything jumped.
+// Needs ffmpeg and Pillow for the frame diff:
+//
+//   OUT_DIR=/tmp/flicker node scripts/flicker/record-pages.mjs
+//   python scripts/flicker/analyze-frames.py /tmp/flicker
+//
+// Run it when the Pi is otherwise idle. Eighteen cold contexts back to back can saturate its
+// SD card, and a page that sits blank for twenty seconds is that, not a UI bug.
 import { chromium } from '@playwright/test';
+// Side effect: populates process.env from e2e/.env before the constants below are read.
+import { BASE_URL, API_URL, USERNAME, PASSWORD } from './env.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const BASE = process.env.E2E_BASE_URL || 'https://dance.takelord.com';
-const API = process.env.E2E_API_URL || 'https://dance-api.takelord.com/api';
-const USER = process.env.E2E_USERNAME;
-const PASS = process.env.E2E_PASSWORD;
-const OUT = process.env.OUT_DIR;
+const BASE = BASE_URL, API = API_URL;
+const USER = USERNAME, PASS = PASSWORD;
+// Artifacts land under the gitignored test-results/ by default.
+const OUT = process.env.OUT_DIR || 'test-results/flicker-pages';
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
 
 const TARGETS = [

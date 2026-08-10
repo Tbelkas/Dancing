@@ -12,6 +12,7 @@
     "test:api": "playwright test --project=api",
     "report": "playwright show-report",
     "verify:testids": "node scripts/verify-testids.mjs",
+    "flicker:skeletons": "node scripts/flicker/skeleton-timing.mjs",
     "install:browsers": "playwright install chromium",
     "serve:dist": "node scripts/serve-dist.mjs 4300",
     "test:local": "node scripts/run-against-build.mjs"

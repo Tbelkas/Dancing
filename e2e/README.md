@@ -177,8 +177,61 @@ e2e/
 └─ scripts/
    ├─ verify-testids.mjs    the contract guard
    ├─ serve-dist.mjs        static server + SPA fallback + /api proxy
-   └─ run-against-build.mjs `npm run test:local` — starts the server, runs, tears down
+   ├─ run-against-build.mjs `npm run test:local` — starts the server, runs, tears down
+   └─ flicker/              measuring tools, not tests — see "Checking for flicker"
 ```
+
+---
+
+## Checking for flicker
+
+`scripts/flicker/` holds four probes. They are **measuring tools, not tests** — nothing here
+runs in the suite or fails a build. Reach for them when someone says the app "flashes" or
+"blinks", or after touching a loading state.
+
+They all read `e2e/.env` and target the deployed app, same as the suite. They are read-only:
+they type, sort, paginate, hover and navigate, and never write.
+
+| Probe | Answers |
+|---|---|
+| `npm run flicker:skeletons` | How many ms is each page's skeleton actually on screen? |
+| `node scripts/flicker/redirect-flash.mjs` | Does a redirect paint the wrong page on the way past? |
+| `node scripts/flicker/record-pages.mjs` | Video + CLS + a load/idle/scroll phase timeline per page |
+| `node scripts/flicker/dom-oscillation.mjs` | Does anything go A → B → A while the page is driven? |
+
+### Reading the skeleton timings
+
+`flicker:skeletons` is the one to run first, and the regression check for
+[`delayedLoading()`](../dance-platform-ui/src/app/core/utils/delayed-loading.ts).
+
+- **`none`** — healthy. The response beat the 220ms delay, so no skeleton ever rendered.
+- **a few hundred ms** — healthy. A genuinely slow response got a skeleton that stayed put
+  long enough to read.
+- **anything under ~150ms** — the bug. Too short to register as loading, long enough to see a
+  grey block and half a shimmer sweep. Every page did this before delayedLoading existed:
+  17–115ms across the board, because the API answers in 30–80ms.
+
+A skeleton bound straight to a `loading` signal will always land in that third bucket on a
+fast connection. That is why the templates carry a third branch — skeleton, then a silent
+window, then content — instead of the usual two.
+
+### The other three
+
+`record-pages.mjs` and `dom-oscillation.mjs` write artifacts for a second pass:
+
+```bash
+OUT_DIR=/tmp/flicker node scripts/flicker/record-pages.mjs
+python scripts/flicker/analyze-frames.py /tmp/flicker        # needs ffmpeg + Pillow
+
+OUT_FILE=/tmp/dom.json node scripts/flicker/dom-oscillation.mjs
+python scripts/flicker/osc.py /tmp/dom.json
+```
+
+`analyze-frames.py` reports per-phase pixel change. Expect zero in the idle window on every
+page **except the landing page**, whose style marquee is a deliberate animation.
+
+Run `record-pages.mjs` when the Pi is otherwise idle. Eighteen cold contexts back to back can
+saturate its SD card, and a page that then sits blank for twenty seconds is that, not a UI bug.
 
 ---
 

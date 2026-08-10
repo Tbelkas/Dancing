@@ -1,10 +1,22 @@
-// How long is each page's loading skeleton actually on screen? Anything under ~150ms is a
-// flash rather than a loading state. Measures both a cold page load and an in-app (SPA)
-// navigation, three runs each.
+// How long is each page's loading skeleton actually on screen?
+//
+// This is the regression check for delayedLoading() (core/utils/delayed-loading.ts). Anything
+// under ~150ms is a flash rather than a loading state: too short to read, long enough to see
+// a grey block and a half-finished shimmer. "none" is the healthy answer on a warm API — the
+// data beat the delay and the skeleton never rendered. A number in the hundreds is fine too;
+// that is a genuinely slow response getting a skeleton that stays put.
+//
+// Measures a cold page load and an in-app (SPA) navigation, three runs each.
+//
+//   npm run flicker:skeletons             # all pages, 3 runs
+//   RUNS=1 npm run flicker:skeletons      # quicker
+//   PAGES='[["/dances","browse"]]' npm run flicker:skeletons
 import { chromium } from '@playwright/test';
+// Side effect: populates process.env from e2e/.env before the constants below are read.
+import { BASE_URL, API_URL, USERNAME, PASSWORD } from './env.mjs';
 
-const BASE = process.env.E2E_BASE_URL, API = process.env.E2E_API_URL;
-const USER = process.env.E2E_USERNAME, PASS = process.env.E2E_PASSWORD;
+const BASE = BASE_URL, API = API_URL;
+const USER = USERNAME, PASS = PASSWORD;
 const RUNS = Number(process.env.RUNS || 3);
 
 const PROBE = `

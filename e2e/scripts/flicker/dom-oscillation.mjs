@@ -4,13 +4,23 @@
 // refills, a skeleton that comes back after content was already on screen.
 //
 // Read-only: no favourites, no saves, no settings toggles. It only types, sorts, paginates,
-// hovers and navigates.
+// hovers and navigates — the authed pages here run against the production database, so this
+// stays under the same rule as the suite.
+//
+// Writes a JSON blob of samples; read it with scripts/flicker/osc.py.
+//
+//   OUT_FILE=/tmp/dom.json node scripts/flicker/dom-oscillation.mjs
+//   python scripts/flicker/osc.py /tmp/dom.json
 import { chromium } from '@playwright/test';
+// Side effect: populates process.env from e2e/.env before the constants below are read.
+import { BASE_URL, API_URL, USERNAME, PASSWORD } from './env.mjs';
 import fs from 'node:fs';
+import path from 'node:path';
 
-const BASE = process.env.E2E_BASE_URL, API = process.env.E2E_API_URL;
-const USER = process.env.E2E_USERNAME, PASS = process.env.E2E_PASSWORD;
-const OUT = process.env.OUT_FILE;
+const BASE = BASE_URL, API = API_URL;
+const USER = USERNAME, PASS = PASSWORD;
+// Artifacts land under the gitignored test-results/ by default.
+const OUT = process.env.OUT_FILE || 'test-results/flicker-dom.json';
 const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
 
 const PROBE = `
@@ -174,5 +184,6 @@ for (const s of SCENARIOS) {
   await ctx.close();
 }
 await browser.close();
+fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, JSON.stringify(out));
 console.log('wrote ' + OUT);

@@ -1,12 +1,21 @@
-// Two suspected wrong-page flashes:
-//   1. signed-in user opening "/" — LandingComponent paints, then ngOnInit redirects
-//   2. signed-out user opening an authed route — does the page paint before the guard fires?
+// Does a redirect show the wrong page on the way past?
+//
+// Samples the URL and the visible copy every animation frame, then prints one line per
+// distinct state. A redirect done right produces two states (blank, then the destination).
+// A third state naming the *source* page means it painted before the redirect fired — that
+// is the bug landingGuard was written for.
+//
+// Cases: a signed-in visitor opening "/", and a signed-out one opening a guarded route.
+//
+//   OUT_DIR=/tmp/flicker node scripts/flicker/redirect-flash.mjs
 import { chromium } from '@playwright/test';
-import fs from 'node:fs';
+// Side effect: populates process.env from e2e/.env before the constants below are read.
+import { BASE_URL, API_URL, USERNAME, PASSWORD } from './env.mjs';
 
-const BASE = process.env.E2E_BASE_URL, API = process.env.E2E_API_URL;
-const USER = process.env.E2E_USERNAME, PASS = process.env.E2E_PASSWORD;
-const OUT = process.env.OUT_DIR;
+const BASE = BASE_URL, API = API_URL;
+const USER = USERNAME, PASS = PASSWORD;
+// Videos land under test-results/ by default so a bare run doesn't scatter files.
+const OUT = process.env.OUT_DIR || 'test-results/flicker-redirect';
 
 const PROBE = `
 window.__t = [];
@@ -46,7 +55,6 @@ for (const c of cases) {
   await page.goto(BASE + c.url, { waitUntil: 'commit', timeout: 45000 });
   await page.waitForTimeout(5000);
   const t = await page.evaluate(() => window.__t || []);
-  console.log('samples:', t.length, await page.evaluate(() => typeof window.__t));
   // collapse to state changes
   const states = [];
   let prev = null;
