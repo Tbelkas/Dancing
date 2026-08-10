@@ -163,6 +163,18 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
 
   readonly isNew = computed(() => this.roadmapId() === null);
 
+  /**
+   * Whether the *route* is /roadmaps/new — which `isNew()` can't answer during the load, since
+   * roadmapId is null until the fetch lands. Editing an existing tree used to spend the whole
+   * wait with a breadcrumb reading "Roadmaps / New skill tree". Set in ngOnInit, before the
+   * first render, from the same snapshot the loader uses.
+   */
+  isNewRoute = true;
+
+  /** Placeholder form cards, one array of fields each: "The tree" carries four inputs, then a
+   *  branch card apiece. Enough to reserve the fold — the real form runs much longer. */
+  readonly skeletonCards = [[0, 1, 2, 3], [0, 1], [0, 1]];
+
   private readonly allSteps = computed(() =>
     this.stages().flatMap((stage, si) => stage.steps.map(step => ({ step, stage, stageIndex: si }))));
 
@@ -248,6 +260,7 @@ export class RoadmapBuilderComponent implements OnInit, OnDestroy, HasUnsavedCha
   ) {}
 
   ngOnInit(): void {
+    this.isNewRoute = !this.route.snapshot.paramMap.get('slug');
     window.addEventListener('beforeunload', this.beforeUnload);
     this.styleService.getAll().subscribe(s => this.styles.set(s));
 

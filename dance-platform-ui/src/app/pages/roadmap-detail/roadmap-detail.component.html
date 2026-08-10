@@ -298,21 +298,32 @@
       }
     }
   } @else if (showSkeleton()) {
-    <div class="page-header" aria-busy="true">
+    <!-- Follows `view()`, which is known before the fetch (it comes from localStorage, and is
+         forced to 'tree' when signed out). This drew the list view's markered steps for every
+         visitor regardless — a shape nobody sees unless they have already switched to it. -->
+    <div class="page-header" aria-busy="true" aria-label="Loading roadmap">
       <div class="skeleton skeleton-line skeleton-line--page-title"></div>
       <div class="skeleton skeleton-line skeleton-line--short"></div>
+      <div class="skeleton skeleton-line roadmap-skeleton__intro"></div>
+      <div class="skeleton skeleton-line roadmap-skeleton__stats"></div>
     </div>
-    <div class="path" aria-hidden="true">
-      @for (i of [0,1,2,3]; track i) {
-        <div class="step step--skeleton">
-          <div class="step__marker skeleton"></div>
-          <div class="step__body">
-            <div class="skeleton skeleton-line skeleton-line--title"></div>
-            <div class="skeleton skeleton-line skeleton-line--short"></div>
+    @if (view() === 'list') {
+      <div class="path" aria-hidden="true">
+        @for (i of [0,1,2,3]; track i) {
+          <div class="step step--skeleton">
+            <div class="step__marker skeleton"></div>
+            <div class="step__body">
+              <div class="skeleton skeleton-line skeleton-line--title"></div>
+              <div class="skeleton skeleton-line skeleton-line--short"></div>
+            </div>
           </div>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    } @else {
+      <!-- The tree's real height comes from a data-driven viewBox, so this stands in with a
+           plausible one rather than pretending to know the shape of a graph it hasn't seen. -->
+      <div class="skeleton roadmap-skeleton__canvas" aria-hidden="true"></div>
+    }
   } @else if (loading()) {
     <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
   } @else {

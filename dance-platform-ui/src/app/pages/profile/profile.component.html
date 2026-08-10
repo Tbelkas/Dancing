@@ -138,8 +138,9 @@
       <button class="btn btn--primary" (click)="loadError.set(false); ngOnInit()">Retry</button>
     </div>
   } @else if (showSkeleton()) {
-    <!-- Two stats cards: the loaded column shows at most Practice + Your Dances,
-         so a third placeholder would make the page shrink when data lands. -->
+    <!-- Three stats cards, matching the loaded column: Practice (for anyone who has logged a
+         session), Your Dances, Settings. It was two until Settings was added — measured at
+         2 cards / 272px standing in for 3 cards / 584px. -->
     <div class="profile-layout" aria-busy="true" aria-label="Loading profile">
       <div class="card skeleton-card">
         <div class="skeleton skeleton-avatar"></div>
@@ -147,7 +148,7 @@
         <div class="skeleton skeleton-line skeleton-line--short"></div>
       </div>
       <div class="stats-column">
-        @for (i of [0, 1]; track i) {
+        @for (i of [0, 1, 2]; track i) {
           <div class="card skeleton-card">
             <div class="skeleton skeleton-line skeleton-line--title"></div>
             <div class="skeleton skeleton-line"></div>

@@ -1,13 +1,31 @@
 <div class="container">
   <nav class="crumb">
     <a routerLink="/roadmaps">Roadmaps</a> <span aria-hidden="true">/</span>
-    {{ isNew() ? 'New skill tree' : 'Editing' }}
+    {{ isNewRoute ? 'New skill tree' : 'Editing' }}
   </nav>
 
   @if (showSkeleton()) {
-    <div class="page-header" aria-busy="true">
+    <!-- What loads here is a whole editor, not a heading: two placeholder lines stood in for
+         seven form cards and left the page 7500px short. The form column is the part worth
+         reserving — the tree preview beside it is drawn from data we don't have yet. -->
+    <div class="page-header" aria-busy="true" aria-label="Loading skill tree">
       <div class="skeleton skeleton-line skeleton-line--page-title"></div>
       <div class="skeleton skeleton-line skeleton-line--short"></div>
+    </div>
+    <div class="builder">
+      <div class="builder__form">
+        @for (card of skeletonCards; track $index) {
+          <div class="card builder__card builder__card--skeleton">
+            <div class="skeleton skeleton-line skeleton-line--title"></div>
+            @for (field of card; track field) {
+              <div class="builder-skeleton__field">
+                <div class="skeleton skeleton-line builder-skeleton__label"></div>
+                <div class="skeleton builder-skeleton__input"></div>
+              </div>
+            }
+          </div>
+        }
+      </div>
     </div>
   } @else if (loading()) {
     <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->

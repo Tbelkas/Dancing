@@ -853,6 +853,19 @@
   .step__body { display: flex; flex-direction: column; gap: 10px; }
 }
 
+/* Header placeholders, matching the loaded order: title, subtitle, intro, stat row. */
+.roadmap-skeleton__intro { width: 70%; max-width: 620px; margin-top: 6px; }
+.roadmap-skeleton__stats { width: 300px; max-width: 80%; height: 0.78rem; margin-top: 10px; }
+
+.roadmap-skeleton__canvas {
+  margin-top: 24px;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  min-height: 320px;
+  max-height: 70vh;
+  border-radius: var(--radius-lg);
+}
+
 .empty-state {
   text-align: center;
   padding: 56px 24px;

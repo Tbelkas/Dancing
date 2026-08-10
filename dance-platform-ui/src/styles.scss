@@ -303,6 +303,7 @@ textarea:focus-visible,
 @media (max-width: 640px) {
   .container { padding: 0 16px; }
   .page-title { font-size: 2.2rem; }
+  .skeleton-line--page-title { height: 2.31rem; }
   .grid--2 { grid-template-columns: 1fr; }
   .grid--3 { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .btn { padding: 10px 18px; font-size: 0.8rem; }
@@ -696,7 +697,9 @@ textarea:focus-visible,
 }
 .skeleton-line--title { height: 1.35rem; width: 60%; }
 .skeleton-line--short { width: 40%; }
-.skeleton-line--page-title { height: 2.6rem; width: 50%; }
+/* Matches .page-title's line box (3rem x 1.05) plus its 6px bottom margin, and drops with it
+   at the 640px breakpoint — a flat 2.6rem was 8px short on desktop and 5px tall on mobile. */
+.skeleton-line--page-title { height: 3.15rem; width: 50%; margin-bottom: 6px; }
 .skeleton-badge { height: 22px; width: 70px; border-radius: 2px; }
 .skeleton-badges { display: flex; flex-wrap: wrap; gap: 6px; }
 /* Card whose contents are all placeholders — the gap stands in for text rhythm.

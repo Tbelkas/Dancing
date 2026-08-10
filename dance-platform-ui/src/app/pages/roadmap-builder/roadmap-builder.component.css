@@ -114,6 +114,19 @@
   padding: 20px 22px;
 }
 
+/* Loading placeholders for the form column. The tree preview beside it stays empty — its
+   shape comes from the data being fetched, so there is nothing honest to draw there yet. */
+.builder__card--skeleton {
+  pointer-events: none;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.builder-skeleton__field { display: flex; flex-direction: column; gap: 8px; }
+.builder-skeleton__label { width: 90px; height: 0.7rem; }
+.builder-skeleton__input { height: 40px; border-radius: var(--radius); }
+
 .builder__heading {
   font-family: var(--font-ui);
   font-size: 0.82rem;

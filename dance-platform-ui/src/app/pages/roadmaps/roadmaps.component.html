@@ -13,8 +13,11 @@
   </div>
 
   @if (showSkeleton()) {
+    <!-- Six, not two: the grid is auto-fill at 320px, so on a desktop two cards are a stranded
+         half-row that the real content (three curated paths, plus whatever the user has built)
+         immediately outgrows. Six fills the fold at any column count. -->
     <div class="roadmap-grid" aria-busy="true" aria-label="Loading roadmaps">
-      @for (i of [0,1]; track i) {
+      @for (i of [0,1,2,3,4,5]; track i) {
         <div class="roadmap-card roadmap-card--skeleton">
           <div class="roadmap-card__media skeleton"></div>
           <div class="roadmap-card__body">
