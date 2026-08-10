@@ -10,6 +10,7 @@ import { VideoSegment } from '../../models/video.model';
 import { LocalVideoPlayerComponent } from '../../shared/components/local-video-player/local-video-player.component';
 import { formatTimeSecs } from '../../core/utils/video-url.utils';
 import { delayedLoading } from '../../core/utils/delayed-loading';
+import { SkeletonCount } from '../../core/utils/skeleton-count';
 
 /**
  * Choreo videos that live on the user's own computer. The server stores only each
@@ -29,6 +30,7 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
   choreos = signal<Choreo[]>([]);
   loading = signal(true);
   showSkeleton = delayedLoading(this.loading);
+  readonly skeleton = new SkeletonCount('choreos', 3, { max: 10 });
   selected = signal<Choreo | null>(null);
   videoUrl = signal<string | null>(null);
   /** Set when the re-picked file's name differs from the one saved for the choreo. */
@@ -54,7 +56,7 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.choreoService.getMine().subscribe({
-      next: list => { this.choreos.set(list); this.loading.set(false); },
+      next: list => { this.choreos.set(list); this.skeleton.remember(list.length); this.loading.set(false); },
       error: () => { this.choreos.set([]); this.loading.set(false); }
     });
   }

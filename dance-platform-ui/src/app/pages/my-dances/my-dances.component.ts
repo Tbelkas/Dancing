@@ -18,6 +18,7 @@ import { Video } from '../../models/video.model';
 import { Dance } from '../../models/dance.model';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
 import { delayedLoading } from '../../core/utils/delayed-loading';
+import { SkeletonCount } from '../../core/utils/skeleton-count';
 
 /** A history entry plus the query params that reopen the video it was left on. */
 interface ContinueCard extends RecentDance {
@@ -43,11 +44,18 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   showSkeleton = delayedLoading(this.loading);
   showStylePicker = signal(false);
 
+  // Placeholder counts remembered from the last visit — the tab strip and the row list are
+  // both as long as this particular user made them, and a fixed guess is only ever right
+  // for one of us. See SkeletonCount.
+  readonly tabsSkeleton = new SkeletonCount('mydances-tabs', 4, { max: 10 });
+  readonly rowsSkeleton = new SkeletonCount('mydances-rows', 5, { max: 12 });
+
   /** Sentinel tab id for the cross-style Favorites view. */
   readonly FAVORITES_TAB = -1;
   favoriteDances = signal<Dance[]>([]);
   loadingFavorites = signal(false);
   showFavoritesSkeleton = delayedLoading(this.loadingFavorites);
+  readonly favoritesSkeleton = new SkeletonCount('mydances-favorites', 4, { max: 12 });
   private favoritesLoaded = false;
 
   // Add style form
@@ -82,6 +90,8 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   recommendedDances = signal<Dance[]>([]);
   loadingRecommended = signal(false);
   showRecommendedSkeleton = delayedLoading(this.loadingRecommended);
+  /** Never more than the display cap — the row is a fixed shelf, not an open list. */
+  readonly recommendedSkeleton = new SkeletonCount('mydances-recommended', 3, { max: this.RECOMMENDED_SHOWN });
   private recCache = new Map<number, Dance[]>();
 
   /** Every dance the user tracks in any style — recommendations must never repeat these. */
@@ -230,6 +240,7 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
         this.recCache.set(styleId, res.items);
         if (this.selectedStyleId() === styleId) {
           this.recommendedDances.set(res.items);
+          this.recommendedSkeleton.remember(this.recommendedVisible().length);
           this.loadingRecommended.set(false);
         }
       },
@@ -351,6 +362,7 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
     this.danceService.searchDances({ favoritesOnly: true, sortBy: 'name', pageSize: 200 }).subscribe({
       next: res => {
         this.favoriteDances.set(res.items);
+        this.favoritesSkeleton.remember(res.items.length);
         this.favoritesLoaded = true;
         this.loadingFavorites.set(false);
       },
@@ -382,6 +394,11 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
         if (expandedId && data.flatMap(ms => ms.dances).some(d => d.id === expandedId)) {
           this.expandDance(expandedId);
         }
+        this.tabsSkeleton.remember(data.length + 1); // + the Favorites tab, always present
+        // Only when a real style is open — on the Favorites tab there are no style rows to
+        // measure, and recording a zero would shrink the placeholder for everyone who lands here.
+        const style = this.selectedStyle();
+        if (style) this.rowsSkeleton.remember(style.dances.length);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)

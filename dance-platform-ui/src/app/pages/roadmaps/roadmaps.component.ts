@@ -7,6 +7,7 @@ import { RoadmapSummary } from '../../models/roadmap.model';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
 import { delayedLoading } from '../../core/utils/delayed-loading';
+import { SkeletonCount } from '../../core/utils/skeleton-count';
 
 @Component({
   selector: 'app-roadmaps',
@@ -19,6 +20,7 @@ export class RoadmapsComponent implements OnInit {
   roadmaps = signal<RoadmapSummary[]>([]);
   loading = signal(true);
   showSkeleton = delayedLoading(this.loading);
+  readonly skeleton = new SkeletonCount('roadmaps', 6, { max: 12 });
   failed = signal(false);
   private readonly thumbs = new ThumbFallback();
 
@@ -39,7 +41,7 @@ export class RoadmapsComponent implements OnInit {
 
   ngOnInit(): void {
     this.roadmapService.getAll().subscribe({
-      next: r => { this.roadmaps.set(r); this.loading.set(false); },
+      next: r => { this.roadmaps.set(r); this.skeleton.remember(r.length); this.loading.set(false); },
       error: () => { this.failed.set(true); this.loading.set(false); }
     });
   }

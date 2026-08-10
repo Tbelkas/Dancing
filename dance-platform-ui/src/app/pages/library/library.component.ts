@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
@@ -11,6 +11,7 @@ import { VideoLibraryItem } from '../../models/video.model';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
 import { delayedLoading } from '../../core/utils/delayed-loading';
+import { SkeletonCount } from '../../core/utils/skeleton-count';
 
 type LibraryScope = 'mine' | 'global';
 
@@ -27,6 +28,14 @@ export class LibraryComponent implements OnInit {
   loading = signal(true);
   showSkeleton = delayedLoading(this.loading);
   private readonly thumbs = new ThumbFallback();
+
+  // The two scopes are wildly different lengths — a handful of personal videos against the
+  // whole catalog — so each remembers its own placeholder count.
+  private readonly skeletons: Record<LibraryScope, SkeletonCount> = {
+    mine: new SkeletonCount('library-mine', 5, { max: 12 }),
+    global: new SkeletonCount('library-global', 5, { max: 12 })
+  };
+  readonly skeletonSlots = computed(() => this.skeletons[this.scope()].slots());
 
   constructor(
     private videoService: VideoService,
@@ -48,9 +57,14 @@ export class LibraryComponent implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    const req = this.scope() === 'global' ? this.videoService.getGlobal() : this.videoService.getMine();
+    const scope = this.scope();
+    const req = scope === 'global' ? this.videoService.getGlobal() : this.videoService.getMine();
     req.subscribe({
-      next: items => { this.items.set(items); this.loading.set(false); },
+      next: items => {
+        this.items.set(items);
+        this.skeletons[scope].remember(items.length);
+        this.loading.set(false);
+      },
       error: () => { this.items.set([]); this.loading.set(false); }
     });
   }

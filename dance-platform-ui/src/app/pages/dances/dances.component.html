@@ -70,7 +70,7 @@
     <section class="rail" aria-hidden="true">
       <h2 class="rail__title"><span class="skeleton rail__title-skeleton"></span></h2>
       <div class="rail__scroller">
-        @for (i of [0, 1, 2]; track i) {
+        @for (i of skeletonRail.slots(); track i) {
           <span class="rail-card">
             <span class="rail-card__thumb skeleton"></span>
             <span class="skeleton rail-card__name-skeleton"></span>
@@ -294,7 +294,7 @@
   @if (showSkeleton()) {
     @if (viewMode() === 'list') {
       <ul class="dance-rows" aria-busy="true" aria-label="Loading dances">
-        @for (i of skeletonRows; track i) {
+        @for (i of skeletonRows.slots(); track i) {
           <li class="dance-row-item dance-row-item--skeleton">
             <span class="dance-row-item__thumb skeleton"></span>
             <span class="dance-row-item__main">
@@ -306,7 +306,7 @@
       </ul>
     } @else {
       <div class="grid grid--2" aria-busy="true" aria-label="Loading dances">
-        @for (i of skeletonCards; track i) {
+        @for (i of skeletonCards.slots(); track i) {
           <div class="card dance-card dance-card--skeleton">
             <div class="dance-card__media skeleton"></div>
             <div class="dance-card__body">

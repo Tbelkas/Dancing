@@ -21,6 +21,7 @@ import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { UrlFilterSync, idFromParam, pageFromParam } from '../../core/utils/url-filter-sync';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
 import { delayedLoading } from '../../core/utils/delayed-loading';
+import { SkeletonCount } from '../../core/utils/skeleton-count';
 import { AddStyleFormComponent } from '../../shared/components/add-style-form/add-style-form.component';
 import { AddDanceFormComponent } from '../../shared/components/add-dance-form/add-dance-form.component';
 import { BulkImportFormComponent } from '../../shared/components/bulk-import-form/bulk-import-form.component';
@@ -61,9 +62,13 @@ export class DancesComponent implements OnInit, OnDestroy {
   readonly difficulties = DIFFICULTY_FILTER_OPTIONS;
   readonly difficultyLevels = DIFFICULTY_LEVELS;
   readonly statusOptions = STATUS_OPTIONS;
-  readonly skeletonCards = [0, 1, 2, 3, 4, 5];
-  /** Compact rows are much shorter than cards, so the list skeleton needs more of them. */
-  readonly skeletonRows = [0, 1, 2, 3, 4, 5, 6, 7];
+  // Browse is paged, so the remembered count is capped at what used to be hardcoded: it can
+  // only ever shrink the placeholder to match a small result set — filters are restored on
+  // arrival, so the last search really is the one about to load — never grow it past the fold.
+  // Compact rows are much shorter than cards, so the list skeleton needs more of them.
+  readonly skeletonCards = new SkeletonCount('browse-grid', 6, { max: 6 });
+  readonly skeletonRows = new SkeletonCount('browse-list', 8, { max: 8 });
+  readonly skeletonRail = new SkeletonCount('browse-rail', 3, { max: 4 });
   readonly PAGE_SIZE = 24;
 
   // Data
@@ -357,7 +362,11 @@ export class DancesComponent implements OnInit, OnDestroy {
       this.railPending.set(true);
       this.danceService.searchDances({ status: 'inprogress', sortBy: 'name', pageSize: 12 })
         .subscribe({
-          next: r => { this.railDances.set(r.items); this.railPending.set(false); },
+          next: r => {
+            this.railDances.set(r.items);
+            this.skeletonRail.remember(r.items.length);
+            this.railPending.set(false);
+          },
           error: () => this.railPending.set(false)
         });
     }
@@ -409,6 +418,10 @@ export class DancesComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: result => {
         this.searchResults.set(result.items);
+        // Both modes remember, not just the active one: the view toggle is restored from
+        // storage too, and switching it must not leave the other skeleton stale.
+        this.skeletonCards.remember(result.items.length);
+        this.skeletonRows.remember(result.items.length);
         this.searchTotal.set(result.total);
         this.grandTotal.set(result.grandTotal ?? result.total);
         this.loading.set(false);

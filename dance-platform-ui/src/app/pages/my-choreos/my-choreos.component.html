@@ -61,7 +61,7 @@
 
     @if (showSkeleton()) {
       <div class="choreo-list" aria-busy="true" aria-label="Loading choreos">
-        @for (i of [0,1,2]; track i) {
+        @for (i of skeleton.slots(); track i) {
           <div class="choreo-row choreo-row--skeleton">
             <div class="choreo-row__icon skeleton"></div>
             <div class="choreo-row__main">

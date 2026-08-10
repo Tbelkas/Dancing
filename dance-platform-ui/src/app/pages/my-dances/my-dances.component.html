@@ -132,13 +132,13 @@
         <div class="skeleton skeleton-progress__track"></div>
       </div>
       <div class="skeleton-tabs">
-        @for (i of [0, 1, 2, 3]; track i) {
+        @for (i of tabsSkeleton.slots(); track i) {
           <div class="skeleton skeleton-tab"></div>
         }
       </div>
       <div class="skeleton skeleton-section-title"></div>
       <div class="skeleton-rows">
-        @for (i of [0, 1, 2, 3, 4]; track i) {
+        @for (i of rowsSkeleton.slots(); track i) {
           <div class="skeleton skeleton-rows__item"></div>
         }
       </div>
@@ -203,7 +203,7 @@
       <div class="dances-view">
         @if (showFavoritesSkeleton()) {
           <div class="skeleton-rows" aria-busy="true" aria-label="Loading favorites">
-            @for (i of [0, 1, 2, 3]; track i) {
+            @for (i of favoritesSkeleton.slots(); track i) {
               <div class="skeleton skeleton-rows__item"></div>
             }
           </div>
@@ -454,7 +454,7 @@
               Recommended for you
             </h3>
             <div class="rec-grid">
-              @for (i of [0, 1, 2]; track i) {
+              @for (i of recommendedSkeleton.slots(); track i) {
                 <div class="skeleton rec-skeleton"></div>
               }
             </div>
