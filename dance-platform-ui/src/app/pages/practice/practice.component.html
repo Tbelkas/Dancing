@@ -23,9 +23,14 @@
        ready() adds the skeleton's minimum-visible hold on top, so these three blocks and the
        list below all arrive together. -->
   @if (ready() && streakAtRisk()) {
-    <div class="streak-risk">
+    <div class="streak-risk" [class.is-urgent]="streakTimeLeft() !== null">
       <i class="fa-solid fa-fire"></i>
       <span>Your <strong>{{ streak() }}-day streak</strong> is on the line — practice today to keep it alive.</span>
+      @if (streakTimeLeft(); as timeLeft) {
+        <span class="streak-risk__clock">
+          <i class="fa-regular fa-clock" aria-hidden="true"></i>{{ timeLeft }}
+        </span>
+      }
     </div>
   }
 

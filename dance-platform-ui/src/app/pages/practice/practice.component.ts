@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -9,7 +9,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { PracticeSession, PracticeSessionItem } from '../../models/practice-session.model';
 import { ReviewDance } from '../../models/review-dance.model';
 import { toLocalDateString, toPracticeDateString, formatClock } from '../../core/utils/video-url.utils';
-import { meaningfulSessions, practiceStreak } from '../../core/utils/practice.utils';
+import { meaningfulSessions, practiceStreak, streakTimeLeftLabel } from '../../core/utils/practice.utils';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { delayedLoading } from '../../core/utils/delayed-loading';
 
@@ -66,7 +66,7 @@ interface BreakdownRow {
   templateUrl: './practice.component.html',
   styleUrls: ['./practice.component.css']
 })
-export class PracticeComponent implements OnInit {
+export class PracticeComponent implements OnInit, OnDestroy {
   sessions = signal<PracticeSession[]>([]);
   dances = signal<{ id: number; name: string }[]>([]);
   loading = signal(true);
@@ -122,12 +122,21 @@ export class PracticeComponent implements OnInit {
 
   readonly hiddenReviewCount = computed(() => this.reviewQueue().length - this.visibleReview().length);
 
-  private readonly streakInfo = computed(() => practiceStreak(this.sessions()));
+  /** Drives everything that depends on "now", so a page left open doesn't show a stale
+   *  countdown — or keep yesterday's streak lit after the practice day rolls over at 4 AM. */
+  private readonly clockTick = signal(Date.now());
+  private clockHandle: ReturnType<typeof setInterval> | null = null;
+
+  private readonly streakInfo = computed(() => practiceStreak(this.sessions(), new Date(this.clockTick())));
 
   readonly streak = computed(() => this.streakInfo().current);
   readonly longestStreak = computed(() => this.streakInfo().longest);
   /** The streak survives today only if the user practices — nudge while it's still alive. */
   readonly streakAtRisk = computed(() => this.streakInfo().atRisk);
+
+  /** "3 hours left" / "12 min left" once the deadline is close; null while there's plenty of day. */
+  readonly streakTimeLeft = computed(() =>
+    this.streakAtRisk() ? streakTimeLeftLabel(new Date(this.clockTick())) : null);
 
   readonly scopedSessions = computed(() => {
     const tf = this.timeframe();
@@ -362,6 +371,8 @@ export class PracticeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // 30s keeps the minute countdown honest without the cost of a per-second tick.
+    this.clockHandle = setInterval(() => this.clockTick.set(Date.now()), 30_000);
     this.newDate = toPracticeDateString(new Date());
     this.danceService.getNames().subscribe(d => this.dances.set(d));
     // Both requests gate the same wait. The review panel renders *above* the stats and the
@@ -383,6 +394,10 @@ export class PracticeComponent implements OnInit {
       error: settled,
       complete: settled
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.clockHandle) clearInterval(this.clockHandle);
   }
 
   // --- Stats helpers ---

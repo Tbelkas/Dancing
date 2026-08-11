@@ -3,12 +3,15 @@ export function toLocalDateString(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+/** A practice day runs 4 AM → 4 AM, not midnight → midnight. */
+export const PRACTICE_DAY_START_HOUR = 4;
+
 /**
  * The "practice day" a moment belongs to: anything before 4 AM counts toward the previous
  * calendar day, so a midnight session doesn't artificially split or break a streak.
  */
 export function toPracticeDateString(d: Date): string {
-  const shifted = new Date(d.getTime() - 4 * 3600000);
+  const shifted = new Date(d.getTime() - PRACTICE_DAY_START_HOUR * 3600000);
   return toLocalDateString(shifted);
 }
 

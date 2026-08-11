@@ -52,6 +52,42 @@
   animation: flame-flicker 1.8s ease-in-out infinite;
 }
 
+/* Inside the last few hours the border stops being decoration and starts being a deadline. */
+.streak-risk.is-urgent {
+  border-color: rgba(232, 80, 58, 0.7);
+}
+
+/* The countdown sits at the far end so the sentence still reads first. */
+.streak-risk__clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(232, 80, 58, 0.14);
+  color: var(--color-accent);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The flame flickers; a clock that flickered would just look broken. */
+.streak-risk__clock i {
+  animation: none;
+}
+
+@media (max-width: 560px) {
+  .streak-risk {
+    flex-wrap: wrap;
+  }
+
+  .streak-risk__clock {
+    margin-left: 28px;
+  }
+}
+
 /* ---------- Review queue ---------- */
 .review-panel {
   padding: 18px 20px;

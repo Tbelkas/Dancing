@@ -29,6 +29,14 @@ can't drift between pages. Covered by `practice.utils.spec.ts`.
 - Rules it encodes: consecutive **practice days** with ≥1 meaningful session; alive while the
   newest day is today *or* yesterday (one grace day); future-dated sessions are **ignored**,
   not treated as a break; day arithmetic goes through calendar fields, never ±86400000ms.
+- `streakTimeLeftLabel(now)` is the at-risk countdown: `null` until 4 h remain, then
+  "3 hours left", then "12 min left" inside the last hour. Both round **down** — never tell
+  someone they have an hour when they have sixty seconds. Because the deadline is the practice
+  day's 4 AM end, the countdown only ever appears between midnight and 4 AM.
+- The page feeds it a `clockTick` signal (30 s), so a tab left open doesn't show a frozen
+  countdown or keep yesterday's streak lit past the rollover. Pass `now` explicitly in tests.
+- To *see* the banner, `e2e/scripts/shot-streak-warning.mjs` screenshots it at four times of
+  day against the local build (fixed clock + stubbed API — no credentials needed).
 
 ## Rules (do not regress — known-issues #1/#2)
 - **All day logic is LOCAL, never UTC.**

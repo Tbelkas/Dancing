@@ -1,4 +1,4 @@
-import { toLocalDateString, toPracticeDateString } from './video-url.utils';
+import { PRACTICE_DAY_START_HOUR, toLocalDateString, toPracticeDateString } from './video-url.utils';
 
 /** Sub-minute blips — a stray watch, a mis-tap — aren't practice, so they never count. */
 const MEANINGFUL_SECONDS = 60;
@@ -63,4 +63,29 @@ export function practiceStreak(
   }
 
   return { current, longest, atRisk: current > 0 && newest !== today };
+}
+
+/** How long is left to log something and keep the day: the practice day ends at the next 4 AM. */
+export function minutesLeftInPracticeDay(now: Date = new Date()): number {
+  const end = new Date(toPracticeDateString(now) + 'T00:00:00');
+  end.setDate(end.getDate() + 1);
+  end.setHours(PRACTICE_DAY_START_HOUR, 0, 0, 0);
+  return Math.max(0, (end.getTime() - now.getTime()) / 60000);
+}
+
+/**
+ * Countdown for the at-risk nudge — `null` until the deadline is close enough to be worth a
+ * number, then hours, then minutes inside the last hour. Both round down: better to under-
+ * promise the time left than to tell someone they have an hour when they have sixty seconds.
+ *
+ * Note the deadline is the practice day's 4 AM end, so this stays quiet until midnight.
+ */
+export function streakTimeLeftLabel(now: Date = new Date(), warnWithinHours = 4): string | null {
+  const minutes = minutesLeftInPracticeDay(now);
+  if (minutes > warnWithinHours * 60) return null;
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    return `${hours} hour${hours === 1 ? '' : 's'} left`;
+  }
+  return `${Math.max(1, Math.floor(minutes))} min left`;
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { meaningfulSessions, practiceStreak } from './practice.utils';
+import { meaningfulSessions, minutesLeftInPracticeDay, practiceStreak, streakTimeLeftLabel } from './practice.utils';
 
 /** A logged session on a given day. Duration only matters for the sub-minute cutoff. */
 const on = (date: string, totalSeconds = 600) => ({ date, totalSeconds });
@@ -102,5 +102,52 @@ describe('practiceStreak', () => {
     for (const day of fallBack) {
       expect(practiceStreak([on(shift(day, -1))], at(day)).current, day).toBe(1);
     }
+  });
+});
+
+/** A wall-clock moment on 2026-08-11, to the minute. */
+const clock = (h: number, m = 0) => new Date(`2026-08-11T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`);
+
+describe('minutesLeftInPracticeDay', () => {
+  it('runs to the next 4 AM', () => {
+    expect(minutesLeftInPracticeDay(clock(12))).toBe(16 * 60);
+    expect(minutesLeftInPracticeDay(clock(23, 30))).toBe(4 * 60 + 30);
+  });
+
+  it('measures against the same 4 AM after midnight, not a fresh day', () => {
+    // 01:00 is still the 10th's practice day, with three hours to go.
+    expect(minutesLeftInPracticeDay(clock(1))).toBe(3 * 60);
+  });
+
+  it('gives a full day just after the boundary', () => {
+    expect(minutesLeftInPracticeDay(clock(4))).toBe(24 * 60);
+    expect(minutesLeftInPracticeDay(clock(3, 59))).toBe(1);
+  });
+});
+
+describe('streakTimeLeftLabel', () => {
+  it('stays quiet while there is plenty of day left', () => {
+    expect(streakTimeLeftLabel(clock(12))).toBeNull();
+    expect(streakTimeLeftLabel(clock(19, 59))).toBeNull();
+  });
+
+  it('starts counting at four hours', () => {
+    expect(streakTimeLeftLabel(clock(0))).toBe('4 hours left');
+    expect(streakTimeLeftLabel(clock(1))).toBe('3 hours left');
+    expect(streakTimeLeftLabel(clock(2, 30))).toBe('1 hour left');
+  });
+
+  it('rounds hours down, so it never over-promises', () => {
+    expect(streakTimeLeftLabel(clock(1, 1))).toBe('2 hours left');
+  });
+
+  it('switches to minutes inside the last hour', () => {
+    expect(streakTimeLeftLabel(clock(3))).toBe('1 hour left');
+    expect(streakTimeLeftLabel(clock(3, 1))).toBe('59 min left');
+    expect(streakTimeLeftLabel(clock(3, 48))).toBe('12 min left');
+  });
+
+  it('never counts down to zero while the day is still alive', () => {
+    expect(streakTimeLeftLabel(new Date('2026-08-11T03:59:30'))).toBe('1 min left');
   });
 });
