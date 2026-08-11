@@ -231,6 +231,15 @@ names on one fan collide however they're placed.
 
 ## Personal skill trees
 
+> ⚠️ **Hidden since 2026-08-12.** `PERSONAL_ROADMAPS_ENABLED` (false) in
+> `dance-platform-ui/src/app/core/constants/feature-flags.ts` takes every surface below off the
+> app: the build button, the fork button, the owner/edit/share/delete row, the "My skill trees"
+> grid, the shared-trees card on a public profile, and the builder routes (`personalRoadmapsGuard`
+> redirects them to `/roadmaps`). **The API, the DB rows and the code are untouched** — an owned
+> tree is filtered out of the index client-side, not deleted. Everything below describes the
+> feature as it works when the flag is on; turning it back on is the constant plus restoring the
+> `personal skill trees` block in `e2e/tests/authed.spec.ts` from git history.
+
 A signed-in user can build their own tree — same renderer, same unlocking, their own content.
 Entry points: **Build a skill tree** on the index, and **Make my own version** on any curated
 path (a fork, so the curated one is never altered).

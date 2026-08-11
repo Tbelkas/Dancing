@@ -42,8 +42,9 @@
 
       <div class="stats-column">
         <!-- Only rendered when they've shared something — an empty "Skill trees" card on every
-             profile would advertise a feature most people haven't used. -->
-        @if (profile()!.sharedRoadmaps.length > 0) {
+             profile would advertise a feature most people haven't used. Off entirely while
+             personal trees are: this is the only place a shared one is listed. -->
+        @if (personalTrees && profile()!.sharedRoadmaps.length > 0) {
           <div class="card">
             <h3>Skill Trees <span class="count-badge">{{ profile()!.sharedRoadmaps.length }}</span></h3>
             <div class="dance-ref-list" data-testid="profile-shared-roadmaps">

@@ -5,7 +5,7 @@
       Ordered paths through a style — the moves in the order they actually build on each other,
       with every video we have for them attached.
     </p>
-    @if (auth.isAuthenticated()) {
+    @if (personalTrees && auth.isAuthenticated()) {
       <a class="btn btn--primary btn--sm page-header__action" routerLink="/roadmaps/new" data-testid="roadmap-new">
         <i class="fa-solid fa-plus" aria-hidden="true"></i> Build a skill tree
       </a>
@@ -54,7 +54,7 @@
       @if (started().length === 0 && rest().length > 0) {
         <h2 class="section-heading section-heading--spaced">Curated paths</h2>
       }
-    } @else if (auth.isAuthenticated()) {
+    } @else if (personalTrees && auth.isAuthenticated()) {
       <!-- One line rather than a card: the button is already in the header, and an empty-state
            panel for a thing nobody has asked for yet would outweigh the paths below it. -->
       <p class="build-prompt">
@@ -65,9 +65,11 @@
     }
 
     @if (started().length > 0) {
-      <!-- Always preceded by something — a started path means a signed-in user, who gets either
-           the "My skill trees" grid or the build prompt above this — so it always needs the gap. -->
-      <h2 class="section-heading section-heading--spaced">Picked up</h2>
+      <!-- A started path means a signed-in user, who gets either the "My skill trees" grid or the
+           build prompt above this — but only while personal trees are switched on. With them off
+           this heading follows the page header directly, and the extra gap would look like a
+           section failed to render. -->
+      <h2 class="section-heading" [class.section-heading--spaced]="personalTrees">Picked up</h2>
       <div class="roadmap-grid">
         @for (r of started(); track r.id) {
           <ng-container *ngTemplateOutlet="card; context: { $implicit: r }" />

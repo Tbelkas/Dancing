@@ -8,6 +8,7 @@ import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
 import { delayedLoading } from '../../core/utils/delayed-loading';
 import { SkeletonCount } from '../../core/utils/skeleton-count';
+import { PERSONAL_ROADMAPS_ENABLED } from '../../core/constants/feature-flags';
 
 @Component({
   selector: 'app-roadmaps',
@@ -23,6 +24,9 @@ export class RoadmapsComponent implements OnInit {
   readonly skeleton = new SkeletonCount('roadmaps', 6, { max: 12 });
   failed = signal(false);
   private readonly thumbs = new ThumbFallback();
+
+  /** Gates every personal-tree surface on this page: the build button, the prompt, the grid. */
+  readonly personalTrees = PERSONAL_ROADMAPS_ENABLED;
 
   /**
    * The user's own trees come first and are never mixed into the curated sections — a path
@@ -41,7 +45,13 @@ export class RoadmapsComponent implements OnInit {
 
   ngOnInit(): void {
     this.roadmapService.getAll().subscribe({
-      next: r => { this.roadmaps.set(r); this.skeleton.remember(r.length); this.loading.set(false); },
+      // Filtered here rather than per-section: with personal trees off, an owned tree must not
+      // reach any of them — dropping it at the source keeps it out of "Everything else" too,
+      // and keeps the empty state honest about what there is to show.
+      next: list => {
+        const r = this.personalTrees ? list : list.filter(x => !x.isOwned);
+        this.roadmaps.set(r); this.skeleton.remember(r.length); this.loading.set(false);
+      },
       error: () => { this.failed.set(true); this.loading.set(false); }
     });
   }

@@ -13,6 +13,7 @@ import { ThumbFallback } from '../../core/utils/thumb-fallback';
 import { RoadmapTreeComponent } from './roadmap-tree.component';
 import { SignInDialogComponent } from '../../shared/components/sign-in-dialog/sign-in-dialog.component';
 import { delayedLoading } from '../../core/utils/delayed-loading';
+import { PERSONAL_ROADMAPS_ENABLED } from '../../core/constants/feature-flags';
 
 type RoadmapView = 'tree' | 'list';
 const VIEW_KEY = 'dp_roadmap_view';
@@ -44,6 +45,9 @@ export class RoadmapDetailComponent implements OnInit {
    * clicked on the tree. Remembered, so anyone reading the curriculum keeps it open.
    */
   branchesOpen = signal(false);
+
+  /** Gates the owner badge and the edit/share/fork row — see feature-flags.ts. */
+  readonly personalTrees = PERSONAL_ROADMAPS_ENABLED;
 
   /** Guard on the delete button: a tree is a lot of work to lose to a stray click. */
   confirmingDelete = signal(false);

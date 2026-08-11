@@ -19,7 +19,7 @@
     }
 
     <div class="page-header">
-      @if (r.isOwned) {
+      @if (personalTrees && r.isOwned) {
         <span class="owner-badge" data-testid="roadmap-owned-badge">
           <i class="fa-solid fa-user-pen" aria-hidden="true"></i> Your skill tree
         </span>
@@ -49,8 +49,10 @@
 
       <!-- Owning a tree is the only thing that unlocks editing it; the curated paths are
            authored content and are changed by changing their JSON file. Everyone signed in can
-           fork one, which is how a curated path gets personalised without being altered. -->
-      @if (auth.isAuthenticated()) {
+           fork one, which is how a curated path gets personalised without being altered.
+           The whole row is off while personal trees are — every button in it either makes a
+           tree or changes one, and there is nowhere left in the app to see the result. -->
+      @if (personalTrees && auth.isAuthenticated()) {
         <div class="roadmap-actions">
           @if (r.isOwned) {
             <a class="btn btn--ghost btn--sm" [routerLink]="['/roadmaps', r.slug, 'edit']" data-testid="roadmap-edit">

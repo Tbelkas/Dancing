@@ -6,6 +6,7 @@ import { switchMap, catchError } from 'rxjs/operators';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { UserService, PublicProfile } from '../../core/services/user.service';
 import { delayedLoading } from '../../core/utils/delayed-loading';
+import { PERSONAL_ROADMAPS_ENABLED } from '../../core/constants/feature-flags';
 
 @Component({
   selector: 'app-user-profile',
@@ -18,6 +19,9 @@ export class UserProfileComponent implements OnInit {
   notFound = signal(false);
   loading = signal(true);
   showSkeleton = delayedLoading(this.loading);
+
+  /** Gates the shared "Skill Trees" card — see feature-flags.ts. */
+  readonly personalTrees = PERSONAL_ROADMAPS_ENABLED;
 
   constructor(private route: ActivatedRoute, private userService: UserService) {}
 

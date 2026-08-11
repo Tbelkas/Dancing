@@ -77,8 +77,10 @@ using the throwaway account in `.env`.
 Every authed test is therefore **either read-only or restores what it changed** — the
 favourite-toggle test flips a favourite and flips it back in a `finally` block.
 
-The `personal skill trees` block is the one that genuinely creates rows. It follows four rules
-worth copying for anything else that has to:
+Nothing in the suite creates rows any more. The `personal skill trees` block did, and was
+removed on 2026-08-12 along with the feature's UI (`PERSONAL_ROADMAPS_ENABLED` in
+`dance-platform-ui/src/app/core/constants/feature-flags.ts`) — restore it from git history when
+the flag goes back on. It followed four rules worth copying for anything else that has to write:
 
 - the tree's name carries `Date.now()`, so two overlapping runs can't fight over one slug;
 - cleanup goes over the **API**, in a `finally`, rather than through the UI — a test that only
@@ -120,6 +122,11 @@ visible text would break on every one of those and teach you to ignore them. So 
 anchors on a small, deliberate set of `data-testid` attributes.
 
 **These 76 attributes are a contract. Treat them like a public API.**
+
+The personal-skill-tree rows below (`roadmap-new` … `builder-step-clip`, and
+`profile-shared-roadmaps`) are **dormant**: the markup still carries them, but it is gated on
+`PERSONAL_ROADMAPS_ENABLED` and nothing selects on them while the flag is off. Keep them where
+they are — the tests come back with the feature.
 
 | Test id | Lives in | Anchors |
 |---|---|---|
