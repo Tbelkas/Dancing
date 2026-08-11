@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { meaningfulSessions, minutesLeftInPracticeDay, practiceStreak, streakTimeLeftLabel } from './practice.utils';
+import {
+  meaningfulSessions,
+  minutesLeftInPracticeDay,
+  practiceStreak,
+  streakTimeLeftLabel,
+  streakWarningLabel,
+} from './practice.utils';
 
 /** A logged session on a given day. Duration only matters for the sub-minute cutoff. */
 const on = (date: string, totalSeconds = 600) => ({ date, totalSeconds });
@@ -131,10 +137,17 @@ describe('streakTimeLeftLabel', () => {
     expect(streakTimeLeftLabel(clock(19, 59))).toBeNull();
   });
 
-  it('starts counting at four hours', () => {
+  it('starts counting in the evening, eight hours out', () => {
+    expect(streakTimeLeftLabel(clock(20))).toBe('8 hours left');
+    expect(streakTimeLeftLabel(clock(22))).toBe('6 hours left');
     expect(streakTimeLeftLabel(clock(0))).toBe('4 hours left');
     expect(streakTimeLeftLabel(clock(1))).toBe('3 hours left');
     expect(streakTimeLeftLabel(clock(2, 30))).toBe('1 hour left');
+  });
+
+  it('takes a wider window when asked', () => {
+    expect(streakTimeLeftLabel(clock(19, 59), 4)).toBeNull();
+    expect(streakTimeLeftLabel(clock(19, 59), 12)).toBe('8 hours left');
   });
 
   it('rounds hours down, so it never over-promises', () => {
@@ -149,5 +162,45 @@ describe('streakTimeLeftLabel', () => {
 
   it('never counts down to zero while the day is still alive', () => {
     expect(streakTimeLeftLabel(new Date('2026-08-11T03:59:30'))).toBe('1 min left');
+  });
+});
+
+describe('streakWarningLabel', () => {
+  /** A run of `days` ending yesterday: at risk, with nothing logged today yet. */
+  const atRisk = (days: number, today = '2026-08-11') =>
+    practiceStreak(
+      Array.from({ length: days }, (_, i) => on(shift(today, -(i + 1)))),
+      at(today)
+    );
+
+  it('says nothing about a short streak, however late it gets', () => {
+    for (const days of [1, 2, 6]) {
+      expect(streakWarningLabel(atRisk(days), clock(23)), `${days}-day`).toBeNull();
+    }
+  });
+
+  it('warns from seven days up, in the evening', () => {
+    expect(streakWarningLabel(atRisk(7), clock(21))).toBe('7 hours left');
+    expect(streakWarningLabel(atRisk(30), clock(21))).toBe('7 hours left');
+  });
+
+  it('stays quiet earlier in the day, however long the streak', () => {
+    expect(streakWarningLabel(atRisk(30), clock(9))).toBeNull();
+    expect(streakWarningLabel(atRisk(30), clock(19, 59))).toBeNull();
+  });
+
+  it('says nothing once today is already practiced, long streak or not', () => {
+    // Ten days ending *today* — long enough and late enough, but there is nothing to save.
+    const done = practiceStreak(
+      Array.from({ length: 10 }, (_, i) => on(shift('2026-08-11', -i))),
+      at('2026-08-11')
+    );
+    expect(done.current).toBe(10);
+    expect(done.atRisk).toBe(false);
+    expect(streakWarningLabel(done, clock(23))).toBeNull();
+  });
+
+  it('says nothing when there is no streak at all', () => {
+    expect(streakWarningLabel(practiceStreak([], at('2026-08-11')), clock(23))).toBeNull();
   });
 });

@@ -78,9 +78,10 @@ export function minutesLeftInPracticeDay(now: Date = new Date()): number {
  * number, then hours, then minutes inside the last hour. Both round down: better to under-
  * promise the time left than to tell someone they have an hour when they have sixty seconds.
  *
- * Note the deadline is the practice day's 4 AM end, so this stays quiet until midnight.
+ * The deadline is the practice day's 4 AM end, so an 8-hour window starts the countdown at
+ * 8 PM — the evening, while there's still time to do something about it.
  */
-export function streakTimeLeftLabel(now: Date = new Date(), warnWithinHours = 4): string | null {
+export function streakTimeLeftLabel(now: Date = new Date(), warnWithinHours = 8): string | null {
   const minutes = minutesLeftInPracticeDay(now);
   if (minutes > warnWithinHours * 60) return null;
   if (minutes >= 60) {
@@ -88,4 +89,23 @@ export function streakTimeLeftLabel(now: Date = new Date(), warnWithinHours = 4)
     return `${hours} hour${hours === 1 ? '' : 's'} left`;
   }
   return `${Math.max(1, Math.floor(minutes))} min left`;
+}
+
+/** Below this the streak isn't yet worth defending, and saying so is just noise. */
+export const STREAK_WARNING_MIN_DAYS = 7;
+
+/**
+ * Whether to nag, and what the countdown reads — `null` for "say nothing".
+ *
+ * Two gates, because a warning that fires on a 2-day streak at noon trains people to ignore
+ * it: the streak has to be long enough to be worth losing, and the day has to be running out.
+ * Returns the label rather than a boolean so the banner can't render without its countdown.
+ */
+export function streakWarningLabel(
+  streak: Streak,
+  now: Date = new Date(),
+  warnWithinHours = 8
+): string | null {
+  if (!streak.atRisk || streak.current < STREAK_WARNING_MIN_DAYS) return null;
+  return streakTimeLeftLabel(now, warnWithinHours);
 }

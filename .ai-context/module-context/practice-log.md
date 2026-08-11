@@ -29,14 +29,20 @@ can't drift between pages. Covered by `practice.utils.spec.ts`.
 - Rules it encodes: consecutive **practice days** with ≥1 meaningful session; alive while the
   newest day is today *or* yesterday (one grace day); future-dated sessions are **ignored**,
   not treated as a break; day arithmetic goes through calendar fields, never ±86400000ms.
-- `streakTimeLeftLabel(now)` is the at-risk countdown: `null` until 4 h remain, then
+- `streakWarningLabel(streak, now)` decides the whole at-risk banner and returns its countdown
+  text, or `null` for "say nothing". **Two gates, both deliberate:** the streak must be
+  ≥ `STREAK_WARNING_MIN_DAYS` (7) *and* the day must be nearly out. A nag on a 2-day streak at
+  noon just teaches people to ignore the banner. It returns the label rather than a boolean so
+  the banner can't render without its countdown — there is no "quiet" variant to style for.
+- `streakTimeLeftLabel(now)` is the countdown underneath: `null` until 8 h remain, then
   "3 hours left", then "12 min left" inside the last hour. Both round **down** — never tell
-  someone they have an hour when they have sixty seconds. Because the deadline is the practice
-  day's 4 AM end, the countdown only ever appears between midnight and 4 AM.
+  someone they have an hour when they have sixty seconds. The deadline is the practice day's
+  4 AM end, so the 8 h window puts the banner on screen from 8 PM until the streak dies.
 - The page feeds it a `clockTick` signal (30 s), so a tab left open doesn't show a frozen
   countdown or keep yesterday's streak lit past the rollover. Pass `now` explicitly in tests.
-- To *see* the banner, `e2e/scripts/shot-streak-warning.mjs` screenshots it at four times of
-  day against the local build (fixed clock + stubbed API — no credentials needed).
+- To *see* the banner, `e2e/scripts/shot-streak-warning.mjs` walks six scenarios against the
+  local build (fixed clock + stubbed API, no credentials), screenshots the ones that should
+  show it, and exits non-zero if any case appears when it shouldn't.
 
 ## Rules (do not regress — known-issues #1/#2)
 - **All day logic is LOCAL, never UTC.**

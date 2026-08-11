@@ -9,7 +9,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { PracticeSession, PracticeSessionItem } from '../../models/practice-session.model';
 import { ReviewDance } from '../../models/review-dance.model';
 import { toLocalDateString, toPracticeDateString, formatClock } from '../../core/utils/video-url.utils';
-import { meaningfulSessions, practiceStreak, streakTimeLeftLabel } from '../../core/utils/practice.utils';
+import { meaningfulSessions, practiceStreak, streakWarningLabel } from '../../core/utils/practice.utils';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { delayedLoading } from '../../core/utils/delayed-loading';
 
@@ -131,12 +131,11 @@ export class PracticeComponent implements OnInit, OnDestroy {
 
   readonly streak = computed(() => this.streakInfo().current);
   readonly longestStreak = computed(() => this.streakInfo().longest);
-  /** The streak survives today only if the user practices — nudge while it's still alive. */
-  readonly streakAtRisk = computed(() => this.streakInfo().atRisk);
 
-  /** "3 hours left" / "12 min left" once the deadline is close; null while there's plenty of day. */
-  readonly streakTimeLeft = computed(() =>
-    this.streakAtRisk() ? streakTimeLeftLabel(new Date(this.clockTick())) : null);
+  /** The banner's whole condition: "3 hours left" / "12 min left" when a streak worth keeping
+   *  is running out of day, null the rest of the time. */
+  readonly streakWarning = computed(() =>
+    streakWarningLabel(this.streakInfo(), new Date(this.clockTick())));
 
   readonly scopedSessions = computed(() => {
     const tf = this.timeframe();

@@ -21,9 +21,9 @@ const day = (from, offset) => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-/** A four-day run ending yesterday: a live streak with nothing logged today. */
-const atRiskSessions = (today) =>
-  [1, 2, 3, 4].map((back, i) => ({
+/** A run ending yesterday: a live streak with nothing logged today. */
+const atRiskSessions = (today, days) =>
+  Array.from({ length: days }, (_, i) => i + 1).map((back, i) => ({
     id: 900 + i,
     date: day(today, -back),
     startedAt: `${day(today, -back)}T18:00:00Z`,
@@ -36,17 +36,23 @@ const atRiskSessions = (today) =>
     }],
   }));
 
+// [name, when, streak days, does the banner show?] — the banner needs a 7+ day streak AND
+// the evening, so the negative cases matter as much as the positive ones.
 const cases = [
-  ['1-plenty-of-day', '2026-08-11T21:00:00'],   // no countdown yet
-  ['2-four-hours', '2026-08-12T00:05:00'],
-  ['3-two-hours', '2026-08-12T02:10:00'],
-  ['4-minutes', '2026-08-12T03:47:00'],
+  ['1-short-streak-evening', '2026-08-11T21:00:00', 3, false],
+  ['2-long-streak-daytime', '2026-08-11T14:00:00', 12, false],
+  ['3-evening', '2026-08-11T20:30:00', 12, true],
+  ['4-late-evening', '2026-08-11T23:00:00', 12, true],
+  ['5-after-midnight', '2026-08-12T02:10:00', 12, true],
+  ['6-minutes', '2026-08-12T03:47:00', 12, true],
 ];
 
 mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch();
 
-for (const [name, when] of cases) {
+let failures = 0;
+
+for (const [name, when, days, shouldShow] of cases) {
   const context = await browser.newContext({
     viewport: { width: 1280, height: 900 },
     timezoneId: 'Europe/Vilnius',
@@ -67,22 +73,29 @@ for (const [name, when] of cases) {
   // and bounce this synthetic session straight to /login.
   await page.route('**/api/**', (route) => route.fulfill({ json: [] }));
   await page.route('**/api/practice', (route) =>
-    route.fulfill({ json: atRiskSessions(practiceDay) }));
+    route.fulfill({ json: atRiskSessions(practiceDay, days) }));
 
   await page.goto(`${BASE}/practice`);
+  // The page is painted once the streak chip is up, so an absent banner is a real absence
+  // rather than a screenshot taken too early.
+  await page.locator('.stat-chip--streak').waitFor({ timeout: 15_000 });
   const banner = page.locator('.streak-risk');
-  try {
-    await banner.waitFor({ timeout: 15_000 });
-  } catch (err) {
-    await page.screenshot({ path: `${OUT}/${name}-FAILED.png`, fullPage: true });
-    console.log(`${name}: no banner. url=${page.url()}`);
-    console.log((await page.locator('body').innerText()).slice(0, 600));
-    await context.close();
-    continue;
+  const shown = await banner.count() > 0;
+
+  if (shown !== shouldShow) {
+    failures++;
+    await page.screenshot({ path: `${OUT}/${name}-UNEXPECTED.png`, fullPage: true });
   }
-  await banner.screenshot({ path: `${OUT}/${name}.png` });
-  console.log(`${name.padEnd(18)} ${when}  ->  ${JSON.stringify(await banner.innerText())}`);
+  if (shown) await banner.screenshot({ path: `${OUT}/${name}.png` });
+
+  const verdict = shown === shouldShow ? 'ok  ' : 'WRONG';
+  const text = shown ? JSON.stringify(await banner.innerText()) : '(no banner)';
+  console.log(`${verdict} ${name.padEnd(22)} ${when}  ${days}d  ->  ${text}`);
   await context.close();
 }
 
 await browser.close();
+if (failures) {
+  console.error(`\n${failures} case(s) did not match expectations.`);
+  process.exit(1);
+}
