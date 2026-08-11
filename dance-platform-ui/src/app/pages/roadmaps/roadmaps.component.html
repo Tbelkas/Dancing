@@ -51,7 +51,7 @@
       </div>
       <!-- Only when nothing follows it would carry a heading of its own — "Picked up" already
            separates the curated block, and two headings in a row reads as a mistake. -->
-      @if (started().length === 0) {
+      @if (started().length === 0 && rest().length > 0) {
         <h2 class="section-heading section-heading--spaced">Curated paths</h2>
       }
     } @else if (auth.isAuthenticated()) {
@@ -65,20 +65,28 @@
     }
 
     @if (started().length > 0) {
-      <h2 class="section-heading">Picked up</h2>
+      <!-- Always preceded by something — a started path means a signed-in user, who gets either
+           the "My skill trees" grid or the build prompt above this — so it always needs the gap. -->
+      <h2 class="section-heading section-heading--spaced">Picked up</h2>
       <div class="roadmap-grid">
         @for (r of started(); track r.id) {
           <ng-container *ngTemplateOutlet="card; context: { $implicit: r }" />
         }
       </div>
-      <h2 class="section-heading section-heading--spaced">Everything else</h2>
+      <!-- Suppressed once every curated path has been picked up: a heading over an empty grid
+           reads as content that failed to load. -->
+      @if (rest().length > 0) {
+        <h2 class="section-heading section-heading--spaced">Everything else</h2>
+      }
     }
 
-    <div class="roadmap-grid">
-      @for (r of rest(); track r.id) {
-        <ng-container *ngTemplateOutlet="card; context: { $implicit: r }" />
-      }
-    </div>
+    @if (rest().length > 0) {
+      <div class="roadmap-grid">
+        @for (r of rest(); track r.id) {
+          <ng-container *ngTemplateOutlet="card; context: { $implicit: r }" />
+        }
+      </div>
+    }
   }
 </div>
 
