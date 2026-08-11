@@ -26,6 +26,8 @@ const NODE_R = 30;
  * at 30 the selected node's label started exactly on the halo's stroke.
  */
 const LABEL_OUTWARD = 38;
+/** Disc radius plus a little air: what a label has to stay outside of to be readable. */
+const NODE_CLEAR = 24;
 /**
  * Rough label metrics, used only to keep the text inside the viewBox. The font is the condensed
  * bold UI face at 11.5px, measured at 3.98–4.25px per character across the authored paths. The
@@ -163,28 +165,50 @@ export function layoutRoadmapTree(roadmap: Roadmap): TreeLayout {
   const maxDepth = Math.max(...steps.map(s => s.depth));
 
   /**
-   * Label placement, resolved before the bounds so the bounds can include it. Push the label
-   * outward along the spoke, and away from the circle horizontally so the text of a node on the
-   * left of the fan reads leftward and vice versa.
+   * Label placement, resolved before the bounds so the bounds can include it. The preferred spot
+   * is outward along the spoke, reading away from the fan's centre — but that spot is only
+   * offered, not imposed: each label takes the first candidate that lands on nobody, and falls
+   * back to the least-crowded one when the fan is too dense for a clean slot.
    *
-   * The extents matter: on the outermost nodes of the fan the label reaches much further than
+   * Both halves matter. Along a near-vertical spoke `cos` is small, so the old unconditional
+   * `cos * LABEL_OUTWARD` started the text *inside* its own disc; and even a label clear of its
+   * own node happily sat on top of the neighbour drawn next to it.
+   *
+   * The extents matter too: on the outermost nodes of the fan the label reaches much further than
    * the circle does, and a fixed pad never covered it — the text ran off the edge of the viewBox
    * and was clipped by the svg, with no ellipsis to show that it had been.
    */
+  const boxOf = (x: number, y: number, dx: number, dy: number, w: number, anchor: TreeNode['labelAnchor']): Box => ({
+    left: x + dx - (anchor === 'end' ? w : anchor === 'middle' ? w / 2 : 0),
+    right: x + dx + (anchor === 'start' ? w : anchor === 'middle' ? w / 2 : 0),
+    top: y + dy - LABEL_ASCENT,
+    bottom: y + dy + LABEL_DESCENT
+  });
+
+  const taken: Box[] = [];
   const placed = raw.map(p => {
-    const cos = Math.cos(p.a);
-    const labelAnchor: TreeNode['labelAnchor'] = cos < -0.35 ? 'end' : cos > 0.35 ? 'start' : 'middle';
     const label = shortLabel(p.step.title);
     const w = label.length * LABEL_CHAR_W;
-    const dx = cos * LABEL_OUTWARD;
-    const dy = Math.sin(p.a) * LABEL_OUTWARD + (labelAnchor === 'middle' ? -6 : 4);
-    return {
-      p, label, labelAnchor, dx, dy,
-      left: p.x + dx - (labelAnchor === 'end' ? w : labelAnchor === 'middle' ? w / 2 : 0),
-      right: p.x + dx + (labelAnchor === 'start' ? w : labelAnchor === 'middle' ? w / 2 : 0),
-      top: p.y + dy - LABEL_ASCENT,
-      bottom: p.y + dy + LABEL_DESCENT
-    };
+
+    let best: { spot: Placement; box: Box; cost: number } | null = null;
+    for (const spot of candidates(p.a)) {
+      const box = boxOf(p.x, p.y, spot.dx, spot.dy, w, spot.anchor);
+      // A circle costs far more than another label: a name over a disc is unreadable, whereas
+      // two names near each other are usually not even shown at the same time.
+      let cost = 0;
+      for (const other of raw) {
+        if (other !== p && hitsCircle(box, other.x, other.y, NODE_CLEAR)) cost += 10;
+      }
+      for (const other of taken) {
+        if (overlaps(box, other)) cost += 3;
+      }
+      if (cost === 0) { best = { spot, box, cost }; break; }
+      if (!best || cost < best.cost) best = { spot, box, cost };
+    }
+
+    const { spot, box } = best!;
+    taken.push(box);
+    return { p, label, labelAnchor: spot.anchor, dx: spot.dx, dy: spot.dy, ...box };
   });
 
   const minX = Math.min(...placed.map(q => Math.min(q.p.x - NODE_R, q.left))) - PAD;
@@ -244,6 +268,59 @@ export function layoutRoadmapTree(roadmap: Roadmap): TreeLayout {
     rings,
     centre: { x: originX, y: originY }
   };
+}
+
+interface Box { left: number; right: number; top: number; bottom: number; }
+interface Placement { dx: number; dy: number; anchor: TreeNode['labelAnchor']; }
+
+/**
+ * Where a label may go, best first: out along the spoke, then swung off it or pushed further
+ * out, then parked above, below, or beside the node. Every candidate clears the node's own disc —
+ * the choice between them is only ever about what *else* is in the way.
+ *
+ * Order is preference order, and the search takes the first candidate that costs nothing, so
+ * the common case still puts the name exactly where the eye expects it: outward along the spoke.
+ */
+function candidates(a: number): Placement[] {
+  const side = Math.cos(a) < 0 ? -1 : 1;
+
+  /** A spot `out` from the centre along a spoke swung `da` off this node's own. */
+  const radial = (out: number, da = 0): Placement => {
+    const cos = Math.cos(a + da);
+    const anchor: TreeNode['labelAnchor'] = cos < -0.35 ? 'end' : cos > 0.35 ? 'start' : 'middle';
+    let dx = cos * out;
+    // A steep spoke barely moves the text sideways. Clear the circle first, then follow the spoke.
+    if (anchor === 'start') dx = Math.max(dx, NODE_CLEAR);
+    if (anchor === 'end') dx = Math.min(dx, -NODE_CLEAR);
+    return { dx, dy: Math.sin(a + da) * out + (anchor === 'middle' ? -6 : 4), anchor };
+  };
+
+  return [
+    radial(LABEL_OUTWARD),
+    radial(LABEL_OUTWARD + 20),
+    radial(LABEL_OUTWARD + 6, 0.36),
+    radial(LABEL_OUTWARD + 6, -0.36),
+    radial(LABEL_OUTWARD + 26, 0.5),
+    radial(LABEL_OUTWARD + 26, -0.5),
+    radial(LABEL_OUTWARD + 44),
+    { dx: 0, dy: -(NODE_CLEAR + 6), anchor: 'middle' },
+    { dx: 0, dy: NODE_CLEAR + 14, anchor: 'middle' },
+    { dx: side * NODE_CLEAR, dy: 4, anchor: side < 0 ? 'end' : 'start' },
+    { dx: -side * NODE_CLEAR, dy: 4, anchor: side < 0 ? 'start' : 'end' },
+    { dx: 0, dy: -(NODE_CLEAR + 24), anchor: 'middle' },
+    { dx: 0, dy: NODE_CLEAR + 32, anchor: 'middle' }
+  ];
+}
+
+/** Box against a node's disc: nearest point on the box to the centre, compared to the radius. */
+function hitsCircle(box: Box, cx: number, cy: number, r: number): boolean {
+  const nx = Math.min(Math.max(cx, box.left), box.right);
+  const ny = Math.min(Math.max(cy, box.top), box.bottom);
+  return (cx - nx) ** 2 + (cy - ny) ** 2 < r * r;
+}
+
+function overlaps(a: Box, b: Box): boolean {
+  return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
 }
 
 /**

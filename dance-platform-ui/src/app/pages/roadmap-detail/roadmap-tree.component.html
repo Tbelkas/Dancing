@@ -88,18 +88,32 @@
               @if (!node.step.dance && !node.step.module) {
                 <circle class="tree__pending" [attr.cx]="node.x + 14" [attr.cy]="node.y - 14" r="3.4" />
               }
-
-              <!-- Labels only for what you're looking at, plus the moves already learned.
-                   31 names on one fan collide no matter how they're placed; the detail panel,
-                   the branch list and the List view carry the full text. -->
-              @if (showLabel(node)) {
-                <text
-                  class="tree__label"
-                  [attr.x]="node.labelX"
-                  [attr.y]="node.labelY"
-                  [attr.text-anchor]="node.labelAnchor">{{ node.label }}</text>
-              }
             </g>
+          }
+        </g>
+
+        <!-- Labels only for what you're looking at, plus the moves already learned.
+             31 names on one fan collide no matter how they're placed; the detail panel,
+             the branch list and the List view carry the full text.
+
+             They ride in their own layer above every node rather than inside the node's own
+             group: drawn inline, a circle later in the fan painted over the start of an earlier
+             neighbour's name. The accessible name comes from the node's aria-label, so this
+             layer is decorative. -->
+        <g class="tree__labels" aria-hidden="true">
+          @for (node of l.nodes; track node.key) {
+            @if (showLabel(node)) {
+              <text
+                class="tree__label"
+                [class.is-learned]="node.state === 'learned'"
+                [class.is-available]="node.state === 'available'"
+                [class.is-locked]="node.state === 'locked'"
+                [class.is-selected]="selected() === node.key"
+                [class.is-dimmed]="isDimmed(node)"
+                [attr.x]="node.labelX"
+                [attr.y]="node.labelY"
+                [attr.text-anchor]="node.labelAnchor">{{ node.label }}</text>
+            }
           }
         </g>
       </svg>

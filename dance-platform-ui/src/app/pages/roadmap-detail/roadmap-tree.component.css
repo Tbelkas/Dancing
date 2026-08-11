@@ -111,6 +111,8 @@
   opacity: 0.75;
 }
 
+/* Labels live in their own layer above the nodes (see the template), so their state classes sit
+   on the text itself rather than being inherited from the node group. */
 .tree__label {
   font-family: var(--font-ui);
   font-size: 11.5px;
@@ -118,17 +120,23 @@
   letter-spacing: 0.04em;
   fill: var(--color-text-muted);
   pointer-events: none;
-  transition: fill var(--transition);
+  transition: fill var(--transition), opacity var(--transition);
+  /* Page-coloured outline behind the glyphs. The layout keeps names off the discs, but edges
+     and depth rings run everywhere — without this they draw a line through the lettering. */
+  paint-order: stroke;
+  stroke: var(--color-bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
 }
 
 /* Learned: filled gold, the only solid nodes on the board. */
 .tree__node.is-learned .tree__node-disc { fill: var(--color-primary); }
 .tree__node.is-learned .tree__node-ring { stroke: var(--color-primary); }
-.tree__node.is-learned .tree__label { fill: var(--color-text); }
+.tree__label.is-learned { fill: var(--color-text); }
 
 /* Ready: coral ring and centre dot — the "you can do this now" state. */
 .tree__node.is-available .tree__node-ring { stroke: var(--color-accent); }
-.tree__node.is-available .tree__label { fill: var(--color-text); }
+.tree__label.is-available { fill: var(--color-text); }
 
 /* Locked: recedes, but stays legible — it's advisory, not a wall. */
 .tree__node.is-locked .tree__node-disc { fill: var(--color-surface); }
@@ -136,7 +144,7 @@
   stroke: var(--color-border);
   stroke-dasharray: 3 3;
 }
-.tree__node.is-locked .tree__label { fill: var(--color-text-muted); opacity: 0.75; }
+.tree__label.is-locked { fill: var(--color-text-muted); opacity: 0.75; }
 
 /* No catalog video behind this step yet. */
 .tree__pending {
@@ -179,13 +187,14 @@
   stroke: var(--color-primary);
   stroke-width: 3;
 }
-.tree__node.is-selected .tree__label {
+.tree__label.is-selected {
   fill: var(--color-primary);
   font-weight: 700;
 }
 
 /* Everything off the focused lineage steps back so the ancestry reads clearly. */
 .tree__node.is-dimmed { opacity: 0.34; }
+.tree__label.is-dimmed { opacity: 0.34; }
 
 .tree__node:hover .tree__node-ring { stroke: var(--color-primary); }
 
