@@ -1066,12 +1066,31 @@
   gap: 8px;
 }
 
-/* ---------- Undo toast ---------- */
+/* ---------- Empty state ----------
+   Same shape as the one on My Choreos: a bare centred sentence on a page this tall reads as
+   something that failed to load rather than as a page waiting to be filled. */
 .empty-state {
   text-align: center;
   padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.empty-state__icon {
+  font-size: 2rem;
+  color: var(--color-border-light);
+  margin-bottom: 4px;
+}
+
+.empty-state h2 { color: var(--color-text); }
+
+.empty-state p {
   color: var(--color-text-muted);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+  max-width: 52ch;
 }
 
 @media (max-width: 640px) {

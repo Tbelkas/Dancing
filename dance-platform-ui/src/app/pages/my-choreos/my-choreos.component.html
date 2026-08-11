@@ -53,11 +53,13 @@
       </p>
     </div>
 
-    <div class="actions-row">
-      <button class="btn btn--primary" (click)="pickNewFile()">
-        <i class="fa-solid fa-plus"></i> Add choreo
-      </button>
-    </div>
+    @if (!isEmpty()) {
+      <div class="actions-row">
+        <button class="btn btn--primary" (click)="pickNewFile()">
+          <i class="fa-solid fa-plus"></i> Add choreo
+        </button>
+      </div>
+    }
 
     @if (showSkeleton()) {
       <div class="choreo-list" aria-busy="true" aria-label="Loading choreos">
@@ -73,7 +75,7 @@
       </div>
     } @else if (loading()) {
       <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
-    } @else if (choreos().length === 0) {
+    } @else if (isEmpty()) {
       <div class="empty-state card">
         <div class="empty-state__icon"><i class="fa-solid fa-clapperboard"></i></div>
         <h2>No choreos yet</h2>

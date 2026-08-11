@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChoreoService } from '../../core/services/choreo.service';
@@ -31,6 +31,12 @@ export class MyChoreosComponent implements OnInit, OnDestroy {
   loading = signal(true);
   showSkeleton = delayedLoading(this.loading);
   readonly skeleton = new SkeletonCount('choreos', 3, { max: 10 });
+  /**
+   * Drives both the empty state and the suppression of the toolbar's "Add choreo" — the empty
+   * state carries its own, larger call to action, and two identical buttons on an otherwise
+   * bare page read as a rendering bug rather than as emphasis.
+   */
+  readonly isEmpty = computed(() => !this.loading() && this.choreos().length === 0);
   selected = signal<Choreo | null>(null);
   videoUrl = signal<string | null>(null);
   /** Set when the re-picked file's name differs from the one saved for the choreo. */

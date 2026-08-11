@@ -114,6 +114,13 @@ export class PracticeComponent implements OnInit, OnDestroy {
   /** Only surface sessions that lasted more than a minute — sub-minute blips (stray watches) are noise. */
   readonly visibleSessions = computed(() => meaningfulSessions(this.sessions()));
 
+  /**
+   * Nothing logged, ever — not "nothing in the current timeframe", which is what scopedSessions
+   * answers. Drives the empty state and the suppression of the header's "Log Session", which the
+   * empty state's own call to action replaces while it is up.
+   */
+  readonly isEmpty = computed(() => !this.loading() && this.visibleSessions().length === 0);
+
   /** How many review cards show before the queue collapses behind "show all". */
   private readonly REVIEW_PREVIEW = 6;
 

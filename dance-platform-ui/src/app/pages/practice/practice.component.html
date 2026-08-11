@@ -11,9 +11,13 @@
             <i class="fa-solid fa-download"></i> Export CSV
           </button>
         }
-        <button class="btn btn--primary btn--sm" (click)="toggleAddForm()">
-          @if (showAddForm()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Log Session }
-        </button>
+        <!-- Stands down while the empty state is up — that carries its own, larger call to
+             action. Kept once the form is open, where it is the only way to close it again. -->
+        @if (!isEmpty() || showAddForm()) {
+          <button class="btn btn--primary btn--sm" (click)="toggleAddForm()">
+            @if (showAddForm()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Log Session }
+          </button>
+        }
       </div>
     </div>
   </div>
@@ -301,9 +305,19 @@
     </div>
   } @else if (loading()) {
     <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
-  } @else if (visibleSessions().length === 0) {
-    <div class="empty-state">
-      <p>No practice sessions yet. Watch a dance video — the clock starts on its own — or hit "Log Session"!</p>
+  } @else if (isEmpty()) {
+    <div class="empty-state card">
+      <div class="empty-state__icon"><i class="fa-solid fa-stopwatch"></i></div>
+      <h2>No practice sessions yet</h2>
+      <p>Play any dance video and the clock starts on its own. Anything you practiced away from
+        the screen — a class, an hour in the studio — you can add by hand.</p>
+      <!-- The form opens directly above this, so the button that opened it would be pointing
+           at itself. -->
+      @if (!showAddForm()) {
+        <button class="btn btn--primary btn--sm" (click)="toggleAddForm()">
+          <i class="fa-solid fa-plus"></i> Log your first session
+        </button>
+      }
     </div>
   } @else {
     <div class="sessions-list">
