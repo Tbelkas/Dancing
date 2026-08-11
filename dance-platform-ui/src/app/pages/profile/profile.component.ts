@@ -10,7 +10,7 @@ import { PracticeService } from '../../core/services/practice.service';
 import { AuthService } from '../../core/services/auth.service';
 import { UserProfile } from '../../models/user.model';
 import { PracticeSession } from '../../models/practice-session.model';
-import { computeStreak } from '../../core/utils/practice.utils';
+import { meaningfulSessions, practiceStreak } from '../../core/utils/practice.utils';
 import { delayedLoading } from '../../core/utils/delayed-loading';
 
 @Component({
@@ -34,7 +34,7 @@ export class ProfileComponent implements OnInit {
   editAvatarUrl = '';
   editVisibility: 'Public' | 'Private' = 'Private';
 
-  readonly streak = computed(() => computeStreak(this.sessions()));
+  readonly streak = computed(() => practiceStreak(this.sessions()).current);
 
   readonly totalSessions = computed(() => this.sessions().length);
 
@@ -62,7 +62,7 @@ export class ProfileComponent implements OnInit {
       next: ({ profile, sessions }) => {
         this.profile.set(profile);
         // Ignore sub-minute blips so streak/totals match the Practice Log page.
-        this.sessions.set(sessions.filter(s => s.totalSeconds > 60));
+        this.sessions.set(meaningfulSessions(sessions));
       },
       error: () => this.loadError.set(true)
     });

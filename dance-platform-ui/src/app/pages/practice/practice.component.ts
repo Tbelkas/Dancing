@@ -9,7 +9,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { PracticeSession, PracticeSessionItem } from '../../models/practice-session.model';
 import { ReviewDance } from '../../models/review-dance.model';
 import { toLocalDateString, toPracticeDateString, formatClock } from '../../core/utils/video-url.utils';
-import { computeStreak, computeLongestStreak } from '../../core/utils/practice.utils';
+import { meaningfulSessions, practiceStreak } from '../../core/utils/practice.utils';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { delayedLoading } from '../../core/utils/delayed-loading';
 
@@ -112,7 +112,7 @@ export class PracticeComponent implements OnInit {
   editError = signal('');
 
   /** Only surface sessions that lasted more than a minute — sub-minute blips (stray watches) are noise. */
-  readonly visibleSessions = computed(() => this.sessions().filter(s => s.totalSeconds > 60));
+  readonly visibleSessions = computed(() => meaningfulSessions(this.sessions()));
 
   /** How many review cards show before the queue collapses behind "show all". */
   private readonly REVIEW_PREVIEW = 6;
@@ -122,14 +122,12 @@ export class PracticeComponent implements OnInit {
 
   readonly hiddenReviewCount = computed(() => this.reviewQueue().length - this.visibleReview().length);
 
-  readonly streak = computed(() => computeStreak(this.visibleSessions()));
-  readonly longestStreak = computed(() => computeLongestStreak(this.visibleSessions()));
+  private readonly streakInfo = computed(() => practiceStreak(this.sessions()));
 
+  readonly streak = computed(() => this.streakInfo().current);
+  readonly longestStreak = computed(() => this.streakInfo().longest);
   /** The streak survives today only if the user practices — nudge while it's still alive. */
-  readonly streakAtRisk = computed(() => {
-    const today = toPracticeDateString(new Date());
-    return this.streak() > 0 && !this.visibleSessions().some(s => s.date === today);
-  });
+  readonly streakAtRisk = computed(() => this.streakInfo().atRisk);
 
   readonly scopedSessions = computed(() => {
     const tf = this.timeframe();
@@ -364,7 +362,7 @@ export class PracticeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.newDate = toLocalDateString(new Date());
+    this.newDate = toPracticeDateString(new Date());
     this.danceService.getNames().subscribe(d => this.dances.set(d));
     // Both requests gate the same wait. The review panel renders *above* the stats and the
     // session list, so letting it land on its own pushed 175px of already-painted page down
@@ -454,7 +452,7 @@ export class PracticeComponent implements OnInit {
     this.showAddForm.update(v => !v);
     this.addError.set('');
     this.newDanceId = null;
-    this.newDate = toLocalDateString(new Date());
+    this.newDate = toPracticeDateString(new Date());
     this.newDuration = null;
     this.newNotes = '';
   }

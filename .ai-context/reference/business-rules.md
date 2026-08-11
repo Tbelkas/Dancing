@@ -42,7 +42,10 @@ fix whichever is wrong — but decide deliberately.
   local midnight (but before UTC midnight) count as the wrong day and broke streaks east of
   UTC; and rendering `DateOnly` via `new Date(str)` shifted dates a day west of UTC.
   → FE: default `= local today`; render by parsing `str + 'T00:00:00'` (local midnight).
-- Streak = consecutive local days with ≥1 session, anchored on local today/yesterday.
+- Streak = consecutive **practice days** (local, 4 AM boundary) with ≥1 session over 60s,
+  alive while the newest is today or yesterday. Future-dated sessions are ignored, not a break.
+  One implementation only: `practiceStreak()` in `core/utils/practice.utils.ts` — never
+  recompute it at a call site. See module-context → practice-log.
 
 ## Profiles & visibility
 - **Profiles default to `Private`.** A profile is exposed at `GET /users/{username}` **only

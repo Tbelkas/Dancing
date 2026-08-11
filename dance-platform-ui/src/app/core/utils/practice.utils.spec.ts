@@ -1,0 +1,106 @@
+import { describe, it, expect } from 'vitest';
+import { meaningfulSessions, practiceStreak } from './practice.utils';
+
+/** A logged session on a given day. Duration only matters for the sub-minute cutoff. */
+const on = (date: string, totalSeconds = 600) => ({ date, totalSeconds });
+
+/** A fixed "now" well clear of any day boundary, so tests read as calendar dates. */
+const at = (dateStr: string, hour = 12) => new Date(`${dateStr}T${String(hour).padStart(2, '0')}:00:00`);
+
+/** Neighbouring calendar day, spelled out in the test so it doesn't lean on the code under test. */
+const shift = (dateStr: string, days: number) => {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+describe('meaningfulSessions', () => {
+  it('drops sub-minute blips and keeps the rest', () => {
+    const kept = meaningfulSessions([on('2026-08-11', 61), on('2026-08-11', 60), on('2026-08-10', 5)]);
+    expect(kept).toEqual([on('2026-08-11', 61)]);
+  });
+});
+
+describe('practiceStreak', () => {
+  it('is empty with no sessions', () => {
+    expect(practiceStreak([], at('2026-08-11'))).toEqual({ current: 0, longest: 0, atRisk: false });
+  });
+
+  it('counts consecutive days up to today', () => {
+    const s = practiceStreak([on('2026-08-09'), on('2026-08-10'), on('2026-08-11')], at('2026-08-11'));
+    expect(s.current).toBe(3);
+    expect(s.atRisk).toBe(false);
+  });
+
+  it('counts several sessions on one day once', () => {
+    expect(practiceStreak([on('2026-08-11'), on('2026-08-11')], at('2026-08-11')).current).toBe(1);
+  });
+
+  it('holds the streak through today and flags it at risk', () => {
+    const s = practiceStreak([on('2026-08-09'), on('2026-08-10')], at('2026-08-11'));
+    expect(s.current).toBe(2);
+    expect(s.atRisk).toBe(true);
+  });
+
+  it('breaks once a whole day passes unlogged', () => {
+    expect(practiceStreak([on('2026-08-09'), on('2026-08-10')], at('2026-08-12')).current).toBe(0);
+  });
+
+  it('stops at the first gap', () => {
+    expect(practiceStreak([on('2026-08-07'), on('2026-08-10'), on('2026-08-11')], at('2026-08-11')).current).toBe(2);
+  });
+
+  it('ignores sub-minute blips when they would bridge a gap', () => {
+    const s = practiceStreak([on('2026-08-09'), on('2026-08-10', 20), on('2026-08-11')], at('2026-08-11'));
+    expect(s.current).toBe(1);
+  });
+
+  it('reports the longest run in history even after the current one breaks', () => {
+    const s = practiceStreak(
+      [on('2026-01-01'), on('2026-01-02'), on('2026-01-03'), on('2026-01-04'), on('2026-08-11')],
+      at('2026-08-11')
+    );
+    expect(s.current).toBe(1);
+    expect(s.longest).toBe(4);
+  });
+
+  it('counts a session after midnight toward the previous day', () => {
+    // 1 AM on the 12th is still the 11th's practice day, so the 11th is "today".
+    const s = practiceStreak([on('2026-08-10'), on('2026-08-11')], at('2026-08-12', 1));
+    expect(s.current).toBe(2);
+    expect(s.atRisk).toBe(false);
+  });
+
+  it('treats 4 AM as the start of the new practice day', () => {
+    const s = practiceStreak([on('2026-08-10'), on('2026-08-11')], at('2026-08-12', 4));
+    expect(s.current).toBe(2);
+    expect(s.atRisk).toBe(true);
+  });
+
+  it('ignores a future-dated session instead of reading it as a break', () => {
+    // A device clock ahead, or a hand-typed date: the real run still stands.
+    const s = practiceStreak([on('2026-08-10'), on('2026-08-11'), on('2026-09-01')], at('2026-08-11'));
+    expect(s.current).toBe(2);
+    expect(s.longest).toBe(2);
+  });
+
+  // Both EU (2026-03-29 / 2026-10-25) and US (2026-03-08 / 2026-11-01) transitions, so the
+  // cases are real 23- and 25-hour days whichever timezone the runner sits in.
+  const springForward = ['2026-03-08', '2026-03-29'];
+  const fallBack = ['2026-11-01', '2026-10-25'];
+
+  it('spans a DST transition without dropping a day', () => {
+    for (const day of [...springForward, ...fallBack]) {
+      const before = shift(day, -1);
+      const after = shift(day, 1);
+      expect(practiceStreak([on(before), on(day), on(after)], at(after)).current, day).toBe(3);
+    }
+  });
+
+  it('still grants the grace day on a fall-back day', () => {
+    // The 25-hour day is why "yesterday" can't be now minus 86400000ms.
+    for (const day of fallBack) {
+      expect(practiceStreak([on(shift(day, -1))], at(day)).current, day).toBe(1);
+    }
+  });
+});
