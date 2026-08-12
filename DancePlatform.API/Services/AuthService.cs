@@ -1,11 +1,7 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using DancePlatform.API.Data;
 using DancePlatform.API.DTOs.Auth;
 using DancePlatform.API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace DancePlatform.API.Services;
 
@@ -16,12 +12,12 @@ namespace DancePlatform.API.Services;
 public class AuthService : IAuthService
 {
     private readonly AppDbContext _db;
-    private readonly IConfiguration _config;
+    private readonly ITokenService _tokens;
 
-    public AuthService(AppDbContext db, IConfiguration config)
+    public AuthService(AppDbContext db, ITokenService tokens)
     {
         _db = db;
-        _config = config;
+        _tokens = tokens;
     }
 
     public async Task<AuthResponse?> LoginAsync(LoginRequest request)
@@ -30,12 +26,17 @@ public class AuthService : IAuthService
         // ILIKE would treat as wildcards). Uses the functional unique index on LOWER("Username").
         var username = request.Username.ToLower();
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username);
-        if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        // An account created through Google/Facebook has no password hash. Reject it here rather
+        // than handing an empty hash to BCrypt.Verify — that is the difference between "this
+        // account has no password" and "any password might match".
+        if (user is null || string.IsNullOrEmpty(user.PasswordHash))
+            return null;
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return null;
 
         return new AuthResponse
         {
-            Token = GenerateToken(user),
+            Token = _tokens.CreateAccessToken(user),
             Username = user.Username,
             UserId = user.Id
         };
@@ -70,35 +71,11 @@ public class AuthService : IAuthService
 
         return new AuthResponse
         {
-            Token = GenerateToken(user),
+            Token = _tokens.CreateAccessToken(user),
             Username = user.Username,
             UserId = user.Id
         };
     }
 
-    private string GenerateToken(User user)
-    {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Username),
-            // Admin is carried in the signed token so authorization needs no per-request DB
-            // lookup. Trade-off: a grant/revoke only takes effect once the user gets a new
-            // token (re-login), since the claim is fixed for the token's lifetime.
-            new Claim("isAdmin", user.IsAdmin ? "true" : "false")
-        };
-
-        var token = new JwtSecurityToken(
-            issuer: _config["Jwt:Issuer"],
-            audience: _config["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(_config.GetValue("Jwt:ExpiryDays", 30)),
-            signingCredentials: creds);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
 }
 #pragma warning restore CA1862

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ExternalProvider } from '../../models/external-auth.model';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,14 @@ export class LoginComponent implements OnInit {
   isRegister = signal(false);
   loading = signal(false);
   error = signal('');
+  providers = signal<ExternalProvider[]>([]);
+
+  /** Why a social sign-in bounced back here. Deliberately vague about the cause: the useful
+   *  action is the same either way, and the detail is in the server log. */
+  private static readonly OAUTH_ERRORS: Record<string, string> = {
+    oauth_state: 'That sign-in link expired. Please try again.',
+    oauth_failed: "We couldn't complete that sign-in. Please try again."
+  };
 
   constructor(private auth: AuthService, private router: Router, private route: ActivatedRoute) {}
 
@@ -26,6 +35,26 @@ export class LoginComponent implements OnInit {
     if (this.route.snapshot.url[0]?.path === 'register') {
       this.isRegister.set(true);
     }
+
+    const oauthError = this.route.snapshot.queryParamMap.get('error');
+    if (oauthError) {
+      this.error.set(LoginComponent.OAUTH_ERRORS[oauthError] ?? 'Sign-in failed. Please try again.');
+    }
+
+    // Failing quietly is right here: the password form below is fully usable without this.
+    this.auth.externalProviders().subscribe({
+      next: list => this.providers.set(list),
+      error: () => this.providers.set([])
+    });
+  }
+
+  hasProvider(name: string): boolean {
+    return this.providers().some(p => p.name === name);
+  }
+
+  signInWith(provider: string): void {
+    this.loading.set(true);
+    this.auth.startExternal(provider);
   }
 
   toggleMode(): void {

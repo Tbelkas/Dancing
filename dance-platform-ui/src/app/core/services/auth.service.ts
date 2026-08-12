@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { AuthResponse } from '../../models/user.model';
+import { AuthResponse, UserProfile } from '../../models/user.model';
+import { ExternalProvider, LinkedAccounts, SignupTicket } from '../../models/external-auth.model';
 import { environment } from '../../../environments/environment';
 import { RoleService } from './role.service';
 import { ProfileService } from './profile.service';
@@ -53,6 +54,58 @@ export class AuthService {
   register(data: { username: string; password: string; name: string; nickname: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, data)
       .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); this.syncAccountPrefs(); }));
+  }
+
+  /** Providers with credentials configured server-side. Empty on a dev box with no secrets. */
+  externalProviders(): Observable<ExternalProvider[]> {
+    return this.http.get<ExternalProvider[]>(`${environment.apiUrl}/auth/external/providers`);
+  }
+
+  /** Leaves the SPA for the provider's consent screen. A full navigation, not an XHR — the
+   *  provider has to see a real browser to show its own UI and set its own cookies. */
+  startExternal(provider: string): void {
+    window.location.href = `${environment.apiUrl}/auth/external/${provider}/start`;
+  }
+
+  /** Completes a social sign-in whose token arrived in the redirect fragment. Identity comes from
+   *  /profile rather than an AuthResponse, so this never has to guess how .NET named its claims. */
+  adoptExternalToken(token: string): Observable<UserProfile> {
+    localStorage.setItem(this.TOKEN_KEY, token);
+    this._token.set(token);
+    this.roleService.loadFromToken(token);
+
+    return this.profileService.getProfile().pipe(tap(profile => {
+      localStorage.setItem(this.USER_KEY,
+        JSON.stringify({ userId: profile.id, username: profile.username }));
+      this.currentUserId.set(profile.id);
+      this.currentUsername.set(profile.username);
+    }));
+  }
+
+  /** Describes an unspent sign-up ticket so the username step can show who signed in. */
+  inspectTicket(ticket: string): Observable<SignupTicket> {
+    return this.http.post<SignupTicket>(`${environment.apiUrl}/auth/external/ticket`, { ticket });
+  }
+
+  /** Spends the ticket, creating the account under the chosen username. */
+  completeExternal(ticket: string, username: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/external/complete`, { ticket, username })
+      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); this.syncAccountPrefs(); }));
+  }
+
+  linkedAccounts(): Observable<LinkedAccounts> {
+    return this.http.get<LinkedAccounts>(`${environment.apiUrl}/auth/external/links`);
+  }
+
+  /** Starts a link from the profile page. A POST first, so the bearer token travels in a header
+   *  instead of the query string; the server hands back the URL to navigate to. */
+  startLink(provider: string): Observable<{ url: string }> {
+    return this.http.post<{ url: string }>(
+      `${environment.apiUrl}/auth/external/${provider}/link-start`, {});
+  }
+
+  unlinkAccount(provider: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/auth/external/links/${provider}`);
   }
 
   /** Best-effort profile fetch purely for its side effect: ProfileService mirrors

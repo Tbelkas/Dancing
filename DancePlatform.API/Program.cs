@@ -1,6 +1,7 @@
 using System.Text;
 using DancePlatform.API.Data;
 using DancePlatform.API.Services;
+using DancePlatform.API.Services.ExternalAuth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
+builder.Services.AddSingleton<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDanceService, DanceService>();
 builder.Services.AddScoped<IStyleService, StyleService>();
@@ -54,6 +56,16 @@ builder.Services.AddHttpClient<IYoutubeChapterService, YoutubeChapterService>(cl
     client.DefaultRequestHeaders.Add("Cookie", "CONSENT=YES+cb; SOCS=CAI");
 });
 
+// Social sign-in. Each provider is registered against the shared IExternalAuthProvider contract
+// so ExternalAuthService can enumerate whichever ones actually have credentials — an unconfigured
+// provider is simply absent from /auth/external/providers and gets no button.
+builder.Services.AddSingleton<OAuthStateProtector>();
+builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
+builder.Services.AddHttpClient<GoogleAuthProvider>();
+builder.Services.AddHttpClient<FacebookAuthProvider>();
+builder.Services.AddScoped<IExternalAuthProvider>(sp => sp.GetRequiredService<GoogleAuthProvider>());
+builder.Services.AddScoped<IExternalAuthProvider>(sp => sp.GetRequiredService<FacebookAuthProvider>());
+
 builder.Services.AddHttpClient<IOllamaService, OllamaService>(client =>
 {
     var baseUrl = builder.Configuration["Ollama:BaseUrl"] ?? "http://localhost:11434";
@@ -70,6 +82,28 @@ if (string.IsNullOrWhiteSpace(jwtKey) ||
     throw new InvalidOperationException(
         "Jwt:Key is missing or insecure. Set a strong Jwt__Key (>= 32 chars) via environment configuration before running outside Development.");
 }
+// Same idea for the public base URLs, which only matter once a social provider is configured.
+// A provider set up in production against the committed localhost defaults would build a
+// redirect_uri the provider rejects, and — worse — bounce real users to localhost after consent.
+// Fail at boot instead of at the moment someone tries to sign in.
+var socialConfigured =
+    !string.IsNullOrWhiteSpace(builder.Configuration["Authentication:Google:ClientId"]) ||
+    !string.IsNullOrWhiteSpace(builder.Configuration["Authentication:Facebook:AppId"]);
+if (socialConfigured && !builder.Environment.IsDevelopment())
+{
+    foreach (var key in new[] { "App:ApiUrl", "App:UiUrl" })
+    {
+        var value = builder.Configuration[key];
+        if (string.IsNullOrWhiteSpace(value) || value.Contains("localhost", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"{key} is missing or still points at localhost, but a social sign-in provider is " +
+                $"configured. Set {key.Replace(":", "__", StringComparison.Ordinal)} " +
+                "(e.g. App__UiUrl=https://dance.takelord.com) via environment configuration.");
+        }
+    }
+}
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

@@ -7,6 +7,32 @@
       <div class="error-message" data-testid="login-error">{{ error() }}</div>
     }
 
+    <!--
+      Spelled out per provider rather than looped over the server's list. Each one needs its own
+      brand mark and wording anyway, and a literal data-testid is what keeps these inside the
+      e2e test-id contract — verify:testids scans statically and cannot see a bound attribute.
+      Adding a third provider means adding a block here.
+    -->
+    @if (providers().length) {
+      <div class="social-buttons">
+        @if (hasProvider('google')) {
+          <button type="button" class="social-btn" data-testid="login-google"
+                  (click)="signInWith('google')" [disabled]="loading()">
+            <span class="social-btn__icon social-btn__icon--google" aria-hidden="true"></span>
+            Continue with Google
+          </button>
+        }
+        @if (hasProvider('facebook')) {
+          <button type="button" class="social-btn" data-testid="login-facebook"
+                  (click)="signInWith('facebook')" [disabled]="loading()">
+            <span class="social-btn__icon social-btn__icon--facebook" aria-hidden="true"></span>
+            Continue with Facebook
+          </button>
+        }
+      </div>
+      <div class="divider"><span>or</span></div>
+    }
+
     <form (ngSubmit)="submit()" #form="ngForm">
       <div class="form-group">
         <label for="login-username">Username</label>

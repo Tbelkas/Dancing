@@ -130,6 +130,43 @@
             </div>
           </div>
         </div>
+
+        <!-- Connected accounts -->
+        @if (linked(); as links) {
+          <div class="card" data-testid="connected-accounts">
+            <h3>Connected accounts</h3>
+
+            @if (linkMessage()) {
+              <p class="link-message" [class.link-message--error]="linkFailed()">{{ linkMessage() }}</p>
+            }
+
+            @for (account of links.accounts; track account.provider) {
+              <div class="setting-row">
+                <div class="setting-text">
+                  <span class="setting-label">{{ account.displayName }}</span>
+                  <span class="setting-desc">{{ account.email ?? 'Connected' }}</span>
+                </div>
+                @if (canUnlink()) {
+                  <button type="button" class="btn btn--ghost" (click)="unlink(account.provider)"
+                          [disabled]="busyProvider() === account.provider">Disconnect</button>
+                } @else {
+                  <span class="setting-desc">Your only sign-in</span>
+                }
+              </div>
+            }
+
+            @for (provider of unlinkedProviders(); track provider.name) {
+              <div class="setting-row">
+                <div class="setting-text">
+                  <span class="setting-label">{{ provider.displayName }}</span>
+                  <span class="setting-desc">Not connected</span>
+                </div>
+                <button type="button" class="btn btn--ghost" (click)="link(provider.name)"
+                        [disabled]="busyProvider() === provider.name">Connect</button>
+              </div>
+            }
+          </div>
+        }
       </div>
     </div>
   } @else if (loadError()) {

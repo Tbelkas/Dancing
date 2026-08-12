@@ -196,3 +196,16 @@
   cursor: wait;
   opacity: 0.7;
 }
+
+.link-message {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin-bottom: 14px;
+}
+
+.link-message--error {
+  color: var(--color-danger, #ff6b6b);
+}

@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DancePathPipe } from '../../shared/pipes/dance-path.pipe';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { ProfileService } from '../../core/services/profile.service';
 import { PracticeService } from '../../core/services/practice.service';
 import { AuthService } from '../../core/services/auth.service';
 import { UserProfile } from '../../models/user.model';
+import { ExternalProvider, LinkedAccounts } from '../../models/external-auth.model';
 import { PracticeSession } from '../../models/practice-session.model';
 import { meaningfulSessions, practiceStreak } from '../../core/utils/practice.utils';
 import { delayedLoading } from '../../core/utils/delayed-loading';
@@ -42,17 +43,91 @@ export class ProfileComponent implements OnInit {
     this.sessions().reduce((sum, s) => sum + (s.durationMinutes ?? 0), 0)
   );
 
+  linked = signal<LinkedAccounts | null>(null);
+  providers = signal<ExternalProvider[]>([]);
+  busyProvider = signal('');
+  linkMessage = signal('');
+  linkFailed = signal(false);
+
+  /** Providers with credentials that this account hasn't connected yet. */
+  readonly unlinkedProviders = computed(() => {
+    const connected = new Set(this.linked()?.accounts.map(a => a.provider) ?? []);
+    return this.providers().filter(p => !connected.has(p.name));
+  });
+
   constructor(
     private profileService: ProfileService,
     private practiceService: PracticeService,
-    private auth: AuthService
+    private auth: AuthService,
+    private route: ActivatedRoute
   ) {}
+
+  /** False when a single social login is the account's only way in — disconnecting it would
+   *  strand the user, so the button isn't offered. The server enforces this too; this just
+   *  avoids presenting an action that can only fail. */
+  readonly canUnlink = computed(() => {
+    const links = this.linked();
+    return !!links && (links.hasPassword || links.accounts.length > 1);
+  });
+
+  link(provider: string): void {
+    this.busyProvider.set(provider);
+    this.auth.startLink(provider).subscribe({
+      next: ({ url }) => { window.location.href = url; },
+      error: () => {
+        this.busyProvider.set('');
+        this.linkFailed.set(true);
+        this.linkMessage.set('Could not start that connection. Please try again.');
+      }
+    });
+  }
+
+  unlink(provider: string): void {
+    this.busyProvider.set(provider);
+    this.auth.unlinkAccount(provider).subscribe({
+      next: () => {
+        this.busyProvider.set('');
+        this.linkFailed.set(false);
+        this.linkMessage.set('Disconnected.');
+        this.loadLinkedAccounts();
+      },
+      error: err => {
+        this.busyProvider.set('');
+        this.linkFailed.set(true);
+        this.linkMessage.set(err.error?.message ?? 'Could not disconnect that account.');
+      }
+    });
+  }
+
+  private loadLinkedAccounts(): void {
+    this.auth.linkedAccounts().subscribe({
+      next: links => this.linked.set(links),
+      error: () => this.linked.set(null)
+    });
+  }
 
   signOut(): void {
     this.auth.logout();
   }
 
   ngOnInit(): void {
+    // The link flow leaves the app entirely and comes back here via the provider's callback,
+    // so the outcome arrives as a query param rather than an HTTP response.
+    const params = this.route.snapshot.queryParamMap;
+    if (params.get('linked')) {
+      this.linkFailed.set(false);
+      this.linkMessage.set('Account connected.');
+    } else if (params.get('linkError')) {
+      this.linkFailed.set(true);
+      this.linkMessage.set('That account is already connected to a different Dance Platform user.');
+    }
+
+    this.loadLinkedAccounts();
+    this.auth.externalProviders().subscribe({
+      next: list => this.providers.set(list),
+      error: () => this.providers.set([])
+    });
+
     forkJoin({
       profile: this.profileService.getProfile(),
       // Practice history is secondary — if it fails, still show the profile with an empty streak

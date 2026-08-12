@@ -9,6 +9,10 @@ export const routes: Routes = [
   { path: '', title: 'Dance Platform · Learn any dance, one loop at a time', loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent), canActivate: [landingGuard] },
   { path: 'login', title: 'Sign in · Dance Platform', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
   { path: 'register', title: 'Create account · Dance Platform', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
+  // Where a provider's callback sends the browser back to. No guard: the whole point is that the
+  // user isn't authenticated yet when they arrive.
+  { path: 'auth/callback', title: 'Signing in · Dance Platform', loadComponent: () => import('./pages/auth-callback/auth-callback.component').then(m => m.AuthCallbackComponent) },
+  { path: 'finish-signup', title: 'Pick your username · Dance Platform', loadComponent: () => import('./pages/finish-signup/finish-signup.component').then(m => m.FinishSignupComponent) },
   { path: 'dances', title: 'Browse Dances · Dance Platform', loadComponent: () => import('./pages/dances/dances.component').then(m => m.DancesComponent) },
   { path: 'roadmaps', title: 'Roadmaps · Dance Platform', loadComponent: () => import('./pages/roadmaps/roadmaps.component').then(m => m.RoadmapsComponent) },
   // Ahead of ':slug', or "new" resolves as a roadmap slug and 404s.

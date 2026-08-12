@@ -18,6 +18,27 @@ responses are `XxxDto` (never raw entities).
 
 JWT claims: `NameIdentifier`=userId, `Name`=username, `isAdmin`=`"true"`/`"false"` (signed).
 The FE reads admin from the token claim (`jwtIsAdmin()`); there is no role endpoint.
+All tokens — password *and* social — are issued by `ITokenService.CreateAccessToken`.
+
+## Social sign-in — `/api/auth/external`
+
+Google and Facebook only. **Instagram is not offered**: personal IG accounts have had no API
+path since Basic Display shut down on 2024-12-04.
+
+| Method | Path | Auth | Body | Returns |
+|--------|------|------|------|---------|
+| GET | `/auth/external/providers` | — | — | `ExternalProviderDto[]` — only providers with credentials configured. Empty array is normal on a dev box |
+| GET | `/auth/external/{provider}/start` | — | — | **302** to the provider's consent screen (state + PKCE). 404 if the provider is unknown *or* unconfigured |
+| POST | `/auth/external/{provider}/link-start` | Bearer | — | `{ url }` to navigate to. A POST so the token rides in a header, not the query string |
+| GET | `/auth/external/{provider}/callback` | — | — | **302** to `{ui}/auth/callback#token=…` (known user), `{ui}/finish-signup#ticket=…` (new user), or `{ui}/profile?linked=…` (link flow). Errors bounce to `{ui}/login?error=oauth_state\|oauth_failed` |
+| POST | `/auth/external/ticket` | — | `{ ticket }` | `SignupTicketDto { provider, email, name, suggestedUsername }`; 401 if expired/forged |
+| POST | `/auth/external/complete` | — | `{ ticket, username }` | `AuthResponse`; 401 bad ticket, 409 username taken, 400 malformed username |
+| GET | `/auth/external/links` | Bearer | — | `LinkedAccountsDto { accounts[], hasPassword }` |
+| DELETE | `/auth/external/links/{provider}` | Bearer | — | 204; 404 not linked; **409 if it's the account's only way to sign in** |
+| POST | `/auth/external/facebook/data-deletion` | — | form `signed_request` | `{ url, confirmation_code }`. Meta requires this before a FB app can go Live; HMAC-verified against the app secret |
+
+The access token is returned in the **URL fragment**, never a query param — a fragment isn't
+sent to the server, so it stays out of Apache's access log and out of `Referer` headers.
 
 ## Dances — `/api/dances`
 | Method | Path | Auth | Notes |

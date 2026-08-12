@@ -6,6 +6,17 @@
   "Jwt": {
     "Key": "a-local-dev-signing-key-at-least-32-characters-long"
   },
+  "_social_signin": "Optional. Leave a provider blank and its sign-in button simply isn't offered. Google redirect URI to register: http://localhost:5000/api/auth/external/google/callback",
+  "Authentication": {
+    "Google": {
+      "ClientId": "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
+      "ClientSecret": "YOUR_GOOGLE_CLIENT_SECRET"
+    },
+    "Facebook": {
+      "AppId": "YOUR_FACEBOOK_APP_ID",
+      "AppSecret": "YOUR_FACEBOOK_APP_SECRET"
+    }
+  },
   "Logging": {
     "LogLevel": {
       "Default": "Debug",

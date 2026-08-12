@@ -8,6 +8,7 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<UserLogin> UserLogins => Set<UserLogin>();
     public DbSet<Dance> Dances => Set<Dance>();
     public DbSet<Style> Styles => Set<Style>();
     public DbSet<MusicalStyle> MusicalStyles => Set<MusicalStyle>();
@@ -194,6 +195,24 @@ public class AppDbContext : DbContext
         // LOWER(...) so "Justas" and "justas" are the same account.
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Username);
+
+        // External sign-in methods die with the account they belong to.
+        modelBuilder.Entity<UserLogin>()
+            .HasOne(l => l.User)
+            .WithMany(u => u.Logins)
+            .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // The identity constraint of the whole feature: one provider subject maps to exactly one
+        // account. Without uniqueness here, a race on the callback could mint two accounts for the
+        // same Google user, and the second sign-in would pick between them arbitrarily.
+        modelBuilder.Entity<UserLogin>()
+            .HasIndex(l => new { l.Provider, l.ProviderUserId })
+            .IsUnique();
+
+        // Backs the "which providers is this account linked to?" lookup on the profile page.
+        modelBuilder.Entity<UserLogin>()
+            .HasIndex(l => l.UserId);
 
         modelBuilder.Entity<VideoRating>()
             .HasKey(vr => new { vr.UserId, vr.VideoId });

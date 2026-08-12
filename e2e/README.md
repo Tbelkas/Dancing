@@ -121,7 +121,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 76 attributes are a contract. Treat them like a public API.**
+**These 86 attributes are a contract. Treat them like a public API.**
 
 The personal-skill-tree rows below (`roadmap-new` … `builder-step-clip`, and
 `profile-shared-roadmaps`) are **dormant**: the markup still carries them, but it is gated on
@@ -133,6 +133,10 @@ they are — the tests come back with the feature.
 | `nav-browse`, `nav-my-dances`, `nav-sign-in`, `nav-roadmaps` | `app.component.html` | Header nav links |
 | `user-menu-button`, `sign-out` | `app.component.html` | Account menu |
 | `login-username`, `login-password`, `login-submit`, `login-error` | `login.component.html` | Sign-in form |
+| `login-google`, `login-facebook` | `login.component.html` | Social sign-in buttons. Rendered from `GET /auth/external/providers`, so a provider with no server-side credentials produces **no button at all** — assert on them conditionally, never unconditionally |
+| `finish-signup-username`, `finish-signup-submit`, `finish-signup-error` | `finish-signup.component.html` | The username step a first-time social sign-in lands on. Reachable only with a valid ticket in the URL fragment; without one the page redirects to `/login` |
+| `auth-callback` | `auth-callback.component.ts` | The post-provider landing page. Consumes the token from the fragment and redirects — it is never a resting state |
+| `connected-accounts` | `profile.component.html` | The Connected accounts card. **Absent** until `GET /auth/external/links` resolves |
 | `search-input`, `results-count`, `sort-select`, `empty-state` | `dances.component.html` | Browse controls |
 | `style-filter-pills` | `dances.component.html` | The Style filter row — `.style-filters` alone also matches the Level row |
 | `dance-card`, `dance-card-link` | `dances.component.html` | Result cards — **on both the grid card and the list row** |

@@ -11,15 +11,33 @@ unless a composite key is listed.
 |--------|------|-------|
 | Id | int PK | |
 | Username | string | **unique index** |
-| PasswordHash | string | BCrypt |
+| PasswordHash | string | BCrypt. **Empty for social-only accounts** — `LoginAsync` rejects an empty hash before calling `BCrypt.Verify`, so the password form can't reach them |
+| Email | string? | From an external provider; null for password registrations. Display/recovery only — **never** the identity key |
 | Name | string | |
 | Nickname | string | |
-| IsAdmin | bool | default `false`; the admin gate (checked live, not in JWT) |
+| IsAdmin | bool | default `false`; the admin gate. Stamped into the JWT as a signed `isAdmin` claim at issuance — **not** re-read per request, so a grant/revoke takes effect on the user's next login |
 | AvatarUrl | string? | |
 | Visibility | enum `ProfileVisibility` | **default `Private`** (`Public=0, Private=1`) |
 | DateAdded | datetime | |
 
-Nav: FavoriteDances, LearnedDances, InProgressDances, MyStyles, Ratings, PracticeSessions.
+Nav: Logins, FavoriteDances, LearnedDances, InProgressDances, MyStyles, Ratings, PracticeSessions.
+
+### UserLogin
+An external sign-in method (Google, Facebook). A user may hold several, alongside or instead of
+a password.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| Id | int PK | |
+| UserId | int FK → User | **cascade delete** |
+| Provider | string | `"google"` / `"facebook"` — matches `IExternalAuthProvider.Name` |
+| ProviderUserId | string | The provider's immutable subject id |
+| Email | string? | As reported at link time; display only |
+| CreatedAt | datetime | |
+
+**Unique index on (Provider, ProviderUserId)** — this is the identity constraint of social
+sign-in. Without it a race on the callback could mint two accounts for the same Google user.
+Also indexed on UserId for the profile page's "connected accounts" lookup.
 
 ### Dance
 | Column | Type | Notes |
@@ -178,6 +196,7 @@ depth and locked/available state are computed per-request in `RoadmapService`, n
 
 ## Relationship notes (from `OnModelCreating`)
 - `Dance.Slug` and `User.Username` are unique indexes.
+- `UserLogin(Provider, ProviderUserId)` is a unique index; UserLogin → User cascades.
 - VideoSegment, VideoRating, PracticeSession, DanceInstructor(dance side) → cascade delete.
 - DanceInstructor → Instructor side is **Restrict** (can't delete an instructor still linked
   to a dance via cascade; remove links first).
