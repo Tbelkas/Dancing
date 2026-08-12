@@ -1,0 +1,76 @@
+{
+  "slug": "tutting-fingers",
+  "styleName": "Tutting",
+  "title": "Finger tutting",
+  "subtitle": "The same geometry, at the scale of a hand.",
+  "description": "Finger tutting is tutting's vocabulary shrunk onto the fingers, and it long ago stopped being only a dance: it went through gloving and light shows and out into Samsung adverts, and its best teachers — Pnut of Finger Circus, JayFunk, RYOGA — come from that world as much as from popping. It has a genuinely agreed progression, which the parent style does not: finger tuts, then digits, then monstas. Work it in that order. The hands take longer to build than the arms, and the advanced shapes will hurt you if you rush them.",
+  "sortOrder": 0,
+  "stages": [
+    {
+      "title": "The three tiers",
+      "description": "Pnut's own ladder, and the one nearly every finger tutting tutorial since has followed.",
+      "steps": [
+        {
+          "key": "finger-basics",
+          "title": "What finger tutting is",
+          "description": "Watch a full beginner tutorial before drilling. The hands do here exactly what the arms do in the parent style — right angles, fixed points, tracing — only smaller and faster.",
+          "danceSlug": "finger-tutting"
+        },
+        {
+          "key": "finger-tuts",
+          "title": "Finger tuts",
+          "requires": ["finger-basics"],
+          "description": "The beginner tier: plain right-angle shapes made with the fingers of both hands, held still enough to actually read. Speed here is worth nothing until the shapes are legible.",
+          "danceSlug": "finger-tuts"
+        },
+        {
+          "key": "digits",
+          "title": "Digits",
+          "requires": ["finger-tuts"],
+          "description": "Interlock the fingers of both hands into one shape and rotate it as a single unit. The middle tier, and the point at which finger tutting starts looking like a mechanism rather than a gesture.",
+          "danceSlug": "digits"
+        },
+        {
+          "key": "monstas",
+          "title": "Monstas",
+          "requires": ["digits", "stacking"],
+          "description": "The advanced tier: compound digits folding several shapes through each other, at the edge of what most hands will physically do. Pnut's own warning applies — his hands are unusual, and this tier is where people injure themselves.",
+          "danceSlug": "monstas"
+        }
+      ]
+    },
+    {
+      "title": "What makes the tiers possible",
+      "description": "Two capacities that have to be built alongside the shapes, not after them.",
+      "steps": [
+        {
+          "key": "stacking",
+          "title": "Finger stacking",
+          "requires": ["finger-tuts"],
+          "description": "Layer the fingers of both hands into one stacked column and peel them apart in order. This is a finger-independence drill wearing a move's clothing, and it is what the harder digits are actually waiting on.",
+          "danceSlug": "finger-stacking"
+        },
+        {
+          "key": "tunneling",
+          "title": "Tunneling",
+          "requires": ["digits"],
+          "description": "Pass one hand through the gap made by the other without either shape breaking. The finger-scale version of tracing, and the concept that lets two hands look like one object.",
+          "danceSlug": "tunneling"
+        }
+      ]
+    },
+    {
+      "title": "Using it",
+      "description": "Finger tutting is watched close up and slowed down. Clean beats fast, every time.",
+      "steps": [
+        {
+          "key": "finger-combo",
+          "title": "A full finger phrase",
+          "requires": ["tunneling", "monstas"],
+          "description": "Digits, tunnels and traces together at the speed they are meant to be done. Film it on a phone and watch it back at quarter speed — that is roughly how an audience sees it, and it is unforgiving.",
+          "danceSlug": "finger-tutting-combo"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "slug": "tutting-geometry",
+  "styleName": "Tutting",
+  "title": "The grid and the boxes",
+  "subtitle": "Why tutting is learnable and not just copyable.",
+  "description": "Every serious tutting syllabus — Mr. Wiggles' Menu, Dance Djedi's Tutting I, the Tutting Institution's ladder — organises the style the same way: not around moves, but around a fixed geometry drawn on your own body. The reference points do not move, so the arms always have somewhere definite to be, and a shape can be described, drilled and corrected instead of merely imitated. Get through this and you stop learning tutting move by move; you start reading it.",
+  "sortOrder": 0,
+  "stages": [
+    {
+      "title": "The reference",
+      "description": "Before any shape, the points it is measured against.",
+      "steps": [
+        {
+          "key": "body-points",
+          "title": "The four body points",
+          "description": "Chin, chest, waist, shoulder. The targets the hands travel between, all of them on you and none of them moving. Touch each one with each hand until you can find them with your eyes shut — back tuts depend on this later.",
+          "danceSlug": "four-body-points"
+        },
+        {
+          "key": "four-square",
+          "title": "The four square",
+          "requires": ["body-points"],
+          "description": "Two forearms and two upper arms making four right angles in front of the chest. The first real tutting position, and the one every later shape is a deviation from.",
+          "danceSlug": "the-four-square"
+        },
+        {
+          "key": "grid",
+          "title": "The grid",
+          "requires": ["four-square"],
+          "description": "Expand the four square up and down into levels so the arms have a whole lattice of positions rather than one plane. Taught as the \"holy grid\": the map everything else is drawn on.",
+          "danceSlug": "the-grid"
+        }
+      ]
+    },
+    {
+      "title": "Boxes",
+      "description": "The shape everyone pictures when they hear tutting — and the one that quietly falls apart the moment it has to move.",
+      "steps": [
+        {
+          "key": "box-tuts",
+          "title": "Box tuts",
+          "requires": ["four-square"],
+          "description": "Close the arms into a real box or rectangle with the hands completing the shape. Second thing on every syllabus after the King Tut, and the first shape that reads from across a room.",
+          "danceSlug": "box-tuts"
+        },
+        {
+          "key": "squaring",
+          "title": "Squaring the boxes",
+          "requires": ["box-tuts"],
+          "description": "Keep a box genuinely square while it travels and rotates, instead of letting it sag into a parallelogram as soon as the arms move. This is where clean tutting parts company with approximate tutting.",
+          "danceSlug": "squaring-the-boxes"
+        },
+        {
+          "key": "magic-box",
+          "title": "The magic box",
+          "requires": ["squaring"],
+          "description": "A box that appears to hang fixed in space while the arms rebuild it around a different pair of limbs. Fixed points and boxes doing their jobs at the same time.",
+          "danceSlug": "the-magic-box"
+        }
+      ]
+    },
+    {
+      "title": "Off the front plane",
+      "description": "The same geometry, no longer facing the audience square on.",
+      "steps": [
+        {
+          "key": "advanced-four-square",
+          "title": "Advanced four square",
+          "requires": ["grid", "squaring"],
+          "description": "The four square rotated, inverted and stacked above and behind the body, once the basic version happens without thinking. Do not start this before the plain one is automatic — it will only teach you a sloppier version of the same shape.",
+          "danceSlug": "advanced-four-square"
+        },
+        {
+          "key": "grid-drill",
+          "title": "Name the point, hit the point",
+          "requires": ["advanced-four-square", "magic-box"],
+          "description": "Have someone call out a body point and a level at random and hit it on the next beat, with no sequence to fall back on. The drill that proves the grid is memorised rather than recited, and the one that makes freestyle possible later."
+        }
+      ]
+    }
+  ]
+}

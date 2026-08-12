@@ -1,0 +1,205 @@
+{
+  "slug": "tutting",
+  "styleName": "Tutting",
+  "title": "Tutting",
+  "subtitle": "It is a popping style before it is a shape-making one. Learn it in that order.",
+  "description": "Tutting was made in 1979 by Mark Benson — King Boogaloo Tut — who took the angular figures off Egyptian bas-reliefs and hit them like a popper, one position at a time. That is still the whole mechanic: pop into a position, hold it, snap to the next. The shapes get the attention, but a dancer who makes perfect boxes and drifts between them is not tutting, and a dancer who hits rough angles cleanly on the beat is. So this path starts with the hit and the right angle, not with a combo. From there it goes where every real syllabus goes — to the grid, the fixed reference points on your own body that the arms travel between, which is what makes tutting learnable instead of mimicry. Two nodes open into modules of their own: the geometry and the fingers are each a path's worth of work.",
+  "sortOrder": 40,
+  "stages": [
+    {
+      "title": "It's popping first",
+      "description": "Tutting is an element of popping that grew its own community. Everything below is borrowed from that parent style, and skipping it is why so much tutting looks like careful posing.",
+      "steps": [
+        {
+          "key": "overview",
+          "title": "What tutting is",
+          "description": "Watch a beginner tutorial end to end before drilling anything, so the later steps have somewhere to attach. Come back here whenever a concept stops making sense on its own.",
+          "danceSlug": "tutting"
+        },
+        {
+          "key": "the-hit",
+          "title": "Hit the position",
+          "requires": ["overview"],
+          "description": "The founding mechanic: pop into a shape, hold it, then snap to the next with nothing visible in between. Originally described as hitting one position and moving to the next immediately — the shapes are the vocabulary, the hit is the grammar.",
+          "danceSlug": "the-hit"
+        },
+        {
+          "key": "right-angles",
+          "title": "Right angles",
+          "requires": ["overview"],
+          "description": "The 90-degree angle is the basic unit of the entire style. Elbows and wrists square, lines either flat to the floor or straight up. Drill it in a mirror against the door frame behind you — your eye is worse at this than you think.",
+          "danceSlug": "right-angles"
+        },
+        {
+          "key": "stretches",
+          "title": "Stretch the hands first",
+          "requires": ["overview"],
+          "description": "Not optional. Tutting parks the wrists and fingers at the end of their range for minutes at a time, and that range is the hard ceiling on how clean an angle you can make. Two minutes before every session.",
+          "danceSlug": "tutting-stretches"
+        },
+        {
+          "key": "wrist-rolls",
+          "title": "Wrist rolls",
+          "requires": ["stretches"],
+          "description": "Rolling the wrist through its range with the forearm locked. The joint that joins one angle to the next, and the cheapest way to make a flat shape read as three-dimensional.",
+          "danceSlug": "wrist-rolls"
+        }
+      ]
+    },
+    {
+      "title": "Shapes with a reference",
+      "description": "A shape means nothing on its own — it means something against a point that is not moving. This is the stage that separates tutting from waving.",
+      "steps": [
+        {
+          "key": "king-tut",
+          "title": "The King Tut",
+          "requires": ["right-angles", "the-hit"],
+          "description": "The origin move, and still the best diagnostic: forearms flat, upper arms flat, everything square to the audience. Mr. Wiggles teaches it purely as an exercise in cleaner angles, which is exactly what it is.",
+          "danceSlug": "king-tut"
+        },
+        {
+          "key": "fixed-points",
+          "title": "Fixed points",
+          "requires": ["right-angles"],
+          "description": "Choose a knuckle, an elbow or a fingertip and refuse to let it move while everything rotates around it. This is the concept that turns a sequence of poses into an illusion, and the one most often skipped on the way to learning combos.",
+          "danceSlug": "fixed-points"
+        },
+        {
+          "key": "geometry",
+          "title": "The grid and the boxes",
+          "requires": ["king-tut"],
+          "description": "Body points, the four square, the grid built on top of it, and every box that comes out of them. Seven steps of their own — this is the bulk of the style, and finishing them marks this node.",
+          "module": "tutting-geometry"
+        }
+      ]
+    },
+    {
+      "title": "Joining the shapes",
+      "description": "The positions are the easy half. A path between them that stays on the grid is the actual craft, and it is where a tutter stops looking like a slideshow.",
+      "steps": [
+        {
+          "key": "transitions",
+          "title": "Moving between positions",
+          "requires": ["geometry", "the-hit"],
+          "description": "Getting from one shape to the next without a visible scramble. If you can hit two positions but the join is a guess, the phrase reads as two moves rather than one.",
+          "danceSlug": "tutting-transitions"
+        },
+        {
+          "key": "tracing",
+          "title": "Tracing",
+          "requires": ["geometry"],
+          "description": "One hand follows the edge of the other arm, or of a shape you are holding in the air. JayFunk teaches this second, before any combo, because it is what gives a phrase continuity — practise it in freestyle rather than as a routine.",
+          "danceSlug": "tracing"
+        },
+        {
+          "key": "isolation-points",
+          "title": "Isolation points",
+          "requires": ["fixed-points"],
+          "description": "A fixed point applied inside a moving phrase rather than to a single held shape: one joint stays absolutely still and everything else is read against it.",
+          "danceSlug": "isolation-points"
+        },
+        {
+          "key": "hinges",
+          "title": "Hinges",
+          "requires": ["transitions"],
+          "description": "Treat a joint as a hinge with exactly one axis, so a limb folds and opens flat instead of swinging through an arc. This is what makes tutting look mechanical rather than merely angular.",
+          "danceSlug": "hinges"
+        },
+        {
+          "key": "folds",
+          "title": "Folds and unfolds",
+          "requires": ["hinges"],
+          "description": "Collapse a shape into itself and open it back out along the same path. The cheapest way out of a position you have painted yourself into.",
+          "danceSlug": "folds-and-unfolds"
+        },
+        {
+          "key": "crumbling",
+          "title": "Crumbling",
+          "requires": ["folds"],
+          "description": "Let a shape fall apart joint by joint instead of all at once, so leaving a position is itself a move. Usually taught as the fix for freezing up mid-phrase.",
+          "danceSlug": "crumbling"
+        }
+      ]
+    },
+    {
+      "title": "Off the flat plane",
+      "description": "Most tutting lives on one pane of glass in front of the chest. These take it into the round, and they are what a battle-level tutter has that a beginner does not.",
+      "steps": [
+        {
+          "key": "3d-space",
+          "title": "Three dimensions",
+          "requires": ["geometry", "fixed-points"],
+          "description": "Build shapes with depth away from the body. Often taught as a Rubik's-cube idea: the shape has a back and two sides, not only a face, and you can turn it.",
+          "danceSlug": "3d-space"
+        },
+        {
+          "key": "back-tuts",
+          "title": "Tuts behind the body",
+          "requires": ["3d-space"],
+          "description": "Shapes made behind the torso, where you cannot see your own hands and have to work entirely off the body points. The reason the grid was worth memorising.",
+          "danceSlug": "back-tuts"
+        },
+        {
+          "key": "floor-tuts",
+          "title": "Tutting on the floor",
+          "requires": ["3d-space"],
+          "description": "Take the grid to the ground and use the floor itself as one of the fixed planes. The half of the style that arm-only tutters never build.",
+          "danceSlug": "floor-tuts"
+        },
+        {
+          "key": "leg-tuts",
+          "title": "Tut with the legs",
+          "requires": ["floor-tuts"],
+          "description": "The same right angles made with knees and ankles, usually standing on one leg. Mr. Wiggles put leg tuts into a battle and they stuck. Nothing in the catalog teaches this yet — search for leg tutting drills and expect balance to be the limit, not geometry."
+        }
+      ]
+    },
+    {
+      "title": "The hands",
+      "description": "Finger tutting grew out of this style and then out of dance entirely, into gloving and light shows. It has its own pioneers, its own tiers and its own path.",
+      "steps": [
+        {
+          "key": "fingers",
+          "title": "Finger tutting",
+          "requires": ["right-angles", "wrist-rolls"],
+          "description": "Finger tuts, digits, stacking, tunnels and monstas — the whole hand-scale discipline, in the order Pnut and JayFunk teach it. Seven steps of their own.",
+          "module": "tutting-fingers"
+        }
+      ]
+    },
+    {
+      "title": "Making it dance",
+      "description": "Everything above is vocabulary. Tutting is a battle style, and none of it counts until it lands on a record you have not heard before.",
+      "steps": [
+        {
+          "key": "patterns",
+          "title": "Build a stock of patterns",
+          "requires": ["tracing", "transitions"],
+          "description": "Collect ready-made shapes and short sequences so that freestyling is a choice between things you know rather than an attempt to invent geometry in real time.",
+          "danceSlug": "tutting-patterns"
+        },
+        {
+          "key": "combo",
+          "title": "Learn a full combo",
+          "requires": ["transitions", "hinges"],
+          "description": "Angles, boxes and transitions strung into one phrase. The first thing on this path that looks like dancing rather than drilling — and deliberately not the first thing on it.",
+          "danceSlug": "tutting-combo"
+        },
+        {
+          "key": "musicality",
+          "title": "Put the hits where the record does",
+          "requires": ["the-hit", "combo"],
+          "description": "A technically clean phrase landing off the beat reads worse than a rough one landing on it. This is where the popping foundation from the first stage finally pays.",
+          "danceSlug": "tutting-musicality"
+        },
+        {
+          "key": "freestyle",
+          "title": "Freestyle rounds",
+          "requires": ["patterns", "musicality"],
+          "description": "Ninety seconds, no combo in mind. Notice how much of your tutting was a routine you were recalling rather than shapes you were choosing — then drop the routine.",
+          "danceSlug": "freestyle-tutting"
+        }
+      ]
+    }
+  ]
+}
