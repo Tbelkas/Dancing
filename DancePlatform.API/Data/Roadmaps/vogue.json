@@ -1,0 +1,136 @@
+{
+  "slug": "vogue",
+  "styleName": "Vogue",
+  "title": "Vogue",
+  "subtitle": "Learn the ballroom before you learn the arms.",
+  "description": "Vogue was made by Black and Latino LGBTQ+ people in Harlem's ball scene — a world of chosen families called houses, competing at balls in categories, that goes back to drag balls in the 1920s and took its modern shape in 1970 when Crystal LaBeija founded the House of LaBeija rather than keep losing rigged pageants. The dance is scored competition, not choreography, and it carries the people who made it. That is why this path spends its first branch on the culture: you cannot walk a category you cannot name, and a dancer who has taken the moves without the ballroom has taken the wrong thing. After that it splits the way the dance itself splits — into Old Way, New Way and Vogue Fem, three genuinely different styles rather than three difficulty levels. Each opens as a module of its own.",
+  "sortOrder": 50,
+  "stages": [
+    {
+      "title": "Before you vogue",
+      "description": "Nothing here is a movement step, and none of it is optional. This is a competitive dance owned by a living community, and the vocabulary below is what its rooms actually run on.",
+      "steps": [
+        {
+          "key": "what-vogue-is",
+          "title": "What vogue is",
+          "description": "A competitive performance dance out of the Harlem ball scene — judged, walked in categories, and much older than the Madonna record most people first heard it through. Start with a short overview and one history piece before you move at all.",
+          "danceSlug": "what-vogue-is"
+        },
+        {
+          "key": "herstory",
+          "title": "Ballroom herstory",
+          "requires": ["what-vogue-is"],
+          "description": "Drag balls from the 1920s, the racism of the pageant circuit, and Crystal LaBeija walking out and founding the first house in 1970. Paris Is Burning is the famous document but it is a 1990 snapshot by an outsider — treat it as one source, not the source.",
+          "danceSlug": "ballroom-herstory"
+        },
+        {
+          "key": "houses",
+          "title": "Houses and balls",
+          "requires": ["herstory"],
+          "description": "A house is a chosen family with a mother or father, not a building, and it exists because its members were thrown out of somewhere else. A ball is where houses compete. Both are the structure the dance lives inside.",
+          "danceSlug": "houses-and-balls"
+        },
+        {
+          "key": "categories",
+          "title": "Walking a category",
+          "requires": ["houses"],
+          "description": "You do not just vogue at a ball — you walk a named category with its own criteria. Face, body, runway, realness, and the vogue categories are each judged on different things.",
+          "danceSlug": "ballroom-categories"
+        },
+        {
+          "key": "realness",
+          "title": "Realness",
+          "requires": ["categories"],
+          "description": "The category judged on passing convincingly — executive, schoolboy, femme queen. The least dance-like thing at a ball and the closest to why balls exist at all. Understand it before you walk anything.",
+          "danceSlug": "realness"
+        }
+      ]
+    },
+    {
+      "title": "The common vocabulary",
+      "description": "Three things every style assumes. Build them before choosing which way you want to vogue, because all three ways take them for granted.",
+      "steps": [
+        {
+          "key": "hands",
+          "title": "Hand performance",
+          "requires": ["what-vogue-is"],
+          "description": "The story told with the hands and forearms around the face and body. Counted as one of the Five Elements of Vogue Fem, but every style uses it — Old Way frames with it and New Way builds illusions out of it.",
+          "danceSlug": "hand-performance"
+        },
+        {
+          "key": "arm-lines",
+          "title": "Arms and lines",
+          "requires": ["hands"],
+          "description": "Long lines, clean shapes, and detail carried all the way out to the fingertips. The single most visible difference between someone who trains vogue and someone imitating it.",
+          "danceSlug": "vogue-arm-lines"
+        },
+        {
+          "key": "poses",
+          "title": "The pose",
+          "requires": ["arm-lines"],
+          "description": "The magazine poses the dance is named for: struck cleanly, framed around the face, held. Vogue started as posing to a beat, and the pose is still what the arms travel between.",
+          "danceSlug": "vogue-poses"
+        },
+        {
+          "key": "musicality",
+          "title": "Find the ha",
+          "requires": ["what-vogue-is"],
+          "description": "Ballroom tracks are built on a house beat with a crash — the \"ha\" — that dips and hits land on. Counting a vogue track like an ordinary eight-count pop song is the most common beginner mistake and the hardest to unlearn.",
+          "danceSlug": "vogue-musicality"
+        }
+      ]
+    },
+    {
+      "title": "The three ways",
+      "description": "Not three difficulty levels — three styles, from three eras, judged in different categories. Old Way first, because the other two are answers to it.",
+      "steps": [
+        {
+          "key": "old-way",
+          "title": "Old Way",
+          "requires": ["poses", "herstory"],
+          "description": "The original form, called Pop, Dip and Spin before anyone said vogue: symmetry, clean lines, poses popped precisely on the beat. Seven steps of their own.",
+          "module": "vogue-old-way"
+        },
+        {
+          "key": "new-way",
+          "title": "New Way",
+          "requires": ["old-way"],
+          "description": "The 1990s answer to Old Way — rigid arms, arms control, boxes and joint illusions, borrowing openly from locking and tutting. Seven steps of their own.",
+          "module": "vogue-new-way"
+        },
+        {
+          "key": "vogue-fem",
+          "title": "Vogue Fem",
+          "requires": ["arm-lines", "musicality"],
+          "description": "The style most people mean by voguing today, built from the Five Elements and performed anywhere between Dramatics and Soft. Twelve steps of their own.",
+          "module": "vogue-fem"
+        }
+      ]
+    },
+    {
+      "title": "Walking a ball",
+      "description": "The dance was built to be done in a room, in front of judges, for a trophy. None of the above is finished until it has been somewhere.",
+      "steps": [
+        {
+          "key": "runway",
+          "title": "Runway",
+          "requires": ["categories"],
+          "description": "The walk as its own category: posture, timing and command of the floor. European and American runway are scored differently, and both are older than the vogue categories.",
+          "danceSlug": "runway"
+        },
+        {
+          "key": "battle",
+          "title": "Walk a battle",
+          "requires": ["vogue-fem", "realness"],
+          "description": "Two dancers, one track, judges calling it. Everything you drilled alone changes when someone is answering you — the point of a battle is the conversation, not the trick you had ready."
+        },
+        {
+          "key": "your-people",
+          "title": "Find your people",
+          "requires": ["battle", "houses"],
+          "description": "Kiki balls and beginner-friendly houses exist in most cities, and vogue is not a style you can finish off a screen — it is taught body to body and judged in a room. Go and be the worst person there for a while."
+        }
+      ]
+    }
+  ]
+}

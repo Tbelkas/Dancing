@@ -1,0 +1,73 @@
+{
+  "slug": "vogue-new-way",
+  "styleName": "Vogue",
+  "title": "New Way",
+  "subtitle": "Rigid arms, impossible angles, and illusions the eye refuses to accept.",
+  "description": "New Way appeared around 1990 and took Old Way's geometry somewhere Old Way could not go: instead of symmetric poses popped on the beat, a continuous flow of shapes built out of flexibility, joint control and illusion. It borrows openly from locking and tutting, which is why arms control looks so much like a tutter's boxes, and it demands a body that has been stretched for it. Nothing here rewards rushing — the flexibility is the actual work and the shapes are what you do once you have it.",
+  "sortOrder": 0,
+  "stages": [
+    {
+      "title": "The base",
+      "description": "New Way is an illusion style, and every illusion is a straight line bent somewhere unexpected. Build the straight line first.",
+      "steps": [
+        {
+          "key": "new-way-basics",
+          "title": "What New Way is",
+          "description": "Watch a full New Way lesson before drilling. Notice that the arms almost never stop moving — where Old Way is a series of held poses, New Way is one continuous line under control.",
+          "danceSlug": "new-way-vogue"
+        },
+        {
+          "key": "flexibility",
+          "title": "Build the flexibility",
+          "requires": ["new-way-basics"],
+          "description": "Shoulders, wrists and spine, worked patiently and often. Every New Way illusion is a joint going somewhere most joints do not, and the only route there is months of stretching. No shortcut exists, and forcing it is how people injure their shoulders."
+        },
+        {
+          "key": "lines",
+          "title": "Lines",
+          "requires": ["new-way-basics"],
+          "description": "Straight, fully extended lines drilled through both arms as the base every later shape is bent out of. Boring, and exactly why good New Way looks effortless.",
+          "danceSlug": "new-way-lines"
+        }
+      ]
+    },
+    {
+      "title": "Control",
+      "description": "The two named skills the style is judged on.",
+      "steps": [
+        {
+          "key": "arms-control",
+          "title": "Arms control",
+          "requires": ["lines"],
+          "description": "The signature New Way skill: illusions made with the wrists and arms so that they appear to pass through each other rather than around. This is where the locking and tutting borrowing is most obvious.",
+          "danceSlug": "arms-control"
+        },
+        {
+          "key": "boxes",
+          "title": "Boxes",
+          "requires": ["arms-control"],
+          "description": "Right-angled boxes drawn with the forearms and passed around the body. The shape most New Way combinations are assembled from, and the clearest debt the style owes to tutting.",
+          "danceSlug": "new-way-boxes"
+        },
+        {
+          "key": "clicks",
+          "title": "Clicks",
+          "requires": ["arms-control", "flexibility"],
+          "description": "The joint contortions the style is known for — an arm or shoulder rotating past where it should stop, snapped into place. Genuinely risky, entirely dependent on the flexibility work, and taught in person for good reason. No tutorial worth linking exists; find a teacher."
+        }
+      ]
+    },
+    {
+      "title": "Putting it together",
+      "description": "Shapes on their own are a party trick. The style is the joining.",
+      "steps": [
+        {
+          "key": "illusion",
+          "title": "Sell the illusion",
+          "requires": ["boxes", "clicks"],
+          "description": "Chain the shapes so the eye never catches the reset between them, and keep the face out of it — the moment you look like you are concentrating, the illusion is gone. Film yourself; this is one you cannot judge from the inside."
+        }
+      ]
+    }
+  ]
+}

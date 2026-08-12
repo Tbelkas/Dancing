@@ -1,0 +1,74 @@
+{
+  "slug": "vogue-old-way",
+  "styleName": "Vogue",
+  "title": "Old Way",
+  "subtitle": "Pop, Dip and Spin — what it was called before it was called vogue.",
+  "description": "Old Way is the original form, danced in the balls of the 1970s and 80s and captured on film in Paris Is Burning. Its rules are strict and its vocabulary is small: symmetry, clean lines, right angles borrowed from Egyptian figures and martial arts films, and every pose popped exactly on the beat rather than flowed through. In battle it was literally a fight — the older format had you pin your opponent against a wall or the floor and hold them there. Learn it first, because both later styles are arguments with it.",
+  "sortOrder": 0,
+  "stages": [
+    {
+      "title": "The form",
+      "description": "Small vocabulary, high standard. Old Way is judged on precision, and there is nowhere to hide in it.",
+      "steps": [
+        {
+          "key": "old-way-basics",
+          "title": "What Old Way is",
+          "description": "Watch a full Old Way lesson end to end before drilling. Note how little vocabulary there is compared to Vogue Fem, and how much is being asked of each shape.",
+          "danceSlug": "old-way-vogue"
+        },
+        {
+          "key": "pop-dip-spin",
+          "title": "Pop, Dip and Spin",
+          "requires": ["old-way-basics"],
+          "description": "The name the style carried before \"vogue\" existed, and a fair description of the whole thing: a pose popped to the beat, a dip, a spin. Everything else is detail on top of these three.",
+          "danceSlug": "pop-dip-and-spin"
+        },
+        {
+          "key": "pose-beat",
+          "title": "Pose to the beat",
+          "requires": ["pop-dip-spin"],
+          "description": "Land each pose exactly on the beat instead of drifting through it. Old Way is popped, not swum — this single habit is the difference between voguing and posing prettily to music.",
+          "danceSlug": "pose-to-the-beat"
+        }
+      ]
+    },
+    {
+      "title": "Getting between poses",
+      "description": "Two drills that carry the arms from one position to the next without the geometry falling apart.",
+      "steps": [
+        {
+          "key": "switches",
+          "title": "Switches",
+          "requires": ["old-way-basics"],
+          "description": "Switching the arms between front, side, up and down without losing the line or the symmetry. The basic Old Way drill, and the one that exposes sloppy shoulders immediately.",
+          "danceSlug": "old-way-switches"
+        },
+        {
+          "key": "slides",
+          "title": "Slides",
+          "requires": ["switches"],
+          "description": "Travelling one arm along a fixed line into the next position — front slide, up slide. How Old Way moves without breaking the shape it is moving out of.",
+          "danceSlug": "old-way-slides"
+        },
+        {
+          "key": "symmetry",
+          "title": "Mirror yourself",
+          "requires": ["slides", "pose-beat"],
+          "description": "Old Way is scored on symmetry, so drill everything on both sides and check it in a mirror or on camera. Almost everyone is noticeably cleaner on one side and cannot feel it — you have to look."
+        }
+      ]
+    },
+    {
+      "title": "The fight",
+      "description": "Old Way battles were confrontational in a way the later styles are not. Worth knowing even if you never walk one.",
+      "steps": [
+        {
+          "key": "pinning",
+          "title": "Pinning",
+          "requires": ["pop-dip-spin"],
+          "description": "The original competitive object: trap your opponent against a wall or the floor with your shapes and hold them there, so they cannot answer without breaking form. No good tutorial footage of this exists — read about it, and watch old battle tape rather than a lesson."
+        }
+      ]
+    }
+  ]
+}

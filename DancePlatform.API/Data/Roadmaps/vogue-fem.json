@@ -1,0 +1,115 @@
+{
+  "slug": "vogue-fem",
+  "styleName": "Vogue",
+  "title": "Vogue Fem",
+  "subtitle": "The Five Elements, and the whole range between Soft and Dramatics.",
+  "description": "Vogue Fem emerged around 1995, emphasising an exaggerated, theatrical femininity, and it is what most people now mean by voguing. Unlike the other two styles it has an agreed syllabus — the Five Elements: hand performance, catwalk, duckwalk, floor performance, and spins and dips. What it does not have is one correct intensity. The same five elements are walked as Dramatics, all speed and stunts, or as Soft, all grace and unbroken flow, and both are judged seriously. Learn the elements first and pick your end of that range afterwards, not before. Hand performance is on the main path rather than here, because all three styles use it.",
+  "sortOrder": 0,
+  "stages": [
+    {
+      "title": "Walking",
+      "description": "Two of the Five Elements, and the ones that carry you around the floor between everything else.",
+      "steps": [
+        {
+          "key": "fem-basics",
+          "title": "What Vogue Fem is",
+          "description": "Watch a beginner Vogue Fem lesson end to end. Note that the softness is a technique and not an absence of one — the flow costs as much control as the stunts do.",
+          "danceSlug": "vogue-fem"
+        },
+        {
+          "key": "catwalk",
+          "title": "Catwalk",
+          "requires": ["fem-basics"],
+          "description": "The exaggerated runway walk, hips leading, arms switching overhead. The element you spend the most total time in, and the one that reveals whether you have found the beat.",
+          "danceSlug": "catwalk"
+        },
+        {
+          "key": "duckwalk",
+          "title": "Duckwalk",
+          "requires": ["catwalk"],
+          "description": "Travelling in a deep squat, bouncing on the beat, kicking forward from the heel. Universally dreaded, unavoidable, and hard on the knees — build up slowly and stop when they complain.",
+          "danceSlug": "duckwalk"
+        }
+      ]
+    },
+    {
+      "title": "The floor",
+      "description": "Floor performance is a whole element with its own named moves. Wear knee pads from the first session, not from the first injury.",
+      "steps": [
+        {
+          "key": "floor",
+          "title": "Floor performance",
+          "requires": ["duckwalk"],
+          "description": "Getting down, performing on the ground and getting back up without ever looking like you are climbing. The transitions matter as much as the shapes.",
+          "danceSlug": "floor-performance"
+        },
+        {
+          "key": "fan-kick",
+          "title": "Fan kick",
+          "requires": ["floor"],
+          "description": "A straight leg swept in a wide arc from the floor. The most recognisable single move in floor performance and usually the first one taught.",
+          "danceSlug": "fan-kick"
+        },
+        {
+          "key": "leg-circles",
+          "title": "Leg circles",
+          "requires": ["floor"],
+          "description": "Continuous circles traced with one leg while the upper body keeps performing. What keeps floor work moving between the bigger shapes instead of stalling between them.",
+          "danceSlug": "leg-circles"
+        },
+        {
+          "key": "knee-moves",
+          "title": "Knee moves",
+          "requires": ["floor"],
+          "description": "Drops, slides and turns on and around the knees. This is the element that ends careers when it is drilled on a hard floor — pads, and a sprung floor if you can find one.",
+          "danceSlug": "knee-moves"
+        }
+      ]
+    },
+    {
+      "title": "Dips",
+      "description": "The punctuation of the style, and the most misunderstood thing in it.",
+      "steps": [
+        {
+          "key": "dips",
+          "title": "Spins and dips",
+          "requires": ["duckwalk"],
+          "description": "A spin dropping into a controlled fall onto the back with the front leg folded. The scene calls it a dip; \"death drop\" is an outsider term. It is controlled, not a fall — learn the landing before the spin.",
+          "danceSlug": "spin-and-dip"
+        },
+        {
+          "key": "dip-variations",
+          "title": "Dip variations",
+          "requires": ["dips"],
+          "description": "Kicks, jumps and entries that change how a dip arrives without changing how it lands. Add these only once the plain dip is genuinely safe at full speed.",
+          "danceSlug": "dip-with-a-kick"
+        }
+      ]
+    },
+    {
+      "title": "Your range",
+      "description": "Same five elements, two very different performances. Most dancers pick one end and never visit the other; the good ones can do both.",
+      "steps": [
+        {
+          "key": "dramatics",
+          "title": "Dramatics",
+          "requires": ["dips", "fan-kick"],
+          "description": "The high-energy end: speed, stunts and tricks, with the dip as punctuation. Leiomy Maldonado's athletic style in the early 2000s is what pushed this end of the range into what it is now.",
+          "danceSlug": "vogue-fem-dramatics"
+        },
+        {
+          "key": "soft",
+          "title": "Soft",
+          "requires": ["floor", "dips"],
+          "description": "The other end: unbroken, graceful flow between the elements with nothing sold as a trick. Judged just as hard as Dramatics and much less often practised, because it is difficult to look effortless on camera and impossible to fake in a room."
+        },
+        {
+          "key": "signature",
+          "title": "Find your signature",
+          "requires": ["dramatics", "soft"],
+          "description": "Every legendary voguer is known for something specific — Leiomy for the hair flip that carries her name. Once the elements are yours, the question stops being whether you can do them and starts being what you do that nobody else does."
+        }
+      ]
+    }
+  ]
+}
