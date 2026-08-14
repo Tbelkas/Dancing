@@ -6,6 +6,7 @@ import { VideoSegment, VideoChapter, VideoNote } from '../../../models/video.mod
 import { ViewerPrefsService } from '../../../core/services/viewer-prefs.service';
 import { PlayerBaseComponent } from '../player-base';
 import { sectionMarkers } from '../../../core/utils/section-markers.utils';
+import { introSkipTarget } from '../../../core/utils/intro-skip.utils';
 import { CameraPaneComponent } from '../camera-pane/camera-pane.component';
 
 @Component({
@@ -70,6 +71,24 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
 
   /** Only worth showing the jump row when the source video holds more than one dance. */
   get hasChapters(): boolean { return this.chapters.length > 1; }
+
+  /**
+   * Most tutorials open with a minute of greeting before anything is taught, and the
+   * chipping pass already marks it. When it does, playback opens past it — the loop
+   * region starts there too, so a looping video doesn't drag the intro back in.
+   * Null when the video has no skippable intro; see introSkipTarget for the rules.
+   */
+  private introSkipTo: number | null = null;
+
+  /** Says the intro was skipped and offers the way back. It's an offer, not a dialog:
+   *  it clears itself once the user takes the video somewhere, or after a few seconds. */
+  introNotice = signal(false);
+  private introNoticeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  /** Where playback opens: past the intro when there is one, else the dance's own start. */
+  private get openingTime(): number | undefined {
+    return this.introSkipTo ?? this.startTime;
+  }
 
   // --- Personal notes: draft state for the add row and the inline editor. ---
   noteDraftText = '';
@@ -197,9 +216,9 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     if (type === 'onPlayerReady') {
       const defaultDur = this.endTime ? this.endTime + 10 : 60;
       this.videoDuration.set(defaultDur);
-      this.repeatStart = this.startTime ?? 0;
+      this.repeatStart = this.openingTime ?? 0;
       this.repeatEnd = this.endTime ?? defaultDur;
-      if (this.startTime) this.tiktokPost({ type: 'seekTo', value: this.startTime });
+      if (this.openingTime) this.tiktokPost({ type: 'seekTo', value: this.openingTime });
       if (this.repeating()) {
         // Clear any interval started before the player was ready, then start fresh.
         this.clearRepeat();
@@ -236,6 +255,11 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
 
   ngOnInit(): void {
     this.betaChrome = this.isYouTube && this.viewerPrefs.betaViewer();
+    this.introSkipTo = introSkipTarget(this.segments, this.startTime, this.endTime);
+    if (this.introSkipTo !== null) {
+      this.introNotice.set(true);
+      this.introNoticeTimeout = setTimeout(() => this.introNotice.set(false), 9000);
+    }
     // Registered whatever the chrome: the camera pane adds a fullscreen control of its
     // own, so every player needs to know when it's in fullscreen.
     document.addEventListener('fullscreenchange', this.fullscreenHandler);
@@ -250,7 +274,7 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     if (this.isTikTok) {
       const defaultDur = this.endTime ? this.endTime + 10 : 60;
       this.videoDuration.set(defaultDur);
-      this.repeatStart = this.startTime ?? 0;
+      this.repeatStart = this.openingTime ?? 0;
       this.repeatEnd = this.endTime ?? defaultDur;
       window.addEventListener('message', this.tiktokMessageHandler);
     }
@@ -284,6 +308,7 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     if (this.chromeTickInterval) clearInterval(this.chromeTickInterval);
     document.removeEventListener('fullscreenchange', this.fullscreenHandler);
     if (this.tiktokStallHandle) clearTimeout(this.tiktokStallHandle);
+    if (this.introNoticeTimeout) clearTimeout(this.introNoticeTimeout);
     this.clearFlashTimeout();
     document.removeEventListener('keydown', this.keydownHandler);
     // Frees the device: a stream left running keeps the camera light on after navigation.
@@ -297,6 +322,7 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
   /** Seek the embedded player to another dance in the same video and arm its loop
    *  region, without leaving the page. */
   jumpToChapter(chapter: VideoChapter): void {
+    this.dismissIntroNotice();
     this.activeChapterId.set(chapter.id);
     const start = chapter.startTime ?? 0;
     this.repeatStart = start;
@@ -314,8 +340,25 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     }
   }
 
+  /** The notice's escape hatch: rewind into the skipped intro and play it. Only the
+   *  untouched default region follows — a loop the user has set stays theirs. */
+  playIntro(): void {
+    const start = this.startTime ?? 0;
+    if (this.repeatStart === this.introSkipTo) this.repeatStart = start;
+    this.dismissIntroNotice();
+    this.seekAndPlay(start);
+  }
+
+  /** The offer has been answered — by taking it, or by the user going their own way. */
+  dismissIntroNotice(): void {
+    if (this.introNoticeTimeout) clearTimeout(this.introNoticeTimeout);
+    this.introNoticeTimeout = null;
+    this.introNotice.set(false);
+  }
+
   jumpToSegment(segment: VideoSegment): void {
     VideoPlayerComponent.activeInstance = this;
+    this.dismissIntroNotice();
     this.activeSegmentId.set(segment.id);
     this.activePersonalLoopId.set(null);
     if (segment.endTime != null) {
@@ -497,7 +540,7 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
       playerVars['iv_load_policy'] = 3;
       playerVars['playsinline'] = 1;
     }
-    if (this.startTime != null) playerVars['start'] = this.startTime;
+    if (this.openingTime != null) playerVars['start'] = this.openingTime;
     // With multiple dances in one video the player must stay seekable past this
     // dance's end, so don't hard-bound it — the loop region handles section limits.
     if (this.endTime != null && !this.hasChapters) playerVars['end'] = this.endTime;
@@ -538,7 +581,7 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
 
   private initRegion(duration: number): void {
     if (!this.regionInitialised) {
-      this.repeatStart = this.startTime ?? 0;
+      this.repeatStart = this.openingTime ?? 0;
       this.repeatEnd = this.endTime ?? duration;
       this.regionInitialised = true;
     }
@@ -621,6 +664,7 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
 
   seekToTime(seconds: number): void {
     VideoPlayerComponent.activeInstance = this;
+    this.dismissIntroNotice();
     this.player?.seekTo(seconds, true);
     this.currentTime.set(seconds);
   }

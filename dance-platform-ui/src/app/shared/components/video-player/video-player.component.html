@@ -116,6 +116,7 @@
       @if (mirrored()) {
         <span class="mirror-tag" aria-hidden="true"><i class="fa-solid fa-left-right"></i> Mirrored</span>
       }
+      <ng-container [ngTemplateOutlet]="introTag"></ng-container>
     </div>
 
     <div class="controls">
@@ -198,6 +199,7 @@
       @if (loopFlash()) {
         <div class="loop-flash" aria-hidden="true"><i class="fa-solid fa-rotate-left"></i></div>
       }
+      <ng-container [ngTemplateOutlet]="introTag"></ng-container>
     </div>
 
     <div class="controls">
@@ -246,6 +248,17 @@
       </iframe>
     </div>
   }
+
+  <!-- Says what was done and offers the way back, then gets out of the way on its own.
+       The "Intro" chip in the Sections bar stays the permanent route back. -->
+  <ng-template #introTag>
+    @if (introNotice()) {
+      <div class="intro-tag" role="status">
+        <span class="intro-tag__text"><i class="fa-solid fa-forward"></i> Intro skipped</span>
+        <button type="button" class="intro-tag__btn" (click)="playIntro()">Play from start</button>
+      </div>
+    }
+  </ng-template>
 
   <!-- The practice bench in one row: open a tool when you need it, and each toggle
        reports its own state (loop armed, note count) while folded. -->
