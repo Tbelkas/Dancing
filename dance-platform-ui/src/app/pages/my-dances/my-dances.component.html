@@ -12,54 +12,57 @@
   @if (continueLearning().length > 0) {
     <section class="continue-learning">
       <div class="continue-learning__head">
-        <div class="continue-learning__heading">
-          <h2 class="section-heading continue-learning__title">Recently viewed</h2>
-          <p class="continue-learning__sub">Dances you've opened lately, newest first</p>
-        </div>
+        <h2 class="section-heading continue-learning__title">Recently viewed</h2>
         <div class="continue-nav">
-          <button type="button" class="continue-toggle" [class.is-on]="historyGrouped()"
-            [attr.aria-pressed]="historyGrouped()" (click)="toggleHistoryGrouped()">
-            <i class="fa-solid fa-layer-group"></i> By style
-          </button>
-          @if (!historyGrouped() && historyOverflow()) {
-            <button type="button" class="carousel-arrow" (click)="scrollHistory(-1)" [disabled]="historyAtStart()" aria-label="Scroll to more recent">
-              <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <button type="button" class="carousel-arrow" (click)="scrollHistory(1)" [disabled]="historyAtEnd()" aria-label="Scroll to older history">
-              <i class="fa-solid fa-chevron-right"></i>
-            </button>
+          @if (continueStyleFacets().length > 1) {
+            <div class="trail-filter" role="group" aria-label="Filter recently viewed by style">
+              <button type="button" class="trail-chip trail-chip--all" [class.is-on]="activeHistoryStyle() === ''"
+                [attr.aria-pressed]="activeHistoryStyle() === ''" (click)="setHistoryStyle('')">
+                All styles
+              </button>
+              @for (facet of continueStyleFacets(); track facet.name) {
+                <button type="button" class="trail-chip" [class.is-on]="activeHistoryStyle() === facet.name"
+                  [attr.aria-pressed]="activeHistoryStyle() === facet.name" (click)="setHistoryStyle(facet.name)">
+                  {{ facet.name }} <span class="trail-chip__count">{{ facet.count }}</span>
+                </button>
+              }
+            </div>
+          }
+          @if (historyOverflow()) {
+            <div class="continue-arrows">
+              <button type="button" class="carousel-arrow" (click)="scrollHistory(-1)" [disabled]="historyAtStart()" aria-label="Scroll to more recent">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button type="button" class="carousel-arrow" (click)="scrollHistory(1)" [disabled]="historyAtEnd()" aria-label="Scroll to older history">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
           }
         </div>
       </div>
 
-      @if (historyGrouped()) {
-        <div class="continue-groups">
-          @for (group of continueGroups(); track group.styleName) {
-            <div class="continue-group">
-              <div class="continue-group__head">
-                <h3 class="continue-group__name">{{ group.styleName }}</h3>
-                <span class="continue-group__count">{{ group.dances.length }}</span>
-              </div>
-              <div class="continue-grid">
-                @for (dance of group.dances; track dance.id) {
-                  <ng-container *ngTemplateOutlet="continueCard; context: { $implicit: dance }"></ng-container>
-                }
-              </div>
-            </div>
+      <!-- One rail, always. Age bands are the structure - a marker goes down where the trail
+           crosses into an older day, which is the "newest first" promise made visible instead
+           of asserted in a subtitle. A marker is a boundary, so the newest band doesn't get
+           one: nothing precedes it, and a leading marker pushed the whole rail out of line
+           with every other row on the page. -->
+      <div #historyTrack class="continue-track" (scroll)="onHistoryScroll()">
+        @for (band of continueBands(); track band.label; let firstBand = $first) {
+          @if (!firstBand) {
+            <p class="trail-marker"><span class="trail-marker__label">{{ band.label }}</span></p>
           }
-        </div>
-      } @else {
-        <div #historyTrack class="continue-track" (scroll)="onHistoryScroll()">
-          @for (dance of continueLearning(); track dance.id) {
-            <ng-container *ngTemplateOutlet="continueCard; context: { $implicit: dance }"></ng-container>
+          @for (dance of band.dances; track dance.id; let firstCard = $first) {
+            <ng-container *ngTemplateOutlet="continueCard;
+              context: { $implicit: dance, fade: band.fade, head: firstBand && firstCard }"></ng-container>
           }
-        </div>
-      }
+        }
+      </div>
     </section>
 
-    <ng-template #continueCard let-dance>
+    <ng-template #continueCard let-dance let-fade="fade" let-head="head">
       <a class="card continue-card" [class.is-dismissing]="dismissingIds().has(dance.id)"
         [class.is-restoring]="restoringIds().has(dance.id)"
+        [class.is-head]="head" [class.is-fade-1]="fade === 1" [class.is-fade-2]="fade === 2"
         [routerLink]="dance.slug | dancePath:dance.styleSlug" [queryParams]="dance.resume">
         <span class="continue-card__media">
           @if (continueThumbnailUrl(dance); as thumb) {
@@ -71,7 +74,7 @@
         </span>
         <span class="continue-card__body">
           <h3 class="continue-card__name">{{ dance.name }}</h3>
-          @if (dance.styleName) {
+          @if (dance.styleName && !activeHistoryStyle()) {
             <span class="continue-card__style">{{ dance.styleName }}</span>
           }
         </span>
@@ -180,7 +183,8 @@
       </div>
     }
 
-    <div class="style-tabs">
+    <div class="tab-bar">
+      <div class="style-tabs">
       @for (ms of myStyles(); track ms.styleId) {
         <button
           class="style-tab"
@@ -197,6 +201,12 @@
         <i class="fa-solid fa-star" aria-hidden="true"></i> Favorites
         @if (favoriteDances().length > 0) { <span class="tab-count">{{ favoriteDances().length }}</span> }
       </button>
+      </div>
+      @if (selectedStyle()) {
+        <button class="btn btn--ghost btn--sm add-dance-btn" (click)="toggleAddDance()">
+          @if (showAddDance()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Dance }
+        </button>
+      }
     </div>
 
     @if (selectedStyleId() === FAVORITES_TAB) {
@@ -274,13 +284,7 @@
            :has() rule in the stylesheet — they only pair up when both actually exist). -->
       <div class="dances-view dances-view--split">
 
-        <!-- Add Dance Button + Form -->
-        <div class="add-dance-bar">
-          <button class="btn btn--ghost btn--sm" (click)="toggleAddDance()">
-            @if (showAddDance()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Dance }
-          </button>
-        </div>
-
+        <!-- The Add Dance trigger lives on the tab strip; this is the form it opens. -->
         @if (showAddDance()) {
           <div class="card add-dance-form">
             <h3 class="form-title">New Dance in {{ selectedStyle()!.styleName }}</h3>

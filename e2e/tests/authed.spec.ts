@@ -155,43 +155,56 @@ test.describe('authenticated', () => {
   });
 
   /**
-   * "By style" regroups the same local trail — nothing server-side — so a pair of synthetic
-   * entries in two styles is enough to prove the grouping and that the choice is remembered.
+   * Style narrows the same local trail — nothing server-side — so a pair of synthetic entries
+   * in two styles is enough to prove the filter, that the rail stays one rail, and that the
+   * choice is remembered. The probes are dated into two different age bands so the run also
+   * covers the markers that carry the rail's structure.
    */
-  test('Recently viewed can be regrouped by style, and remembers the choice', async ({ authedPage: page }) => {
+  test('Recently viewed can be filtered by style, and remembers the choice', async ({ authedPage: page }) => {
+    const midnight = new Date();
+    midnight.setHours(0, 0, 0, 0);
     const probes = [
-      { id: 999_003, name: 'E2E Group Probe House', slug: 'e2e-group-house', styleSlug: 'house', styleName: 'House', viewedAt: Date.now(), learned: false },
-      { id: 999_004, name: 'E2E Group Probe Hip-hop', slug: 'e2e-group-hiphop', styleSlug: 'hip-hop', styleName: 'Hip-hop', viewedAt: Date.now() - 1000, learned: false },
+      { id: 999_003, name: 'E2E Filter Probe House', slug: 'e2e-filter-house', styleSlug: 'house', styleName: 'House', viewedAt: Date.now(), learned: false },
+      // Yesterday afternoon: a different age band, so a second marker has to appear.
+      { id: 999_004, name: 'E2E Filter Probe Hip-hop', slug: 'e2e-filter-hiphop', styleSlug: 'hip-hop', styleName: 'Hip-hop', viewedAt: midnight.getTime() - 6 * 3600_000, learned: false },
     ];
     await page.addInitScript(entries => {
       localStorage.setItem('dp_recent_dances', JSON.stringify(entries));
       // This runs on the reload too, so only force the starting state once — otherwise it
-      // would undo the very toggle the reload is meant to prove was remembered.
-      if (!sessionStorage.getItem('e2e_grouping_seeded')) {
-        sessionStorage.setItem('e2e_grouping_seeded', '1');
-        localStorage.removeItem('dp_continue_grouped');
+      // would undo the very choice the reload is meant to prove was remembered.
+      if (!sessionStorage.getItem('e2e_trail_seeded')) {
+        sessionStorage.setItem('e2e_trail_seeded', '1');
+        localStorage.removeItem('dp_continue_style');
       }
     }, probes);
 
     await page.goto('/my-dances');
-    const toggle = page.getByRole('button', { name: 'By style' });
-    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
-    await expect(page.locator('.continue-group')).toHaveCount(0);
+    const all = page.getByRole('button', { name: 'All styles' });
+    const house = page.getByRole('button', { name: /^House/ });
+    await expect(all).toHaveAttribute('aria-pressed', 'true');
 
-    await toggle.click();
-    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    // Unfiltered: both cards on one rail, newest first. A marker is a boundary, so only the
+    // crossing into the older band gets one - the newest band has nothing before it.
+    const cards = page.locator('.continue-card');
+    await expect(cards).toHaveCount(2);
+    await expect(cards.first()).toHaveText(/E2E Filter Probe House/);
+    await expect(page.locator('.trail-marker')).toHaveText(['Yesterday']);
 
-    // One group per style, most recently viewed first, each holding its own card.
-    const groups = page.locator('.continue-group');
-    await expect(groups).toHaveCount(2);
-    await expect(groups.first().locator('.continue-group__name')).toHaveText('House');
-    await expect(groups.first().locator('.continue-card')).toHaveText(/E2E Group Probe House/);
-    await expect(groups.nth(1).locator('.continue-group__name')).toHaveText('Hip-hop');
+    await house.click();
+    await expect(house).toHaveAttribute('aria-pressed', 'true');
+    await expect(all).toHaveAttribute('aria-pressed', 'false');
 
-    // The grouping survives a reload — it is stored, not just component state.
+    // Filtering narrows the rail rather than regrouping it — still one track, fewer cards.
+    await expect(cards).toHaveCount(1);
+    await expect(cards.first()).toHaveText(/E2E Filter Probe House/);
+    await expect(page.locator('.continue-track')).toHaveCount(1);
+    // One band left, so no boundary and no marker.
+    await expect(page.locator('.trail-marker')).toHaveCount(0);
+
+    // The choice survives a reload — it is stored, not just component state.
     await page.reload();
-    await expect(page.locator('.continue-group')).toHaveCount(2);
-    await expect(page.getByRole('button', { name: 'By style' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.continue-card')).toHaveCount(1);
+    await expect(page.getByRole('button', { name: /^House/ })).toHaveAttribute('aria-pressed', 'true');
   });
 
   /**

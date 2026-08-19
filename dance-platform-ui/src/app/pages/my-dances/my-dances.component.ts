@@ -35,7 +35,7 @@ interface ContinueCard extends RecentDance {
 export class MyDancesComponent implements OnInit, AfterViewInit {
   private readonly SELECTED_STYLE_KEY = 'dp_mydances_style';
   private readonly EXPANDED_DANCE_KEY = 'dp_mydances_expanded';
-  private readonly CONTINUE_GROUPED_KEY = 'dp_continue_grouped';
+  private readonly CONTINUE_STYLE_KEY = 'dp_continue_style';
 
   myStyles = signal<MyStyleWithDances[]>([]);
   allStyles = signal<Style[]>([]);
@@ -142,27 +142,72 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   readonly historyAtEnd = signal(false);
 
   /**
-   * "By style" swaps the single recency carousel for one wrapped grid per style. The choice
-   * is remembered — someone who thinks of their history as "what was I doing in House?"
-   * shouldn't have to re-pick it on every visit.
+   * Style narrows the trail; it never re-orders it. Grouping by style used to fan the row out
+   * into one grid per style, which cost the section its height ceiling and threw away the only
+   * thing it knows — what you did last. As a filter it still answers "what was I doing in
+   * House?" while the rail stays one card tall and stays in recency order. Remembered, so
+   * someone who thinks in styles doesn't re-pick it every visit.
    */
-  readonly historyGrouped = signal(localStorage.getItem(this.CONTINUE_GROUPED_KEY) === '1');
+  readonly historyStyle = signal<string>(localStorage.getItem(this.CONTINUE_STYLE_KEY) ?? '');
 
-  /**
-   * The same cards as {@link continueLearning}, bucketed by style. Groups appear in order of
-   * their most recently viewed dance (the source list is already recency-sorted), so the style
-   * you were just working on stays at the top.
-   */
-  readonly continueGroups = computed(() => {
-    const groups = new Map<string, ContinueCard[]>();
+  /** Styles present in the trail, first-seen (so most-recent) first, with their card counts. */
+  readonly continueStyleFacets = computed(() => {
+    const counts = new Map<string, number>();
     for (const dance of this.continueLearning()) {
       const key = dance.styleName || 'Other';
-      const existing = groups.get(key);
-      if (existing) existing.push(dance);
-      else groups.set(key, [dance]);
+      counts.set(key, (counts.get(key) ?? 0) + 1);
     }
-    return [...groups].map(([styleName, dances]) => ({ styleName, dances }));
+    return [...counts].map(([name, count]) => ({ name, count }));
   });
+
+  /**
+   * The stored filter resolved against what's actually in the trail. A style drops out as soon
+   * as its last card is dismissed or learned, and a filter pinned to a style that is no longer
+   * there would show an empty rail with no way back — fall through to all instead.
+   */
+  readonly activeHistoryStyle = computed(() => {
+    const chosen = this.historyStyle();
+    return chosen && this.continueStyleFacets().some(f => f.name === chosen) ? chosen : '';
+  });
+
+  readonly continueVisible = computed(() => {
+    const style = this.activeHistoryStyle();
+    if (!style) return this.continueLearning();
+    return this.continueLearning().filter(d => (d.styleName || 'Other') === style);
+  });
+
+  /**
+   * The rail's structure is time, not style: consecutive cards from the same age band are
+   * collected so the track can set a marker down where the band changes. The source list is
+   * recency-sorted, so bands come out in order and each appears at most once.
+   *
+   * `fade` is how far the band's thumbnails are dimmed — the trail decays as it goes back,
+   * which is what makes 20 equally loud cards read as one gradient with a lit head.
+   */
+  readonly continueBands = computed(() => {
+    const bands: { label: string; fade: number; dances: ContinueCard[] }[] = [];
+    for (const dance of this.continueVisible()) {
+      const index = this.ageBand(dance.viewedAt);
+      const label = this.AGE_BANDS[index];
+      const open = bands[bands.length - 1];
+      if (open && open.label === label) open.dances.push(dance);
+      else bands.push({ label, fade: Math.min(index, 2), dances: [dance] });
+    }
+    return bands;
+  });
+
+  private readonly AGE_BANDS = ['Today', 'Yesterday', 'This week', 'Earlier'];
+
+  /** Which age band a view falls in, counted in calendar days rather than elapsed hours. */
+  private ageBand(viewedAt: number): number {
+    const now = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const day = 86_400_000;
+    if (viewedAt >= midnight) return 0;
+    if (viewedAt >= midnight - day) return 1;
+    if (viewedAt >= midnight - 6 * day) return 2;
+    return 3;
+  }
 
   // Cards mid-animation. Kept as id sets rather than a flag on the card because the
   // cards are recomputed objects — the transition has to survive their identity changing.
@@ -173,10 +218,11 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
   readonly restoringIds = signal<ReadonlySet<number>>(new Set());
   private dismissTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
-  toggleHistoryGrouped(): void {
-    const grouped = !this.historyGrouped();
-    this.historyGrouped.set(grouped);
-    localStorage.setItem(this.CONTINUE_GROUPED_KEY, grouped ? '1' : '0');
+  /** Empty string is the unfiltered trail. */
+  setHistoryStyle(name: string): void {
+    this.historyStyle.set(name);
+    if (name) localStorage.setItem(this.CONTINUE_STYLE_KEY, name);
+    else localStorage.removeItem(this.CONTINUE_STYLE_KEY);
   }
 
   readonly selectedStyle = computed(() => {
@@ -212,8 +258,7 @@ export class MyDancesComponent implements OnInit, AfterViewInit {
     // The card list grows/shrinks as history loads or a card is dismissed — re-measure
     // the track after the DOM settles so the arrows reflect the new scrollable width.
     effect(() => {
-      this.continueLearning();
-      this.historyGrouped();
+      this.continueVisible();
       setTimeout(() => this.updateHistoryScrollState());
     });
 

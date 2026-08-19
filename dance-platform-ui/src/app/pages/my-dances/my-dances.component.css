@@ -112,16 +112,31 @@
 }
 
 /* Style Tabs */
+/* Add Dance shares the tab strip's rule rather than owning a band of its own below it —
+   it acts on whichever style is selected, so it belongs on the same line as the selection. */
+.tab-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--color-border);
+}
+
 .style-tabs {
   display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
   flex-wrap: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
   gap: 0;
-  margin-bottom: 28px;
-  border-bottom: 1px solid var(--color-border);
 
   &::-webkit-scrollbar { display: none; }
+}
+
+.add-dance-btn {
+  flex: 0 0 auto;
+  margin-bottom: 6px;
 }
 
 .style-tab {
@@ -166,11 +181,6 @@
 }
 
 /* Add Dance */
-.add-dance-bar {
-  display: flex;
-  justify-content: flex-end;
-}
-
 .add-dance-form {
   animation: slideDown 0.18s ease both;
 }
@@ -561,42 +571,41 @@
 
 .continue-learning__head {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.continue-learning__title {
-  margin-bottom: 2px;
-}
-
-.continue-learning__sub {
-  font-family: var(--font-ui);
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  margin: 0;
+  gap: 16px;
+  margin-bottom: 14px;
 }
 
 .continue-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+  gap: 10px;
+  min-width: 0;
 }
 
-/* Recency ⇄ by-style switch. Styled as a pressable chip so its "on" state is
-   readable at a glance, unlike the arrows which are momentary actions. */
-.continue-toggle {
+/* ---------- Style as a filter, not a regrouping ---------- */
+/* Grouping used to fan this row into one grid per style, which took the section's height
+   ceiling off and cost it its recency order. Narrowing the same rail keeps both. */
+.trail-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.trail-filter::-webkit-scrollbar { display: none; }
+
+.trail-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
   height: 34px;
   padding: 0 12px;
-  background: var(--color-surface-2);
+  background: transparent;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   color: var(--color-text-muted);
@@ -605,90 +614,82 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  white-space: nowrap;
   cursor: pointer;
   transition: background var(--transition), border-color var(--transition), color var(--transition);
 }
 
-.continue-toggle:hover {
+.trail-chip:hover {
   color: var(--color-text);
   border-color: var(--color-border-light);
 }
 
-.continue-toggle.is-on {
+/* Gold says a filter is on. "All styles" selected is the absence of one, so it reads as
+   the resting state rather than lighting the header up on every page load. */
+.trail-chip.is-on {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: #07070D;
 }
 
-/* ---------- Continue Learning, grouped by style ---------- */
-/* Capped at roughly three or four styles and scrolled past that: someone with a
-   dozen styles in their history was pushing the rest of the page off-screen. The
-   2px of vertical padding leaves room for a card's hover lift instead of clipping it. */
-.continue-groups {
-  display: flex;
-  flex-direction: column;
-  gap: 26px;
-  max-height: min(78vh, 720px);
-  overflow-y: auto;
-  padding: 2px 8px 2px 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-light) transparent;
-}
-
-.continue-groups::-webkit-scrollbar {
-  width: 6px;
-}
-
-.continue-groups::-webkit-scrollbar-thumb {
-  background: var(--color-border-light);
-  border-radius: 3px;
-}
-
-.continue-groups::-webkit-scrollbar-track {
+.trail-chip--all.is-on {
   background: transparent;
-}
-
-/* Sticky so the style you're scrolling through stays named. */
-.continue-group__head {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 12px;
-  padding-top: 2px;
-  padding-bottom: 8px;
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.continue-group__name {
-  margin: 0;
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  border-color: var(--color-border-light);
   color: var(--color-text);
 }
 
-.continue-group__count {
+.trail-chip__count {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 400;
+  opacity: 0.72;
+}
+
+.continue-arrows {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ---------- Age markers ---------- */
+/* The trail's one real axis is time, so time is what gets the structural device: a hairline
+   dropped into the rail wherever it crosses into an older day. Set vertically because the
+   rail is horizontal and a marker that stole a card's width would be the clutter it replaced.
+   At most four ever exist, and a typical trail shows two. */
+.trail-marker {
+  position: relative;
+  flex: 0 0 auto;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  margin: 0;
+  scroll-snap-align: start;
+}
+
+.trail-marker::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--color-primary), transparent 78%);
+  opacity: 0.55;
+}
+
+.trail-marker__label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
   font-family: var(--font-ui);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
   color: var(--color-text-muted);
-}
-
-.continue-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 14px;
-}
-
-/* The group heading already names the style — repeating it on every card is noise. */
-.continue-grid .continue-card__style {
-  display: none;
+  white-space: nowrap;
 }
 
 .carousel-arrow {
@@ -783,6 +784,32 @@
   overflow: hidden;
 }
 
+/* The afterimage decays. Twenty thumbnails at equal strength are twenty competing
+   pictures; dimming them by age turns the rail into one gradient with a lit head, and
+   gives the age markers something to be the boundary of. The veil sits on the artwork
+   only — never on the title — so nothing readable loses contrast, and hovering or
+   tabbing to a card clears it because you are looking at that one now. */
+.continue-card__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+
+.continue-card.is-fade-1 .continue-card__media::after { opacity: 0.42; }
+.continue-card.is-fade-2 .continue-card__media::after { opacity: 0.62; }
+
+.continue-card:hover .continue-card__media::after,
+.continue-card:focus-visible .continue-card__media::after { opacity: 0; }
+
+@media (prefers-contrast: more) {
+  .continue-card.is-fade-1 .continue-card__media::after,
+  .continue-card.is-fade-2 .continue-card__media::after { opacity: 0; }
+}
+
 .continue-card__thumb {
   width: 100%;
   height: 100%;
@@ -800,10 +827,16 @@
   color: var(--color-border-light);
 }
 
+/* Only the head of the trail wears this. It used to sit on all twenty cards at once,
+   which made a gold pill the page's dominant texture rather than the one thing worth
+   resuming; the rest reveal it when you point at them. */
 .continue-card__resume {
   position: absolute;
   left: 8px;
   bottom: 8px;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity var(--transition);
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -817,6 +850,10 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+
+.continue-card.is-head .continue-card__resume,
+.continue-card:hover .continue-card__resume,
+.continue-card:focus-visible .continue-card__resume { opacity: 1; }
 
 .continue-card__body {
   padding: 12px 14px;
@@ -869,6 +906,40 @@
 @media (max-width: 640px) {
   .continue-card { flex-basis: 150px; }
   .continue-card__dismiss { opacity: 1; }
+  /* No hover on touch, so the trail's head is the only Resume anyone would ever see. */
+  .continue-card.is-head .continue-card__resume { opacity: 1; }
+  .trail-marker { width: 26px; }
+}
+
+/* The head stacks before the chips have to compete with the heading for the same line. */
+@media (max-width: 760px) {
+  .continue-learning__head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .continue-nav { justify-content: flex-start; }
+  .continue-arrows { display: none; }
+  .trail-chip { height: 38px; }
+}
+
+/* Below the tab strip's own breathing room, Add Dance drops under the tabs rather than
+   squeezing them; the rule goes back on the strip so the active tab still sits on it. */
+@media (max-width: 640px) {
+  .tab-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    border-bottom: none;
+  }
+
+  .tab-bar .style-tabs { border-bottom: 1px solid var(--color-border); }
+
+  .add-dance-btn {
+    align-self: flex-end;
+    margin: 12px 0 0;
+  }
 }
 
 /* ---------- RECOMMENDED FOR YOU ---------- */
@@ -993,7 +1064,6 @@
     align-items: start;
   }
 
-  .dances-view--split .add-dance-bar,
   .dances-view--split .add-dance-form,
   .dances-view--split .empty-style,
   .dances-view--split .dance-section--full { grid-column: 1 / -1; }
@@ -1009,8 +1079,6 @@
    the sixth card onto its own line. 1fr tracks + a card max-width fills the row when
    the rail is full and still stops two lonely items becoming billboards. */
 @media (min-width: 1500px) {
-  .rec-grid,
-  .continue-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
-  .rec-card,
-  .continue-card { max-width: 340px; }
+  .rec-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+  .rec-card { max-width: 340px; }
 }
