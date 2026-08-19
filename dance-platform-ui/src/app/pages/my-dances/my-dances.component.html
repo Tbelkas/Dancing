@@ -2,9 +2,6 @@
   <div class="page-header">
     <div class="page-header__top">
       <h1 class="page-title">My Dances</h1>
-      <button class="btn btn--ghost" (click)="showStylePicker.set(!showStylePicker())">
-        @if (showStylePicker()) { <i class="fa-solid fa-xmark"></i> Done } @else { <i class="fa-solid fa-plus"></i> Manage Styles }
-      </button>
     </div>
     <p class="page-subtitle">Your dance styles and tracked moves</p>
   </div>
@@ -86,7 +83,7 @@
     </ng-template>
   }
 
-  @if (showStylePicker()) {
+  <ng-template #stylePicker>
     <div class="card style-picker">
       <div class="style-picker__header">
         <h3 class="style-picker__title">Select your dance styles</h3>
@@ -121,7 +118,7 @@
         </div>
       }
     </div>
-  }
+  </ng-template>
 
   @if (showSkeleton()) {
     <!-- Mirrors the loaded order — progress bar, style tabs, section title, bordered
@@ -152,8 +149,15 @@
     <div class="empty-state card">
       <div class="empty-state__icon"><i class="fa-solid fa-shoe-prints"></i></div>
       <h2>No dance styles yet</h2>
-      <p>Click "Manage Styles" above to add the styles you practice.</p>
+      <p>Pick the styles you practice &mdash; each one becomes a tab here.</p>
+      <button class="btn btn--primary empty-state__cta" (click)="showStylePicker.set(!showStylePicker())"
+        [attr.aria-expanded]="showStylePicker()">
+        @if (showStylePicker()) { <i class="fa-solid fa-xmark"></i> Done } @else { <i class="fa-solid fa-sliders"></i> Choose your styles }
+      </button>
     </div>
+    @if (showStylePicker()) {
+      <ng-container *ngTemplateOutlet="stylePicker"></ng-container>
+    }
   } @else {
     @if (selectedStyle() && trackedCount() > 0) {
       <div class="style-progress">
@@ -202,12 +206,24 @@
         @if (favoriteDances().length > 0) { <span class="tab-count">{{ favoriteDances().length }}</span> }
       </button>
       </div>
-      @if (selectedStyle()) {
-        <button class="btn btn--ghost btn--sm add-dance-btn" (click)="toggleAddDance()">
-          @if (showAddDance()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Dance }
+      <div class="tab-bar__actions">
+        <button class="btn btn--ghost btn--sm manage-styles-btn" (click)="showStylePicker.set(!showStylePicker())"
+          [class.is-open]="showStylePicker()" [attr.aria-expanded]="showStylePicker()"
+          [attr.aria-label]="showStylePicker() ? 'Close style settings' : 'Manage styles'"
+          [title]="showStylePicker() ? 'Close style settings' : 'Manage styles'">
+          @if (showStylePicker()) { <i class="fa-solid fa-xmark"></i> } @else { <i class="fa-solid fa-sliders"></i> }
         </button>
-      }
+        @if (selectedStyle()) {
+          <button class="btn btn--ghost btn--sm add-dance-btn" (click)="toggleAddDance()">
+            @if (showAddDance()) { <i class="fa-solid fa-xmark"></i> Cancel } @else { <i class="fa-solid fa-plus"></i> Add Dance }
+          </button>
+        }
+      </div>
     </div>
+
+    @if (showStylePicker()) {
+      <ng-container *ngTemplateOutlet="stylePicker"></ng-container>
+    }
 
     @if (selectedStyleId() === FAVORITES_TAB) {
       <div class="dances-view">

@@ -26,6 +26,12 @@
   animation: slideDown 0.18s ease both;
 }
 
+/* Opened from the empty state the panel is a second card, not a disclosure under a rule,
+   so it needs the gap the tab strip's own margin gives it everywhere else. */
+.empty-state + .style-picker {
+  margin-top: 20px;
+}
+
 .style-picker__header {
   display: flex;
   align-items: center;
@@ -134,9 +140,31 @@
   &::-webkit-scrollbar { display: none; }
 }
 
-.add-dance-btn {
+.tab-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex: 0 0 auto;
   margin-bottom: 6px;
+}
+
+/* Which styles have tabs is a setting, not an action, so it sits beside Add Dance at a
+   lower volume - icon only. Two labelled ghost buttons on one rule read as two equally
+   likely next moves, which is not true: you add dances often and edit the strip rarely. */
+.manage-styles-btn {
+  width: 36px;
+  padding: 8px 0;
+  color: var(--color-text-muted);
+}
+
+.manage-styles-btn:hover,
+.manage-styles-btn.is-open {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.empty-state__cta {
+  margin-top: 22px;
 }
 
 .style-tab {
@@ -936,8 +964,8 @@
 
   .tab-bar .style-tabs { border-bottom: 1px solid var(--color-border); }
 
-  .add-dance-btn {
-    align-self: flex-end;
+  .tab-bar__actions {
+    justify-content: flex-end;
     margin: 12px 0 0;
   }
 }
