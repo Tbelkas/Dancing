@@ -382,6 +382,11 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     this.player?.setPlaybackRate(rate);
   }
 
+  /** Where the cropped-out header used to point. */
+  get instagramPostUrl(): string {
+    return `https://www.instagram.com/p/${this.videoId}/`;
+  }
+
   /** Looping needs a transport to drive; the Instagram embed exposes none. */
   get hasLoopTool(): boolean {
     return !this.isInstagram;

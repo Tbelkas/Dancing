@@ -241,14 +241,20 @@
          [class.player-media--mirrored]="mirrored()"
          [class.player-media--camera]="cameraOn()"
          [class.player-media--camera-overlay]="cameraOn() && cameraLayout() === 'overlay'">
-      <iframe
-        [src]="embedUrl | trustUrl"
-        class="embed-frame embed-frame--instagram"
-        allow="autoplay; fullscreen"
-        allowfullscreen
-        frameborder="0"
-        scrolling="no">
-      </iframe>
+      <!-- The iframe is taller than this window and sits shifted up inside it, so only
+           Instagram's media band shows. Mirroring the whole embed flipped its chrome too,
+           which left the username, the like count and "Add a comment" rendering as
+           reversed text. Cropping is what makes Mirror mean the video. -->
+      <div class="ig-viewport">
+        <iframe
+          [src]="embedUrl | trustUrl"
+          class="embed-frame embed-frame--instagram"
+          allow="autoplay; fullscreen"
+          allowfullscreen
+          frameborder="0"
+          scrolling="no">
+        </iframe>
+      </div>
       @if (cameraOn()) {
         <app-camera-pane [layout]="cameraLayout()" [layoutLocked]="cameraLayoutLocked()"
                          [isFullscreen]="fullscreen()" (exitFullscreen)="toggleFullscreen()" />
@@ -265,6 +271,12 @@
     <div class="controls">
       <div class="control-row">
         <ng-container [ngTemplateOutlet]="toolToggles"></ng-container>
+        <div class="control-row__end">
+          <!-- The cropped-away header was the credit and the way back to the post. -->
+          <a class="ig-credit" [href]="instagramPostUrl" target="_blank" rel="noopener noreferrer">
+            View on Instagram <i class="fa-solid fa-up-right-from-square"></i>
+          </a>
+        </div>
       </div>
     </div>
   }
