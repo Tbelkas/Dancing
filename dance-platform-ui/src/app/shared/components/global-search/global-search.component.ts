@@ -6,12 +6,15 @@ import { Dance } from '../../../models/dance.model';
 
 /** Matches the ≤720px breakpoint the header uses to swap to the mobile layout. */
 const NARROW_QUERY = '(max-width: 720px)';
+/** Above this the full-bleed header has room to leave the field open; below, it rests as an icon. */
+const ROOMY_QUERY = '(min-width: 1200px)';
 
 /**
  * Header-wide dance search with typeahead. Ctrl+K or "/" focuses it from
  * anywhere; Enter on "See all" hands the query off to the Browse page.
- * On desktop it rests as an icon button and expands on click/shortcut;
- * on mobile (≤720px) CSS keeps it permanently expanded.
+ * Between 721px and 1199px it rests as an icon button and expands on click/shortcut;
+ * wider than that the header has room to leave the field open, and on mobile
+ * (≤720px) CSS keeps it expanded too.
  */
 @Component({
   selector: 'app-global-search',
@@ -27,7 +30,7 @@ export class GlobalSearchComponent {
   open = signal(false);
   loading = signal(false);
   activeIndex = signal(-1);
-  /** Desktop-only: false renders the search as a lone icon button (CSS ignores this on mobile). */
+  /** Mid-width desktop only: false renders the search as a lone icon button (CSS ignores this on mobile). */
   expanded = signal(false);
 
   /**
@@ -36,6 +39,15 @@ export class GlobalSearchComponent {
    */
   private readonly narrow = signal(window.matchMedia(NARROW_QUERY).matches);
   readonly placeholder = computed(() => (this.narrow() ? 'Search…' : 'Search dances…'));
+
+  /**
+   * The collapse-to-an-icon exists because the header used to share the content
+   * container's width. Now that the bar spans the viewport there is room to spare
+   * above 1200px, so the field rests open there — and stays tabbable, which a
+   * visible input with tabindex="-1" would not be.
+   */
+  private readonly roomy = signal(window.matchMedia(ROOMY_QUERY).matches);
+  readonly fieldVisible = computed(() => this.expanded() || this.roomy());
 
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
@@ -50,6 +62,8 @@ export class GlobalSearchComponent {
   ) {
     // Rotating a phone crosses the breakpoint without a reload.
     window.matchMedia(NARROW_QUERY).addEventListener('change', e => this.narrow.set(e.matches));
+    // Resizing across 1200px likewise swaps the resting state without a reload.
+    window.matchMedia(ROOMY_QUERY).addEventListener('change', e => this.roomy.set(e.matches));
   }
 
   onInput(value: string): void {

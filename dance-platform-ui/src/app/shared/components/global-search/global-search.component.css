@@ -41,9 +41,11 @@
   transition: width var(--transition), border-color var(--transition), background var(--transition);
 }
 
-/* Desktop resting state: just the magnifier in a 36px pill; the input is
-   present but zero-width so shortcut focus + the width transition still work.
-   Mobile (≤720px) never collapses — the bar stays full-width there. */
+/* Mid-width resting state (721–1199px): just the magnifier in a 36px pill; the
+   input is present but zero-width so shortcut focus + the width transition still
+   work. Mobile (≤720px) never collapses — the bar stays full-width there — and
+   above 1200px the component drops the collapsed class (see `roomy`), so the
+   240px field rests open in the full-bleed header. */
 @media (min-width: 721px) {
   .gsearch__input { width: 240px; }
 
