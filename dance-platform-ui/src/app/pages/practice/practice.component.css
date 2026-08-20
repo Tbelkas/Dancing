@@ -503,8 +503,10 @@
   height: 150px;
   /* The tallest bar is 100%, and its value label is anchored at `bottom: heightPct%` — so that
      one label sits entirely above the plot box. Without room reserved here it lands on the
-     card's own <h3>, colliding with "last 12 weeks" at wide widths. */
-  margin-top: 18px;
+     card's own <h3>, colliding with "last 12 weeks" at wide widths. Measured on the deployed
+     page, the label reaches 20px above the plot's top edge (a 16.9px line box plus the -3px
+     nudge); 28px clears it with room to spare. */
+  margin-top: 28px;
 }
 
 .trend__grid {
