@@ -831,6 +831,9 @@ textarea:focus-visible,
     display: inline-block;
     padding-block: 11px;
     margin-block: -11px;
+    /* The line box is 21px, so padding alone lands on 43 — one pixel short. box-sizing is
+       border-box globally, so this is an exact floor rather than an addition. */
+    min-height: 44px;
   }
 
   /* Native control: min-height is enough, and forcing a display value on a <select> only
