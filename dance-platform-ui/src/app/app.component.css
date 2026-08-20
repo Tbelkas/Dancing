@@ -29,10 +29,13 @@
   z-index: 100;
 }
 
+/* Full-bleed on purpose: the bar spans the viewport rather than the content
+   container, so the logo sits on the left edge and nav + avatar on the right. */
 .header__inner {
   display: flex;
   align-items: center;
   height: 64px;
+  padding: 0 20px;
 }
 
 .header__logo {
@@ -381,6 +384,7 @@
 }
 
 @media (max-width: 640px) {
+  .header__inner { padding: 0 14px; }
   .header__logo { font-size: 1.25rem; }
   .main { padding: 28px 0; }
 }
