@@ -426,7 +426,10 @@
 @media (max-width: 560px) {
   .lp-grid { grid-template-columns: 1fr; }
   .lp-card, .lp-card--feature { grid-column: span 1; }
-  .lp-cta .btn { flex: 1; justify-content: center; }
+  /* flex-basis auto (not 0) so a label that no longer fits beside its sibling wraps the whole
+     button onto its own full-width line, instead of splitting the row evenly and breaking
+     "Browse dances" across two lines inside the button. */
+  .lp-cta .btn { flex: 1 1 auto; justify-content: center; white-space: nowrap; }
   .lp-features { padding-top: 64px; }
   .lp-marquee__item { font-size: 1.2rem; }
 }

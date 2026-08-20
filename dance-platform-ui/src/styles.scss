@@ -329,6 +329,15 @@ textarea:focus-visible,
 .grid--2 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 .grid--3 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
 
+/* Small-laptop / tablet-landscape band. A 300px floor needs 940px of track to seat three
+   cards, which this band never has — so it drops to two and inflates them to ~400px, and the
+   catalog reads as a two-column list. A 250px floor seats three all the way across, landing on
+   254px cards at the bottom of the band and 334px at the top, which is where the 1100px+
+   three-column layout picks them up. */
+@media (min-width: 860px) and (max-width: 1099px) {
+  .grid--2 { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+}
+
 @media (min-width: 1860px) {
   .grid { gap: 24px; }
   .grid--2 { grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
@@ -529,6 +538,12 @@ textarea:focus-visible,
 }
 @media (max-width: 768px) {
   .profile-layout { grid-template-columns: 1fr; }
+}
+/* The right column is a stack of label/control rows, and 1fr hands it the whole shell — 1470px
+   at 2560, which throws each setting's control most of a screen away from the label it belongs
+   to. Cap it at a measure the rows were drawn for; the column stays put under the title. */
+@media (min-width: 1500px) {
+  .profile-layout { grid-template-columns: 340px minmax(0, 860px); }
 }
 
 .profile-card { border-top: 2px solid var(--color-primary); }
@@ -769,4 +784,33 @@ textarea:focus-visible,
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ---------- TOUCH TARGETS ----------
+   Coarse pointers only, so nothing here changes the mouse-sized density the desktop layout is
+   drawn for. A responsive audit measured these controls between 14px and 31px tall on phones,
+   well under the 44px comfortable minimum; min-height grows the hit area while the type size,
+   padding and border stay exactly as they are.
+
+   Global rather than per-component on purpose: emulated encapsulation scopes a *component's*
+   own rules, but a global rule still matches inside components, and these same class names
+   (.filter-pill especially) recur across Browse, Practice and Roadmaps. */
+@media (pointer: coarse) {
+  .filter-pill,
+  .active-chip,
+  .active-filters__clear,
+  .choice-btn,
+  .goal-set-btn,
+  .tree__key-toggle,
+  .step__toggle,
+  .crumb a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Native control: min-height is enough, and forcing a display value on a <select> only
+     confuses the platform's own rendering. */
+  .sort-control select { min-height: 44px; }
 }

@@ -13,7 +13,10 @@
       }
     </div>
 
-    <div class="header__search">
+    <!-- Browse carries its own always-visible search field, so on a phone (where the header bar
+         is expanded rather than collapsed to an icon) the two would stack a few hundred pixels
+         apart. Desktop keeps both: there the header search is just an icon. -->
+    <div class="header__search" [class.header__search--redundant]="browseActive()">
       <app-global-search />
     </div>
 

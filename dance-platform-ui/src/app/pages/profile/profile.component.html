@@ -131,8 +131,9 @@
           </div>
         </div>
 
-        <!-- Connected accounts -->
-        @if (linked(); as links) {
+        <!-- Connected accounts. Hidden entirely when there is neither a connected account nor a
+             provider left to connect — see showConnectedAccounts. -->
+        @if (showConnectedAccounts() && linked(); as links) {
           <div class="card" data-testid="connected-accounts">
             <h3>Connected accounts</h3>
 

@@ -136,7 +136,7 @@ they are — the tests come back with the feature.
 | `login-google`, `login-facebook` | `login.component.html` | Social sign-in buttons. Rendered from `GET /auth/external/providers`, so a provider with no server-side credentials produces **no button at all** — assert on them conditionally, never unconditionally |
 | `finish-signup-username`, `finish-signup-submit`, `finish-signup-error` | `finish-signup.component.html` | The username step a first-time social sign-in lands on. Reachable only with a valid ticket in the URL fragment; without one the page redirects to `/login` |
 | `auth-callback` | `auth-callback.component.ts` | The post-provider landing page. Consumes the token from the fragment and redirects — it is never a resting state |
-| `connected-accounts` | `profile.component.html` | The Connected accounts card. **Absent** until `GET /auth/external/links` resolves |
+| `connected-accounts` | `profile.component.html` | The Connected accounts card. **Absent** until `GET /auth/external/links` resolves, and absent altogether when no provider is connected or connectable |
 | `search-input`, `results-count`, `sort-select`, `empty-state` | `dances.component.html` | Browse controls |
 | `style-filter-pills` | `dances.component.html` | The Style filter row — `.style-filters` alone also matches the Level row |
 | `dance-card`, `dance-card-link` | `dances.component.html` | Result cards — **on both the grid card and the list row** |

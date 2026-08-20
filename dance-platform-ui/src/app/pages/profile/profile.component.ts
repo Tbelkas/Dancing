@@ -55,6 +55,15 @@ export class ProfileComponent implements OnInit {
     return this.providers().filter(p => !connected.has(p.name));
   });
 
+  /**
+   * Nothing connected and nothing left to connect means the card is a heading over an empty
+   * box. That's the normal state whenever the deployment has no provider credentials
+   * configured — not an edge case — so the whole section stays out of the page.
+   */
+  readonly showConnectedAccounts = computed(
+    () => (this.linked()?.accounts.length ?? 0) > 0 || this.unlinkedProviders().length > 0
+  );
+
   constructor(
     private profileService: ProfileService,
     private practiceService: PracticeService,

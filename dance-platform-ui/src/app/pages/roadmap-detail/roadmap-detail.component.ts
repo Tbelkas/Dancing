@@ -105,7 +105,15 @@ export class RoadmapDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const stored = localStorage.getItem(VIEW_KEY);
-    if (stored === 'tree' || stored === 'list') this.storedView.set(stored);
+    if (stored === 'tree' || stored === 'list') {
+      this.storedView.set(stored);
+    } else if (window.matchMedia('(max-width: 720px)').matches) {
+      // No preference yet, on a phone. The tree is drawn to a 760px floor and scrolls sideways
+      // below that (roadmap-tree.component.css) — deliberate, but half a diagram is the wrong
+      // thing to land on. The list is the same curriculum in a column. Only the *default*
+      // moves: an explicit choice, on any screen, still wins and is still remembered.
+      this.storedView.set('list');
+    }
     this.branchesOpen.set(localStorage.getItem(BRANCHES_KEY) === '1');
 
     // Subscribed, not read once from the snapshot: modules made roadmap-to-roadmap navigation

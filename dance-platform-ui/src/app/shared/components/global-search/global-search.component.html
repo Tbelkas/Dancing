@@ -11,7 +11,7 @@
     (input)="onInput($any($event.target).value)"
     (keydown)="onKeydown($event)"
     (focus)="onFocus()"
-    placeholder="Search dances…"
+    [placeholder]="placeholder()"
     aria-label="Search dances"
     role="combobox"
     [attr.aria-expanded]="open()"

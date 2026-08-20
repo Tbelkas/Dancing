@@ -1,8 +1,11 @@
-import { Component, ElementRef, HostListener, ViewChild, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DanceService } from '../../../core/services/dance.service';
 import { Dance } from '../../../models/dance.model';
+
+/** Matches the ≤720px breakpoint the header uses to swap to the mobile layout. */
+const NARROW_QUERY = '(max-width: 720px)';
 
 /**
  * Header-wide dance search with typeahead. Ctrl+K or "/" focuses it from
@@ -27,6 +30,13 @@ export class GlobalSearchComponent {
   /** Desktop-only: false renders the search as a lone icon button (CSS ignores this on mobile). */
   expanded = signal(false);
 
+  /**
+   * On a phone the header slot is only ~120px wide, and "Search dances…" is clipped to
+   * "Search dan". The short form fits; the full wording stays in the aria-label either way.
+   */
+  private readonly narrow = signal(window.matchMedia(NARROW_QUERY).matches);
+  readonly placeholder = computed(() => (this.narrow() ? 'Search…' : 'Search dances…'));
+
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
   private debounceHandle: ReturnType<typeof setTimeout> | null = null;
@@ -37,7 +47,10 @@ export class GlobalSearchComponent {
     private dances: DanceService,
     private router: Router,
     private host: ElementRef<HTMLElement>
-  ) {}
+  ) {
+    // Rotating a phone crosses the breakpoint without a reload.
+    window.matchMedia(NARROW_QUERY).addEventListener('change', e => this.narrow.set(e.matches));
+  }
 
   onInput(value: string): void {
     this.query.set(value);

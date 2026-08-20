@@ -751,6 +751,11 @@ a.path-step__row:hover { border-color: var(--color-primary); color: var(--color-
 
 .dance-pager__link--next { text-align: right; margin-left: auto; }
 
+/* First or last dance in the style: only one <a> in the nav, so the 46% cap would strand it in
+   half a row and ellipsise a name that had room to spare. The empty <span> placeholder holding
+   the other side is a different element type, which is what makes :only-of-type work here. */
+.dance-pager__link:only-of-type { max-width: 100%; }
+
 .dance-pager__meta {
   display: flex;
   flex-direction: column;
