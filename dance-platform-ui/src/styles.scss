@@ -822,6 +822,17 @@ textarea:focus-visible,
      display rules the class sets for itself. */
   .btn { min-height: 44px; }
 
+  /* A step title in the list view is the step's primary target, but a path has thirty-odd of
+     them: a min-height would add 22px apiece and stretch the page by several screens. The hit
+     area grows into padding that the negative margin hands straight back, so the layout is
+     untouched. Safe here specifically because consecutive titles are separated by a
+     description and a video row — the expanded areas never reach each other. */
+  .step__title a {
+    display: inline-block;
+    padding-block: 11px;
+    margin-block: -11px;
+  }
+
   /* Native control: min-height is enough, and forcing a display value on a <select> only
      confuses the platform's own rendering. */
   .sort-control select { min-height: 44px; }
