@@ -179,7 +179,7 @@
   }
 
   @if (isTikTok) {
-    <div class="embed-container embed-container--portrait player-media"
+    <div #mediaEl class="embed-container embed-container--portrait player-media"
          [class.player-media--mirrored]="mirrored()"
          [class.player-media--camera]="cameraOn()"
          [class.player-media--camera-overlay]="cameraOn() && cameraLayout() === 'overlay'">
@@ -237,7 +237,10 @@
   }
 
   @if (isInstagram) {
-    <div class="embed-container embed-container--instagram">
+    <div #mediaEl class="embed-container embed-container--instagram player-media"
+         [class.player-media--mirrored]="mirrored()"
+         [class.player-media--camera]="cameraOn()"
+         [class.player-media--camera-overlay]="cameraOn() && cameraLayout() === 'overlay'">
       <iframe
         [src]="embedUrl | trustUrl"
         class="embed-frame embed-frame--instagram"
@@ -246,6 +249,23 @@
         frameborder="0"
         scrolling="no">
       </iframe>
+      @if (cameraOn()) {
+        <app-camera-pane [layout]="cameraLayout()" [layoutLocked]="cameraLayoutLocked()"
+                         [isFullscreen]="fullscreen()" (exitFullscreen)="toggleFullscreen()" />
+      }
+      @if (mirrored()) {
+        <span class="mirror-tag" aria-hidden="true"><i class="fa-solid fa-left-right"></i> Mirrored</span>
+      }
+    </div>
+
+    <!-- Instagram's embed publishes no player API, so everything that needs the transport
+         (sections, loop, speed, timestamped notes) is absent by necessity. Mirror, camera
+         and fullscreen act on *our* frame rather than the embed, so they work anyway — and
+         they are the three that matter most for learning a reel. -->
+    <div class="controls">
+      <div class="control-row">
+        <ng-container [ngTemplateOutlet]="toolToggles"></ng-container>
+      </div>
     </div>
   }
 
@@ -263,11 +283,13 @@
   <!-- The practice bench in one row: open a tool when you need it, and each toggle
        reports its own state (loop armed, note count) while folded. -->
   <ng-template #toolToggles>
-    <button class="tool-btn tool-btn--loop" [class.is-open]="loopOpen()" [class.is-armed]="repeating()"
-            (click)="loopOpen.set(!loopOpen())" [attr.aria-expanded]="loopOpen()"
-            title="Loop a section of the video over and over">
-      <i class="fa-solid fa-rotate-left"></i> Loop
-    </button>
+    @if (hasLoopTool) {
+      <button class="tool-btn tool-btn--loop" [class.is-open]="loopOpen()" [class.is-armed]="repeating()"
+              (click)="loopOpen.set(!loopOpen())" [attr.aria-expanded]="loopOpen()"
+              title="Loop a section of the video over and over">
+        <i class="fa-solid fa-rotate-left"></i> Loop
+      </button>
+    }
     @if (hasNotesTool) {
       <button class="tool-btn" [class.is-open]="notesOpen()" (click)="notesOpen.set(!notesOpen())"
               [attr.aria-expanded]="notesOpen()" title="Your private notes pinned to moments in this video">

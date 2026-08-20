@@ -77,6 +77,20 @@
   aspect-ratio: auto;
 }
 
+/* Instagram's embed is a different fixed size from TikTok's, so it needs its own
+   pane dimensions — otherwise the camera stands 578px tall beside a 505px video.
+   Same specificity as the rules above, so these have to stay below them. */
+.embed-container--instagram.player-media--camera app-camera-pane {
+  width: 400px;
+  max-width: 100%;
+  aspect-ratio: 400 / 505;
+}
+
+.embed-container--instagram.player-media--camera-overlay app-camera-pane {
+  width: auto;
+  aspect-ratio: auto;
+}
+
 /* Fullscreen: fill the height rather than letting the 16:9 row float in a black
    field, and keep both columns stretched to it. */
 .player-media--camera:fullscreen {

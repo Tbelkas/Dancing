@@ -382,8 +382,16 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     this.player?.setPlaybackRate(rate);
   }
 
-  /** Notes are worth a toolbar slot only when this user can write them or has some. */
+  /** Looping needs a transport to drive; the Instagram embed exposes none. */
+  get hasLoopTool(): boolean {
+    return !this.isInstagram;
+  }
+
+  /** Notes are worth a toolbar slot only when this user can write them or has some.
+   *  A note pins itself to a playback position, so Instagram — where that position is
+   *  unreadable — would file every note at 0:00. Better to offer nothing than that. */
   get hasNotesTool(): boolean {
+    if (this.isInstagram) return false;
     return this.canTakeNotes || this.personalNotes.length > 0;
   }
 
