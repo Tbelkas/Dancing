@@ -81,9 +81,9 @@
    pane dimensions — otherwise the camera stands 578px tall beside a 505px video.
    Same specificity as the rules above, so these have to stay below them. */
 .embed-container--instagram.player-media--camera app-camera-pane {
-  width: 400px;
+  width: 360px;
   max-width: 100%;
-  aspect-ratio: 400 / 505;
+  aspect-ratio: 360 / 640;
 }
 
 .embed-container--instagram.player-media--camera-overlay app-camera-pane {
@@ -431,9 +431,12 @@
   border: none;
 }
 
+/* Reels are portrait, and Instagram's chrome (header + like/comment footer) eats
+   ~135px of whatever height it is given. 505px cut the video off mid-frame; 640
+   is the first height that fits the video whole without leaving dead white below. */
 .embed-frame--instagram {
-  width: 400px;
-  height: 505px;
+  width: 360px;
+  height: 640px;
   border: none;
 }
 
