@@ -803,12 +803,24 @@ textarea:focus-visible,
   .goal-set-btn,
   .tree__key-toggle,
   .step__toggle,
-  .crumb a {
+  .crumb a,
+  .dance-summary__open,
+  .breakdown-row__name,
+  .session-dance-name,
+  .roadmap-stats a,
+  /* A roadmap card's media is a plain div, so unlike a dance card (whose thumbnail is a second
+     link to the same place, big enough on its own) the title is the card's only target. */
+  .roadmap-card__title-link {
     min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
+
+  /* .btn already centres its own content, so it only needs the floor. This catches the ghost
+     buttons that sit below it — "Next: The jack" measured 30px — without restating the
+     display rules the class sets for itself. */
+  .btn { min-height: 44px; }
 
   /* Native control: min-height is enough, and forcing a display value on a <select> only
      confuses the platform's own rendering. */
