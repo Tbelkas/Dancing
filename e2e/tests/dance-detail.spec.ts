@@ -23,7 +23,11 @@ test.describe('dance detail', () => {
     const name = await openFirstDance(page);
 
     await expect(page.getByTestId('dance-title')).toHaveText(name);
-    await expect(page.getByRole('heading', { name: 'Videos' })).toBeVisible();
+    // exact: the videos section is headed "Videos", and a dance holding more than one also
+    // carries an "All N videos" sub-heading over the list under the player. A substring match
+    // hits both and fails strict mode, on whichever dance the browse rotation happens to lead
+    // with that day.
+    await expect(page.getByRole('heading', { name: 'Videos', exact: true })).toBeVisible();
     // Page title should follow the dance, not stay on the browse title.
     await expect(page).toHaveTitle(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
   });
