@@ -206,8 +206,17 @@ NUMBERED = re.compile(r"^(part|section|chapter|step|move)\s*\d+$"
 ELLIPSIS = ("...", "\u2026")
 
 
+UNTITLED = re.compile(r"^<\s*untitled", re.I)
+
+
 def usable_chapters(d):
-    """The creator's chapters as sections, or None if they are not real markers."""
+    """The creator's chapters as sections, or None if they are not real markers.
+
+    The distinction that matters is human-authored vs YouTube auto-generated.
+    Auto-generated chapters are transcript fragments ("starts with a grapevine")
+    and make a terrible target: a proposal that names the move properly scores
+    zero against them, so the eval would punish exactly the behaviour we want.
+    """
     ch = [c for c in (d.get("chapters") or []) if isinstance(c, dict)]
     if len(ch) < 4:
         return None
@@ -220,6 +229,27 @@ def usable_chapters(d):
     if sum(1 for l in labels if len(l) > 45 or l.endswith(ELLIPSIS)) > n * 0.3:
         return None
     if len({l.lower() for l in labels}) < n * 0.8:
+        return None
+
+    # Sentence fragments starting lower-case are the auto-generation signature.
+    # A stray one is fine; a third of them means nobody wrote these.
+    if sum(1 for l in labels if l[:1].islower()) > n * 0.3:
+        return None
+
+    # "<Untitled Chapter 1>" is YouTube's placeholder when the first chapter does
+    # not start at 0:00 - an artifact on an otherwise hand-written list, not a
+    # reason to throw the video away. Rename it, and only reject if there are more.
+    untitled = [i for i, l in enumerate(labels) if UNTITLED.match(l)]
+    if untitled == [0]:
+        labels[0] = "Intro"
+    elif untitled:
+        return None
+
+    # A creator who put four chapters on a 31-minute class did not really chapter
+    # it. Scoring against that punishes a proposal for being more useful than the
+    # original, which is the opposite of what this measures.
+    dur = d.get("duration") or 0
+    if dur and n / (dur / 60) < 0.25:
         return None
     out = []
     for i, c in enumerate(ch):
