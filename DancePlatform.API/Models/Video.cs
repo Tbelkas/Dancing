@@ -17,6 +17,27 @@ public class Video
     /// <summary>Full source-video length in seconds (from yt-dlp metadata); null when unknown.</summary>
     public int? DurationSeconds { get; set; }
 
+    // --- Intake quality gate ---------------------------------------------
+    // Bulk-seeded videos land as "pending" and are held out of every public
+    // query by the global filter in AppDbContext until someone reviews them.
+    // That filter is deliberately global rather than a Where() per call site:
+    // DanceService, RoadmapService and PracticeService all read Dance.Videos
+    // directly, and a hand-written predicate would eventually miss one and
+    // leak a quarantined video onto the site.
+    //
+    // Videos added by hand through the admin form go straight to "approved" —
+    // someone has already looked at them — but still carry a score and flags
+    // so a bad one can be found later.
+    //
+    //   approved  visible; the default and what every existing row backfills to
+    //   pending   held back, waiting on review
+    //   rejected  held back, reviewed and refused
+    public string ReviewState { get; set; } = "approved";
+    public float? QualityScore { get; set; }
+    public string? QualityFlags { get; set; }
+    public DateTime? ReviewedAt { get; set; }
+    public string? ReviewNote { get; set; }
+
     public double AverageRating { get; set; }
     public int RatingCount { get; set; }
 

@@ -43,6 +43,31 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Dance>()
             .HasIndex(d => d.Slug);
 
+        // --- Intake quarantine -------------------------------------------------
+        // A video only reaches a query once it is approved. This is a GLOBAL filter
+        // on purpose: Dance.Videos is read directly by DanceService (counts,
+        // thumbnails, sort order), RoadmapService and PracticeService, so filtering
+        // at each call site would eventually miss one and leak a pending video onto
+        // the public site. Admin paths that must reach held-back rows call
+        // IgnoreQueryFilters() explicitly.
+        //
+        // The four dependents below carry the matching filter because they have a
+        // required relationship to Video; without it EF warns, and their rows would
+        // otherwise survive a query whose principal was filtered away.
+        modelBuilder.Entity<Video>()
+            .HasQueryFilter(v => v.ReviewState == "approved");
+        modelBuilder.Entity<VideoSegment>()
+            .HasQueryFilter(s => s.Video.ReviewState == "approved");
+        modelBuilder.Entity<VideoRating>()
+            .HasQueryFilter(r => r.Video.ReviewState == "approved");
+        modelBuilder.Entity<VideoNote>()
+            .HasQueryFilter(n => n.Video.ReviewState == "approved");
+        modelBuilder.Entity<UserVideoLoop>()
+            .HasQueryFilter(l => l.Video.ReviewState == "approved");
+
+        modelBuilder.Entity<Video>()
+            .HasIndex(v => v.ReviewState);
+
         modelBuilder.Entity<VideoSegment>()
             .HasOne(vs => vs.Video)
             .WithMany(v => v.Segments)

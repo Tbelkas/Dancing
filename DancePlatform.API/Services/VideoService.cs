@@ -117,7 +117,7 @@ public class VideoService : IVideoService
         // among the videos this one would coexist with (global plus the owner's personal ones).
         // Same source with a different StartTime stays allowed — multi-move montages legitimately
         // put several cuts of one video on the platform, and GetRelatedAsync groups them.
-        var duplicateExists = await _db.Videos.AnyAsync(v =>
+        var duplicateExists = await _db.Videos.IgnoreQueryFilters().AnyAsync(v =>
             v.DanceId == request.DanceId &&
             v.VideoId == request.VideoId &&
             v.Platform == request.Platform &&
@@ -147,7 +147,13 @@ public class VideoService : IVideoService
             await EnsureInProgressAsync(uid, request.DanceId);
 
         await _db.SaveChangesAsync();
-        return (CreateVideoResult.Success, await GetByIdAsync(video.Id, userId));
+        // Read back past the quarantine filter: a video created in any state other
+        // than "approved" is invisible to GetByIdAsync, which would hand the caller
+        // a 200 with a null body instead of the thing it just created.
+        var created = await Project(
+            _db.Videos.IgnoreQueryFilters().Where(v => v.Id == video.Id), userId)
+            .FirstOrDefaultAsync();
+        return (CreateVideoResult.Success, created);
     }
 
     // Marks a dance In Progress for a user if they aren't already tracking or have learned it.
@@ -163,7 +169,7 @@ public class VideoService : IVideoService
 
     public async Task<VideoDto?> UpdateAsync(int id, UpdateVideoRequest request, int? userId)
     {
-        var video = await _db.Videos.Include(v => v.Segments).FirstOrDefaultAsync(v => v.Id == id);
+        var video = await _db.Videos.IgnoreQueryFilters().Include(v => v.Segments).FirstOrDefaultAsync(v => v.Id == id);
         if (video is null) return null;
 
         if (request.Title is not null) video.Title = request.Title;
@@ -192,7 +198,7 @@ public class VideoService : IVideoService
     // aggregates are recomputed since the video's ratings move with it.
     public async Task<(MoveVideoResult Result, VideoDto? Video)> MoveToDanceAsync(int id, int danceId, int? userId)
     {
-        var video = await _db.Videos.FirstOrDefaultAsync(v => v.Id == id);
+        var video = await _db.Videos.IgnoreQueryFilters().FirstOrDefaultAsync(v => v.Id == id);
         if (video is null) return (MoveVideoResult.VideoNotFound, null);
 
         if (!await _db.Dances.AnyAsync(d => d.Id == danceId))
@@ -214,7 +220,7 @@ public class VideoService : IVideoService
     public async Task<VideoDto?> AddSegmentAsync(int id, VideoSegmentDto segment, int? userId)
     {
         if (string.IsNullOrWhiteSpace(segment.Label)) return null;
-        var video = await _db.Videos.Include(v => v.Segments).FirstOrDefaultAsync(v => v.Id == id);
+        var video = await _db.Videos.IgnoreQueryFilters().Include(v => v.Segments).FirstOrDefaultAsync(v => v.Id == id);
         if (video is null) return null;
 
         video.Segments.Add(new VideoSegment
@@ -239,7 +245,7 @@ public class VideoService : IVideoService
 
     public async Task<DeleteVideoResult> DeleteAsync(int id, int? userId, bool isAdmin)
     {
-        var video = await _db.Videos.FindAsync(id);
+        var video = await _db.Videos.IgnoreQueryFilters().FirstOrDefaultAsync(v => v.Id == id);
         if (video is null) return DeleteVideoResult.NotFound;
         // Admins delete anything; a regular user may delete only their own personal video.
         if (!isAdmin && video.OwnerUserId != userId) return DeleteVideoResult.Forbidden;
