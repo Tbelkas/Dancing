@@ -22,10 +22,29 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
   @Input() startTime?: number;
   @Input() endTime?: number;
   @Input() segments: VideoSegment[] = [];
-  /** Other dances cut from this same source video; includes the one being shown. */
-  @Input() chapters: VideoChapter[] = [];
+  /**
+   * Other dances cut from this same source video; includes the one being shown.
+   *
+   * A setter rather than a plain input because the list arrives on its own request, after the
+   * player has mounted: the dance page shows the player straight away and fills the chips in
+   * when they land. Snapshotting the open/closed state in ngOnInit alone would leave every
+   * chip bar collapsed. Short lists open by default; long ones (some videos hold dozens of
+   * dances) stay collapsed so they don't bury the player controls.
+   */
+  @Input() set chapters(value: VideoChapter[]) {
+    this._chapters = value ?? [];
+    this.chaptersExpanded.set(this._chapters.length > 0 && this._chapters.length <= 6);
+  }
+  get chapters(): VideoChapter[] { return this._chapters; }
+  private _chapters: VideoChapter[] = [];
   /** Video row id of the dance currently on the page — used to highlight its chip. */
   @Input() activeVideoId?: number;
+  /**
+   * True when other dances are cut from this same upload. It decides whether playback is
+   * hard-bounded at `endTime`, and that decision is made once, when the player is built — so
+   * it cannot be read off `chapters`, which arrive on their own request a moment later.
+   */
+  @Input() sharedSource = false;
   /** Admins can name and persist the current loop region as a global section. */
   @Input() canSaveLoops = false;
   /** This user's private loops for the video; shown alongside the global sections. */
@@ -264,9 +283,6 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     // own, so every player needs to know when it's in fullscreen.
     document.addEventListener('fullscreenchange', this.fullscreenHandler);
     this.activeChapterId.set(this.activeVideoId ?? null);
-    // Short lists open by default; long ones (some videos hold dozens of dances)
-    // start collapsed so they don't bury the player controls.
-    this.chaptersExpanded.set(this.chapters.length > 0 && this.chapters.length <= 6);
     this.restorePlayerPrefs();
     VideoPlayerComponent.activeInstance = this;
     document.addEventListener('keydown', this.keydownHandler);
@@ -556,7 +572,7 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     if (this.openingTime != null) playerVars['start'] = this.openingTime;
     // With multiple dances in one video the player must stay seekable past this
     // dance's end, so don't hard-bound it — the loop region handles section limits.
-    if (this.endTime != null && !this.hasChapters) playerVars['end'] = this.endTime;
+    if (this.endTime != null && !this.sharedSource) playerVars['end'] = this.endTime;
 
     this.player = new window.YT.Player(this.playerContainer.nativeElement, {
       videoId: this.videoId,

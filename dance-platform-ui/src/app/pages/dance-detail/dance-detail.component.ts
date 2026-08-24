@@ -64,6 +64,12 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   readonly videosLoading = signal(true);
   showVideosSkeleton = delayedLoading(this.videosLoading);
   selectedVideo = signal<Video | null>(null);
+  /**
+   * The open video as a 0-or-1 length list, so the template can render it through `@for`
+   * with `track v.id`. `@if` would reuse the component instance across a switch and the
+   * player, which reads its video once at creation, would keep playing the old one.
+   */
+  readonly mainSlot = computed(() => { const v = this.selectedVideo(); return v ? [v] : []; });
   // Other dances sharing the selected video, for in-place jump chips in the player.
   chapters = signal<VideoChapter[]>([]);
   // The signed-in user's private loops, keyed by video id.
@@ -298,11 +304,14 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
         // afterwards starts from that video's own beginning rather than a stale timestamp.
         this.resumeTimeVideoId = resume && this.resumeTime !== null ? resume.id : null;
         this.resumeVideoId = null;
-        const open = resume ?? (v.length === 1 ? v[0] : null);
+        // The main video plays on arrival whatever the count. `v` comes back best-first
+        // (the user's own 4-5 star picks, then add order), so v[0] is the one this dance
+        // leads with; a ?v= deep link overrides it. Landing on a list of collapsed rows
+        // asked the reader to choose before showing them anything to choose between.
+        const open = resume ?? v[0] ?? null;
         if (open) {
           this.videoService.recordView(open.id).subscribe();
           this.revealVideo(open);
-          if (resume && v.length > 1) this.scrollToVideo(open.id);
         }
       },
       // A failed fetch still has to end the wait, or the section holds a skeleton forever.
@@ -416,14 +425,16 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   }
 
   selectVideo(video: Video): void {
+    // Re-picking what is already playing scrolls back to it rather than closing it: with the
+    // player above the list there is nothing to collapse into, and blanking it would punish
+    // a stray click on the row you are watching.
     if (this.selectedVideo()?.id === video.id) {
-      this.selectedVideo.set(null);
-      this.chapters.set([]);
-      this.practiceTimer.stop();
+      this.scrollToPlayer();
       return;
     }
     this.videoService.recordView(video.id).subscribe();
     this.revealVideo(video);
+    this.scrollToPlayer();
   }
 
   // Resolve the sibling dances sharing this source video *before* mounting the
@@ -432,13 +443,17 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   private revealVideo(video: Video): void {
     const d = this.dance();
     if (d) this.recentDances.setVideo(d.id, video.id);
-    this.selectedVideo.set(null);
     this.chapters.set([]);
+    // Mount the player immediately instead of waiting on the sibling-dance lookup. The chips
+    // are a garnish on the player, not a precondition for it, and they now fold in on arrival
+    // (VideoPlayerComponent takes `chapters` through a setter). Holding the player back for
+    // them put a request between every click and any picture.
+    this.selectedVideo.set(video);
     this.loadPersonalLoops(video.id);
     this.loadPersonalNotes(video.id);
     this.videoService.getRelated(video.id).subscribe({
-      next: ch => { this.chapters.set(ch); this.selectedVideo.set(video); },
-      error: () => this.selectedVideo.set(video)
+      // Drop a response for a video the reader has already clicked past.
+      next: ch => { if (this.selectedVideo()?.id === video.id) this.chapters.set(ch); }
     });
   }
 
@@ -455,13 +470,15 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   }
 
   /** Brings a deep-linked video's row into view, once the list has rendered. */
-  private scrollToVideo(videoId: number): void {
+  /** Bring the player back into view after picking a different video from the list below it. */
+  private scrollToPlayer(): void {
     setTimeout(() => {
       this.host.nativeElement
-        .querySelector(`[data-video-id="${videoId}"]`)
+        .querySelector('[data-main-player]')
         ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
+
 
   /** Personal loops the signed-in user saved for a given video (empty if none/anon). */
   personalLoopsFor(videoId: number): VideoSegment[] {
@@ -770,9 +787,21 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   onVideoMoved(video: Video): void {
     this.videos.update(list => list.filter(v => v.id !== video.id));
     this.dance.update(d => d ? { ...d, videoCount: Math.max(0, d.videoCount - 1) } : d);
-    if (this.selectedVideo()?.id === video.id) this.selectedVideo.set(null);
+    if (this.selectedVideo()?.id === video.id) this.openNextVideo();
     this.movingVideoId.set(null);
     this.actionError.set('');
+  }
+
+  /**
+   * Hand the player to whatever video is left at the front of the list, or empty it if that
+   * was the last one. The player leads the section now, so removing the open video has to
+   * leave something there rather than a hole above a list of things it could be showing.
+   */
+  private openNextVideo(): void {
+    const next = this.videos()[0] ?? null;
+    this.chapters.set([]);
+    this.selectedVideo.set(null);
+    if (next) this.revealVideo(next); else this.practiceTimer.stop();
   }
 
   async deleteVideo(video: Video): Promise<void> {
@@ -783,7 +812,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     const wasOpen = this.selectedVideo()?.id === video.id;
     this.videos.update(list => list.filter(v => v.id !== video.id));
     this.dance.update(d => d ? { ...d, videoCount: Math.max(0, d.videoCount - 1) } : d);
-    if (wasOpen) this.selectedVideo.set(null);
+    if (wasOpen) this.openNextVideo();
 
     const restore = () => {
       this.videos.update(list => {
@@ -792,7 +821,7 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
         return next;
       });
       this.dance.update(d => d ? { ...d, videoCount: d.videoCount + 1 } : d);
-      if (wasOpen) this.selectedVideo.set(video);
+      if (wasOpen) this.revealVideo(video);
     };
     this.toast.undoable(`Video "${video.title}" deleted.`, {
       undo: restore,

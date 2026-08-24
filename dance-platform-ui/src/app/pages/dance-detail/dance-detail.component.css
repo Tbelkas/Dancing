@@ -336,23 +336,33 @@
   font-weight: 700;
 }
 
-.video-list-item__toggle {
+/* What a row does when clicked: a play cue, or the marker on the one already up in the
+   player. The rows no longer expand, so a chevron would promise something that never happens. */
+.video-list-item__state {
   color: var(--color-text-muted);
   font-size: 0.68rem;
   flex-shrink: 0;
   font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
 }
 
-.video-player-expanded {
-  padding: 18px 18px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  animation: fadeIn 0.18s ease both;
-  background: var(--color-surface-2);
-  border-bottom: 1px solid var(--color-border);
+.video-list-item__state--playing {
+  color: var(--color-primary);
+  font-weight: 700;
+}
 
-  &:last-child { border-bottom: none; }
+/* Separates the player above from the alternatives below, and says how many there are before
+   the reader has to count rows. */
+.video-list__heading {
+  margin: 28px 0 10px;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--color-text-muted);
 }
 
 .empty {

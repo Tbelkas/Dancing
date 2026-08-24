@@ -15,6 +15,13 @@ public class VideoDto
     // Full length of the source upload. The UI subtracts StartTime to show how much of it this
     // video actually is - runtime is what you pick on when several videos cover the same move.
     public int? DurationSeconds { get; set; }
+    /// <summary>
+    /// How many dances are cut from this same source upload, this one included. Above 1 means
+    /// the player must stay seekable past this dance's end so the jump chips can reach the
+    /// neighbouring sections. The chips themselves arrive on a separate request, too late for
+    /// the player to be built around them, so the decision rides along with the video instead.
+    /// </summary>
+    public int SharedSourceCount { get; set; }
     public double AverageRating { get; set; }
     public int RatingCount { get; set; }
     public int? UserRating { get; set; }

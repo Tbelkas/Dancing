@@ -49,6 +49,9 @@ export interface Video {
   endTime?: number;
   /** Length of the whole source upload; clip it with startTime/endTime via `videoRuntime`. */
   durationSeconds?: number;
+  /** Dances cut from this same upload, this one included. Above 1 and the player must stay
+   *  seekable past this dance's end so the jump chips can reach the neighbouring sections. */
+  sharedSourceCount?: number;
   averageRating: number;
   ratingCount: number;
   userRating?: number;

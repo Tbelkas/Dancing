@@ -331,7 +331,7 @@ public class VideoService : IVideoService
                 })
                 .ToList();
 
-    private static IQueryable<VideoDto> Project(IQueryable<Video> source, int? userId) =>
+    private IQueryable<VideoDto> Project(IQueryable<Video> source, int? userId) =>
         source.Select(v => new VideoDto
         {
             Id = v.Id,
@@ -345,6 +345,10 @@ public class VideoService : IVideoService
             StartTime = v.StartTime,
             EndTime = v.EndTime,
             DurationSeconds = v.DurationSeconds,
+            // Matches GetRelatedAsync's definition of a sibling: same upload, same platform.
+            // Not scoped to the viewer - a private cut someone else made still means the source
+            // runs past this dance's end, which is all this count is asked to decide.
+            SharedSourceCount = _db.Videos.Count(o => o.VideoId == v.VideoId && o.Platform == v.Platform),
             AverageRating = v.AverageRating,
             RatingCount = v.RatingCount,
             UserRating = userId == null

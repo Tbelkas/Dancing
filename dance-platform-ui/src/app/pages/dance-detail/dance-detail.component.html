@@ -126,101 +126,100 @@
             <!-- Loading, but not for long enough to be worth a skeleton — hold the space empty. -->
           } @else if (videos().length === 0) {
             <p class="empty">No videos available for this dance yet.</p>
-          } @else if (videos().length === 1) {
-            <div class="video-item">
-              <div class="video-item__header">
-                <h3 class="video-title">{{ videos()[0].title }}</h3>
-                @if (videos()[0].videoType === 'tutorial') {
-                  <span class="badge badge--tutorial"><i class="fa-solid fa-graduation-cap"></i> Tutorial</span>
-                }
-                @if (isPersonalVideo(videos()[0])) {
-                  <span class="badge badge--personal"><i class="fa-solid fa-lock"></i> Personal</span>
-                }
-                @if (role.isAdmin()) {
-                  <button class="btn btn--ghost btn--sm" (click)="toggleEditVideoTime(videos()[0])"><i class="fa-solid fa-clock"></i> Edit Time</button>
-                  <button class="btn btn--ghost btn--sm" (click)="toggleMoveVideo(videos()[0])"><i class="fa-solid fa-arrow-right-arrow-left"></i> Move</button>
-                }
-                @if (canDeleteVideo(videos()[0])) {
-                  <button class="btn btn--danger btn--sm" (click)="deleteVideo(videos()[0])"><i class="fa-solid fa-trash"></i> Delete</button>
-                }
-              </div>
-              @defer (when editingVideoId() === videos()[0].id) {
-                @if (editingVideoId() === videos()[0].id) {
-                  <app-edit-video-form [video]="videos()[0]" (updated)="onVideoUpdated($event)" (cancelled)="editingVideoId.set(null)" />
-                }
-              }
-              @defer (when movingVideoId() === videos()[0].id) {
-                @if (movingVideoId() === videos()[0].id) {
-                  <app-move-video-picker [video]="videos()[0]" [excludeDanceId]="dance()!.id" (moved)="onVideoMoved($event)" (cancelled)="movingVideoId.set(null)" />
-                }
-              }
-              @if (videos()[0].description) {
-                <p class="video-desc">{{ videos()[0].description }}</p>
-              }
-              <app-video-player [videoId]="videos()[0].videoId" [platform]="videos()[0].platform" [startTime]="playerStart(videos()[0])" [endTime]="videos()[0].endTime" [segments]="videos()[0].segments" [chapters]="chapters()" [activeVideoId]="videos()[0].id" [canSaveLoops]="role.isAdmin()" [personalLoops]="personalLoopsFor(videos()[0].id)" [canSavePersonal]="auth.isAuthenticated()" [personalNotes]="personalNotesFor(videos()[0].id)" [canTakeNotes]="auth.isAuthenticated()" (saveLoop)="onSaveLoop(videos()[0], $event)" (deleteLoop)="onDeleteLoop(videos()[0], $event)" (savePersonalLoop)="onSavePersonalLoop(videos()[0], $event)" (deletePersonalLoop)="onDeletePersonalLoop(videos()[0], $event)" (saveNote)="onSaveNote(videos()[0], $event)" (updateNote)="onUpdateNote(videos()[0], $event)" (deleteNote)="onDeleteNote(videos()[0], $event)" (playingChange)="onPlayerPlaying($event)" />
-              <ng-container [ngTemplateOutlet]="videoRating" [ngTemplateOutletContext]="{ $implicit: videos()[0] }"></ng-container>
-            </div>
           } @else {
-            <div class="video-list">
-              @for (video of videos(); track video.id) {
-                <div class="video-list-item" [attr.data-video-id]="video.id" [class.video-list-item--active]="selectedVideo()?.id === video.id" (click)="selectVideo(video)">
-                  <div class="video-list-item__info">
-                    <span class="video-list-item__title">
-                      {{ video.title }}
-                      @if (video.videoType === 'tutorial') {
-                        <span class="badge badge--tutorial"><i class="fa-solid fa-graduation-cap"></i> Tutorial</span>
-                      }
-                      @if (isPersonalVideo(video)) {
-                        <span class="badge badge--personal"><i class="fa-solid fa-lock"></i> Personal</span>
-                      }
-                    </span>
-                    <span class="video-list-item__meta">
-                      <!-- Runtime leads: with several videos on one move there is often no best
-                           one, and length is what the choice actually turns on. -->
-                      @if (runtimeLabel(video); as runtime) {
-                        <span class="runtime-badge"><i class="fa-solid fa-clock"></i> {{ runtime }}</span>
-                      }
-                      <span>{{ video.dateAdded | date:'mediumDate' }}</span>
-                      <span class="views-badge"><i class="fa-solid fa-eye"></i> {{ viewCountBucket(video.viewCount) }}</span>
-                      @if (video.userRating) {
-                        <span class="rating-badge rating-badge--yours" title="Your rating"><i class="fa-solid fa-star"></i> {{ video.userRating }}</span>
-                      } @else if (video.ratingCount > 0) {
-                        <span class="rating-badge" title="Community rating"><i class="fa-solid fa-star"></i> {{ video.averageRating | number:'1.1-1' }}</span>
-                      }
-                    </span>
-                  </div>
-                  <div class="video-list-item__end">
-                    @if (role.isAdmin()) {
-                      <button class="btn btn--ghost btn--xs" (click)="$event.stopPropagation(); toggleEditVideoTime(video)" title="Edit time/sections"><i class="fa-solid fa-clock"></i></button>
-                      <button class="btn btn--ghost btn--xs" (click)="$event.stopPropagation(); toggleMoveVideo(video)" title="Move to another dance"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
-                    }
-                    @if (canDeleteVideo(video)) {
-                      <button class="btn btn--danger btn--xs" (click)="$event.stopPropagation(); deleteVideo(video)" title="Delete video"><i class="fa-solid fa-trash"></i></button>
-                    }
-                    @if (selectedVideo()?.id === video.id) { <span class="video-list-item__toggle"><i class="fa-solid fa-chevron-up"></i></span> } @else { <span class="video-list-item__toggle"><i class="fa-solid fa-chevron-down"></i></span> }
-                  </div>
+            <!-- One player, above the list, already playing the video this dance leads with.
+                 The list underneath switches it. It used to be the other way round - every
+                 video collapsed, nothing playing - which made the reader pick before they had
+                 seen anything, and for a move whose videos are near-interchangeable there was
+                 no honest basis for the pick.
+                 `@for` over a 0-or-1 list rather than `@if`: `track video.id` forces a fresh
+                 player on a switch, and the player reads its video once at creation. -->
+            @for (video of mainSlot(); track video.id) {
+              <div class="video-item" data-main-player>
+                <div class="video-item__header">
+                  <h3 class="video-title">{{ video.title }}</h3>
+                  @if (video.videoType === 'tutorial') {
+                    <span class="badge badge--tutorial"><i class="fa-solid fa-graduation-cap"></i> Tutorial</span>
+                  }
+                  @if (isPersonalVideo(video)) {
+                    <span class="badge badge--personal"><i class="fa-solid fa-lock"></i> Personal</span>
+                  }
+                  @if (role.isAdmin()) {
+                    <button class="btn btn--ghost btn--sm" (click)="toggleEditVideoTime(video)"><i class="fa-solid fa-clock"></i> Edit Time</button>
+                    <button class="btn btn--ghost btn--sm" (click)="toggleMoveVideo(video)"><i class="fa-solid fa-arrow-right-arrow-left"></i> Move</button>
+                  }
+                  @if (canDeleteVideo(video)) {
+                    <button class="btn btn--danger btn--sm" (click)="deleteVideo(video)"><i class="fa-solid fa-trash"></i> Delete</button>
+                  }
                 </div>
+                @defer (when editingVideoId() === video.id) {
+                  @if (editingVideoId() === video.id) {
+                    <app-edit-video-form [video]="video" (updated)="onVideoUpdated($event)" (cancelled)="editingVideoId.set(null)" />
+                  }
+                }
                 @defer (when movingVideoId() === video.id) {
                   @if (movingVideoId() === video.id) {
                     <app-move-video-picker [video]="video" [excludeDanceId]="dance()!.id" (moved)="onVideoMoved($event)" (cancelled)="movingVideoId.set(null)" />
                   }
                 }
-                @if (selectedVideo()?.id === video.id) {
-                  <div class="video-player-expanded">
-                    @defer (when editingVideoId() === video.id) {
-                      @if (editingVideoId() === video.id) {
-                        <app-edit-video-form [video]="video" (updated)="onVideoUpdated($event)" (cancelled)="editingVideoId.set(null)" />
+                @if (video.description) {
+                  <p class="video-desc">{{ video.description }}</p>
+                }
+                <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="playerStart(video)" [endTime]="video.endTime" [segments]="video.segments" [chapters]="chapters()" [activeVideoId]="video.id" [sharedSource]="(video.sharedSourceCount ?? 1) > 1" [canSaveLoops]="role.isAdmin()" [personalLoops]="personalLoopsFor(video.id)" [canSavePersonal]="auth.isAuthenticated()" [personalNotes]="personalNotesFor(video.id)" [canTakeNotes]="auth.isAuthenticated()" (saveLoop)="onSaveLoop(video, $event)" (deleteLoop)="onDeleteLoop(video, $event)" (savePersonalLoop)="onSavePersonalLoop(video, $event)" (deletePersonalLoop)="onDeletePersonalLoop(video, $event)" (saveNote)="onSaveNote(video, $event)" (updateNote)="onUpdateNote(video, $event)" (deleteNote)="onDeleteNote(video, $event)" (playingChange)="onPlayerPlaying($event)" />
+                <ng-container [ngTemplateOutlet]="videoRating" [ngTemplateOutletContext]="{ $implicit: video }"></ng-container>
+              </div>
+            }
+
+            <!-- The rest of this move's videos. The one playing stays in the list, marked, so
+                 the rows never reshuffle under the cursor as you move between them. -->
+            @if (videos().length > 1) {
+              <h3 class="video-list__heading">All {{ videos().length }} videos</h3>
+              <div class="video-list">
+                @for (video of videos(); track video.id) {
+                  <div class="video-list-item" [attr.data-video-id]="video.id" [class.video-list-item--active]="selectedVideo()?.id === video.id" role="button" tabindex="0" [attr.aria-current]="selectedVideo()?.id === video.id" (click)="selectVideo(video)" (keydown.enter)="selectVideo(video)" (keydown.space)="$event.preventDefault(); selectVideo(video)">
+                    <div class="video-list-item__info">
+                      <span class="video-list-item__title">
+                        {{ video.title }}
+                        @if (video.videoType === 'tutorial') {
+                          <span class="badge badge--tutorial"><i class="fa-solid fa-graduation-cap"></i> Tutorial</span>
+                        }
+                        @if (isPersonalVideo(video)) {
+                          <span class="badge badge--personal"><i class="fa-solid fa-lock"></i> Personal</span>
+                        }
+                      </span>
+                      <span class="video-list-item__meta">
+                        <!-- Runtime leads: with several videos on one move there is often no best
+                             one, and length is what the choice actually turns on. -->
+                        @if (runtimeLabel(video); as runtime) {
+                          <span class="runtime-badge"><i class="fa-solid fa-clock"></i> {{ runtime }}</span>
+                        }
+                        <span>{{ video.dateAdded | date:'mediumDate' }}</span>
+                        <span class="views-badge"><i class="fa-solid fa-eye"></i> {{ viewCountBucket(video.viewCount) }}</span>
+                        @if (video.userRating) {
+                          <span class="rating-badge rating-badge--yours" title="Your rating"><i class="fa-solid fa-star"></i> {{ video.userRating }}</span>
+                        } @else if (video.ratingCount > 0) {
+                          <span class="rating-badge" title="Community rating"><i class="fa-solid fa-star"></i> {{ video.averageRating | number:'1.1-1' }}</span>
+                        }
+                      </span>
+                    </div>
+                    <div class="video-list-item__end">
+                      @if (role.isAdmin()) {
+                        <button class="btn btn--ghost btn--xs" (click)="$event.stopPropagation(); toggleEditVideoTime(video)" title="Edit time/sections"><i class="fa-solid fa-clock"></i></button>
+                        <button class="btn btn--ghost btn--xs" (click)="$event.stopPropagation(); toggleMoveVideo(video)" title="Move to another dance"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
                       }
-                    }
-                    @if (video.description) {
-                      <p class="video-desc">{{ video.description }}</p>
-                    }
-                    <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="playerStart(video)" [endTime]="video.endTime" [segments]="video.segments" [chapters]="chapters()" [activeVideoId]="video.id" [canSaveLoops]="role.isAdmin()" [personalLoops]="personalLoopsFor(video.id)" [canSavePersonal]="auth.isAuthenticated()" [personalNotes]="personalNotesFor(video.id)" [canTakeNotes]="auth.isAuthenticated()" (saveLoop)="onSaveLoop(video, $event)" (deleteLoop)="onDeleteLoop(video, $event)" (savePersonalLoop)="onSavePersonalLoop(video, $event)" (deletePersonalLoop)="onDeletePersonalLoop(video, $event)" (saveNote)="onSaveNote(video, $event)" (updateNote)="onUpdateNote(video, $event)" (deleteNote)="onDeleteNote(video, $event)" (playingChange)="onPlayerPlaying($event)" />
-                    <ng-container [ngTemplateOutlet]="videoRating" [ngTemplateOutletContext]="{ $implicit: video }"></ng-container>
+                      @if (canDeleteVideo(video)) {
+                        <button class="btn btn--danger btn--xs" (click)="$event.stopPropagation(); deleteVideo(video)" title="Delete video"><i class="fa-solid fa-trash"></i></button>
+                      }
+                      @if (selectedVideo()?.id === video.id) {
+                        <span class="video-list-item__state video-list-item__state--playing"><i class="fa-solid fa-volume-high"></i> Playing</span>
+                      } @else {
+                        <span class="video-list-item__state"><i class="fa-solid fa-play"></i></span>
+                      }
+                    </div>
                   </div>
                 }
-              }
-            </div>
+              </div>
+            }
           }
 
           <!-- Per-video star rating: signed-in users rate; everyone sees the community average. -->
