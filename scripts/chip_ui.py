@@ -5,8 +5,10 @@ Local dashboard for the chip pipeline. Two tabs:
 
   Queue  catalog chip health, the queue ranked by reach x deficit, live run
          progress and stage, a log, and Pause / Resume / Stop.
-  Gold   the eval set: play each video, mark section boundaries at the playhead,
-         save. Turns hand-chipping 30 videos from JSON editing into clicking.
+  Gold   the optional half of the eval set. Most ground truth comes free from
+         creators' own chapter markers (chip_gold.py auto); this tab is only for
+         the videos that have no chapters and no free truth. Play, press S at each
+         boundary, name it, save.
 
     python scripts/chip_ui.py     ->  http://127.0.0.1:8787
 
@@ -34,6 +36,7 @@ import chip_runstate as rs  # noqa: E402
 ROOT = rs.ROOT
 HEALTH = os.path.join(rs.PROTO, "chip_health.json")
 GOLD = os.path.join(rs.PROTO, "gold")
+GOLD_AUTO = os.path.join(rs.PROTO, "gold_auto")
 
 _rescan = {"running": False, "error": None}
 
@@ -146,10 +149,13 @@ class Handler(BaseHTTPRequestHandler):
 
         if self.path == "/api/gold":
             g = gold_list()
+            auto = len([f for f in os.listdir(GOLD_AUTO)
+                        if f.endswith(".json")]) if os.path.isdir(GOLD_AUTO) else 0
             return self._send(200, json.dumps({
                 "entries": g,
                 "reviewed": sum(1 for r in g if r["reviewed"]),
                 "total": len(g),
+                "auto": auto,
             }))
 
         m = re.fullmatch(r"/api/gold/(\d+)", self.path)
@@ -345,6 +351,7 @@ td.t{white-space:normal;max-width:330px;color:var(--muted)}
 </div>
 
 <div id="tab-gold" class="hide">
+  <div class="panel"><div class="body" id="gnote" style="color:var(--muted);font-size:14px"></div></div>
   <div class="gwrap">
     <div class="glist" id="glist"></div>
     <div>
@@ -482,7 +489,12 @@ async function refresh(){
 async function loadGold(){
   const d = await api('/api/gold');
   gold = d.entries;
-  $('#gcount').textContent = `${d.reviewed}/${d.total}`;
+  $('#gcount').textContent = `${d.auto} auto${d.total?` + ${d.reviewed}/${d.total}`:''}`;
+  const note = $('#gnote');
+  if(note) note.innerHTML = `<b>${d.auto}</b> videos are already scored against their
+    creators' own chapter markers — no work needed. The <b>${d.total}</b> below have no
+    chapters and no free ground truth, so they are the only ones a human could add
+    anything to. <b>Entirely optional</b>: the eval works without them.`;
   $('#glist').innerHTML = gold.map(g=>`
     <div class="gitem ${g.reviewed?'done':''} ${cur&&cur.vid===g.vid?'on':''}" data-vid="${g.vid}">
       <span class="tick">${g.reviewed?'✓':'○'}</span>
