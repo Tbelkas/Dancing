@@ -175,6 +175,11 @@
                       }
                     </span>
                     <span class="video-list-item__meta">
+                      <!-- Runtime leads: with several videos on one move there is often no best
+                           one, and length is what the choice actually turns on. -->
+                      @if (runtimeLabel(video); as runtime) {
+                        <span class="runtime-badge"><i class="fa-solid fa-clock"></i> {{ runtime }}</span>
+                      }
                       <span>{{ video.dateAdded | date:'mediumDate' }}</span>
                       <span class="views-badge"><i class="fa-solid fa-eye"></i> {{ viewCountBucket(video.viewCount) }}</span>
                       @if (video.userRating) {

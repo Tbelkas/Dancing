@@ -344,6 +344,7 @@ public class VideoService : IVideoService
             ViewCount = v.ViewCount,
             StartTime = v.StartTime,
             EndTime = v.EndTime,
+            DurationSeconds = v.DurationSeconds,
             AverageRating = v.AverageRating,
             RatingCount = v.RatingCount,
             UserRating = userId == null

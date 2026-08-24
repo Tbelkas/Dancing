@@ -12,6 +12,9 @@ public class VideoDto
     public long ViewCount { get; set; }
     public int? StartTime { get; set; }
     public int? EndTime { get; set; }
+    // Full length of the source upload. The UI subtracts StartTime to show how much of it this
+    // video actually is - runtime is what you pick on when several videos cover the same move.
+    public int? DurationSeconds { get; set; }
     public double AverageRating { get; set; }
     public int RatingCount { get; set; }
     public int? UserRating { get; set; }

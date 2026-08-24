@@ -305,6 +305,17 @@
   color: var(--color-text-muted);
 }
 
+/* Runtime leads the row meta and carries the weight the rest of it doesn't: it is the one
+   attribute you compare across videos of the same move. Brighter than its neighbours on
+   purpose. */
+.runtime-badge {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+
+  & i { color: var(--color-text-muted); }
+}
+
 .views-badge {
   color: var(--color-text-muted);
   font-family: var(--font-mono);

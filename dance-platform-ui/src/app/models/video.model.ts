@@ -47,6 +47,8 @@ export interface Video {
   viewCount: number;
   startTime?: number;
   endTime?: number;
+  /** Length of the whole source upload; clip it with startTime/endTime via `videoRuntime`. */
+  durationSeconds?: number;
   averageRating: number;
   ratingCount: number;
   userRating?: number;
@@ -74,6 +76,19 @@ export interface VideoLibraryItem {
   danceName: string;
   danceSlug: string;
   styleSlug: string;
+}
+
+/**
+ * How long this video actually plays for, in seconds — the source length clipped to the
+ * start/end the dance pins it to. 0 when the source duration was never backfilled.
+ *
+ * Mirrors the sum in DanceService.TotalDurationSeconds so a card's total and the rows behind
+ * it can't disagree.
+ */
+export function videoRuntime(v: Pick<Video, 'startTime' | 'endTime' | 'durationSeconds'>): number {
+  const start = v.startTime ?? 0;
+  if (v.endTime) return Math.max(0, v.endTime - start);
+  return v.durationSeconds ? Math.max(0, v.durationSeconds - start) : 0;
 }
 
 export function viewCountBucket(count: number): string {

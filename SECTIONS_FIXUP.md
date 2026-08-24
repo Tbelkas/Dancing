@@ -344,133 +344,135 @@ Goal: maximize chips across as many dance categories as possible.
   (same ytid, now only on video 2026, which is chipped).
 
 <!-- CHIP-QUEUE:START -->
-## Auto-detected chip queue _(last checked 2026-08-17 09:00)_
+## Auto-detected chip queue _(last checked 2026-08-24 09:00)_
 
-121 tutorial video(s) awaiting section chips (118 new since last check):
+123 tutorial video(s) awaiting section chips (2 new since last check):
 
 | VideoDbId | YtId | Dance |
 |---|---|---|
 | 319 | hyxUBMVd0_Y | Waacking |
 | 2110 | i6TzP2COtow | Balance & Stretch |
 | 2111 | 1fGERdWc_6Q | Go Down |
-| 2113 | MTMcRWMsvW8 | The Whack ⭐ |
-| 2114 | XXI5YCKAbMA | Overheads ⭐ |
-| 2115 | z1KObpZM6Lk | Overheads ⭐ |
-| 2116 | LRdc1wxBYTY | Punking ⭐ |
-| 2117 | 5AQ2TxY1Tt4 | Waacking Hand Positions ⭐ |
-| 2118 | wfet71YbQi8 | Waacking Warm-Up ⭐ |
-| 2119 | fPVgWK6P1ss | Waacking Warm-Up ⭐ |
-| 2120 | kpTDmW44lBQ | Waacking Lines ⭐ |
-| 2121 | lTZm0GVg6as | Waacking Lines ⭐ |
-| 2122 | ndAZQ4VBV2k | Arm Rolls ⭐ |
-| 2124 | 1FEOjMPhxLE | Waacking Arm Drills ⭐ |
-| 2125 | jWq5B8Z3ig4 | Waacking Arm Drills ⭐ |
-| 2126 | R8YMW9ypfJI | Show the Music ⭐ |
-| 2127 | fj7dO7ns-fU | Outside Rolls ⭐ |
-| 2128 | 5LyUy8IhjGs | Inside Rolls ⭐ |
-| 2129 | Ei90dashg6Q | Extensions and Grooves ⭐ |
-| 2130 | iWNpt0Mti70 | Martial Arts Influence ⭐ |
-| 2131 | 38iRXGiLItk | Loops and Musical Accents ⭐ |
-| 2132 | YZuZtUjAU88 | Propeller ⭐ |
-| 2133 | -CqBB7XIXrE | Power and Speed ⭐ |
-| 2134 | kRU9wl7926Q | The Butterfly ⭐ |
-| 2135 | QK-MSyX4Lns | Three-Point Waack Attack ⭐ |
-| 2136 | cTOEgW6NKQw | Waacking Gestures ⭐ |
-| 2137 | N24G2AepRCM | Waacking Combo ⭐ |
-| 2138 | l3PfYPUt_bQ | Waacking Poses ⭐ |
-| 2139 | IAEV8KrZ4hY | The Hit ⭐ |
-| 2140 | ycPeDQUKjq4 | The Hit ⭐ |
-| 2141 | BVLh5Xiuioo | Right Angles ⭐ |
-| 2142 | wJdGN1gviko | Right Angles ⭐ |
-| 2143 | nXnfZ0WjvOg | Tutting Stretches ⭐ |
-| 2144 | iEcQPvvrfNM | Tutting Stretches ⭐ |
-| 2145 | dz3axgdqaIA | Tutting Stretches ⭐ |
-| 2146 | wegRpQ-V4fM | Wrist Rolls ⭐ |
-| 2147 | B0pQQysjOZA | Fixed Points ⭐ |
-| 2148 | vOzWGnvtyVk | Fixed Points ⭐ |
-| 2149 | QISey0UTy7c | Four Body Points ⭐ |
-| 2150 | _IjKj2kteSY | The Four Square ⭐ |
-| 2151 | rX_Unv9M0HA | The Four Square ⭐ |
-| 2152 | OO3Z0ILaONA | The Four Square ⭐ |
-| 2153 | bqGEzcFYpJw | The Grid ⭐ |
-| 2154 | yDIL5pNT3KQ | Box Tuts ⭐ |
-| 2155 | c47gWAwQtgY | Box Tuts ⭐ |
-| 2156 | lnK2pKtyBG0 | Squaring the Boxes ⭐ |
-| 2157 | 3WThD9uy4AY | The Magic Box ⭐ |
-| 2158 | 5Zk9zvEt02U | Advanced Four Square ⭐ |
-| 2159 | fk7mA7BgnLU | Tutting Transitions ⭐ |
-| 2160 | r_7zXbpBf2U | Tracing ⭐ |
-| 2161 | l85Mc7hALw4 | Tracing ⭐ |
-| 2162 | s62WZrPeLV4 | Tracing ⭐ |
-| 2163 | A4viOzllZNM | Isolation Points ⭐ |
-| 2164 | A4viOzllZNM | Hinges ⭐ |
-| 2165 | bb-ohIks-hM | Hinges ⭐ |
-| 2166 | -tsf1UzJKLw | Folds and Unfolds ⭐ |
-| 2167 | 2UkfqGko9tw | Folds and Unfolds ⭐ |
-| 2168 | 2UkfqGko9tw | Crumbling ⭐ |
-| 2169 | XZR8h_0rUR8 | 3D Space ⭐ |
-| 2170 | 751f7MqhXB4 | 3D Space ⭐ |
-| 2171 | wSn9tUNCv4Y | Back Tuts ⭐ |
-| 2172 | h8BPawC_iXk | Floor Tuts ⭐ |
-| 2173 | FiT3L6q5gr8 | Tutting Patterns ⭐ |
-| 2174 | NTpbV--zJYU | Tutting Combo ⭐ |
-| 2175 | 5QkCBJ1GJtc | Tutting Combo ⭐ |
-| 2176 | WTS1f1zcf2A | Tutting Musicality ⭐ |
-| 2177 | lQgGOEcs6Is | Tutting Musicality ⭐ |
-| 2178 | _WEYSsmAg6A | Freestyle Tutting ⭐ |
-| 2179 | SJpdilUrnG0 | Freestyle Tutting ⭐ |
-| 2180 | onJahzd74_E | Freestyle Tutting ⭐ |
-| 2181 | 5FX5H72B71k | Finger Tuts ⭐ |
-| 2182 | 5FX5H72B71k | Digits ⭐ |
-| 2183 | y2H95jnZf0Y | Digits ⭐ |
-| 2184 | NIKS_Mop1lw | Digits ⭐ |
-| 2185 | 5FX5H72B71k | Monstas ⭐ |
-| 2186 | esysjy9XKn8 | Finger Stacking ⭐ |
-| 2187 | 8vpUHRvPn5w | Tunneling ⭐ |
-| 2188 | fP-ERh8RXFo | Finger Tutting Combo ⭐ |
-| 2189 | JWZY0ZBL8Sw | King Tut ⭐ |
-| 2190 | 2gxZfHRvJ5w | Finger Tutting ⭐ |
-| 2191 | n1YsuRczyyU | Finger Tutting ⭐ |
-| 2192 | f8MtG1ErtwY | Finger Tutting ⭐ |
-| 2193 | c2uAf7aLX24 | What Vogue Is ⭐ |
-| 2194 | XJ6fqQX_e9U | What Vogue Is ⭐ |
-| 2195 | vt9AwsS0_6A | What Vogue Is ⭐ |
-| 2196 | zjfzvo-zRPo | Ballroom Herstory ⭐ |
-| 2197 | vbaCmDvrFxw | Ballroom Herstory ⭐ |
-| 2198 | cL5uGHqhnYw | Ballroom Herstory ⭐ |
-| 2199 | cL5uGHqhnYw | Houses and Balls ⭐ |
-| 2200 | 8ej86oHMJ8o | Houses and Balls ⭐ |
-| 2201 | QS5j7PCSdtg | Houses and Balls ⭐ |
-| 2202 | cL5uGHqhnYw | Ballroom Categories ⭐ |
-| 2203 | cL5uGHqhnYw | Realness ⭐ |
-| 2204 | fBCgb7A466o | Runway ⭐ |
-| 2205 | h2U3i30ZCf4 | Vogue Arm Lines ⭐ |
-| 2206 | wnSMHrmYqVs | Vogue Poses ⭐ |
-| 2207 | y3Uk_ZxiLV0 | Vogue Musicality ⭐ |
-| 2208 | iVmvapZhoJg | Pop, Dip and Spin ⭐ |
-| 2209 | eBCs9n0p93E | Old Way Switches ⭐ |
-| 2210 | eBCs9n0p93E | Pose to the Beat ⭐ |
-| 2211 | eBCs9n0p93E | Old Way Slides ⭐ |
-| 2212 | J39Drfl1dM8 | New Way Vogue ⭐ |
-| 2213 | JqnXibZ8QKM | Arms Control ⭐ |
-| 2214 | gbtpL86VLHE | Arms Control ⭐ |
-| 2215 | zYsz9s8Pv3k | New Way Lines ⭐ |
-| 2216 | zYsz9s8Pv3k | New Way Boxes ⭐ |
-| 2217 | vySNZKVK2xY | Vogue Fem ⭐ |
-| 2218 | VDMFYe7UOtQ | Vogue Fem ⭐ |
-| 2219 | D-s3gsiKpDM | Vogue Fem Dramatics ⭐ |
-| 2220 | kAx5xUA_PEo | Vogue Fem Dramatics ⭐ |
-| 2221 | tqUEcEsA3gQ | Fan Kick ⭐ |
-| 2222 | tqUEcEsA3gQ | Leg Circles ⭐ |
-| 2223 | tqUEcEsA3gQ | Knee Moves ⭐ |
-| 2224 | dLWhfvs-t-k | Catwalk ⭐ |
-| 2225 | ZJzwq0Aj_V0 | Duckwalk ⭐ |
-| 2226 | qzdXauUVYoI | Duckwalk ⭐ |
-| 2227 | 1E3xsNHT-Hc | Floor Performance ⭐ |
-| 2228 | Mp5LFK_BYNI | Hand Performance ⭐ |
-| 2229 | ln8msNBsWk0 | Hand Performance ⭐ |
-| 2230 | LwpLdzz0muI | Spin and Dip ⭐ |
-| 2231 | U_R3mOnIVLg | Old Way Vogue ⭐ |
+| 2113 | MTMcRWMsvW8 | The Whack |
+| 2114 | XXI5YCKAbMA | Overheads |
+| 2115 | z1KObpZM6Lk | Overheads |
+| 2116 | LRdc1wxBYTY | Punking |
+| 2117 | 5AQ2TxY1Tt4 | Waacking Hand Positions |
+| 2118 | wfet71YbQi8 | Waacking Warm-Up |
+| 2119 | fPVgWK6P1ss | Waacking Warm-Up |
+| 2120 | kpTDmW44lBQ | Waacking Lines |
+| 2121 | lTZm0GVg6as | Waacking Lines |
+| 2122 | ndAZQ4VBV2k | Arm Rolls |
+| 2124 | 1FEOjMPhxLE | Waacking Arm Drills |
+| 2125 | jWq5B8Z3ig4 | Waacking Arm Drills |
+| 2126 | R8YMW9ypfJI | Show the Music |
+| 2127 | fj7dO7ns-fU | Outside Rolls |
+| 2128 | 5LyUy8IhjGs | Inside Rolls |
+| 2129 | Ei90dashg6Q | Extensions and Grooves |
+| 2130 | iWNpt0Mti70 | Martial Arts Influence |
+| 2131 | 38iRXGiLItk | Loops and Musical Accents |
+| 2132 | YZuZtUjAU88 | Propeller |
+| 2133 | -CqBB7XIXrE | Power and Speed |
+| 2134 | kRU9wl7926Q | The Butterfly |
+| 2135 | QK-MSyX4Lns | Three-Point Waack Attack |
+| 2136 | cTOEgW6NKQw | Waacking Gestures |
+| 2137 | N24G2AepRCM | Waacking Combo |
+| 2138 | l3PfYPUt_bQ | Waacking Poses |
+| 2139 | IAEV8KrZ4hY | The Hit |
+| 2140 | ycPeDQUKjq4 | The Hit |
+| 2141 | BVLh5Xiuioo | Right Angles |
+| 2142 | wJdGN1gviko | Right Angles |
+| 2143 | nXnfZ0WjvOg | Tutting Stretches |
+| 2144 | iEcQPvvrfNM | Tutting Stretches |
+| 2145 | dz3axgdqaIA | Tutting Stretches |
+| 2146 | wegRpQ-V4fM | Wrist Rolls |
+| 2147 | B0pQQysjOZA | Fixed Points |
+| 2148 | vOzWGnvtyVk | Fixed Points |
+| 2149 | QISey0UTy7c | Four Body Points |
+| 2150 | _IjKj2kteSY | The Four Square |
+| 2151 | rX_Unv9M0HA | The Four Square |
+| 2152 | OO3Z0ILaONA | The Four Square |
+| 2153 | bqGEzcFYpJw | The Grid |
+| 2154 | yDIL5pNT3KQ | Box Tuts |
+| 2155 | c47gWAwQtgY | Box Tuts |
+| 2156 | lnK2pKtyBG0 | Squaring the Boxes |
+| 2157 | 3WThD9uy4AY | The Magic Box |
+| 2158 | 5Zk9zvEt02U | Advanced Four Square |
+| 2159 | fk7mA7BgnLU | Tutting Transitions |
+| 2160 | r_7zXbpBf2U | Tracing |
+| 2161 | l85Mc7hALw4 | Tracing |
+| 2162 | s62WZrPeLV4 | Tracing |
+| 2163 | A4viOzllZNM | Isolation Points |
+| 2164 | A4viOzllZNM | Hinges |
+| 2165 | bb-ohIks-hM | Hinges |
+| 2166 | -tsf1UzJKLw | Folds and Unfolds |
+| 2167 | 2UkfqGko9tw | Folds and Unfolds |
+| 2168 | 2UkfqGko9tw | Crumbling |
+| 2169 | XZR8h_0rUR8 | 3D Space |
+| 2170 | 751f7MqhXB4 | 3D Space |
+| 2171 | wSn9tUNCv4Y | Back Tuts |
+| 2172 | h8BPawC_iXk | Floor Tuts |
+| 2173 | FiT3L6q5gr8 | Tutting Patterns |
+| 2174 | NTpbV--zJYU | Tutting Combo |
+| 2175 | 5QkCBJ1GJtc | Tutting Combo |
+| 2176 | WTS1f1zcf2A | Tutting Musicality |
+| 2177 | lQgGOEcs6Is | Tutting Musicality |
+| 2178 | _WEYSsmAg6A | Freestyle Tutting |
+| 2179 | SJpdilUrnG0 | Freestyle Tutting |
+| 2180 | onJahzd74_E | Freestyle Tutting |
+| 2181 | 5FX5H72B71k | Finger Tuts |
+| 2182 | 5FX5H72B71k | Digits |
+| 2183 | y2H95jnZf0Y | Digits |
+| 2184 | NIKS_Mop1lw | Digits |
+| 2185 | 5FX5H72B71k | Monstas |
+| 2186 | esysjy9XKn8 | Finger Stacking |
+| 2187 | 8vpUHRvPn5w | Tunneling |
+| 2188 | fP-ERh8RXFo | Finger Tutting Combo |
+| 2189 | JWZY0ZBL8Sw | King Tut |
+| 2190 | 2gxZfHRvJ5w | Finger Tutting |
+| 2191 | n1YsuRczyyU | Finger Tutting |
+| 2192 | f8MtG1ErtwY | Finger Tutting |
+| 2193 | c2uAf7aLX24 | What Vogue Is |
+| 2194 | XJ6fqQX_e9U | What Vogue Is |
+| 2195 | vt9AwsS0_6A | What Vogue Is |
+| 2196 | zjfzvo-zRPo | Ballroom Herstory |
+| 2197 | vbaCmDvrFxw | Ballroom Herstory |
+| 2198 | cL5uGHqhnYw | Ballroom Herstory |
+| 2199 | cL5uGHqhnYw | Houses and Balls |
+| 2200 | 8ej86oHMJ8o | Houses and Balls |
+| 2201 | QS5j7PCSdtg | Houses and Balls |
+| 2202 | cL5uGHqhnYw | Ballroom Categories |
+| 2203 | cL5uGHqhnYw | Realness |
+| 2204 | fBCgb7A466o | Runway |
+| 2205 | h2U3i30ZCf4 | Vogue Arm Lines |
+| 2206 | wnSMHrmYqVs | Vogue Poses |
+| 2207 | y3Uk_ZxiLV0 | Vogue Musicality |
+| 2208 | iVmvapZhoJg | Pop, Dip and Spin |
+| 2209 | eBCs9n0p93E | Old Way Switches |
+| 2210 | eBCs9n0p93E | Pose to the Beat |
+| 2211 | eBCs9n0p93E | Old Way Slides |
+| 2212 | J39Drfl1dM8 | New Way Vogue |
+| 2213 | JqnXibZ8QKM | Arms Control |
+| 2214 | gbtpL86VLHE | Arms Control |
+| 2215 | zYsz9s8Pv3k | New Way Lines |
+| 2216 | zYsz9s8Pv3k | New Way Boxes |
+| 2217 | vySNZKVK2xY | Vogue Fem |
+| 2218 | VDMFYe7UOtQ | Vogue Fem |
+| 2219 | D-s3gsiKpDM | Vogue Fem Dramatics |
+| 2220 | kAx5xUA_PEo | Vogue Fem Dramatics |
+| 2221 | tqUEcEsA3gQ | Fan Kick |
+| 2222 | tqUEcEsA3gQ | Leg Circles |
+| 2223 | tqUEcEsA3gQ | Knee Moves |
+| 2224 | dLWhfvs-t-k | Catwalk |
+| 2225 | ZJzwq0Aj_V0 | Duckwalk |
+| 2226 | qzdXauUVYoI | Duckwalk |
+| 2227 | 1E3xsNHT-Hc | Floor Performance |
+| 2228 | Mp5LFK_BYNI | Hand Performance |
+| 2229 | ln8msNBsWk0 | Hand Performance |
+| 2230 | LwpLdzz0muI | Spin and Dip |
+| 2231 | U_R3mOnIVLg | Old Way Vogue |
+| 2232 | aO1boUJhjvk | Balance & Stretch ⭐ |
+| 2233 | DcNz6mbir93 | Waacking Arm Drills ⭐ |
 
 _Auto-processed daily at 09:15 by the `DanceChipAuto` task (headless `/find-chips`); or run `/find-chips` manually._
 <!-- CHIP-QUEUE:END -->

@@ -18,7 +18,8 @@ import { PracticeTimerService } from '../../core/services/practice-timer.service
 import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Dance } from '../../models/dance.model';
-import { Video, VideoChapter, VideoNote, VideoSegment, viewCountBucket } from '../../models/video.model';
+import { Video, VideoChapter, VideoNote, VideoSegment, videoRuntime, viewCountBucket } from '../../models/video.model';
+import { formatClock } from '../../core/utils/video-url.utils';
 import { Style } from '../../models/style.model';
 import { MusicalStyle } from '../../models/musical-style.model';
 import { Instructor } from '../../models/instructor.model';
@@ -135,6 +136,18 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
   prevDance = signal<Dance | null>(null);
   nextDance = signal<Dance | null>(null);
   readonly viewCountBucket = viewCountBucket;
+
+  /**
+   * "14:22" for a video row, or '' when the source length was never backfilled.
+   *
+   * Runtime is the signal that was missing from the collapsed list: when several videos
+   * cover the same move there is often no best one, and length is what you actually choose
+   * on. Date-added and a view bucket answer neither question.
+   */
+  runtimeLabel(video: Video): string {
+    const secs = videoRuntime(video);
+    return secs > 0 ? formatClock(secs) : '';
+  }
 
   // Feedback
   actionError = signal('');
