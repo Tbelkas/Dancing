@@ -48,6 +48,11 @@ GOLD_AUTO = os.path.join(PROTO, "gold_auto")
 GOLD = os.path.join(PROTO, "gold")
 HEALTH = os.path.join(PROTO, "chip_health.json")
 
+# Append-only history of every extraction attempt. The run-state log is a 200-entry
+# ring buffer, so without this a failure scrolls away and leaves no trace of which
+# video died or why - exactly what you need when a chip set comes out wrong.
+EXTRACT_LOG = os.path.join(PROTO, "extract_log.jsonl")
+
 MODEL = os.environ.get("CHIP_ASR_MODEL", "distil-large-v3")
 DEVICE = os.environ.get("CHIP_ASR_DEVICE", "cuda")
 COMPUTE = os.environ.get("CHIP_ASR_COMPUTE", "int8_float16")
@@ -241,32 +246,71 @@ def desc_timestamps(meta):
 
 # --------------------------------------------------------------------- driver
 
+def write_extract_log(rec):
+    os.makedirs(PROTO, exist_ok=True)
+    with open(EXTRACT_LOG, "a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+
+
+def summarise(sig, **extra):
+    """The one-line record of what a video actually yielded."""
+    a = sig.get("asr") or {}
+    rec = {
+        "ts": _now(), "ytid": sig.get("ytid"), "dur": sig.get("dur"),
+        "language": a.get("language"), "lang_prob": a.get("language_probability"),
+        "model": a.get("model"), "device": a.get("device"),
+        "asr_seconds": sig.get("asr_seconds"),
+        "counts": {
+            "segments": len(a.get("segments") or []),
+            "words": len(a.get("words") or []),
+            "silence": len(sig.get("silence") or []),
+            "scenes": len(sig.get("scenes") or []),
+            "density": len(sig.get("density") or []),
+            "chapters": len(sig.get("chapters") or []),
+            "desc_ts": len(sig.get("desc_timestamps") or []),
+        },
+    }
+    rec.update(extra)
+    return rec
+
+
 def process(ytid, want_scenes=True, keep_media=False, force=False):
+    """Returns (status, record). The record is appended to the extraction log so
+    there is a durable answer to 'what did we get out of this video, and when'."""
     out = sig_path(ytid)
     if os.path.exists(out) and not force:
-        return "cached"
+        return "cached", None
 
     meta = fetch_meta(ytid)
     dur = int(meta.get("duration") or 0)
     made = []
+    stages = {}
 
     rs.stage("audio")
+    t0 = time.time()
     wav = fetch_audio(ytid)
+    stages["audio"] = round(time.time() - t0, 1)
     if not wav:
-        return "no-audio"
+        return "no-audio", {"ts": _now(), "ytid": ytid, "status": "no-audio",
+                            "dur": dur, "stages": stages,
+                            "error": "yt-dlp returned no audio stream"}
 
     try:
         rs.stage("asr")
         t0 = time.time()
         a = asr(wav)
         asr_secs = round(time.time() - t0, 1)
+        stages["asr"] = asr_secs
 
         rs.stage("silence")
+        t0 = time.time()
         sil = silences(wav)
+        stages["silence"] = round(time.time() - t0, 1)
 
         sc = []
         if want_scenes:
             rs.stage("scenes")
+            t0 = time.time()
             vid = fetch_video_proxy(ytid)
             if vid:
                 made.append(vid)
@@ -274,6 +318,7 @@ def process(ytid, want_scenes=True, keep_media=False, force=False):
                     sc = scenes(vid)
                 except subprocess.TimeoutExpired:
                     sc = []
+            stages["scenes"] = round(time.time() - t0, 1)
 
         sig = {
             "ytid": ytid,
@@ -292,7 +337,8 @@ def process(ytid, want_scenes=True, keep_media=False, force=False):
             "desc_timestamps": desc_timestamps(meta),
         }
         json.dump(sig, open(out, "w", encoding="utf-8"), ensure_ascii=False)
-        return "ok"
+        return "ok", summarise(sig, status="ok", stages=stages,
+                               bytes=os.path.getsize(out))
     finally:
         if not keep_media:
             for f in [wav] + made:
@@ -337,7 +383,35 @@ def main():
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--no-scenes", action="store_true")
     ap.add_argument("--keep-media", action="store_true")
+    ap.add_argument("--reindex", action="store_true",
+                    help="rebuild the extraction log from cached sig_*.json files")
     args = ap.parse_args()
+
+    if args.reindex:
+        import glob
+        have = set()
+        if os.path.exists(EXTRACT_LOG):
+            for line in open(EXTRACT_LOG, encoding="utf-8"):
+                try:
+                    have.add(json.loads(line).get("ytid"))
+                except ValueError:
+                    pass
+        added = 0
+        for p in sorted(glob.glob(os.path.join(PROTO, "sig_*.json"))):
+            ytid = os.path.basename(p)[4:-5]
+            if ytid in have:
+                continue
+            try:
+                sig = json.load(open(p, encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            # No stage timings to recover - the record is honest about that.
+            write_extract_log(summarise(sig, status="ok", reindexed=True,
+                                        bytes=os.path.getsize(p),
+                                        ts=sig.get("generated") or _now()))
+            added += 1
+        print(f"reindexed {added} extraction(s) into {EXTRACT_LOG}")
+        return
 
     ids = list(args.ytids)
     if args.gold:
@@ -363,16 +437,29 @@ def main():
             break
         rs.begin(ytid=ytid, stage="start")
         t0 = time.time()
+        rec = None
         try:
-            status = process(ytid, want_scenes=not args.no_scenes,
-                             keep_media=args.keep_media, force=args.force)
+            status, rec = process(ytid, want_scenes=not args.no_scenes,
+                                  keep_media=args.keep_media, force=args.force)
         except Exception as e:  # noqa: BLE001 - one bad video must not kill the batch
             status = f"error:{type(e).__name__}"
+            rec = {"ts": _now(), "ytid": ytid, "status": status,
+                   "error": f"{type(e).__name__}: {str(e)[:300]}"}
             rs.log(f"{ytid} failed: {type(e).__name__}: {str(e)[:160]}")
+        elapsed = round(time.time() - t0, 1)
+        if rec is not None:
+            rec.setdefault("status", status)
+            rec["elapsed"] = elapsed
+            write_extract_log(rec)
         counts[status] = counts.get(status, 0) + 1
         ok = status in ("ok", "cached")
-        rs.done_one(ok=ok, msg=f"{ytid} {status} ({time.time()-t0:.0f}s)")
-        print(f"  {ytid:<14} {status:<18} {time.time()-t0:>6.0f}s")
+        rs.done_one(ok=ok, msg=f"{ytid} {status} ({elapsed:.0f}s)")
+        extra = ""
+        if rec and rec.get("counts"):
+            c = rec["counts"]
+            extra = (f"  {c['segments']:>3} seg  {c['words']:>5} words  "
+                     f"{c['silence']:>3} sil  {c['scenes']:>3} cuts")
+        print(f"  {ytid:<14} {status:<18} {elapsed:>6.0f}s{extra}")
     rs.finish()
 
     print("\n" + "  ".join(f"{k}={v}" for k, v in sorted(counts.items())))

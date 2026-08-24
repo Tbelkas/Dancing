@@ -5,6 +5,8 @@ Local dashboard for the chip pipeline. Two tabs:
 
   Queue  catalog chip health, the queue ranked by reach x deficit, live run
          progress and stage, a log, and Pause / Resume / Stop.
+  Signals what stage 01 extracted from each video, and what failed. Reads the
+         append-only extraction log, so a failure does not scroll away.
   Gold   the optional half of the eval set. Most ground truth comes free from
          creators' own chapter markers (chip_gold.py auto); this tab is only for
          the videos that have no chapters and no free truth. Play, press S at each
@@ -37,6 +39,7 @@ ROOT = rs.ROOT
 HEALTH = os.path.join(rs.PROTO, "chip_health.json")
 GOLD = os.path.join(rs.PROTO, "gold")
 GOLD_AUTO = os.path.join(rs.PROTO, "gold_auto")
+EXTRACT_LOG = os.path.join(rs.PROTO, "extract_log.jsonl")
 
 _rescan = {"running": False, "error": None}
 
@@ -114,6 +117,56 @@ def gold_save(vid, body):
     return d
 
 
+# ------------------------------------------------------------------ signals
+
+def extract_records():
+    """Latest extraction record per video, newest first. Reads the append-only
+    log so failures survive; the run-state ring buffer would have dropped them."""
+    latest = {}
+    if os.path.exists(EXTRACT_LOG):
+        for line in open(EXTRACT_LOG, encoding="utf-8"):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                r = json.loads(line)
+            except ValueError:
+                continue
+            if r.get("ytid"):
+                latest[r["ytid"]] = r
+    # Anything extracted before the log existed still deserves a row.
+    for name in os.listdir(rs.PROTO):
+        if name.startswith("sig_") and name.endswith(".json"):
+            yt = name[4:-5]
+            latest.setdefault(yt, {"ytid": yt, "status": "ok", "unlogged": True})
+    rows = list(latest.values())
+    rows.sort(key=lambda r: r.get("ts") or "", reverse=True)
+    return rows
+
+
+def signal_detail(ytid):
+    """The extracted content itself, trimmed to what is worth eyeballing."""
+    path = os.path.join(rs.PROTO, "sig_" + ytid + ".json")
+    d = rs._read(path, None)
+    if d is None:
+        return None
+    a = d.get("asr") or {}
+    return {
+        "ytid": ytid, "dur": d.get("dur"), "generated": d.get("generated"),
+        "language": a.get("language"), "lang_prob": a.get("language_probability"),
+        "model": a.get("model"), "device": a.get("device"),
+        "asr_seconds": d.get("asr_seconds"),
+        "segments": (a.get("segments") or [])[:400],
+        "segment_total": len(a.get("segments") or []),
+        "word_total": len(a.get("words") or []),
+        "silence": (d.get("silence") or [])[:200],
+        "scenes": (d.get("scenes") or [])[:200],
+        "density": d.get("density") or [],
+        "chapters": d.get("chapters") or [],
+        "desc_timestamps": d.get("desc_timestamps") or [],
+    }
+
+
 # ------------------------------------------------------------------ handler
 
 class Handler(BaseHTTPRequestHandler):
@@ -157,6 +210,25 @@ class Handler(BaseHTTPRequestHandler):
                 "total": len(g),
                 "auto": auto,
             }))
+
+        if self.path == "/api/signals":
+            rows = extract_records()
+            ok = [r for r in rows if r.get("status") == "ok"]
+            return self._send(200, json.dumps({
+                "rows": rows[:400],
+                "total": len(rows),
+                "ok": len(ok),
+                "failed": len([r for r in rows if r.get("status") != "ok"]),
+                "asr_seconds": round(sum(r.get("asr_seconds") or 0 for r in ok), 1),
+                "footage": sum(r.get("dur") or 0 for r in ok),
+            }))
+
+        m = re.fullmatch(r"/api/signals/([A-Za-z0-9_-]{5,20})", self.path)
+        if m:
+            d = signal_detail(m.group(1))
+            if d is None:
+                return self._send(404, json.dumps({"error": "no signals for that video"}))
+            return self._send(200, json.dumps(d))
 
         m = re.fullmatch(r"/api/gold/(\d+)", self.path)
         if m:
@@ -289,6 +361,9 @@ td.t{white-space:normal;max-width:330px;color:var(--muted)}
   background:var(--bg);border:1px solid var(--border);padding:11px 13px}
 #log div{color:var(--muted);margin-bottom:3px}
 #log div b{color:var(--dim);font-weight:400;margin-right:9px}
+#tx{font-family:var(--mono);font-size:12.5px;max-height:300px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);padding:11px 13px}
+#tx div{color:var(--muted);margin-bottom:3px}
+#tx div b{color:var(--amber);font-weight:400;margin-right:9px;font-variant-numeric:tabular-nums}
 .empty{color:var(--dim);font-style:italic}
 .err{color:var(--verm);font-family:var(--mono);font-size:12.5px;margin-top:9px}
 
@@ -333,6 +408,7 @@ td.t{white-space:normal;max-width:330px;color:var(--muted)}
   <nav>
     <b data-tab="queue" class="on">Queue</b>
     <b data-tab="gold">Gold set <span id="gcount" class="lbl"></span></b>
+    <b data-tab="signals">Signals <span id="scount" class="lbl"></span></b>
   </nav>
 </header>
 
@@ -348,6 +424,19 @@ td.t{white-space:normal;max-width:330px;color:var(--muted)}
     </table></div>
   </div>
   <div class="panel"><h2>Log</h2><div class="body"><div id="log"></div></div></div>
+</div>
+
+<div id="tab-signals" class="hide">
+  <div class="tiles" id="stiles"></div>
+  <div class="gwrap">
+    <div class="glist" id="slist"></div>
+    <div class="panel">
+      <h2 id="stitle">Pick a video</h2>
+      <div class="body" id="sbody">
+        <div class="empty">Choose a video to see exactly what was extracted from it.</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="tab-gold" class="hide">
@@ -395,7 +484,9 @@ document.querySelectorAll('nav b').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav b').forEach(x => x.classList.toggle('on', x===b));
   $('#tab-queue').classList.toggle('hide', tab!=='queue');
   $('#tab-gold').classList.toggle('hide', tab!=='gold');
+  $('#tab-signals').classList.toggle('hide', tab!=='signals');
   if(tab==='gold') loadGold();
+  if(tab==='signals') loadSignals();
 });
 
 $('#btn-pause').onclick  = () => api('/api/control',{action:'pause'}).then(refresh);
@@ -478,7 +569,9 @@ function draw(){
 }
 
 async function refresh(){
-  try{ state = await api('/api/state'); if(tab==='queue') draw(); else {
+  try{ state = await api('/api/state');
+       if(tab==='signals' && (state.run||{}).run==='signals') loadSignals();
+       if(tab==='queue') draw(); else {
         const s=state, ctl=s.control;
         const st = ctl==='pause'?'paused':ctl==='stop'?'stopped':((s.run||{}).status||'idle');
         $('#status').textContent=st; $('#status').className='pill '+st; } }
@@ -597,6 +690,88 @@ async function saveGold(){
   $('#savedmsg').innerHTML = '<span class="saved">saved</span>';
   setTimeout(()=>{ const m=$('#savedmsg'); if(m) m.innerHTML=''; }, 1800);
   loadGold();
+}
+
+/* ---------------- signals tab ---------------- */
+let sigrows=[], sigcur=null;
+
+async function loadSignals(){
+  const d = await api('/api/signals');
+  sigrows = d.rows;
+  $('#scount').textContent = `${d.ok}${d.failed?` +${d.failed} failed`:''}`;
+  $('#stiles').innerHTML = `
+    <div class="tile ok"><b>${fmt(d.ok)}</b><span class="lbl">Extracted</span></div>
+    <div class="tile ${d.failed?'poor':''}"><b>${fmt(d.failed)}</b><span class="lbl">Failed</span></div>
+    <div class="tile"><b>${Math.round(d.footage/3600)}h</b><span class="lbl">Footage read</span></div>
+    <div class="tile"><b>${Math.round(d.asr_seconds/60)}m</b><span class="lbl">GPU time</span></div>
+    <div class="tile"><b>${d.asr_seconds?Math.round(d.footage/d.asr_seconds):0}x</b><span class="lbl">Realtime</span></div>`;
+  $('#slist').innerHTML = sigrows.map(r=>{
+    const c = r.counts||{};
+    const bad = r.status!=='ok';
+    return `<div class="gitem ${bad?'':'done'} ${sigcur===r.ytid?'on':''}" data-yt="${esc(r.ytid)}">
+      <span class="tick">${bad?'\u00d7':'\u2713'}</span>
+      <span class="nm">${esc(r.ytid)}${bad?` &mdash; ${esc(r.status)}`:
+        ` <span class="bk">${c.segments||0} seg &middot; ${c.silence||0} sil &middot; ${c.scenes||0} cuts</span>`}</span>
+      <span class="bk">${r.dur?mmss(r.dur):''}</span></div>`;
+  }).join('') || `<div class="empty" style="padding:14px">Nothing extracted yet. Run:
+      <br><code>python scripts/signals.py --gold</code></div>`;
+  document.querySelectorAll('#slist .gitem').forEach(el=>
+    el.onclick=()=>openSignal(el.dataset.yt));
+}
+
+async function openSignal(ytid){
+  sigcur = ytid;
+  const rec = sigrows.find(r=>r.ytid===ytid) || {};
+  loadSignals();
+  if(rec.status && rec.status!=='ok'){
+    $('#stitle').textContent = ytid;
+    $('#sbody').innerHTML = `<div class="err">${esc(rec.status)}${
+      rec.error?`<br>${esc(rec.error)}`:''}</div>`;
+    return;
+  }
+  const d = await api('/api/signals/'+ytid);
+  if(d.error){ $('#sbody').innerHTML=`<div class="err">${esc(d.error)}</div>`; return; }
+  $('#stitle').textContent = `${ytid} — what was extracted`;
+
+  const dens = (d.density||[]).map(x=>x.v);
+  const spark = dens.length ? `<svg viewBox="0 0 ${dens.length*4} 34" preserveAspectRatio="none"
+      style="width:100%;height:34px;display:block">
+      ${dens.map((v,i)=>`<rect x="${i*4}" y="${34-v*34}" width="3" height="${Math.max(1,v*34)}"
+        fill="${v<0.2?'var(--teal)':'var(--border-lt)'}"></rect>`).join('')}
+    </svg>` : '<div class="empty">no density data</div>';
+
+  $('#sbody').innerHTML = `
+    <div class="runline">
+      <span><span class="k">length</span> ${d.dur?mmss(d.dur):'?'}</span>
+      <span><span class="k">language</span> ${esc(d.language||'?')} ${d.lang_prob??''}</span>
+      <span><span class="k">model</span> ${esc(d.model||'?')} / ${esc(d.device||'?')}</span>
+      <span><span class="k">asr</span> ${d.asr_seconds??'?'}s</span>
+      <span><span class="k">at</span> ${(d.generated||'').replace('T',' ').replace('+00:00','Z')}</span>
+    </div>
+    <div class="tiles" style="margin:6px 0 16px">
+      <div class="tile"><b>${d.segment_total}</b><span class="lbl">Speech segments</span></div>
+      <div class="tile"><b>${d.word_total}</b><span class="lbl">Words</span></div>
+      <div class="tile"><b>${d.silence.length}</b><span class="lbl">Silences</span></div>
+      <div class="tile"><b>${d.scenes.length}</b><span class="lbl">Scene cuts</span></div>
+      <div class="tile"><b>${d.chapters.length}</b><span class="lbl">Chapters</span></div>
+      <div class="tile"><b>${d.desc_timestamps.length}</b><span class="lbl">Desc stamps</span></div>
+    </div>
+
+    <div class="lbl" style="margin-bottom:5px">Speech density &mdash; teal = likely music / practice</div>
+    ${spark}
+
+    ${d.chapters.length?`<div class="lbl" style="margin:18px 0 5px">Creator chapters
+      <span style="color:var(--verm)">&mdash; held out, the pipeline must not read these</span></div>
+      <div class="hint">${d.chapters.map(c=>`${mmss(c.start)} ${esc(c.label)}`).join(' &middot; ')}</div>`:''}
+
+    <div class="lbl" style="margin:18px 0 5px">Transcript (${d.segment_total} segments)</div>
+    <div id="tx">${d.segments.map(x=>
+      `<div><b>${mmss(x.start)}</b>${esc(x.text)}</div>`).join('')
+      || '<div class="empty">no speech detected</div>'}</div>
+
+    <div class="lbl" style="margin:18px 0 5px">Silences &amp; scene cuts</div>
+    <div class="hint">${d.silence.slice(0,40).map(x=>mmss(x.start)+'-'+mmss(x.end)).join(' · ')
+      || 'none'}<br>cuts: ${d.scenes.slice(0,40).map(mmss).join(' · ') || 'none'}</div>`;
 }
 
 document.addEventListener('keydown', e=>{
