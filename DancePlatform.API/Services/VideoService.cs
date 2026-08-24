@@ -327,7 +327,12 @@ public class VideoService : IVideoService
                 {
                     Label = s.Label.Trim(),
                     StartTime = s.StartTime,
-                    EndTime = s.EndTime
+                    EndTime = s.EndTime,
+                    // Stamped "manual" so the chip pipeline treats these as untouchable —
+                    // anything entered through the admin form outranks any generated set.
+                    Source = "manual",
+                    Confidence = 1f,
+                    GeneratedAt = DateTime.UtcNow
                 })
                 .ToList();
 

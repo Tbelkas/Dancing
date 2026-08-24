@@ -3,6 +3,12 @@ REM Auto-chip runner: drains the CHIP-QUEUE via a headless Claude Code run of /f
 REM Registered as Windows Scheduled Task "DanceChipAuto" (daily 09:15, after DanceChipCheck
 REM refreshes the queue at 09:00). Skips the Claude run entirely when the queue is empty.
 cd /d "C:\Users\valot\Documents\Git\Projects\Dance"
+REM Honour the dashboard's Pause/Stop button (scripts/chip_ui.py -> _proto\chip_control.json).
+python scripts\chip_paused.py
+if not errorlevel 1 (
+  echo [%date% %time%] paused from the dashboard - skipping this run >> "_proto\chip_auto.log"
+  exit /b 0
+)
 findstr /C:"awaiting section chips" SECTIONS_FIXUP.md >nul 2>&1
 if errorlevel 1 (
   echo [%date% %time%] queue empty - nothing to do >> "_proto\chip_auto.log"
