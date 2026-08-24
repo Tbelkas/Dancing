@@ -830,14 +830,14 @@
 }
 
 .skeleton-session-card {
-  height: 86px;
+  height: 44px;
   border-radius: var(--radius-lg);
 }
 
 .sessions-list {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 18px;
 }
 
 .session-date-header {
@@ -852,8 +852,8 @@
   color: #B7B2D4;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin-bottom: 10px;
-  padding-bottom: 8px;
+  margin-bottom: 6px;
+  padding-bottom: 5px;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -870,21 +870,24 @@
 .session-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
 }
 
 .session-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   position: relative;
-  padding: 16px 20px;
+  padding: 9px 16px;
 }
 
+/* When, how long, what — all on one line, wrapping only when a session really does hold
+   several dances (or the window is narrow). */
 .session-card__head {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 6px 14px;
 }
 
 .session-time-range {
@@ -899,15 +902,18 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  /* Takes the slack so the row actions stay pinned right. */
+  flex: 1 1 auto;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
 }
 
 .session-item {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 9px;
 }
 
 .session-item__time {
@@ -927,7 +933,7 @@
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   letter-spacing: -0.01em;
   color: var(--color-text);
 }
@@ -948,7 +954,7 @@
 }
 
 .session-notes {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--color-text-muted);
   line-height: 1.6;
   margin: 0;
@@ -971,6 +977,13 @@
 
 @media (hover: none) {
   .session-actions { opacity: 1; }
+}
+
+@media (max-width: 640px) {
+  /* Too narrow for one line. Break after the clock rather than letting the dances and the
+     buttons fight over the same row: when · how long · actions, then what was practiced. */
+  .session-actions { order: 1; }
+  .session-items { order: 2; flex-basis: 100%; }
 }
 
 .icon-btn {
@@ -1130,4 +1143,21 @@
 @media (min-width: 1500px) {
   .review-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
   .review-card { max-width: 420px; }
+}
+
+/* ---------- Load more ---------- */
+/* Doubles as the scroll sentinel, so it sits where the next chunk will appear. */
+.sessions-more {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin: 18px auto 0;
+}
+
+.sessions-more__count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
 }

@@ -321,7 +321,7 @@
     </div>
   } @else {
     <div class="sessions-list">
-      @for (group of groupedSessions(); track group[0]) {
+      @for (group of renderedGroups(); track group[0]) {
         <div class="session-group">
           <h3 class="session-date-header">
             <span>{{ formatDate(group[0]) }}</span>
@@ -329,6 +329,8 @@
           </h3>
           @for (session of group[1]; track session.id) {
             <div class="card session-card">
+              <!-- One line per session: when, how long, what. A session is usually a single
+                   ten-minute video, so the old stacked card spent 100px of height saying it. -->
               <div class="session-card__head">
                 @if (isNightSession(session)) {
                   <span class="session-night" title="Late-night session"><i class="fa-solid fa-moon"></i></span>
@@ -336,6 +338,32 @@
                 <span class="session-time-range">{{ formatSessionTime(session) }}</span>
                 @if (session.durationMinutes > 0) {
                   <span class="session-duration" [title]="durationTitle(session)"><i class="fa-solid fa-stopwatch"></i> {{ session.durationMinutes }} min</span>
+                }
+                @if (editingId() !== session.id) {
+                  <ul class="session-items">
+                    @for (item of visibleItems(session); track itemKey(item)) {
+                      <li class="session-item">
+                        @if (item.danceId > 0) {
+                          <a [routerLink]="item.danceSlug | dancePath:item.danceStyleSlug" class="session-dance-name">{{ item.danceName }}</a>
+                        } @else {
+                          <!-- Local choreos have no dance page to link to. -->
+                          <span class="session-dance-name">{{ item.danceName }}</span>
+                        }
+                        @if (item.danceStyleName) {
+                          <span class="session-item__style">{{ item.danceStyleName }}</span>
+                        }
+                        @if (item.seconds > 0) {
+                          <span class="session-item__time">{{ formatItemTime(item.seconds) }}</span>
+                        }
+                      </li>
+                    }
+                    @if (hiddenItemCount(session) > 0) {
+                      <li class="session-item session-item--minor">+ {{ hiddenItemCount(session) }} more under 30 s</li>
+                    }
+                    @if (session.items.length === 0) {
+                      <li class="session-item session-item--empty">No dances recorded</li>
+                    }
+                  </ul>
                 }
                 <div class="session-actions">
                   <button class="icon-btn session-action" (click)="startEdit(session)" aria-label="Edit session" title="Edit">
@@ -373,40 +401,24 @@
                     <button class="btn btn--ghost btn--xs" (click)="cancelEdit()">Cancel</button>
                   </div>
                 </div>
-              } @else {
-                <ul class="session-items">
-                  @for (item of visibleItems(session); track itemKey(item)) {
-                    <li class="session-item">
-                      @if (item.danceId > 0) {
-                        <a [routerLink]="item.danceSlug | dancePath:item.danceStyleSlug" class="session-dance-name">{{ item.danceName }}</a>
-                      } @else {
-                        <!-- Local choreos have no dance page to link to. -->
-                        <span class="session-dance-name">{{ item.danceName }}</span>
-                      }
-                      @if (item.danceStyleName) {
-                        <span class="session-item__style">{{ item.danceStyleName }}</span>
-                      }
-                      @if (item.seconds > 0) {
-                        <span class="session-item__time">{{ formatItemTime(item.seconds) }}</span>
-                      }
-                    </li>
-                  }
-                  @if (hiddenItemCount(session) > 0) {
-                    <li class="session-item session-item--minor">+ {{ hiddenItemCount(session) }} more under 30 s</li>
-                  }
-                  @if (session.items.length === 0) {
-                    <li class="session-item session-item--empty">No dances recorded</li>
-                  }
-                </ul>
-                @if (session.notes) {
-                  <p class="session-notes">{{ session.notes }}</p>
-                }
+              } @else if (session.notes) {
+                <p class="session-notes">{{ session.notes }}</p>
               }
             </div>
           }
         </div>
       }
     </div>
+
+    <!-- A long history is thousands of rows of DOM nobody scrolls to. Render a couple of
+         weeks, then hand out the next chunk when this button nears the viewport — it is a
+         real button too, so a browser without IntersectionObserver still gets there. -->
+    @if (hiddenSessionCount() > 0) {
+      <button #loadMore class="btn btn--ghost btn--sm sessions-more" (click)="showMore()">
+        Show older sessions
+        <span class="sessions-more__count">{{ renderedSessionCount() }} of {{ visibleSessions().length }}</span>
+      </button>
+    }
   }
 
 </div>

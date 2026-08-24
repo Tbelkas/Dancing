@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -188,6 +188,61 @@ export class PracticeComponent implements OnInit, OnDestroy {
     return [...map.entries()].sort((a, b) => b[0].localeCompare(a[0]));
   });
 
+  /**
+   * How many sessions the list grows by each time. A year of daily practice is several
+   * hundred rows; rendering them all costs a second of layout for history nobody scrolls
+   * to, so the list starts at roughly a fortnight and extends as the reader reaches the end.
+   */
+  private readonly SESSION_CHUNK = 20;
+  private readonly sessionLimit = signal(this.SESSION_CHUNK);
+
+  /** Whole days, never a day split across the boundary — a truncated date group reads as data loss. */
+  readonly renderedGroups = computed(() => {
+    const limit = this.sessionLimit();
+    const out: [string, PracticeSession[]][] = [];
+    let count = 0;
+    for (const group of this.groupedSessions()) {
+      if (count >= limit) break;
+      out.push(group);
+      count += group[1].length;
+    }
+    return out;
+  });
+
+  readonly renderedSessionCount = computed(() =>
+    this.renderedGroups().reduce((sum, g) => sum + g[1].length, 0));
+
+  readonly hiddenSessionCount = computed(() =>
+    this.visibleSessions().length - this.renderedSessionCount());
+
+  showMore(): void {
+    this.sessionLimit.set(this.renderedSessionCount() + this.SESSION_CHUNK);
+  }
+
+  private moreObserver: IntersectionObserver | null = null;
+
+  /**
+   * Setter rather than a plain @ViewChild: the button is inside an @if, so it comes and goes
+   * as the list grows, and each new element needs observing (and the last one releasing).
+   */
+  @ViewChild('loadMore')
+  set loadMoreButton(ref: ElementRef<HTMLElement> | undefined) {
+    this.moreObserver?.disconnect();
+    this.moreObserver = null;
+    if (!ref || typeof IntersectionObserver === 'undefined') return;
+    // Well before it is on screen, so the next chunk is already there when the reader arrives.
+    this.moreObserver = new IntersectionObserver(
+      entries => {
+        if (!entries.some(e => e.isIntersecting)) return;
+        // zone.js does not patch IntersectionObserver, so without this the signal changes
+        // and no change detection follows.
+        this.zone.run(() => this.showMore());
+      },
+      { rootMargin: '600px 0px' }
+    );
+    this.moreObserver.observe(ref.nativeElement);
+  }
+
   readonly heatmapWeeks = computed<HeatmapWeek[]>(() => {
     const minutesByDate = new Map<string, number>();
     for (const s of this.visibleSessions()) {
@@ -373,7 +428,8 @@ export class PracticeComponent implements OnInit, OnDestroy {
   constructor(
     private practiceService: PracticeService,
     private danceService: DanceService,
-    private toast: ToastService
+    private toast: ToastService,
+    private zone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -404,6 +460,7 @@ export class PracticeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.clockHandle) clearInterval(this.clockHandle);
+    this.moreObserver?.disconnect();
   }
 
   // --- Stats helpers ---
