@@ -5,6 +5,9 @@ Local dashboard for the chip pipeline. Two tabs:
 
   Queue  catalog chip health, the queue ranked by reach x deficit, live run
          progress and stage, a log, and Pause / Resume / Stop.
+  Intake  videos held back by the quality gate, and live ones the rubric would
+          not have admitted. Approve/Reject here is the ONE database write this
+          tool makes, scoped to the three review columns on a single row.
   Signals what stage 01 extracted from each video, and what failed. Reads the
          append-only extraction log, so a failure does not scroll away.
   Gold   the optional half of the eval set. Most ground truth comes free from
@@ -20,7 +23,10 @@ a deploy, and needless load on the Pi, none of which buys anything.
 
 Binds to 127.0.0.1 only. It reads the prod connection string (via chip_health) and
 can trigger a read-only rescan, but it never writes to the database. The only
-things it writes are _proto/chip_control.json and _proto/gold/*.json.
+things it writes are _proto/chip_control.json and _proto/gold/*.json - plus, in
+the Intake tab only, a video's ReviewState/ReviewedAt/ReviewNote when you approve
+or reject it. That one write is deliberate: reviewing is a decision a person makes
+here, so it is applied here.
 """
 import argparse
 import json
@@ -29,6 +35,7 @@ import re
 import subprocess
 import sys
 import threading
+import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -40,6 +47,8 @@ HEALTH = os.path.join(rs.PROTO, "chip_health.json")
 GOLD = os.path.join(rs.PROTO, "gold")
 GOLD_AUTO = os.path.join(rs.PROTO, "gold_auto")
 EXTRACT_LOG = os.path.join(rs.PROTO, "extract_log.jsonl")
+
+_intake_cache = {"at": 0.0, "rows": None}
 
 _rescan = {"running": False, "error": None}
 
@@ -115,6 +124,60 @@ def gold_save(vid, body):
         d["prefilled_from"] = "human"
     rs._write_atomic(path, d)
     return d
+
+
+# -------------------------------------------------------------------- intake
+
+def intake_rows(force=False):
+    """Videos awaiting review, plus admitted ones the rubric flagged.
+
+    Cached briefly: the dashboard polls every 2s and the database is over the LAN.
+    """
+    now = time.time()
+    if not force and _intake_cache["rows"] is not None and now - _intake_cache["at"] < 15:
+        return _intake_cache["rows"]
+    import video_gate as vg
+    raw = json.loads(vg.ch.psql(vg.FETCH).strip() or "[]")
+    rows = []
+    for r in raw:
+        if r["state"] == "approved" and not r.get("otherdances"):
+            pass
+        meta = vg.load_meta(r["ytid"]) if r["platform"] == "youtube" else None
+        sig = vg.load_sig(r["ytid"]) if r["platform"] == "youtube" else None
+        score, verdict, flags, tier = vg.grade(r, meta, sig)
+        # Show what needs a decision: anything held back, plus anything live that
+        # the rubric would not have admitted on its own.
+        if r["state"] != "approved" or verdict != "admit":
+            rows.append({
+                "vid": r["vid"], "ytid": r["ytid"], "platform": r["platform"],
+                "title": r["title"], "dance": r["dance"], "dur": r["dur"],
+                "views": r["views"], "state": r["state"], "vtype": r["vtype"],
+                "score": score, "verdict": verdict, "flags": flags, "tier": tier,
+            })
+    rows.sort(key=lambda x: (x["state"] == "approved", x["score"]))
+    _intake_cache.update(at=now, rows=rows)
+    return rows
+
+
+def intake_decide(vid, action, note):
+    """The ONLY database write this dashboard performs.
+
+    Scoped to the three review columns on one row by id - it never touches video
+    content, chips, or anything else. Reviewing is a decision a person makes here,
+    so it is made here; everything else in this tool stays read-only.
+    """
+    if action not in ("approve", "reject", "pending"):
+        return None
+    import video_gate as vg
+    state = {"approve": "approved", "reject": "rejected", "pending": "pending"}[action]
+    safe = (note or "")[:300].replace("'", "''")
+    vg.ch.psql(f'''update "Videos"
+                      set "ReviewState" = \'{state}\',
+                          "ReviewedAt" = now(),
+                          "ReviewNote" = {"null" if not safe else "'" + safe + "'"}
+                    where "Id" = {int(vid)};''')
+    _intake_cache["rows"] = None
+    return state
 
 
 # ------------------------------------------------------------------ signals
@@ -211,6 +274,18 @@ class Handler(BaseHTTPRequestHandler):
                 "auto": auto,
             }))
 
+        if self.path == "/api/intake":
+            try:
+                rows = intake_rows()
+            except SystemExit as e:
+                return self._send(500, json.dumps({"error": str(e)}))
+            return self._send(200, json.dumps({
+                "rows": rows,
+                "pending": len([r for r in rows if r["state"] == "pending"]),
+                "rejected": len([r for r in rows if r["state"] == "rejected"]),
+                "flagged_live": len([r for r in rows if r["state"] == "approved"]),
+            }))
+
         if self.path == "/api/signals":
             rows = extract_records()
             ok = [r for r in rows if r.get("status") == "ok"]
@@ -260,6 +335,13 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(409, json.dumps({"error": "already running"}))
             threading.Thread(target=_do_rescan, daemon=True).start()
             return self._send(200, json.dumps({"started": True}))
+
+        m = re.fullmatch(r"/api/intake/(\d+)", self.path)
+        if m:
+            state = intake_decide(m.group(1), body.get("action"), body.get("note"))
+            if state is None:
+                return self._send(400, json.dumps({"error": "bad action"}))
+            return self._send(200, json.dumps({"state": state}))
 
         m = re.fullmatch(r"/api/gold/(\d+)", self.path)
         if m:
@@ -409,6 +491,7 @@ td.t{white-space:normal;max-width:330px;color:var(--muted)}
     <b data-tab="queue" class="on">Queue</b>
     <b data-tab="gold">Gold set <span id="gcount" class="lbl"></span></b>
     <b data-tab="signals">Signals <span id="scount" class="lbl"></span></b>
+    <b data-tab="intake">Intake <span id="icount" class="lbl"></span></b>
   </nav>
 </header>
 
@@ -424,6 +507,18 @@ td.t{white-space:normal;max-width:330px;color:var(--muted)}
     </table></div>
   </div>
   <div class="panel"><h2>Log</h2><div class="body"><div id="log"></div></div></div>
+</div>
+
+<div id="tab-intake" class="hide">
+  <div class="tiles" id="itiles"></div>
+  <div class="panel">
+    <h2>Awaiting review &mdash; and live videos the rubric would not have admitted</h2>
+    <div class="tw"><table>
+      <thead><tr><th>State</th><th>Video</th><th>Dance</th><th>Title</th><th>Score</th>
+        <th>Len</th><th>Views</th><th>Why</th><th></th></tr></thead>
+      <tbody id="irows"></tbody>
+    </table></div>
+  </div>
 </div>
 
 <div id="tab-signals" class="hide">
@@ -485,6 +580,8 @@ document.querySelectorAll('nav b').forEach(b => b.onclick = () => {
   $('#tab-queue').classList.toggle('hide', tab!=='queue');
   $('#tab-gold').classList.toggle('hide', tab!=='gold');
   $('#tab-signals').classList.toggle('hide', tab!=='signals');
+  $('#tab-intake').classList.toggle('hide', tab!=='intake');
+  if(tab==='intake') loadIntake();
   if(tab==='gold') loadGold();
   if(tab==='signals') loadSignals();
 });
@@ -690,6 +787,43 @@ async function saveGold(){
   $('#savedmsg').innerHTML = '<span class="saved">saved</span>';
   setTimeout(()=>{ const m=$('#savedmsg'); if(m) m.innerHTML=''; }, 1800);
   loadGold();
+}
+
+/* ---------------- intake tab ---------------- */
+async function loadIntake(){
+  const d = await api('/api/intake');
+  if(d.error){ $('#irows').innerHTML =
+    `<tr><td colspan="9" class="err">${esc(d.error)}</td></tr>`; return; }
+  $('#icount').textContent = d.pending ? `${d.pending} pending` : `${d.flagged_live} flagged`;
+  $('#itiles').innerHTML = `
+    <div class="tile ${d.pending?'weak':''}"><b>${fmt(d.pending)}</b><span class="lbl">Pending</span></div>
+    <div class="tile ${d.rejected?'poor':''}"><b>${fmt(d.rejected)}</b><span class="lbl">Rejected</span></div>
+    <div class="tile"><b>${fmt(d.flagged_live)}</b><span class="lbl">Live but flagged</span></div>`;
+  $('#irows').innerHTML = d.rows.map(r=>`
+    <tr>
+      <td><span class="src ${r.state==='pending'?'generic':r.state==='rejected'?'none':'legacy'}">${esc(r.state)}</span></td>
+      <td class="n">${r.platform==='youtube'
+        ? `<a href="https://youtu.be/${esc(r.ytid)}" target="_blank" rel="noreferrer">#${r.vid}</a>`
+        : `#${r.vid}`}</td>
+      <td class="t">${esc(r.dance)}</td>
+      <td class="t">${esc(r.title)}</td>
+      <td class="n"><span class="sc"><i><s style="width:${Math.round(r.score*100)}%;
+        background:${scColor(r.score)}"></s></i>${r.score.toFixed(2)}</span></td>
+      <td class="n">${r.dur?mmss(r.dur):'—'}</td>
+      <td class="n">${fmt(r.views)}</td>
+      <td class="iss">${esc(r.flags.join(' · ')) || '—'}</td>
+      <td style="white-space:nowrap">
+        ${r.state!=='approved'?`<button class="sm go" data-a="approve" data-v="${r.vid}">Approve</button>`:''}
+        ${r.state!=='rejected'?`<button class="sm danger" data-a="reject" data-v="${r.vid}">Reject</button>`:''}
+      </td>
+    </tr>`).join('')
+    || `<tr><td colspan="9" class="empty" style="padding:16px 12px">
+        Nothing awaiting review, and nothing live that the rubric would have held back.</td></tr>`;
+  document.querySelectorAll('#irows button[data-a]').forEach(b=>b.onclick=async()=>{
+    b.disabled = true;
+    await api('/api/intake/'+b.dataset.v, {action:b.dataset.a});
+    loadIntake();
+  });
 }
 
 /* ---------------- signals tab ---------------- */

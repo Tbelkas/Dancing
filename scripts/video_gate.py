@@ -277,12 +277,77 @@ def cmd_check(args):
             print(f"   - {f}")
 
 
+def cmd_stamp(args):
+    """Score videos in a given ReviewState and write the score back.
+
+    This is the step to run after a seeding batch: the database default drops raw
+    inserts into "pending", this grades them, and --auto-admit promotes the ones
+    that clear the bar so only the questionable remainder needs a human.
+    """
+    rows = json.loads(ch.psql(FETCH).strip() or "[]")
+    rows = [r for r in rows if r["state"] == args.state]
+    if not rows:
+        print(f"no videos in state '{args.state}'")
+        return
+
+    graded = []
+    for r in rows:
+        meta = load_meta(r["ytid"]) if r["platform"] == "youtube" else None
+        sig = load_sig(r["ytid"]) if r["platform"] == "youtube" else None
+        score, verdict, flags, tier = grade(r, meta, sig)
+        graded.append((r, score, verdict, flags))
+
+    by_v = {}
+    for _, _, v, _ in graded:
+        by_v[v] = by_v.get(v, 0) + 1
+    print(f"{len(graded)} video(s) in '{args.state}': "
+          + "  ".join(f"{k}={v}" for k, v in sorted(by_v.items())))
+    promote = [g for g in graded if g[2] == "admit"] if args.auto_admit else []
+    print(f"would write scores to {len(graded)}"
+          + (f", and promote {len(promote)} to approved" if args.auto_admit else ""))
+    for r, score, verdict, flags in graded[:15]:
+        print(f"  #{r['vid']:<5} {score:>5.2f} {verdict:<7} {','.join(flags) or '-'}")
+
+    if not args.apply:
+        print("\ndry run - pass 'apply' to write")
+        return
+
+    for i in range(0, len(graded), 200):
+        chunk = graded[i:i + 200]
+        values = ",".join(
+            "({},{},{})".format(
+                r["vid"], score,
+                "null" if not flags else "'" + ",".join(flags).replace("'", "''") + "'")
+            for r, score, verdict, flags in chunk)
+        ch.psql(f'''
+        update "Videos" v
+           set "QualityScore" = t.score, "QualityFlags" = t.flags
+          from (values {values}) as t(vid, score, flags)
+         where v."Id" = t.vid;''')
+    print(f"scored {len(graded)}")
+
+    if promote:
+        ids = ",".join(str(r["vid"]) for r, _, _, _ in promote)
+        ch.psql(f'''update "Videos" set "ReviewState" = 'approved',
+                    "ReviewedAt" = now(), "ReviewNote" = 'auto-admitted by video_gate'
+                     where "Id" in ({ids});''')
+        print(f"promoted {len(promote)} to approved")
+    left = ch.psql(f"""select count(*) from "Videos"
+                       where "ReviewState" = '{args.state}';""").strip()
+    print(f"still '{args.state}': {left}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     a = sub.add_parser("audit")
     a.add_argument("--limit", type=int)
     a.set_defaults(fn=cmd_audit)
+    st = sub.add_parser("stamp")
+    st.add_argument("--state", default="pending")
+    st.add_argument("--auto-admit", action="store_true")
+    st.add_argument("apply", nargs="?")
+    st.set_defaults(fn=cmd_stamp)
     c = sub.add_parser("check")
     c.add_argument("ytid")
     c.add_argument("dance", nargs="?")

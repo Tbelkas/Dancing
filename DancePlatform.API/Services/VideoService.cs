@@ -139,6 +139,28 @@ public class VideoService : IVideoService
             Segments = MapSegments(request.VideoType, request.Segments)
         };
 
+        // Score it, but admit it: a video added through the API was chosen by a
+        // person who looked at it, unlike the bulk-seeded ones the database default
+        // holds back. Recording the score means a questionable one can still be
+        // found later in the Intake list instead of disappearing into the catalogue.
+        var danceInfo = await _db.Dances
+            .Where(d => d.Id == request.DanceId)
+            .Select(d => new
+            {
+                d.Name,
+                Styles = string.Join(" ", d.DanceStyles.Select(ds => ds.Style.Name))
+            })
+            .FirstOrDefaultAsync();
+        var sameClipOtherDances = await _db.Videos.IgnoreQueryFilters()
+            .CountAsync(o => o.VideoId == request.VideoId
+                          && o.Platform == request.Platform
+                          && o.DanceId != request.DanceId);
+        var (score, flags) = VideoQualityGate.Grade(
+            video, danceInfo?.Name, danceInfo?.Styles, sameClipOtherDances);
+        video.ReviewState = "approved";
+        video.QualityScore = score;
+        video.QualityFlags = flags;
+
         _db.Videos.Add(video);
 
         // Adding a personal video to a dance starts tracking it (In Progress) so it shows
