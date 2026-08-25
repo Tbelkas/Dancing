@@ -129,12 +129,28 @@ A single JSON array, nothing else - no prose, no code fence:
 """
 
 
+class QuotaExhausted(RuntimeError):
+    """The subscription window is used up. Distinct from a normal failure because
+    the right response is to STOP, not to try the next video.
+
+    The 06:00 sweep did not have this: it hit the limit partway through the first
+    variant, then made ~150 more calls that failed instantly, and reported "exit
+    code 0" having produced nothing for four of five variants."""
+
+
+LIMIT_MARKERS = ("session limit", "usage limit", "rate limit",
+                 "quota", "resets ", "limit reached")
+
+
 def call_claude(prompt):
     p = subprocess.run(
         [CLAUDE, "-p", "--dangerously-skip-permissions"],
         input=prompt, capture_output=True, text=True,
         encoding="utf-8", errors="replace", timeout=TIMEOUT,
     )
+    blob = ((p.stderr or "") + " " + (p.stdout or "")).lower()
+    if any(m in blob for m in LIMIT_MARKERS):
+        raise QuotaExhausted(((p.stderr or p.stdout or "")[-200:]).strip())
     if p.returncode != 0:
         raise RuntimeError((p.stderr or p.stdout or "claude failed")[-300:])
     return p.stdout

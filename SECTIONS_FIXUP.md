@@ -33,6 +33,11 @@ no existing segments). 99 distinct YouTube videos / 106 Videos rows. Live DB, no
 | 1671 | Rq0ovsiB4MQ | Pirouettes/Fouettés | ✅ DONE | 8 | transcript |
 | 1676 | Z5ZKDmc6sNE | Waacking | ✅ DONE | 8 | transcript |
 | 957 | ZubfOGRpWRk | Gbe Gbe | ✅ DONE | 8 | transcript (3 amapiano moves) |
+| 2111 | 1fGERdWc_6Q | Go Down | ✅ DONE | 8 | native chapters (5 beginner go downs) |
+| 2113 | MTMcRWMsvW8 | The Whack | ✅ DONE | 8 | transcript (VersaStyle waacking) |
+| 2114 | XXI5YCKAbMA | Overheads | ✅ DONE | 10 | transcript (VersaStyle waacking) |
+| 319 | hyxUBMVd0_Y | Waacking | ⏭️ SKIP | – | 40s K-pop clip, no spoken breakdown |
+| 2110 | i6TzP2COtow | Balance & Stretch | ⏭️ SKIP | – | 15-min stretch to music, lyrics-only captions |
 
 ### Batch 2 — chapter-based (reviewed & adopted)
 839 Double Flare · 585 Running Man Variation · 817 Bachata Body Wave · 1665 Tap Dance Basics ·

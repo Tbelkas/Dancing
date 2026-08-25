@@ -88,35 +88,49 @@ def build_prompt(ytid, sig, cand, dance, variant):
     return prompt
 
 
-def run_variant(variant, ytids, names, samples):
-    outdir = os.path.join(SWEEP, variant)
-    os.makedirs(outdir, exist_ok=True)
-    made = 0
+def run_all(variants, ytids, names):
+    """Interleave: every variant on video 1, then video 2, and so on.
+
+    Variant-major order is what wrecked the 06:00 run - it spent the whole quota
+    on `control`, the one variant already known to lose, and left the other four
+    with nothing. Video-major means a run cut short still compares every variant
+    on the same prefix of videos, which is the only thing that makes the numbers
+    comparable at all.
+    """
+    made, stopped, reason = 0, False, ""
     for ytid in ytids:
-        if not rs.wait_if_paused():
-            return made, True
-        dest = os.path.join(outdir, f"prop_{ytid}.json")
-        if os.path.exists(dest):
-            made += 1
-            continue
+        if stopped:
+            break
         sig = rs._read(cd.sig_path(ytid), None)
         cand = rs._read(cd.cand_path(ytid), None)
         if not sig or not cand or not cand.get("candidates"):
             continue
-        rs.begin(ytid=ytid, stage=variant)
-        try:
-            prompt = build_prompt(ytid, sig, cand, names.get(ytid), variant)
-            secs = pr.parse_sections(pr.call_claude(prompt), cand)
-            json.dump({"ytid": ytid, "variant": variant, "sections": secs},
-                      open(dest, "w", encoding="utf-8"), ensure_ascii=False)
-            made += 1
-            rs.done_one(ok=True, msg=f"{variant}/{ytid}: {len(secs)} sections")
-        except Exception as e:  # noqa: BLE001 - one failure must not stop the sweep
-            rs.done_one(ok=False, msg=f"{variant}/{ytid} failed: {type(e).__name__}")
-    return made, False
+        for variant in variants:
+            if not rs.wait_if_paused():
+                return made, True, "paused"
+            outdir = os.path.join(SWEEP, variant)
+            os.makedirs(outdir, exist_ok=True)
+            dest = os.path.join(outdir, f"prop_{ytid}.json")
+            if os.path.exists(dest):
+                continue
+            rs.begin(ytid=ytid, stage=variant)
+            try:
+                prompt = build_prompt(ytid, sig, cand, names.get(ytid), variant)
+                secs = pr.parse_sections(pr.call_claude(prompt), cand)
+                json.dump({"ytid": ytid, "variant": variant, "sections": secs},
+                          open(dest, "w", encoding="utf-8"), ensure_ascii=False)
+                made += 1
+                rs.done_one(ok=True, msg=f"{variant}/{ytid}: {len(secs)} sections")
+            except pr.QuotaExhausted as e:
+                # Stop dead. Continuing just burns failing calls and reports success.
+                rs.done_one(ok=False, msg=f"QUOTA EXHAUSTED: {e}")
+                return made, True, f"quota exhausted: {e}"
+            except Exception as e:  # noqa: BLE001
+                rs.done_one(ok=False, msg=f"{variant}/{ytid} failed: {type(e).__name__}")
+    return made, stopped, reason
 
 
-def score_variant(variant, gold_by_vid, ytid_to_vid):
+def score_variant(variant, gold_by_vid, ytid_to_vid, restrict=None):
     outdir = os.path.join(SWEEP, variant)
     if not os.path.isdir(outdir):
         return None
@@ -127,6 +141,8 @@ def score_variant(variant, gold_by_vid, ytid_to_vid):
         ytid = name[5:-5]
         vid = ytid_to_vid.get(ytid)
         d = rs._read(os.path.join(outdir, name), None)
+        if restrict is not None and ytid not in restrict:
+            continue
         if vid in gold_by_vid and d and d.get("sections"):
             cand[vid] = d["sections"]
     if not cand:
@@ -170,16 +186,26 @@ def main():
 
     names = pr.dance_names()
     rs.start_run("sweep", total=calls)
-    stopped = False
-    for v in wanted:
-        if stopped:
-            break
-        t0 = time.time()
-        made, stopped = run_variant(v, ytids, names, args.samples)
-        print(f"  {v:<16} {made:>3} proposals  {time.time()-t0:>5.0f}s")
+    t0 = time.time()
+    made, stopped, reason = run_all(wanted, ytids, names)
     rs.finish()
+    print(f"  {made} proposal(s) in {time.time()-t0:.0f}s"
+          + (f"  STOPPED: {reason}" if stopped else ""))
+    if stopped and "quota" in reason:
+        print("  -> re-run when the window resets; finished proposals are cached")
 
-    rows = [r for r in (score_variant(v, gold_by_vid, ytid_to_vid) for v in wanted) if r]
+    # Score every variant on the SAME videos - the ones all of them completed.
+    # Without this a variant that ran on 33 videos is compared against one that
+    # ran on 12, and the numbers mean nothing.
+    done = []
+    for v in wanted:
+        d = os.path.join(SWEEP, v)
+        done.append({n[5:-5] for n in os.listdir(d)} if os.path.isdir(d) else set())
+    common = set.intersection(*done) if done else set()
+    print()
+    print("scoring on the " + str(len(common)) + " video(s) every variant completed")
+    rows = [r for r in (score_variant(v, gold_by_vid, ytid_to_vid, common)
+                        for v in wanted) if r]
     rows.sort(key=lambda r: -r["f1"])
     json.dump({"generated": rs._now(), "rows": rows},
               open(RESULTS, "w", encoding="utf-8"), indent=1)
