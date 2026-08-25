@@ -25,7 +25,14 @@ Dry-run by default: prints the plan and touches nothing. Pass --apply to commit.
 """
 import json, os, subprocess, sys
 
-sys.stdout.reconfigure(encoding="utf-8")
+# pythonw.exe (used to run the dashboard detached) has no stdout, and an
+# unguarded reconfigure() throws on import - which surfaced as an HTTP handler
+# dying with an empty response rather than an error.
+if sys.stdout is not None:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APPSETTINGS = os.path.join(ROOT, "DancePlatform.API", "appsettings.Development.json")

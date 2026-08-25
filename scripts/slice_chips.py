@@ -19,7 +19,14 @@ _proto/sec_<ytid>.txt. Applies via scripts/apply_sections.py with keeptype
 Dry-run unless 'apply'. Optional ytid args restrict to those sources.
 """
 import json, os, re, subprocess, sys
-sys.stdout.reconfigure(encoding="utf-8")
+# pythonw.exe (used to run the dashboard detached) has no stdout, and an
+# unguarded reconfigure() throws on import - which surfaced as an HTTP handler
+# dying with an empty response rather than an error.
+if sys.stdout is not None:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INV = os.path.join(ROOT, "_proto", "chip_all_inventory.tsv")

@@ -6,7 +6,14 @@ cached transcript (_proto/sec_<ytid>.txt). Splits into: Intro / Tutorial /
 the transcript is too thin to structure. Dry-run unless 'apply'.
 """
 import json, os, re, subprocess, sys
-sys.stdout.reconfigure(encoding="utf-8")
+# pythonw.exe (used to run the dashboard detached) has no stdout, and an
+# unguarded reconfigure() throws on import - which surfaced as an HTTP handler
+# dying with an empty response rather than an error.
+if sys.stdout is not None:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
 
 vid, vid_db = sys.argv[1], sys.argv[2]
 apply = len(sys.argv) > 3 and sys.argv[3] == "apply"

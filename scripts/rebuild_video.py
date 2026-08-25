@@ -10,7 +10,14 @@ Modes:
 Always: delete existing dances sharing this VideoId (cascade clears their videos/links), then build anew.
 """
 import os, re, subprocess, sys
-sys.stdout.reconfigure(encoding="utf-8")
+# pythonw.exe (used to run the dashboard detached) has no stdout, and an
+# unguarded reconfigure() throws on import - which surfaced as an HTTP handler
+# dying with an empty response rather than an error.
+if sys.stdout is not None:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
 APPLY = sys.argv[-1]=="apply"
 args = sys.argv[1:-1] if APPLY else sys.argv[1:]
 vid, mode = args[0], args[1]

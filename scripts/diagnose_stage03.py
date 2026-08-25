@@ -31,7 +31,14 @@ import statistics
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+# pythonw.exe (used to run the dashboard detached) has no stdout, and an
+# unguarded reconfigure() throws on import - which surfaced as an HTTP handler
+# dying with an empty response rather than an error.
+if sys.stdout is not None:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
 import chip_runstate as rs  # noqa: E402
 import candidates as cd  # noqa: E402
 import chip_gold as cg  # noqa: E402

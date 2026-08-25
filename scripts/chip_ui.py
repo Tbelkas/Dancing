@@ -5,6 +5,11 @@ Local dashboard for the chip pipeline. Two tabs:
 
   Queue  catalog chip health, the queue ranked by reach x deficit, live run
          progress and stage, a log, and Pause / Resume / Stop.
+  Compare what is live vs what each pipeline variant proposed, side by side,
+          so a person can say which is better. Built because neither automatic
+          metric can: creator-agreement says the proposals lose, and the quality
+          rubric cannot tell prod, the proposals and the creators' own chapters
+          apart. Answers go to _proto/judgments.json.
   Intake  videos held back by the quality gate, and live ones the rubric would
           not have admitted. Approve/Reject here is the ONE database write this
           tool makes, scoped to the three review columns on a single row.
@@ -47,6 +52,8 @@ HEALTH = os.path.join(rs.PROTO, "chip_health.json")
 GOLD = os.path.join(rs.PROTO, "gold")
 GOLD_AUTO = os.path.join(rs.PROTO, "gold_auto")
 EXTRACT_LOG = os.path.join(rs.PROTO, "extract_log.jsonl")
+SWEEP = os.path.join(rs.PROTO, "sweep")
+JUDGMENTS = os.path.join(rs.PROTO, "judgments.json")
 
 _intake_cache = {"at": 0.0, "rows": None}
 
@@ -124,6 +131,82 @@ def gold_save(vid, body):
         d["prefilled_from"] = "human"
     rs._write_atomic(path, d)
     return d
+
+
+# ------------------------------------------------------------------- compare
+
+def _chipsets(ytid):
+    """Every chip set we have for one video: what is live, what each variant
+    proposed, and the creator's own chapters."""
+    out = {}
+    for d in (SWEEP, None):
+        pass
+    if os.path.isdir(SWEEP):
+        for variant in sorted(os.listdir(SWEEP)):
+            f = os.path.join(SWEEP, variant, "prop_" + ytid + ".json")
+            d = rs._read(f, None)
+            if d and d.get("sections"):
+                out[variant] = d["sections"]
+    d = rs._read(os.path.join(rs.PROTO, "prop_" + ytid + ".json"), None)
+    if d and d.get("sections"):
+        out.setdefault("stage03", d["sections"])
+    return out
+
+
+def compare_list():
+    """Videos where a proposal exists to weigh against what is live."""
+    import video_gate as vg
+    raw = json.loads(vg.ch.psql(vg.ch.FETCH).strip() or "[]")
+    by_yt = {}
+    for r in raw:
+        if r["platform"] == "youtube" and r["clipstart"] is None:
+            by_yt.setdefault(r["ytid"], r)
+    judged = rs._read(JUDGMENTS, {})
+    rows = []
+    for ytid, r in by_yt.items():
+        sets = _chipsets(ytid)
+        if not sets:
+            continue
+        rows.append({"ytid": ytid, "vid": r["vid"], "title": r["title"],
+                     "dance": r["dance"], "dur": r["dur"], "views": r["views"],
+                     "prod_n": len(r["segs"]), "variants": sorted(sets),
+                     "judged": judged.get(ytid, {}).get("winner")})
+    rows.sort(key=lambda x: (x["judged"] is not None, -(x["views"] or 0)))
+    return rows
+
+
+def compare_detail(ytid):
+    import video_gate as vg
+    raw = json.loads(vg.ch.psql(vg.ch.FETCH).strip() or "[]")
+    row = next((r for r in raw if r["ytid"] == ytid and r["clipstart"] is None), None)
+    if not row:
+        return None
+    sets = {"prod (live now)": [{"label": x["label"], "start": x["start"]}
+                                for x in row["segs"]]}
+    gold = rs._read(os.path.join(rs.PROTO, "gold_auto", str(row["vid"]) + ".json"), None)
+    if gold and gold.get("sections"):
+        sets["creator chapters"] = [{"label": x["label"], "start": x["start"]}
+                                    for x in gold["sections"]]
+    for k, v in _chipsets(ytid).items():
+        sets[k] = [{"label": x["label"], "start": x["start"]} for x in v]
+    judged = rs._read(JUDGMENTS, {}).get(ytid, {})
+    return {"ytid": ytid, "vid": row["vid"], "title": row["title"],
+            "dance": row["dance"], "dur": row["dur"], "sets": sets,
+            "judged": judged}
+
+
+def compare_judge(ytid, winner, note):
+    """Record which chip set a human thinks is best.
+
+    This exists because neither automatic metric can settle it: creator-agreement
+    says the proposals lose, and our own rubric scores prod, the proposals and the
+    creator's chapters all within 0.01 of each other. Only a person looking at two
+    lists can say which one they would rather have on the page.
+    """
+    j = rs._read(JUDGMENTS, {})
+    j[ytid] = {"winner": winner, "note": (note or "")[:300], "at": rs._now()}
+    rs._write_atomic(JUDGMENTS, j)
+    return j[ytid]
 
 
 # -------------------------------------------------------------------- intake
@@ -274,6 +357,23 @@ class Handler(BaseHTTPRequestHandler):
                 "auto": auto,
             }))
 
+        if self.path == "/api/compare":
+            try:
+                rows = compare_list()
+            except SystemExit as e:
+                return self._send(500, json.dumps({"error": str(e)}))
+            return self._send(200, json.dumps({
+                "rows": rows[:200],
+                "judged": len([r for r in rows if r["judged"]]),
+                "total": len(rows)}))
+
+        m = re.fullmatch(r"/api/compare/([A-Za-z0-9_-]{5,20})", self.path)
+        if m:
+            d = compare_detail(m.group(1))
+            if d is None:
+                return self._send(404, json.dumps({"error": "no such video"}))
+            return self._send(200, json.dumps(d))
+
         if self.path == "/api/intake":
             try:
                 rows = intake_rows()
@@ -335,6 +435,14 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(409, json.dumps({"error": "already running"}))
             threading.Thread(target=_do_rescan, daemon=True).start()
             return self._send(200, json.dumps({"started": True}))
+
+        m = re.fullmatch(r"/api/compare/([A-Za-z0-9_-]{5,20})", self.path)
+        if m:
+            w = body.get("winner")
+            if not w or len(str(w)) > 40:
+                return self._send(400, json.dumps({"error": "bad winner"}))
+            return self._send(200, json.dumps(
+                compare_judge(m.group(1), str(w), body.get("note"))))
 
         m = re.fullmatch(r"/api/intake/(\d+)", self.path)
         if m:
@@ -492,6 +600,7 @@ td.t{white-space:normal;max-width:330px;color:var(--muted)}
     <b data-tab="gold">Gold set <span id="gcount" class="lbl"></span></b>
     <b data-tab="signals">Signals <span id="scount" class="lbl"></span></b>
     <b data-tab="intake">Intake <span id="icount" class="lbl"></span></b>
+    <b data-tab="compare">Compare <span id="ccount" class="lbl"></span></b>
   </nav>
 </header>
 
@@ -507,6 +616,19 @@ td.t{white-space:normal;max-width:330px;color:var(--muted)}
     </table></div>
   </div>
   <div class="panel"><h2>Log</h2><div class="body"><div id="log"></div></div></div>
+</div>
+
+<div id="tab-compare" class="hide">
+  <div class="panel"><div class="body" id="cnote" style="color:var(--muted);font-size:14px"></div></div>
+  <div class="gwrap">
+    <div class="glist" id="clist"></div>
+    <div class="panel">
+      <h2 id="ctitle">Pick a video</h2>
+      <div class="body" id="cbody">
+        <div class="empty">Choose a video to compare what is live against what the pipeline proposed.</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="tab-intake" class="hide">
@@ -581,7 +703,9 @@ document.querySelectorAll('nav b').forEach(b => b.onclick = () => {
   $('#tab-gold').classList.toggle('hide', tab!=='gold');
   $('#tab-signals').classList.toggle('hide', tab!=='signals');
   $('#tab-intake').classList.toggle('hide', tab!=='intake');
+  $('#tab-compare').classList.toggle('hide', tab!=='compare');
   if(tab==='intake') loadIntake();
+  if(tab==='compare') loadCompare();
   if(tab==='gold') loadGold();
   if(tab==='signals') loadSignals();
 });
@@ -787,6 +911,61 @@ async function saveGold(){
   $('#savedmsg').innerHTML = '<span class="saved">saved</span>';
   setTimeout(()=>{ const m=$('#savedmsg'); if(m) m.innerHTML=''; }, 1800);
   loadGold();
+}
+
+/* ---------------- compare tab ---------------- */
+let ccur = null;
+
+async function loadCompare(){
+  const d = await api('/api/compare');
+  if(d.error){ $('#clist').innerHTML = `<div class="err">${esc(d.error)}</div>`; return; }
+  $('#ccount').textContent = `${d.judged}/${d.total}`;
+  const n = $('#cnote');
+  if(n) n.innerHTML = `Neither automatic metric settles this. Creator-agreement says the
+    proposals lose (F1 0.26 vs 0.45); our own rubric scores prod, the proposals and the
+    creators' own chapters all within 0.01. <b>Pick whichever list you would rather see
+    on the dance page.</b> Your answers land in <code>_proto/judgments.json</code>.`;
+  $('#clist').innerHTML = d.rows.map(r=>`
+    <div class="gitem ${r.judged?'done':''} ${ccur===r.ytid?'on':''}" data-yt="${esc(r.ytid)}">
+      <span class="tick">${r.judged?'\u2713':'\u25cb'}</span>
+      <span class="nm">${esc(r.title||r.dance)}</span>
+      <span class="bk">${r.variants.length}</span></div>`).join('')
+    || `<div class="empty" style="padding:14px">No proposals yet.</div>`;
+  document.querySelectorAll('#clist .gitem').forEach(el=>
+    el.onclick=()=>openCompare(el.dataset.yt));
+}
+
+async function openCompare(ytid){
+  ccur = ytid;
+  const d = await api('/api/compare/'+ytid);
+  loadCompare();
+  if(d.error){ $('#cbody').innerHTML=`<div class="err">${esc(d.error)}</div>`; return; }
+  $('#ctitle').textContent = `#${d.vid}  ${d.title||d.dance}`;
+  const names = Object.keys(d.sets);
+  const cols = names.map(nm=>`
+    <div style="min-width:210px;flex:1">
+      <div class="lbl" style="margin-bottom:6px;color:${nm.startsWith('prod')?'var(--teal)':
+        nm.startsWith('creator')?'var(--violet)':'var(--amber)'}">${esc(nm)}
+        &middot; ${d.sets[nm].length}</div>
+      <div style="font-family:var(--mono);font-size:12.5px;line-height:1.7">
+        ${d.sets[nm].map(s=>`<div><b style="color:var(--dim);font-weight:400">${mmss(s.start)}</b>
+           ${esc(s.label)}</div>`).join('') || '<span class="empty">none</span>'}
+      </div>
+      <button class="sm ${d.judged.winner===nm?'go':''}" style="margin-top:10px"
+        data-win="${esc(nm)}">${d.judged.winner===nm?'\u2713 chosen':'This one'}</button>
+    </div>`).join('');
+  $('#cbody').innerHTML = `
+    <div class="runline">
+      <span><span class="k">length</span> ${d.dur?mmss(d.dur):'?'}</span>
+      <span><span class="k">dance</span> ${esc(d.dance||'')}</span>
+      <a href="https://youtu.be/${esc(ytid)}" target="_blank" rel="noreferrer">open on YouTube</a>
+      ${d.judged.winner?`<span class="saved">judged: ${esc(d.judged.winner)}</span>`:''}
+    </div>
+    <div style="display:flex;gap:22px;overflow-x:auto;padding-top:6px">${cols}</div>`;
+  document.querySelectorAll('#cbody button[data-win]').forEach(b=>b.onclick=async()=>{
+    await api('/api/compare/'+ytid, {winner:b.dataset.win});
+    openCompare(ytid);
+  });
 }
 
 /* ---------------- intake tab ---------------- */

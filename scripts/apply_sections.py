@@ -35,7 +35,14 @@ import sys
 import uuid
 from datetime import datetime, timezone
 
-sys.stdout.reconfigure(encoding="utf-8")
+# pythonw.exe (used to run the dashboard detached) has no stdout, and an
+# unguarded reconfigure() throws on import - which surfaced as an HTTP handler
+# dying with an empty response rather than an error.
+if sys.stdout is not None:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
 
 PGHOST = "192.168.0.197"; PGUSER = "dance_user"; PGDB = "dancing"
 MAX_LABEL = 34
