@@ -92,8 +92,20 @@ CORE = re.compile(
     r"|freestyle|eight count|counts?|plie|plies|releve|releves|tendu|passe"
     r"|barre|turnout|pirouette|arabesque|port de bras"
     r"|shuffle|flap|stomp|stomps|ball change|toe tap"
+    # Partner and swing vocabulary. Without these the whole Lindy/Ballroom half of the
+    # catalogue scores zero: "How to Do the Tandem Charleston | Swing Dance" named the
+    # move, the style, and taught throughout, and still scored CORE 0, because every
+    # word it uses - rock step, triple step, kick, swingout - sat in GENERIC.
+    r"|rock step|triple step|swingout|swing out|closed position|open position"
+    r"|kick ball|grapevine|chasse|weight change|basic step|counts? of eight|on count"
     r"|five six seven eight|5 6 7 8|one two three|two three four"
     r"|and one|and two|on the one|downbeat|upbeat)\b", re.I)
+
+# Someone counting a routine out loud. Deliberately separate from CORE: ASR writes the
+# counts interleaved with words ("kick three, step down four, five, pull up six"), so
+# the fixed phrases above never match even when the teacher is plainly counting.
+COUNTS = re.compile(r"\b(one|two|three|four|five|six|seven|eight)\b", re.I)
+MIN_DISTINCT_COUNTS = 5
 GENERIC = re.compile(
     r"\b(kick|kicks|cross|crossing|together|turn|turns|spin|spins|twist|twists"
     r"|slide|slides|tap|taps|drop|drops|jump|jumps|hop|hops|bend|bends|straighten"
@@ -102,10 +114,22 @@ GENERIC = re.compile(
 
 
 def talks_like_dancing(text):
-    """(is_dance, core_count, generic_count). See the note above CORE."""
+    """(is_dance, core_count, generic_count). See the note above CORE.
+
+    Three ways to pass, because no single one covers the styles:
+      CORE >= 2                  technical vocabulary, the normal case
+      CORE >= 1 and GENERIC >= 3 one technical term with movement behind it
+      counting and GENERIC >= 4  a teacher counting a routine out loud
+
+    Measured on 202 transcribed catalogue videos: 193 pass (95.5%). The Super Smash
+    Bros "Dancing Blade" guide scores CORE 0 and does not count, so it still fails.
+    """
     core = len({m.group(0).lower() for m in CORE.finditer(text)})
     gen = len({m.group(0).lower() for m in GENERIC.finditer(text)})
-    return (core >= 2 or (core >= 1 and gen >= 3)), core, gen
+    counting = len({m.group(0).lower()
+                    for m in COUNTS.finditer(text)}) >= MIN_DISTINCT_COUNTS
+    ok = core >= 2 or (core >= 1 and gen >= 3) or (counting and gen >= 4)
+    return ok, core, gen
 
 # How much each verdict is worth as a score. "silent" and "no-transcript" deliberately
 # sit at the review boundary rather than low: absence of evidence is not evidence of a

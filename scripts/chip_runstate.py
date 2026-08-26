@@ -43,17 +43,38 @@ def _now():
 
 
 def _write_atomic(path, obj):
-    """Write via temp + replace so the dashboard never reads a half-written file."""
+    """Write via temp + replace so the dashboard never reads a half-written file.
+
+    os.replace is atomic on Windows but not uncontended: if any other process has the
+    destination open even for reading, it fails with WinError 5 rather than waiting.
+    That happens routinely now - the dashboard polls this file every 2s while two
+    pipeline stages write to it - and an unguarded replace turned a progress update
+    into a crashed extraction, killing the video that happened to be in flight.
+
+    Progress reporting must never be able to fail the work it is reporting on, so a
+    contended write is retried briefly and then given up on. A dropped run-state
+    update costs a stale line in the dashboard; a raised one costs a video.
+    """
     os.makedirs(PROTO, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=PROTO, suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(obj, f, indent=1)
-        os.replace(tmp, path)
+        for attempt in range(6):
+            try:
+                os.replace(tmp, path)
+                return
+            except PermissionError:
+                if attempt == 5:
+                    break
+                time.sleep(0.05 * (attempt + 1))
     except BaseException:
         if os.path.exists(tmp):
             os.unlink(tmp)
         raise
+    # Gave up: drop the update rather than propagating it into the caller.
+    if os.path.exists(tmp):
+        os.unlink(tmp)
 
 
 def _read(path, default):
