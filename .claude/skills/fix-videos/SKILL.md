@@ -15,7 +15,9 @@ video's outcome in `VIDEO_FIXUP.md`.
 - `_proto/<vid>.json` caches yt-dlp metadata; `_proto/` holds montages (gitignored scratch).
 
 ## Prod DB
-Postgres `192.168.0.197` db `dancing` user `dance_user` pw `dancebabydance` (PascalCase, double-quote identifiers).
+Postgres `192.168.0.197` db `dancing` user `dance_user`; the password lives in the gitignored
+`DancePlatform.API/appsettings.Development.json` (it rotates - read it, never hardcode it; this repo
+is public). PascalCase, double-quote identifiers.
 All `Dances` FKs are `ON DELETE CASCADE`, so deleting a dance clears its Videos/DanceStyles/etc.
 Identity IDs auto-generate. The site reads the DB live — **no deploy needed**.
 

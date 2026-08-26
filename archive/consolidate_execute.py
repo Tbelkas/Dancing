@@ -9,11 +9,25 @@ Phase 2: strip redundant 2nd style from 2-style dances (keep more-specific; manu
 import json, os, subprocess, sys, unicodedata, re
 from collections import Counter
 
-PGHOST="192.168.0.197"; PGUSER="dance_user"; PGDB="dancing"; PGPW="dancebabydance"
+PGHOST="192.168.0.197"; PGUSER="dance_user"; PGDB="dancing"
 APPLY = len(sys.argv) > 1 and sys.argv[1] == "apply"
 
+def _prod_password():
+    """Read the prod DB password from appsettings (gitignored) rather than hardcoding it.
+
+    This repo is public: a literal here leaks the production database on every push.
+    """
+    import json as _json
+    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _cfg = os.path.join(_root, "DancePlatform.API", "appsettings.Development.json")
+    for _v in _json.load(open(_cfg, encoding="utf-8-sig")).get("ConnectionStrings", {}).values():
+        if "192.168.0.197" in _v:
+            return dict(_p.split("=", 1) for _p in _v.split(";") if "=" in _p).get("Password", "")
+    raise SystemExit(f"No prod (192.168.0.197) connection string in {_cfg}")
+
+
 def psql(sql):
-    env=dict(os.environ); env["PGPASSWORD"]=PGPW
+    env=dict(os.environ); env["PGPASSWORD"]=_prod_password()
     p=subprocess.run(["psql","-h",PGHOST,"-U",PGUSER,"-d",PGDB,"-v","ON_ERROR_STOP=1","-At","-F","\t","-c",sql],
                      capture_output=True,text=True,encoding="utf-8",env=env)
     if p.returncode!=0: sys.stderr.write("SQL ERROR:\n"+p.stderr); raise SystemExit(1)
@@ -82,7 +96,7 @@ print(f"Phase 2: strip 2nd style from {len(style_drops)} dances")
 print(f"Mode: {'APPLY (COMMIT)' if APPLY else 'DRY RUN (ROLLBACK)'}\n")
 
 # run it (pipe via stdin; -c has a Windows cmdline length limit)
-env=dict(os.environ); env["PGPASSWORD"]=PGPW
+env=dict(os.environ); env["PGPASSWORD"]=_prod_password()
 p=subprocess.run(["psql","-h",PGHOST,"-U",PGUSER,"-d",PGDB,"-v","ON_ERROR_STOP=1","-f","-"],
                  input=script,capture_output=True,text=True,encoding="utf-8",env=env)
 sys.stdout.write(p.stdout); sys.stderr.write(p.stderr)

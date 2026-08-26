@@ -60,15 +60,18 @@ Conventions (and the reasoning behind each) are in
 and hold real credentials. Scripts must read the connection string from `appsettings`, the
 way `scripts/find_chip_candidates.py` and `scripts/enrich_views.py` do — never hardcode it.
 
-No tracked file hardcodes the password any more: the 11 that did (`scripts/apply_sections.py`,
-`scripts/backfill_durations.py`, and nine `archive/*.py`) now call a local `_prod_password()`
-that reads `appsettings.Development.json`. Keep it that way — `git grep` for a literal before
-committing a new script.
+No tracked file hardcodes the password any more. Every script that talks to prod calls a
+local `_prod_password()` that reads `appsettings.Development.json`. The claim was false for
+a while — `scripts/prep_video.py`, `scripts/map_times.py`, `scripts/rebuild_video.py`, eight
+`archive/*.py`, `.claude/skills/fix-videos/SKILL.md` and four stale `settings.local.json`
+permission entries still carried the literal until 2026-08-26. Keep it true: `git grep` for a
+literal before committing a new script, and don't paste a live password into a skill doc or a
+permission rule either — `git grep` finds those too.
 
-> **The password still needs rotating.** It sat in HEAD of a public repo, so it is in the
-> GitHub history and must be treated as compromised even though it is gone from the worktree.
-> Removing it from the current files does not unpublish it. Rotate on the Pi, update the
-> gitignored `appsettings.*.json`, and only then is this rule actually satisfied.
+> **The password has been rotated** (the old `dancebabydance` no longer works; the live one is
+> 36 chars and lives only in the gitignored `appsettings.*.json`). The old value is still in the
+> public GitHub history, which is fine now that it is dead — but that is exactly why a literal
+> must never go back in: removing it from the worktree does not unpublish it.
 
 ---
 
