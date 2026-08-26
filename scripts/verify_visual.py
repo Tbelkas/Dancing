@@ -112,6 +112,30 @@ Sheets:
 """
 
 
+def is_blind(row):
+    """True when audio cannot settle this video, so frames are the only evidence left.
+
+    Two ways to qualify. Either a previous pass already said so in QualityFlags, or the
+    cached transcript itself carries fewer than twenty words - the same test gate_tune
+    uses to decide a transcript is uninformative. Rows with no transcript at all are
+    NOT included: those have not been transcribed yet, and transcription is far cheaper
+    than a model call on frames, so they belong to the backfill first.
+    """
+    flags = {f.strip() for f in (row.get("qflags") or "").split(",") if f.strip()}
+    if flags & BLIND:
+        return True
+    if flags & {"visual:teaches-this-move", "visual:cannot-tell"}:
+        return False  # already looked at
+    if any(f.startswith("visual:") for f in flags):
+        return False
+    sig = vg.load_sig(row["ytid"]) if row["platform"] == "youtube" else None
+    if sig is None:
+        return False
+    text = " ".join(x.get("text", "")
+                    for x in ((sig.get("asr") or {}).get("segments") or []))
+    return len(text.split()) < 20
+
+
 def judge_visually(row):
     dur = int(row.get("dur") or 0)
     if dur <= 0:
@@ -160,9 +184,14 @@ def main():
     # which presents as "nothing to do" rather than as an error.
     rows = json.loads(ch.psql(vg.FETCH).strip() or "[]")
     rows = [r for r in rows if r["state"] == args.state]
-    # Only rows the audio pass already gave up on.
-    todo = [r for r in rows
-            if (r.get("qflags") or "").split(",")[0] in BLIND]
+    # Only rows the audio pass could not judge.
+    #
+    # Decided from the transcript itself, not from the flag text. Matching on the first
+    # flag worked for the pending queue, where verify_intake writes exactly one verdict -
+    # but approved rows carry video_gate's flags, where "silent" arrives third in a list
+    # like "same-clip-on-4-dances,too-short,silent". A prefix match silently skips every
+    # one of those, which is the whole population this was built for.
+    todo = [r for r in rows if is_blind(r)]
     if args.limit:
         todo = todo[:args.limit]
     if not todo:
