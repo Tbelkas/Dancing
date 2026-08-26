@@ -341,6 +341,20 @@ def cmd_stamp(args):
     """
     rows = json.loads(ch.psql(FETCH).strip() or "[]")
     rows = [r for r in rows if r["state"] == args.state]
+
+    # Never overwrite a verdict that came from looking at the video.
+    #
+    # This rubric and verify_visual.py write the same three columns, and this one runs
+    # far more often. A visual verdict costs a download, a contact sheet and a model
+    # call, and it exists precisely for videos this rubric cannot judge - so re-stamping
+    # would replace the only real evidence those rows have with a score derived from
+    # their silence, and do it silently.
+    held = [r for r in rows if (r.get("qflags") or "").startswith("visual:")]
+    if held:
+        rows = [r for r in rows if not (r.get("qflags") or "").startswith("visual:")]
+        print(f"keeping {len(held)} visual verdict(s) - frames beat this rubric on the "
+              "videos it cannot hear")
+
     if not rows:
         print(f"no videos in state '{args.state}'")
         return
