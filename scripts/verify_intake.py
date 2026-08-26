@@ -36,6 +36,8 @@ Verdicts, written to QualityFlags so the Intake tab shows the reasoning:
   dance-but-unnamed  clearly a dance lesson that never says the move's name
   not-a-dance-video  no dance vocabulary - the title was a coincidence
   silent             no speech; a real format (mirrored walkthroughs), so not a verdict
+  unclear            too little recognisable speech to judge - often non-English
+                     audio, which the English-only ASR renders as gibberish
   no-transcript      extraction failed transiently; nothing is claimed either way
   video-unavailable  removed, private or age-walled; it will never play for anyone
 
@@ -141,6 +143,9 @@ VERDICT_SCORE = {
     "silent": 0.50,
     "no-transcript": 0.50,
     "not-a-dance-video": 0.10,
+    # Nothing was learned. Sits at the review boundary for the same reason "silent"
+    # does: an unreadable transcript is not a mark against the video.
+    "unclear": 0.50,
     # A video that will not play is worse than one that is merely wrong: the page is
     # broken for every learner who opens it, and no amount of review makes it work.
     "video-unavailable": 0.05,
@@ -237,6 +242,28 @@ def judge(row):
                  f"teaching={'y' if teaches else 'n'} core={core} gen={gen}"}
 
     if not is_dance:
+        # Rejecting needs positive evidence that the video is about something ELSE,
+        # not merely an absence of dance words.
+        #
+        # The ASR model is distil-large-v3, which is English-only: it cannot transcribe
+        # another language, it reports "en" regardless (all 334 cached transcripts say
+        # English, which is not credible for a catalogue with Afro, K-pop and Indian
+        # classical content), and on non-English audio it emits pseudo-English soup -
+        # "No! Now! All right right Right Right Who Me TapDens" for a Korean tap lesson.
+        # That soup scores zero on every English word list, so a rule that rejects on a
+        # zero would quietly delete the catalogue's entire non-English half.
+        #
+        # Trying to detect the soup by function-word ratio was tried and abandoned: real
+        # dance instruction is terse ("Slow. Slow. Quick, quick, quick") and scores as
+        # low as the garbage, so the test cannot separate them.
+        #
+        # So: if the transcript yielded almost no recognisable vocabulary at all, we
+        # learned nothing and say so. The Smash Bros guide is still rejected, because it
+        # has plenty of vocabulary - four generic movement words and fluent commentary -
+        # it just is not dance vocabulary. That is evidence. A silent zero is not.
+        if core + gen < 3:
+            return "unclear", {**d, "note": d["note"] + " (too little recognised "
+                                                        "speech to judge)"}
         return "not-a-dance-video", d
     if says_move and teaches:
         return "confirmed", d
