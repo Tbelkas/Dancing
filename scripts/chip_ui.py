@@ -223,8 +223,6 @@ def intake_rows(force=False):
     raw = json.loads(vg.ch.psql(vg.FETCH).strip() or "[]")
     rows = []
     for r in raw:
-        if r["state"] == "approved" and not r.get("otherdances"):
-            pass
         meta = vg.load_meta(r["ytid"]) if r["platform"] == "youtube" else None
         sig = vg.load_sig(r["ytid"]) if r["platform"] == "youtube" else None
         score, verdict, flags, tier = vg.grade(r, meta, sig)

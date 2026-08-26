@@ -20,7 +20,12 @@ public interface IVideoService
     Task<List<VideoLibraryItemDto>> GetGlobalAsync();
     Task<List<VideoChapterDto>> GetRelatedAsync(int id, int? userId);
     Task<VideoDto?> GetByIdAsync(int id, int? userId);
-    Task<(CreateVideoResult Result, VideoDto? Video)> CreateAsync(CreateVideoRequest request, int? userId, bool isAdmin);
+    /// <param name="honourGate">
+    /// When true the intake rubric decides the ReviewState: below the admit threshold the
+    /// video lands as "pending" instead of going straight onto the site. Bulk import passes
+    /// true; the add-video form passes false, because a person already looked at it.
+    /// </param>
+    Task<(CreateVideoResult Result, VideoDto? Video)> CreateAsync(CreateVideoRequest request, int? userId, bool isAdmin, bool honourGate = false);
     Task<VideoDto?> UpdateAsync(int id, UpdateVideoRequest request, int? userId);
     Task<(MoveVideoResult Result, VideoDto? Video)> MoveToDanceAsync(int id, int danceId, int? userId);
     Task<VideoDto?> AddSegmentAsync(int id, VideoSegmentDto segment, int? userId);

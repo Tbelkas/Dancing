@@ -102,7 +102,7 @@ public class VideoService : IVideoService
             .ToListAsync();
     }
 
-    public async Task<(CreateVideoResult Result, VideoDto? Video)> CreateAsync(CreateVideoRequest request, int? userId, bool isAdmin)
+    public async Task<(CreateVideoResult Result, VideoDto? Video)> CreateAsync(CreateVideoRequest request, int? userId, bool isAdmin, bool honourGate = false)
     {
         var danceExists = await _db.Dances.AnyAsync(d => d.Id == request.DanceId);
         if (!danceExists) return (CreateVideoResult.DanceNotFound, null);
@@ -139,10 +139,19 @@ public class VideoService : IVideoService
             Segments = MapSegments(request.VideoType, request.Segments)
         };
 
-        // Score it, but admit it: a video added through the API was chosen by a
-        // person who looked at it, unlike the bulk-seeded ones the database default
-        // holds back. Recording the score means a questionable one can still be
-        // found later in the Intake list instead of disappearing into the catalogue.
+        // Score it. Whether the score is allowed to hold the video back depends on
+        // who is adding it.
+        //
+        // A video added through the add-video form was chosen by a person who looked
+        // at it, so it is admitted whatever the score says; recording the score means
+        // a questionable one can still be found later in the dashboard's Intake tab.
+        //
+        // A video arriving through bulk import was chosen by a search query, and that
+        // is exactly the path that filled the catalogue with clips nobody had watched.
+        // There, the rubric decides (honourGate), and anything under the threshold
+        // lands as "pending" — held out of every public query by the global filter —
+        // until someone reviews it. Without this, /import/youtube-video walked straight
+        // past a gate the database default was already applying to raw psql inserts.
         var danceInfo = await _db.Dances
             .Where(d => d.Id == request.DanceId)
             .Select(d => new
@@ -157,9 +166,13 @@ public class VideoService : IVideoService
                           && o.DanceId != request.DanceId);
         var (score, flags) = VideoQualityGate.Grade(
             video, danceInfo?.Name, danceInfo?.Styles, sameClipOtherDances);
-        video.ReviewState = "approved";
+        video.ReviewState = honourGate && score < VideoQualityGate.AdmitThreshold
+            ? "pending"
+            : "approved";
         video.QualityScore = score;
         video.QualityFlags = flags;
+        if (video.ReviewState == "pending")
+            video.ReviewNote = $"held by intake gate at {score:0.00}";
 
         _db.Videos.Add(video);
 

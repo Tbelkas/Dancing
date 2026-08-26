@@ -110,7 +110,7 @@ public class ImportService : IImportService
                         StartTime = startSeconds,
                         EndTime = endSeconds,
                         Segments = []
-                    }, null, isAdmin: true);
+                    }, null, isAdmin: true, honourGate: true);
                     // Throwing routes through the catch below, which rolls the just-created dance back.
                     if (videoResult != CreateVideoResult.Success)
                         throw new InvalidOperationException(videoResult == CreateVideoResult.Duplicate
@@ -150,7 +150,7 @@ public class ImportService : IImportService
             StartTime = request.StartTime,
             EndTime = request.EndTime,
             Segments = request.Segments
-        }, null, isAdmin: true);
+        }, null, isAdmin: true, honourGate: true);
 
         return (result switch
         {

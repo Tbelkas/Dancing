@@ -122,6 +122,64 @@ public class VideoServiceTests : IDisposable
         Assert.Equal(CreateVideoResult.Success, u2Personal);
     }
 
+    [Fact]
+    public async Task Create_HonoursGateOnlyForBulkImport_AndQuarantinesBelowThreshold()
+    {
+        await using var ctx = NewCtx();
+        // The title shares no word with the dance name (title-dance-mismatch, -0.30)
+        // and reads as a course advert (promo-title, -0.20), so the score lands at
+        // 0.50 - under the 0.65 admit threshold. Two flags are needed because on the
+        // API path DurationSeconds is always null, so too-short can never fire there.
+        ctx.Dances.Add(new Dance { Id = 3, Name = "Suzie Q", Slug = "suzie-q" });
+        await ctx.SaveChangesAsync();
+        var svc = new VideoService(ctx);
+
+        CreateVideoRequest Bad() => new()
+        {
+            Title = "Enroll in my full course - Festival Aftermovie 2019",
+            VideoId = "bad1", Platform = "youtube", DanceId = 3
+        };
+
+        // The add-video form: a person looked at it, so it goes live whatever the score.
+        var (formResult, formVideo) = await svc.CreateAsync(Bad(), userId: 1, isAdmin: true);
+        Assert.Equal(CreateVideoResult.Success, formResult);
+        var formRow = await ctx.Videos.IgnoreQueryFilters().FirstAsync(v => v.Id == formVideo!.Id);
+        Assert.Equal("approved", formRow.ReviewState);
+        Assert.True(formRow.QualityScore < VideoQualityGate.AdmitThreshold,
+            "the fixture must actually score badly, or this test proves nothing");
+
+        // Bulk import of the same clip onto another dance: the rubric decides, and
+        // a below-threshold video is held out of every public query.
+        ctx.Dances.Add(new Dance { Id = 4, Name = "Camel Walk", Slug = "camel-walk" });
+        await ctx.SaveChangesAsync();
+        var imported = new CreateVideoRequest
+        {
+            Title = "Enroll in my full course - Festival Aftermovie 2019",
+            VideoId = "bad1", Platform = "youtube", DanceId = 4
+        };
+        var (importResult, importVideo) = await svc.CreateAsync(
+            imported, userId: null, isAdmin: true, honourGate: true);
+        Assert.Equal(CreateVideoResult.Success, importResult);
+        var importRow = await ctx.Videos.IgnoreQueryFilters().FirstAsync(v => v.Id == importVideo!.Id);
+        Assert.Equal("pending", importRow.ReviewState);
+        Assert.NotNull(importRow.ReviewNote);
+
+        // Quarantined means quarantined: the global filter hides it from a normal read.
+        Assert.False(await ctx.Videos.AnyAsync(v => v.Id == importRow.Id));
+
+        // A clean import still goes straight through - the gate holds back the bad, not the bulk.
+        ctx.Dances.Add(new Dance { Id = 5, Name = "Camel Walk Two", Slug = "camel-walk-two" });
+        await ctx.SaveChangesAsync();
+        var (goodResult, goodVideo) = await svc.CreateAsync(new CreateVideoRequest
+        {
+            Title = "How To Camel Walk - Beginner Tutorial",
+            VideoId = "good1", Platform = "youtube", DanceId = 5
+        }, userId: null, isAdmin: true, honourGate: true);
+        Assert.Equal(CreateVideoResult.Success, goodResult);
+        var goodRow = await ctx.Videos.IgnoreQueryFilters().FirstAsync(v => v.Id == goodVideo!.Id);
+        Assert.Equal("approved", goodRow.ReviewState);
+    }
+
     private static async Task<(int Count, double Avg)> VideoStats(AppDbContext ctx, int videoId)
     {
         var v = await ctx.Videos.Where(x => x.Id == videoId).Select(x => new { x.RatingCount, x.AverageRating }).FirstAsync();

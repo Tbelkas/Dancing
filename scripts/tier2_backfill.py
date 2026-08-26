@@ -1,0 +1,136 @@
+"""
+tier2_backfill.py [--batch N] [--limit N] [--rebuild-queue]
+
+Give video_gate.py tier-2 evidence for the whole catalogue.
+
+WHY THIS EXISTS
+---------------
+The intake gate has three tiers, and only tier 2 - what the person in the video
+actually says - can tell that a video is *wrong* rather than merely thin. When the
+gate was first run over prod, 883 of 1153 rows were graded on metadata alone and
+128 on the database row alone. Only 142 reached tier 2. That is why 735 videos
+scored exactly 1.0: not because they are good, because nothing had looked.
+
+So this walks every distinct YouTube id with no _proto/sig_<ytid>.json and runs
+stage 01 (signals.py) on it. Ordered by how many Videos rows each id covers, so
+the extractions that grade the most catalogue land first and an interrupted run
+still leaves the gate better than it found it.
+
+Resumable and idempotent: signals.py skips anything already cached, so re-running
+after a crash, a reboot, or a Ctrl-C picks up where it stopped. Failures are
+recorded and skipped rather than retried forever - one dead video must not stall
+seven hundred.
+
+Batched because argparse (and the Windows command line) will not take 700 ids at
+once, and because a batch boundary is a safe place to stop.
+
+    python scripts/tier2_backfill.py --rebuild-queue   refresh the todo list
+    python scripts/tier2_backfill.py                   drain it
+    python scripts/tier2_backfill.py --limit 50        just a taste
+"""
+import argparse
+import glob
+import json
+import os
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+if sys.stdout is not None:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROTO = os.path.join(ROOT, "_proto")
+QUEUE = os.path.join(PROTO, "tier2_queue.txt")
+FAILED = os.path.join(PROTO, "tier2_failed.tsv")
+
+
+def cached():
+    return {os.path.basename(p)[4:-5] for p in glob.glob(os.path.join(PROTO, "sig_*.json"))}
+
+
+def rebuild_queue():
+    import chip_health as ch
+    rows = ch.psql('''
+    select v."VideoId", count(*) as nrows, max(coalesce(v."DurationSeconds",0)) as dur
+      from "Videos" v where v."Platform"='youtube'
+     group by 1;''').strip().splitlines()
+    have = cached()
+    todo = []
+    for line in rows:
+        ytid, n, dur = line.split("|")
+        if ytid not in have:
+            todo.append((ytid, int(n), int(dur)))
+    # Most catalogue rows graded per extraction first; longer video breaks the tie
+    # because a long one is more likely to be a real tutorial worth judging.
+    todo.sort(key=lambda t: (-t[1], -t[2]))
+    with open(QUEUE, "w", encoding="utf-8") as f:
+        for t in todo:
+            f.write(t[0] + "\n")
+    print(f"queue rebuilt: {len(todo)} to extract, {len(have)} already cached")
+    return [t[0] for t in todo]
+
+
+def load_queue():
+    if not os.path.exists(QUEUE):
+        return rebuild_queue()
+    return [l.strip() for l in open(QUEUE, encoding="utf-8") if l.strip()]
+
+
+def failed_ids():
+    if not os.path.exists(FAILED):
+        return set()
+    return {l.split("\t")[0] for l in open(FAILED, encoding="utf-8") if l.strip()}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--batch", type=int, default=8)
+    ap.add_argument("--limit", type=int)
+    ap.add_argument("--rebuild-queue", action="store_true")
+    args = ap.parse_args()
+
+    if args.rebuild_queue:
+        rebuild_queue()
+        return
+
+    ids = load_queue()
+    have, bad = cached(), failed_ids()
+    todo = [i for i in ids if i not in have and i not in bad]
+    if args.limit:
+        todo = todo[:args.limit]
+    print(f"{len(ids)} queued  {len(ids)-len(todo)} done/skipped  {len(todo)} to go")
+
+    t0, done = time.time(), 0
+    for i in range(0, len(todo), args.batch):
+        chunk = todo[i:i + args.batch]
+        # "--" so ids beginning with "-" are not read as flags. Three of them are.
+        p = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "signals.py"),
+                            "--"] + chunk,
+                           capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", cwd=ROOT)
+        sys.stdout.write(p.stdout or "")
+        if p.returncode:
+            sys.stderr.write((p.stderr or "")[-800:])
+
+        now = cached()
+        with open(FAILED, "a", encoding="utf-8") as f:
+            for ytid in chunk:
+                if ytid not in now:
+                    f.write(f"{ytid}\tno sig written\n")
+        done += len(chunk)
+        el = time.time() - t0
+        rate = done / el if el else 0
+        left = (len(todo) - done) / rate if rate else 0
+        print(f"[{done}/{len(todo)}]  {el/60:.0f}m elapsed  "
+              f"~{left/60:.0f}m left  ({rate*60:.1f}/min)", flush=True)
+
+    print(f"\nbackfill pass complete: {len(cached())} signal caches on disk")
+
+
+if __name__ == "__main__":
+    main()
