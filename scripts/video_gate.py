@@ -124,6 +124,7 @@ select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
   select v."Id" as "vid", v."VideoId" as "ytid", v."Platform" as "platform",
          v."VideoType" as "vtype", v."Title" as "title",
          v."StartTime" as "clipstart",
+         v."EndTime" as "clipend",
          coalesce(v."DurationSeconds", 0) as "dur",
          coalesce(v."ViewCount", 0) as "views",
          v."ReviewState" as "state",

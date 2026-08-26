@@ -66,9 +66,20 @@ def mmss(t):
     return f"{t // 60}:{t % 60:02d}"
 
 
-def sample_times(dur, n):
+def sample_times(dur, n, start=None, end=None):
     """Evenly spaced, skipping the very start and end - a title card and an
-    end screen tell you nothing about the lesson."""
+    end screen tell you nothing about the lesson.
+
+    With start/end, sample only that window and do not trim it: a montage slice is
+    already the interesting part, and shaving 1% off each end of a four-second window
+    throws away most of what there is to see.
+    """
+    if start is not None:
+        lo, hi = float(start), float(end if end else dur)
+        if hi <= lo:
+            return [int(lo)]
+        step = (hi - lo) / max(1, n - 1)
+        return [int(lo + i * step) for i in range(n)]
     lo, hi = max(2, dur * 0.01), dur * 0.98
     if hi <= lo:
         return [0]
@@ -76,15 +87,25 @@ def sample_times(dur, n):
     return [int(lo + i * step) for i in range(n)]
 
 
-def build_sheets(ytid, dur, force=False):
+def build_sheets(ytid, dur, force=False, start=None, end=None):
     """Contact sheets with the timecode burned into every frame.
 
     The burned-in timecode is the whole trick: the model reads the time off the
     picture, so its answer is anchored to a frame it actually saw.
+
+    start/end restrict sampling to one window, for a row that is a slice of a montage
+    rather than a whole video. Without it a four-second slice of a 203-second video was
+    judged on twenty frames spread across the whole three minutes, almost none of which
+    fell inside the window at all - and because the cache is keyed on the video, every
+    slice of the same montage received identical sheets and identical evidence. Callers
+    that pass neither get exactly the previous behaviour.
     """
     os.makedirs(FRAMES, exist_ok=True)
+    # The window is part of the cache identity. Sharing one set of sheets between the
+    # whole video and each of its slices is what made the slices wrong.
+    key = ytid if start is None else f"{ytid}@{int(start)}-{int(end or dur)}"
     existing = sorted(f for f in os.listdir(FRAMES)
-                      if f.startswith(f"{ytid}_sheet") and f.endswith(".png"))
+                      if f.startswith(f"{key}_sheet") and f.endswith(".png"))
     if existing and not force:
         return [os.path.join(FRAMES, f) for f in existing], None
 
@@ -93,15 +114,16 @@ def build_sheets(ytid, dur, force=False):
         return [], "no video stream"
 
     try:
-        n = min(MAX_FRAMES, max(COLS * ROWS, int(dur // 12) or COLS * ROWS))
+        span = (float(end or dur) - float(start)) if start is not None else float(dur)
+        n = min(MAX_FRAMES, max(COLS * ROWS, int(span // 12) or COLS * ROWS))
         n -= n % (COLS * ROWS) or 0
         n = max(COLS * ROWS, n)
-        times = sample_times(dur, n)
+        times = sample_times(dur, n, start, end)
 
         # One PNG per sampled second, timecode drawn on it.
         stills = []
         for i, t in enumerate(times):
-            out = os.path.join(FRAMES, f"{ytid}_f{i:03d}.png")
+            out = os.path.join(FRAMES, f"{key}_f{i:03d}.png")
             label = mmss(t).replace(":", "\\:")
             vf = (f"scale={TILE_W}:-2,"
                   f"drawtext=fontfile='{FONT}':text='{label}':x=6:y=6:"
@@ -119,11 +141,11 @@ def build_sheets(ytid, dur, force=False):
         per = COLS * ROWS
         for s in range(0, len(stills), per):
             chunk = stills[s:s + per]
-            listfile = os.path.join(FRAMES, f"{ytid}_list{s}.txt")
+            listfile = os.path.join(FRAMES, f"{key}_list{s}.txt")
             with open(listfile, "w", encoding="utf-8") as f:
                 for p in chunk:
                     f.write("file '" + os.path.basename(p) + "'\n")
-            sheet = os.path.join(FRAMES, f"{ytid}_sheet{s // per:02d}.png")
+            sheet = os.path.join(FRAMES, f"{key}_sheet{s // per:02d}.png")
             r = sg.run(["ffmpeg", "-hide_banner", "-loglevel", "error",
                         "-f", "concat", "-safe", "0", "-i", listfile,
                         "-vf", f"tile={COLS}x{ROWS}", "-frames:v", "1",

@@ -85,6 +85,8 @@ The video is attached to a dance move in a learning catalogue:
   style: {styles}
   title: {title}
 
+The frames you are given cover {window}
+
 This video has no usable audio - it is silent, or its speech could not be transcribed.
 So the frames are the only evidence. Many silent tutorials carry their instruction as
 on-screen text; if you can read captions, they are your best evidence.
@@ -140,13 +142,25 @@ def judge_visually(row):
     dur = int(row.get("dur") or 0)
     if dur <= 0:
         return "cannot-tell", {"note": "no duration known, cannot sample frames"}
-    sheets, err = vs.build_sheets(row["ytid"], dur)
+
+    # A row can be a slice of a montage rather than a whole video, and then only its
+    # window is what a learner sees. Judging the whole video instead is not a small
+    # inaccuracy: rows 485/487/488/490 are four- and eight-second windows on one
+    # 203-second clip, so twenty frames spread over the full duration landed almost
+    # entirely outside the window - and all four then received the same verdict on the
+    # same cached sheets, because the cache was keyed on the video.
+    start, end = row.get("clipstart"), row.get("clipend")
+    sheets, err = vs.build_sheets(row["ytid"], dur, start=start, end=end)
     if not sheets:
         return "cannot-tell", {"note": f"no frames: {err or 'unknown'}"}
 
+    window = ("the WHOLE video" if start is None else
+              f"ONLY the segment {vs.mmss(start)} to {vs.mmss(end or dur)} - this row is "
+              f"one slice of a longer montage, and the rest of the video teaches other "
+              f"moves. Judge the slice, not the video.")
     prompt = PROMPT.format(
         dance=row["dance"] or "(unnamed)", styles=row["styles"] or "(none)",
-        title=row["title"] or "", sheets="\n".join(sheets))
+        title=row["title"] or "", window=window, sheets="\n".join(sheets))
     raw = pr.call_claude(prompt)
 
     m = re.search(r"\{[\s\S]*\}", raw or "")
