@@ -75,6 +75,28 @@ def graded_rows():
     return out
 
 
+_SPEECH_CACHE = {}
+
+
+def _no_speech(ytid):
+    """True when the transcript exists but carries no usable speech.
+
+    Reaching tier 2 is not the same as learning something. Roughly one video in seven
+    transcribes to nothing at all - music-only clips, wordless mirrored walkthroughs,
+    footage with no narration - and no amount of further extraction will change that.
+    """
+    if ytid in _SPEECH_CACHE:
+        return _SPEECH_CACHE[ytid]
+    sig = vg.load_sig(ytid)
+    if sig is None:
+        _SPEECH_CACHE[ytid] = False
+        return False
+    text = " ".join(x.get("text", "")
+                    for x in ((sig.get("asr") or {}).get("segments") or []))
+    _SPEECH_CACHE[ytid] = len(text.split()) < 20
+    return _SPEECH_CACHE[ytid]
+
+
 # ------------------------------------------------------------------ coverage
 
 def cmd_coverage(args):
@@ -90,23 +112,42 @@ def cmd_coverage(args):
     pending = [r for r in allrows if r["state"] != "approved"]
 
     tiers = {0: 0, 1: 0, 2: 0}
+    speechless = 0
     for r in rows:
         tiers[r["tier"]] += 1
+        if r["tier"] == 2 and _no_speech(r["ytid"]):
+            speechless += 1
     n = len(rows) or 1
     t2 = tiers[2] / n
+    informative = (tiers[2] - speechless) / n
+
     print(f"{len(rows)} approved videos (plus {len(pending)} held in review, "
           "excluded - they are not what a threshold governs)")
     print(f"  tier 0 (database row only) : {tiers[0]:>5}  {tiers[0]/n:>6.1%}")
     print(f"  tier 1 (+ yt-dlp metadata) : {tiers[1]:>5}  {tiers[1]/n:>6.1%}")
     print(f"  tier 2 (+ transcript)      : {tiers[2]:>5}  {t2:>6.1%}")
+    print(f"     of which say nothing    : {speechless:>5}  "
+          "<- transcribed, but no usable speech")
+    print(f"  tier 2 WITH evidence       : {tiers[2]-speechless:>5}  {informative:>6.1%}")
     ceiling = sum(1 for r in rows if r["score"] >= 0.999)
     print(f"\n  scoring exactly 1.0: {ceiling} ({ceiling/n:.1%})"
           "  <- mostly videos nothing has looked at, not videos known to be good")
-    print(f"\ntier-2 coverage is {'sufficient' if t2 >= 0.75 else 'NOT sufficient'} "
+
+    # Gate on the informative share, not the transcribed share. Around 14% of the
+    # catalogue transcribes to nothing - no captions, no speech, music-only - and those
+    # will never yield audio evidence however long the backfill runs. Counting them as
+    # coverage would let the gate report "ready" on the strength of files that say
+    # nothing, which is the same mistake as scoring an unexamined video 1.0.
+    print(f"\ntier-2 coverage with real evidence is "
+          f"{'sufficient' if informative >= 0.75 else 'NOT sufficient'} "
           "for a retune (want >= 75%).")
-    if t2 < 0.75:
+    if informative < 0.75:
         print("  run: python scripts/tier2_backfill.py")
-    return t2
+        if speechless > n * 0.10:
+            print(f"  note: {speechless} videos ({speechless/n:.0%}) are silent and will "
+                  "never contribute. If the informative share stalls short of 75%, that "
+                  "ceiling - not the backfill - is the reason.")
+    return informative
 
 
 # --------------------------------------------------------------------- label
