@@ -226,9 +226,20 @@ def intake_rows(force=False):
         meta = vg.load_meta(r["ytid"]) if r["platform"] == "youtube" else None
         sig = vg.load_sig(r["ytid"]) if r["platform"] == "youtube" else None
         score, verdict, flags, tier = vg.grade(r, meta, sig)
-        # Show what needs a decision: anything held back, plus anything live that
-        # the rubric would not have admitted on its own.
-        if r["state"] != "approved" or verdict != "admit":
+        # Show what needs a decision: anything held back, anything live the rubric
+        # would not have admitted on its own, and anything the FRAMES condemn.
+        #
+        # That last clause is not redundant. The rubric cannot judge a silent video,
+        # so it scores one 1.0 and says "admit" - which meant a live video that
+        # verify_visual had looked at and found to be a performance, or a static album
+        # cover, passed both tests and appeared nowhere. Four such rows existed the
+        # first time this was checked, and the whole 158-video visual pass over the
+        # live catalogue was on course to produce findings no one would ever see.
+        stored = r.get("qflags") or ""
+        seen_and_bad = any(stored.startswith(f"visual:{v}") for v in
+                           ("not-a-dance-video", "dance-performance",
+                            "dance-but-other-move"))
+        if r["state"] != "approved" or verdict != "admit" or seen_and_bad:
             # The stored columns are NOT the same judgement as the live grade above.
             # video_gate re-derives tier 0/1/2 from the row and the caches; verify_intake
             # writes a transcript verdict that answers a different question - is this a
