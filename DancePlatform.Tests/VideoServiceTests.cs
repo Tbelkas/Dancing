@@ -180,6 +180,35 @@ public class VideoServiceTests : IDisposable
         Assert.Equal("approved", goodRow.ReviewState);
     }
 
+    [Theory]
+    // Written the same way - the ordinary case.
+    [InlineData("Loose Legs", "Loose Legs (House Dance Tutorials) Fullout", true)]
+    // One substitution. Both spellings are in real use for this style.
+    [InlineData("Waacking", "How To Whack | Beginner Whacking Tutorial", true)]
+    // A space, which Tokens() cannot see because "dance" is a stop word.
+    [InlineData("Breakdance", "10 Easy Break Dance TOPROCKS for Beginners", true)]
+    // Genuinely different moves must still be caught - this is the whole point.
+    [InlineData("Tendu", "Plie Combination - Level 1", false)]
+    [InlineData("Blade", "Learn How To Backspin | Power Move Basics", false)]
+    public async Task Create_ToleratesSpellingOfMoveNames_ButNotDifferentMoves(
+        string danceName, string title, bool shouldMatch)
+    {
+        await using var ctx = NewCtx();
+        var dance = new Dance { Id = 42, Name = danceName, Slug = "d42" };
+        ctx.Dances.Add(dance);
+        await ctx.SaveChangesAsync();
+
+        var (result, dto) = await new VideoService(ctx).CreateAsync(new CreateVideoRequest
+        {
+            Title = title, VideoId = "nm1", Platform = "youtube", DanceId = 42
+        }, userId: null, isAdmin: true, honourGate: true);
+        Assert.Equal(CreateVideoResult.Success, result);
+
+        var row = await ctx.Videos.IgnoreQueryFilters().FirstAsync(v => v.Id == dto!.Id);
+        var flagged = (row.QualityFlags ?? "").Contains("title-dance-mismatch");
+        Assert.Equal(shouldMatch, !flagged);
+    }
+
     private static async Task<(int Count, double Avg)> VideoStats(AppDbContext ctx, int videoId)
     {
         var v = await ctx.Videos.Where(x => x.Id == videoId).Select(x => new { x.RatingCount, x.AverageRating }).FirstAsync();

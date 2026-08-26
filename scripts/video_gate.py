@@ -25,6 +25,7 @@ This script NEVER writes to the database. Applying a verdict is a separate,
 deliberate step.
 """
 import argparse
+import difflib
 import json
 import os
 import re
@@ -73,6 +74,49 @@ def _stem(w):
 def toks(s):
     return {_stem(w) for w in re.findall(r"[a-z0-9]+", (s or "").lower())
             if w not in STOP and len(w) > 2}
+
+
+def _flat(s):
+    return re.sub(r"[^a-z0-9]+", "", (s or "").lower())
+
+
+def name_matches(dance, text):
+    """Does `text` name this dance? Tolerant of how the same move gets written.
+
+    A bare token intersection produced a steady stream of false accusations against
+    perfectly correct videos, because move names are not written consistently:
+
+      "Waacking"   vs "Beginner Whacking Tutorial"    one substitution
+      "Breakdance" vs "10 Easy Break Dance TOPROCKS"  a space, and toks() cannot see
+                                                      it because "dance" is a stop word
+
+    Both were being flagged title-dance-mismatch and dance-never-mentioned, which is
+    how a rubble of good videos ends up on a "probably wrong" list and the list stops
+    being trusted.
+
+    It stays deliberately strict about genuinely different moves: Tendu does not match
+    a plie combination, and Blade does not match a backspin. What it cannot fix is a
+    move that is simply called something else - "Dramatic Dip" against "Death Drop" is
+    the same move under two names, and only a person knows that.
+    """
+    dt, tt = toks(dance), toks(text)
+    if dt & tt:
+        return True
+    ft = _flat(text)
+    for w in dt:
+        if len(w) >= 5 and w in ft:
+            return True
+    fd = _flat(dance)
+    if len(fd) >= 5 and fd in ft:
+        return True
+    for w in dt:
+        if len(w) < 6:
+            continue
+        for t in tt:
+            if (abs(len(w) - len(t)) <= 2
+                    and difflib.SequenceMatcher(None, w, t).ratio() >= 0.85):
+                return True
+    return False
 
 
 FETCH = """
@@ -154,7 +198,8 @@ def grade(r, meta=None, sig=None):
     # Checking the title against the dance name there produces nothing but noise.
     montage = is_slice or other >= 3
     if (dance_t and title_t and not montage
-            and not (dance_t & title_t) and not (style_t & title_t)):
+            and not name_matches(r.get("dance"), r.get("title"))
+            and not (style_t & title_t)):
         score -= 0.30
         flags.append("title-dance-mismatch")
 
@@ -207,7 +252,8 @@ def grade(r, meta=None, sig=None):
             tt = toks(text)
             # Same reasoning: in a montage the instructor names each move once, and
             # a missed word is weak evidence. Penalise it only on a standalone video.
-            if dance_t and not (dance_t & tt) and not (style_t & tt):
+            if (dance_t and not name_matches(r.get("dance"), text)
+                    and not (style_t & tt)):
                 if montage:
                     flags.append("dance-not-heard(montage)")
                 else:

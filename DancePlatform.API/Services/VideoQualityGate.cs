@@ -65,7 +65,7 @@ public static class VideoQualityGate
             var titleT = Tokens(video.Title);
             var styleT = Tokens(styleNames);
             if (danceT.Count > 0 && titleT.Count > 0
-                && !danceT.Overlaps(titleT) && !styleT.Overlaps(titleT))
+                && !NameMatches(danceName, video.Title) && !styleT.Overlaps(titleT))
             {
                 score -= 0.30f;
                 flags.Add("title-dance-mismatch");
@@ -80,6 +80,65 @@ public static class VideoQualityGate
 
         score = Math.Clamp(score, 0f, 1f);
         return (score, flags.Count == 0 ? null : string.Join(",", flags));
+    }
+
+    /// <summary>
+    /// Does <paramref name="text"/> name this dance? Tolerant of how the same move gets
+    /// written. Mirrors name_matches() in scripts/video_gate.py — keep the two in step.
+    ///
+    /// A bare token intersection accuses correct videos, because move names are not
+    /// written consistently: "Waacking" against "Beginner Whacking Tutorial" is one
+    /// substitution, and "Breakdance" against "10 Easy Break Dance TOPROCKS" differs by
+    /// a space that Tokens() cannot see, because "dance" is a stop word. On the import
+    /// path that mismatch is not cosmetic — it costs 0.30 and quarantines a good video.
+    ///
+    /// Still strict about genuinely different moves: Tendu does not match a plié
+    /// combination, and Blade does not match a backspin.
+    /// </summary>
+    private static bool NameMatches(string? danceName, string? text)
+    {
+        var danceT = Tokens(danceName);
+        var textT = Tokens(text);
+        if (danceT.Overlaps(textT)) return true;
+
+        var flatText = Flatten(text);
+        foreach (var w in danceT)
+            if (w.Length >= 5 && flatText.Contains(w, StringComparison.Ordinal)) return true;
+
+        var flatDance = Flatten(danceName);
+        if (flatDance.Length >= 5 && flatText.Contains(flatDance, StringComparison.Ordinal))
+            return true;
+
+        foreach (var w in danceT)
+        {
+            if (w.Length < 6) continue;
+            foreach (var t in textT)
+                if (Math.Abs(w.Length - t.Length) <= 2 && Similarity(w, t) >= 0.85)
+                    return true;
+        }
+        return false;
+    }
+
+    private static string Flatten(string? s) =>
+        s is null ? "" : Regex.Replace(s.ToLowerInvariant(), "[^a-z0-9]+", "");
+
+    /// <summary>Normalised Levenshtein similarity, matching difflib's ratio closely
+    /// enough for the one-substitution cases this guards against.</summary>
+    private static double Similarity(string a, string b)
+    {
+        if (a.Length == 0 || b.Length == 0) return 0;
+        var prev = new int[b.Length + 1];
+        var cur = new int[b.Length + 1];
+        for (var j = 0; j <= b.Length; j++) prev[j] = j;
+        for (var i = 1; i <= a.Length; i++)
+        {
+            cur[0] = i;
+            for (var j = 1; j <= b.Length; j++)
+                cur[j] = Math.Min(Math.Min(cur[j - 1] + 1, prev[j] + 1),
+                                  prev[j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1));
+            (prev, cur) = (cur, prev);
+        }
+        return 1.0 - (double)prev[b.Length] / Math.Max(a.Length, b.Length);
     }
 
     private static HashSet<string> Tokens(string? s)

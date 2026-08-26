@@ -78,13 +78,24 @@ def graded_rows():
 # ------------------------------------------------------------------ coverage
 
 def cmd_coverage(args):
-    rows = graded_rows()
+    """Coverage of the APPROVED catalogue, which is what a threshold governs.
+
+    Measuring across every row instead makes the number meaningless while discovery is
+    running: each newly-inserted pending video arrives at tier 0, so a run that inserts
+    400 candidates drops "coverage" by a third without a single approved video having
+    become less understood. The denominator has to be the thing being calibrated.
+    """
+    allrows = graded_rows()
+    rows = [r for r in allrows if r["state"] == "approved"]
+    pending = [r for r in allrows if r["state"] != "approved"]
+
     tiers = {0: 0, 1: 0, 2: 0}
     for r in rows:
         tiers[r["tier"]] += 1
-    n = len(rows)
-    t2 = tiers[2] / n if n else 0
-    print(f"{n} videos")
+    n = len(rows) or 1
+    t2 = tiers[2] / n
+    print(f"{len(rows)} approved videos (plus {len(pending)} held in review, "
+          "excluded - they are not what a threshold governs)")
     print(f"  tier 0 (database row only) : {tiers[0]:>5}  {tiers[0]/n:>6.1%}")
     print(f"  tier 1 (+ yt-dlp metadata) : {tiers[1]:>5}  {tiers[1]/n:>6.1%}")
     print(f"  tier 2 (+ transcript)      : {tiers[2]:>5}  {t2:>6.1%}")
