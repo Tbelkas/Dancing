@@ -63,13 +63,49 @@ import video_gate as vg      # noqa: E402
 
 ROOT = ch.ROOT
 
-BODY = re.compile(r"\b(foot|feet|leg|legs|knee|knees|arm|arms|hand|hands|hip|hips"
-                  r"|shoulder|shoulders|chest|torso|wrist|elbow|ankle|heel|heels"
-                  r"|toe|toes|head|body|weight|posture|bounce|groove|rhythm"
-                  r"|beat|beats|count|counts|eight|choreo|choreography|footwork"
-                  r"|step|steps|routine|freestyle|five six seven eight|5 6 7 8"
-                  r"|one two three)\b", re.I)
-MIN_BODY_TERMS = 4
+# Does the speaker talk like someone teaching a dance? Two lists, because one does not
+# work - and both thresholds here are measured against real transcripts, not chosen.
+#
+# The first attempt was a single list of body words with a cut at 4 distinct terms.
+# Over 49 catalogue videos that looked fine (median 10, minimum 2) and it correctly
+# scored the Super Smash Bros "Dancing Blade" guide at 1. Run against the real intake
+# queue it rejected three genuine tutorials in the first ten rows - "The Bus Stop: a
+# step by step dance guide" scored 2, because the list had "leg" and "heel" but not
+# "kick", "cross", "together", "tap", or the count "two three four".
+#
+# Widening the single list fixed those and broke the other end: the Smash guide climbed
+# to 4 on "beat", "cross", "forward" and "swings", level with a real tutorial. Generic
+# motion verbs are not evidence of dancing. A fighting-game commentator uses every one.
+#
+# So: CORE is body parts and dance-technical vocabulary a Smash guide has no reason to
+# say. GENERIC is motion verbs, which corroborate but cannot carry the verdict alone.
+#
+#   Smash guide       CORE 0  GENERIC 4   -> rejected
+#   "The Bus Stop"    CORE 2              -> kept
+#   "Ball & Heel"     CORE 1  GENERIC 3   -> kept
+#   "Releves"         CORE 2              -> kept
+#   117 catalogue videos: CORE median 10; the rule keeps 113.
+CORE = re.compile(
+    r"\b(foot|feet|leg|legs|knee|knees|arm|arms|hand|hands|hip|hips|shoulder|shoulders"
+    r"|chest|torso|wrist|elbow|ankle|heel|heels|toe|toes|waist|spine"
+    r"|posture|balance|bounce|groove|rhythm|footwork|choreo|choreography"
+    r"|freestyle|eight count|counts?|plie|plies|releve|releves|tendu|passe"
+    r"|barre|turnout|pirouette|arabesque|port de bras"
+    r"|shuffle|flap|stomp|stomps|ball change|toe tap"
+    r"|five six seven eight|5 6 7 8|one two three|two three four"
+    r"|and one|and two|on the one|downbeat|upbeat)\b", re.I)
+GENERIC = re.compile(
+    r"\b(kick|kicks|cross|crossing|together|turn|turns|spin|spins|twist|twists"
+    r"|slide|slides|tap|taps|drop|drops|jump|jumps|hop|hops|bend|bends|straighten"
+    r"|point|flex|lift|lifts|swing|swings|rock|rocking|step|steps|stepping"
+    r"|forward|backward|sideways|weight|body|beat|beats|routine)\b", re.I)
+
+
+def talks_like_dancing(text):
+    """(is_dance, core_count, generic_count). See the note above CORE."""
+    core = len({m.group(0).lower() for m in CORE.finditer(text)})
+    gen = len({m.group(0).lower() for m in GENERIC.finditer(text)})
+    return (core >= 2 or (core >= 1 and gen >= 3)), core, gen
 
 # How much each verdict is worth as a score. "silent" and "no-transcript" deliberately
 # sit at the review boundary rather than low: absence of evidence is not evidence of a
@@ -127,7 +163,7 @@ def judge(row):
 
     if speechy < 0.10:
         return "silent", {"note": "no speech - cannot be judged from audio",
-                          "body": 0, "speechy": round(speechy, 3)}
+                          "core": 0, "speechy": round(speechy, 3)}
 
     tt = vg.toks(text)
     dance_t = vg.toks(row["dance"])
@@ -135,15 +171,15 @@ def judge(row):
     says_move = bool(dance_t & tt)
     says_style = bool(style_t & tt)
     teaches = bool(vg.TEACH_CUES.search(text))
-    body = {m.group(0).lower() for m in BODY.finditer(text)}
+    is_dance, core, gen = talks_like_dancing(text)
 
-    d = {"body": len(body), "speechy": round(speechy, 3),
+    d = {"core": core, "generic": gen, "speechy": round(speechy, 3),
          "says_move": says_move, "says_style": says_style, "teaches": teaches,
          "lang": a.get("language"),
          "note": f"move={'y' if says_move else 'n'} style={'y' if says_style else 'n'} "
-                 f"teaching={'y' if teaches else 'n'} body={len(body)}"}
+                 f"teaching={'y' if teaches else 'n'} core={core} gen={gen}"}
 
-    if len(body) < MIN_BODY_TERMS:
+    if not is_dance:
         return "not-a-dance-video", d
     if says_move and teaches:
         return "confirmed", d
@@ -189,8 +225,8 @@ def main():
         if not args.apply:
             continue
         flags = verdict
-        if d.get("body") is not None:
-            flags += f",body-{d['body']}"
+        if d.get("core") is not None:
+            flags += f",core-{d['core']}"
         note = f"verify_intake: {d.get('note', verdict)}"[:280].replace("'", "''")
         ch.psql(f'''update "Videos"
                       set "QualityScore" = {score},
