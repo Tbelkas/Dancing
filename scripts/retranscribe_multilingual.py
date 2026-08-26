@@ -90,26 +90,52 @@ def main():
         print("\ndry run - pass 'apply' to re-transcribe")
         return
 
-    # Keep the old transcript. Two versions disagreeing is how anyone later confirms
-    # this ran and what it changed.
+    # Copy the old transcript aside; do NOT remove it yet. The first version of this
+    # moved every file out of the way before running, then the run timed out - and two
+    # videos were left with no current transcript at all. Preserve first, overwrite with
+    # --force, and put the original back if nothing new arrived.
     for i in existing:
-        src = os.path.join(PROTO, f"sig_{i}.json")
         dst = os.path.join(PROTO, f"sig_{i}.en-only.json")
         if not os.path.exists(dst):
-            shutil.copy2(src, dst)
-        os.unlink(src)
+            shutil.copy2(os.path.join(PROTO, f"sig_{i}.json"), dst)
 
     env = dict(os.environ)
     env["CHIP_ASR_MODEL"] = MULTILINGUAL
 
+    # Fetch the model once, outside the per-video budget. large-v3 is ~3GB and on a cold
+    # cache the download ran into the transcription timeout, which then read as "this
+    # video is too slow" - it was not, it was the first-run download.
+    print("warming the model (first run downloads ~3GB)...", flush=True)
+    warm = subprocess.run(
+        [sys.executable, "-c",
+         "from faster_whisper import WhisperModel;"
+         f"WhisperModel('{MULTILINGUAL}', device='cuda', compute_type='int8_float16')"],
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
+        cwd=ROOT, env=env, timeout=3600)
+    print("  model ready" if warm.returncode == 0
+          else f"  warm failed: {(warm.stderr or '')[-200:]}", flush=True)
+
     t0, done, langs = time.monotonic(), 0, {}
     for i in range(0, len(ids), args.batch):
         chunk = ids[i:i + args.batch]
-        p = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "signals.py"),
-                            "--"] + chunk,
-                           capture_output=True, text=True, encoding="utf-8",
-                           errors="replace", cwd=ROOT, env=env, timeout=900 * len(chunk))
-        sys.stdout.write(p.stdout or "")
+        try:
+            p = subprocess.run([sys.executable,
+                                os.path.join(ROOT, "scripts", "signals.py"),
+                                "--force", "--"] + chunk,
+                               capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", cwd=ROOT, env=env,
+                               timeout=900 * len(chunk))
+            sys.stdout.write(p.stdout or "")
+        except subprocess.TimeoutExpired:
+            print(f"  batch timed out - restoring originals for {' '.join(chunk)}",
+                  flush=True)
+        # Anything that did not get a fresh transcript keeps the one it had.
+        for ytid in chunk:
+            sp = os.path.join(PROTO, f"sig_{ytid}.json")
+            bak = os.path.join(PROTO, f"sig_{ytid}.en-only.json")
+            if not os.path.exists(sp) and os.path.exists(bak):
+                shutil.copy2(bak, sp)
+                print(f"  {ytid:<14} restored the English-only transcript", flush=True)
         for ytid in chunk:
             sp = os.path.join(PROTO, f"sig_{ytid}.json")
             if not os.path.exists(sp):
