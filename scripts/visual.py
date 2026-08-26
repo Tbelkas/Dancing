@@ -48,6 +48,7 @@ if sys.stdout is not None:
     except (AttributeError, ValueError):
         pass
 import chip_runstate as rs  # noqa: E402
+import chip_health as ch  # noqa: E402
 import candidates as cd  # noqa: E402
 import propose as pr  # noqa: E402
 import signals as sg  # noqa: E402
@@ -236,9 +237,30 @@ def parse(raw, times):
     return out
 
 
+def appliable_ytids():
+    """Clips that have a catalogue row stage 06 could actually write chips to.
+
+    apply_chips only writes rows whose StartTime IS NULL, so a clip whose every
+    catalogue row is a montage slice can never receive its proposal, and a clip
+    with no row at all has nowhere to put one. Both used to be selected anyway -
+    13 of 71 silent targets, 18% of a stage that costs one `claude -p` call per
+    video. The filter is here rather than in process() because the waste is in
+    the selection, not the run.
+    """
+    raw = ch.psql('''select coalesce(json_agg(distinct "VideoId"), '[]'::json)
+                     from "Videos"
+                     where "Platform" = 'youtube' and "StartTime" is null;''')
+    return set(json.loads(raw.strip() or "[]"))
+
+
 def silent_targets(limit):
     """Cached videos with a transcript that says essentially nothing."""
-    out = []
+    try:
+        appliable = appliable_ytids()
+    except Exception as e:                      # no DB - do not silently drop
+        print(f"warning: could not read the catalogue ({e}); not filtering")
+        appliable = None
+    out, skipped = [], 0
     for name in sorted(os.listdir(PROTO)):
         if not (name.startswith("sig_") and name.endswith(".json")):
             continue
@@ -249,8 +271,14 @@ def silent_targets(limit):
         segs = (d.get("asr") or {}).get("segments") or []
         words = sum(len(s.get("text", "").split()) for s in segs)
         dur = d.get("dur") or 0
-        if words < 25 and dur >= 120:
-            out.append((ytid, dur))
+        if not (words < 25 and dur >= 120):
+            continue
+        if appliable is not None and ytid not in appliable:
+            skipped += 1
+            continue
+        out.append((ytid, dur))
+    if skipped:
+        print(f"skipped {skipped} silent clip(s) with no appliable catalogue row")
     out.sort(key=lambda x: -x[1])
     return [y for y, _ in out[:limit]]
 
