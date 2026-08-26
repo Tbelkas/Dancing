@@ -87,6 +87,7 @@ FETCH = """
 select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
   select v."Id" as "vid", v."VideoId" as "ytid", v."Platform" as "platform",
          v."Title" as "title", v."ReviewState" as "state",
+         v."QualityScore" as "score",
          coalesce(d."Name", '') as "dance",
          coalesce((select string_agg(s."Name", ' ')
                    from "DanceStyles" ds join "Styles" s on s."Id" = ds."StyleId"
@@ -163,30 +164,30 @@ def main():
     args = ap.parse_args()
 
     rows = json.loads(ch.psql(FETCH % args.state).strip() or "[]")
+    total_in_state = len(rows)
+    if args.only_unscored:
+        rows = [r for r in rows if r.get("score") is None]
     if args.limit:
         rows = rows[:args.limit]
     if not rows:
-        print(f"nothing in state '{args.state}'")
+        print(f"nothing to do in state '{args.state}' "
+              f"({total_in_state} row(s), all already verified)")
         return
-    print(f"{len(rows)} video(s) in '{args.state}'")
+    print(f"{len(rows)} of {total_in_state} video(s) in '{args.state}' to verify")
 
-    results, tally = [], {}
+    # Written per row rather than batched at the end: a queue of a few hundred takes
+    # hours of GPU, and a run that is interrupted must not throw away what it learned.
+    tally = {}
     for n, r in enumerate(rows, 1):
         t0 = time.time()
         verdict, d = judge(r)
         score = VERDICT_SCORE.get(verdict, 0.35)
-        results.append((r, verdict, score, d))
         tally[verdict] = tally.get(verdict, 0) + 1
         print(f"  [{n}/{len(rows)}] #{r['vid']:<5} {r['dance'][:20]:<22} "
               f"{verdict:<18} {d.get('note', '')[:40]}  ({time.time()-t0:.0f}s)",
               flush=True)
-
-    print("\nverdicts:", "  ".join(f"{k}={v}" for k, v in sorted(tally.items())))
-    if not args.apply:
-        print("\ndry run - pass 'apply' to write scores and flags")
-        return
-
-    for r, verdict, score, d in results:
+        if not args.apply:
+            continue
         flags = verdict
         if d.get("body") is not None:
             flags += f",body-{d['body']}"
@@ -196,7 +197,12 @@ def main():
                           "QualityFlags" = '{flags}',
                           "ReviewNote" = '{note}'
                     where "Id" = {int(r["vid"])};''')
-    print(f"\nwrote evidence to {len(results)} row(s). "
+
+    print("\nverdicts:", "  ".join(f"{k}={v}" for k, v in sorted(tally.items())))
+    if not args.apply:
+        print("\ndry run - pass 'apply' to write scores and flags")
+        return
+    print(f"\nwrote evidence to {len(rows)} row(s). "
           "Nothing was approved - promote from the Intake tab.")
 
 
