@@ -83,6 +83,8 @@ select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
          coalesce(v."DurationSeconds", 0) as "dur",
          coalesce(v."ViewCount", 0) as "views",
          v."ReviewState" as "state",
+         v."QualityFlags" as "qflags",
+         v."ReviewNote" as "qnote",
          coalesce(d."Name", '') as "dance",
          coalesce((select string_agg(s."Name", ' ')
                    from "DanceStyles" ds join "Styles" s on s."Id" = ds."StyleId"

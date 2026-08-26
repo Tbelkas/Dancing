@@ -229,11 +229,18 @@ def intake_rows(force=False):
         # Show what needs a decision: anything held back, plus anything live that
         # the rubric would not have admitted on its own.
         if r["state"] != "approved" or verdict != "admit":
+            # The stored columns are NOT the same judgement as the live grade above.
+            # video_gate re-derives tier 0/1/2 from the row and the caches; verify_intake
+            # writes a transcript verdict that answers a different question - is this a
+            # dance video at all, and does it teach THIS move. A reviewer needs both, so
+            # neither is allowed to overwrite the other in this view.
             rows.append({
                 "vid": r["vid"], "ytid": r["ytid"], "platform": r["platform"],
                 "title": r["title"], "dance": r["dance"], "dur": r["dur"],
                 "views": r["views"], "state": r["state"], "vtype": r["vtype"],
                 "score": score, "verdict": verdict, "flags": flags, "tier": tier,
+                "stored_flags": r.get("qflags") or "",
+                "stored_note": r.get("qnote") or "",
             })
     rows.sort(key=lambda x: (x["state"] == "approved", x["score"]))
     _intake_cache.update(at=now, rows=rows)
@@ -635,7 +642,8 @@ td.t{white-space:normal;max-width:330px;color:var(--muted)}
     <h2>Awaiting review &mdash; and live videos the rubric would not have admitted</h2>
     <div class="tw"><table>
       <thead><tr><th>State</th><th>Video</th><th>Dance</th><th>Title</th><th>Score</th>
-        <th>Len</th><th>Views</th><th>Why</th><th></th></tr></thead>
+        <th>Len</th><th>Views</th><th>Why &mdash; rubric, then what the audio said</th>
+        <th></th></tr></thead>
       <tbody id="irows"></tbody>
     </table></div>
   </div>
@@ -988,7 +996,9 @@ async function loadIntake(){
         background:${scColor(r.score)}"></s></i>${r.score.toFixed(2)}</span></td>
       <td class="n">${r.dur?mmss(r.dur):'—'}</td>
       <td class="n">${fmt(r.views)}</td>
-      <td class="iss">${esc(r.flags.join(' · ')) || '—'}</td>
+      <td class="iss">${esc(r.flags.join(' · ')) || '—'}${
+        r.stored_flags ? `<br><span class="lbl" title="${esc(r.stored_note)}"
+          >audio: ${esc(r.stored_flags)}</span>` : ''}</td>
       <td style="white-space:nowrap">
         ${r.state!=='approved'?`<button class="sm go" data-a="approve" data-v="${r.vid}">Approve</button>`:''}
         ${r.state!=='rejected'?`<button class="sm danger" data-a="reject" data-v="${r.vid}">Reject</button>`:''}
