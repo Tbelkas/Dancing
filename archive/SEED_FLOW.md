@@ -1,5 +1,17 @@
 # Dance Platform — Seeding Orchestration Flow
 
+> **SUPERSEDED — DO NOT RUN. Kept as history.**
+>
+> This is the flow that produced the catalogue's quality problem. It searched YouTube for a
+> move name and inserted whatever came back; nothing ever checked that the video taught the
+> move, and its success criteria were counts ("at least 50 new dances", "60% with a linked
+> video"), so a salsa step pointing at an electro clip scored as a win.
+>
+> The current flow is find -> verify -> human review -> chip, and is documented in
+> `.ai-context/module-context/import-admin.md`. Scripts: `scripts/find_videos.py`,
+> `scripts/verify_intake.py`, the Intake tab in `scripts/chip_ui.py`.
+
+
 You are being asked to autonomously seed the DancePlatform database with dance moves,
 classification metadata, and linked tutorial videos. Follow each phase in order.
 Do not ask for confirmation between steps unless you hit an unrecoverable error.
