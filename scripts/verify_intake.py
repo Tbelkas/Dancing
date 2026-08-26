@@ -25,11 +25,10 @@ evidence that settles it is what the speaker says.
 
 THE RULE, AND WHERE IT CAME FROM
 --------------------------------
-A person teaching a dance names body parts and counts - hands, weight, heel, "one two
-three". Measured across 49 transcribed catalogue videos the median is 10 distinct such
-terms and the minimum is 2. The Smash guide scores 1. A real BLACKPINK tutorial scores
-23. Four separates them with room on both sides, so four is the bar - a measured
-threshold, not a guessed one.
+A person teaching a dance uses dance vocabulary and counts. The exact test is two word
+lists and three ways to pass - see the long note above CORE, which records what the
+first two attempts got wrong and why. Every threshold in it is measured against real
+transcripts; none is chosen.
 
 Verdicts, written to QualityFlags so the Intake tab shows the reasoning:
   confirmed          says the move's name, teaching cues present, dance vocabulary
@@ -37,7 +36,8 @@ Verdicts, written to QualityFlags so the Intake tab shows the reasoning:
   dance-but-unnamed  clearly a dance lesson that never says the move's name
   not-a-dance-video  no dance vocabulary - the title was a coincidence
   silent             no speech; a real format (mirrored walkthroughs), so not a verdict
-  no-transcript      extraction failed; nothing is claimed either way
+  no-transcript      extraction failed transiently; nothing is claimed either way
+  video-unavailable  removed, private or age-walled; it will never play for anyone
 
 This NEVER approves anything. It writes QualityScore, QualityFlags and ReviewNote so a
 person reviewing the queue sees what the evidence was. Promotion stays a human decision
@@ -141,6 +141,9 @@ VERDICT_SCORE = {
     "silent": 0.50,
     "no-transcript": 0.50,
     "not-a-dance-video": 0.10,
+    # A video that will not play is worse than one that is merely wrong: the page is
+    # broken for every learner who opens it, and no amount of review makes it work.
+    "video-unavailable": 0.05,
 }
 
 FETCH = """
@@ -156,6 +159,29 @@ select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
   where v."ReviewState" = '%s'
 ) t;
 """
+
+
+DEAD = re.compile(r"(not available|unavailable|private video|has been removed"
+                  r"|terminated|does not exist|age.?restricted|sign in to confirm)", re.I)
+
+
+def is_dead(ytid):
+    """Ask YouTube whether the video still plays. Returns a reason, or None if fine.
+
+    Worth a separate probe because a failed extraction has two very different causes.
+    A transient network problem is nobody's fault and the video deserves another go;
+    a video that has been removed, privated or age-walled can never play for a learner
+    and must not sit in the catalogue at any score. Both look identical from here -
+    signals.py just doesn't write a file - so the difference has to be asked for.
+    """
+    p = subprocess.run(
+        ["yt-dlp", "--skip-download", "--no-warnings", "--simulate",
+         f"https://www.youtube.com/watch?v={ytid}"],
+        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+    if p.returncode == 0:
+        return None
+    m = DEAD.search((p.stderr or "") + (p.stdout or ""))
+    return m.group(0).lower() if m else None
 
 
 def transcript_for(ytid):
@@ -178,6 +204,13 @@ def judge(row):
 
     sig, err = transcript_for(row["ytid"])
     if sig is None:
+        # Extraction failing has two very different meanings - see is_dead().
+        try:
+            reason = is_dead(row["ytid"])
+        except (subprocess.TimeoutExpired, OSError):
+            reason = None
+        if reason:
+            return "video-unavailable", {"note": f"will not play: {reason}"}
         return "no-transcript", {"note": err or "extraction failed"}
 
     a = sig.get("asr") or {}
