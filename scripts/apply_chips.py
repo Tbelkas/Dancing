@@ -1,5 +1,6 @@
 """
-apply_chips.py [--ytid Y ...] [--limit N] [--min-score S] [apply] [--undo RUNID]
+apply_chips.py [--ytid Y ...] [--limit N] [--min-score S] [--include-no-gain]
+               [apply] [--undo RUNID]
 
 Stages 05 + 06: gate a proposal, and only then write it.
 
@@ -24,11 +25,21 @@ or the existing Source is "generic" (the 2026-07-13 placeholder tier). NEVER
 overwrite "manual" - anything a person entered by hand outranks any generated
 set, whatever it scores. This is what makes re-running safe and monotonic.
 
+"NO-GAIN" AND --include-no-gain
+------------------------------
+The rubric cannot rank two good chip sets apart: prod, these proposals and the
+creators' own chapters all score ~0.97. When shown both, Justas judged the
+proposals better, so a tie is not evidence of no gain - it is the metric giving
+up. --include-no-gain promotes those ties to writes. Hard checks, low-score and
+"manual" are unaffected: this only overrides a verdict we know is uninformative.
+
 UNDO
 ----
-Every write is tagged with a run id in Videos->VideoSegments.Model. --undo
-deletes exactly the rows one run created and restores nothing else, so a bad
-batch is one command to reverse.
+Every write is tagged with a run id in Videos->VideoSegments.Model. Before a run
+replaces anything it snapshots the rows it is about to delete to
+_proto/rechip_backup_<runid>.json, so --undo removes what the run wrote AND puts
+back what it displaced. Without that, overwriting a set that was already good
+would be irreversible short of the nightly pg_dump.
 
 Only full videos are touched (StartTime IS NULL). A montage slice is a window
 into a longer clip and the proposal's timeline does not apply to it.
@@ -183,22 +194,69 @@ def gather(args):
                 # A tie is not evidence of no gain, so fall back to
                 # navigation value: more named sections is what Justas
                 # preferred when shown both. 'manual' is still never touched.
-                verdict, why = "no-gain", f"{score:.2f} <= existing {existing:.2f}"
+                if args.include_no_gain:
+                    verdict, why = "write", "tie, forced"
+                else:
+                    verdict, why = "no-gain", f"{score:.2f} <= existing {existing:.2f}"
             out.append({"row": row, "sections": sections, "score": score,
                         "issues": issues, "verdict": verdict, "why": why,
                         "agreement": prop.get("agreement")})
     return out
 
 
+def backup_path(runid):
+    return os.path.join(PROTO, f"rechip_backup_{runid}.json")
+
+
+def snapshot(vids, runid):
+    """Save the chip rows a run is about to delete, so --undo can put them back."""
+    if not vids:
+        return
+    ids = ",".join(str(v) for v in vids)
+    raw = ch.psql(f'''select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
+        select "Label","StartTime","EndTime","VideoId","Source","Confidence",
+               "Model","GeneratedAt"
+        from "VideoSegments" where "VideoId" in ({ids})) t;''')
+    rows = json.loads(raw.strip() or "[]")
+    json.dump({"runid": runid, "rows": rows},
+              open(backup_path(runid), "w", encoding="utf-8"), indent=1,
+              ensure_ascii=False, default=str)
+    print(f"  snapshotted {len(rows)} existing row(s) -> {backup_path(runid)}")
+
+
+def _sql_str(v):
+    return "null" if v is None else "'" + str(v).replace("'", "''") + "'"
+
+
 def do_undo(runid):
     n = ch.psql(f"""select count(*) from "VideoSegments"
                     where "Model" = '{runid}';""").strip()
     print(f"run {runid} wrote {n} segment row(s)")
-    if n == "0":
+    if n != "0":
+        ch.psql(f"""delete from "VideoSegments" where "Model" = '{runid}';""")
+        print(f"deleted {n} row(s)")
+
+    bak = rs._read(backup_path(runid), None)
+    if not bak:
+        print("no snapshot for this run - what it REPLACED is not restored.")
+        print("Use the nightly pg_dump if you need those rows back.")
         return
-    ch.psql(f"""delete from "VideoSegments" where "Model" = '{runid}';""")
-    print(f"deleted {n} rows. NOTE: this removes what the run added; it does not")
-    print("restore chips the run replaced - use the nightly pg_dump for that.")
+    rows = bak.get("rows") or []
+    if not rows:
+        print("snapshot is empty - the run replaced nothing")
+        return
+    vals = []
+    for r in rows:
+        end = "null" if r.get("EndTime") is None else int(r["EndTime"])
+        conf = "null" if r.get("Confidence") is None else float(r["Confidence"])
+        gen = _sql_str(r.get("GeneratedAt"))
+        vals.append(f"({_sql_str(r['Label'])},{int(r['StartTime'])},{end},"
+                    f"{int(r['VideoId'])},{_sql_str(r.get('Source'))},{conf},"
+                    f"{_sql_str(r.get('Model'))},{gen})")
+    ch.psql('''insert into "VideoSegments"("Label","StartTime","EndTime","VideoId",
+                "Source","Confidence","Model","GeneratedAt") values '''
+            + ",".join(vals) + ";")
+    print(f"restored {len(rows)} row(s) the run had replaced")
 
 
 def main():
@@ -208,6 +266,8 @@ def main():
     ap.add_argument("--limit", type=int)
     ap.add_argument("--min-score", type=float, default=MIN_SCORE)
     ap.add_argument("--undo")
+    ap.add_argument("--include-no-gain", action="store_true",
+                    help="also write proposals the rubric scores as a tie")
     args = ap.parse_args()
 
     if args.undo:
@@ -245,6 +305,8 @@ def main():
             + "-" + uuid.uuid4().hex[:6]
     print(f"\nrun id {runid}  (undo with: python scripts/apply_chips.py --undo {runid})")
 
+    snapshot([it["row"]["vid"] for it in writable], runid)
+
     written = 0
     for it in writable:
         vid = it["row"]["vid"]
@@ -263,6 +325,7 @@ def main():
         if written % 10 == 0:
             print(f"  written {written}/{len(writable)}")
     print(f"done - {written} video(s) rechipped, tagged {runid}")
+    print(f"undo: python scripts/apply_chips.py --undo {runid}")
 
 
 if __name__ == "__main__":
