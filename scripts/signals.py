@@ -138,6 +138,9 @@ def fetch_video_proxy(ytid):
 
 # ------------------------------------------------------------------- signals
 
+_cuda_dlls_done = False
+
+
 def _add_cuda_dll_dirs():
     """Put the pip-shipped cuBLAS/cuDNN where CTranslate2 will actually find them.
 
@@ -149,8 +152,16 @@ def _add_cuda_dll_dirs():
     CTranslate2's CUDA DLLs are delay-loaded through the standard Windows search
     order, which consults PATH and ignores os.add_dll_directory(). Getting this
     wrong is the difference between 60x realtime on the GPU and ~2x on the CPU.
+
+    Idempotent, and that is not cosmetic: asr() calls this once per video, and
+    the first version re-prepended the same ~200 characters every time. On a
+    359-video batch PATH crossed Windows' 32767-character limit around video
+    140, after which every os.environ write raised ValueError and 215 videos
+    failed in a row. Prepending only what is missing keeps PATH a fixed size
+    however long the batch runs.
     """
-    if os.name != "nt":
+    global _cuda_dlls_done
+    if os.name != "nt" or _cuda_dlls_done:
         return
     import glob
     import site
@@ -159,8 +170,12 @@ def _add_cuda_dll_dirs():
         for d in glob.glob(os.path.join(r, "nvidia", "*", "bin")):
             if glob.glob(os.path.join(d, "*.dll")):
                 dirs.append(d)
-    if dirs:
-        os.environ["PATH"] = os.pathsep.join(dirs) + os.pathsep + os.environ.get("PATH", "")
+    current = os.environ.get("PATH", "")
+    have = {x.rstrip(os.sep).lower() for x in current.split(os.pathsep) if x}
+    missing = [d for d in dirs if d.rstrip(os.sep).lower() not in have]
+    if missing:
+        os.environ["PATH"] = os.pathsep.join(missing) + os.pathsep + current
+    _cuda_dlls_done = True
 
 
 def asr(path):
