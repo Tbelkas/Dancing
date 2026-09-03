@@ -174,6 +174,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseForwardedHeaders();
+app.UseSecurityHeaders();
 
 // Unhandled exceptions become RFC-7807 ProblemDetails instead of leaking stack traces.
 app.UseExceptionHandler();
