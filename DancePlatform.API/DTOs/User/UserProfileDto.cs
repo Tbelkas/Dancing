@@ -6,6 +6,9 @@ public class UserProfileDto
 {
     public int Id { get; set; }
     public string Username { get; set; } = string.Empty;
+    /// Null for accounts created before the address was collected. The profile page prompts
+    /// for one, because without it the account cannot be recovered.
+    public string? Email { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Nickname { get; set; } = string.Empty;
     public string? AvatarUrl { get; set; }

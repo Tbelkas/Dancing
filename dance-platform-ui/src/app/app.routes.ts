@@ -9,6 +9,9 @@ export const routes: Routes = [
   { path: '', title: 'Dance Platform · Learn any dance, one loop at a time', loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent), canActivate: [landingGuard] },
   { path: 'login', title: 'Sign in · Dance Platform', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
   { path: 'register', title: 'Create account · Dance Platform', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
+  // Both ends of password recovery. No guard on either: the user is by definition signed out.
+  { path: 'forgot-password', title: 'Reset your password · Dance Platform', loadComponent: () => import('./pages/password-reset/password-reset.component').then(m => m.PasswordResetComponent) },
+  { path: 'reset-password', title: 'Choose a new password · Dance Platform', loadComponent: () => import('./pages/password-reset/password-reset.component').then(m => m.PasswordResetComponent) },
   // Where a provider's callback sends the browser back to. No guard: the whole point is that the
   // user isn't authenticated yet when they arrive.
   { path: 'auth/callback', title: 'Signing in · Dance Platform', loadComponent: () => import('./pages/auth-callback/auth-callback.component').then(m => m.AuthCallbackComponent) },

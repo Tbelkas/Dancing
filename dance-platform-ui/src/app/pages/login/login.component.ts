@@ -14,6 +14,7 @@ import { ExternalProvider } from '../../models/external-auth.model';
 })
 export class LoginComponent implements OnInit {
   username = '';
+  email = '';
   password = '';
   name = '';
   nickname = '';
@@ -48,6 +49,13 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  /** Deliberately loose: the server validates properly, and the only job here is to catch the
+   *  obvious typo before a network round-trip (the form is novalidate, so `type=email` alone
+   *  blocks nothing — see known-issues #3). */
+  private isValidEmail(value: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  }
+
   hasProvider(name: string): boolean {
     return this.providers().some(p => p.name === name);
   }
@@ -72,6 +80,10 @@ export class LoginComponent implements OnInit {
         this.error.set('Password must be at least 8 characters.');
         return;
       }
+      if (!this.isValidEmail(this.email)) {
+        this.error.set('A valid email address is required — it is the only way to reset a forgotten password.');
+        return;
+      }
       if (!this.name) {
         this.error.set('Full name is required.');
         return;
@@ -84,7 +96,7 @@ export class LoginComponent implements OnInit {
     this.error.set('');
 
     const obs = this.isRegister()
-      ? this.auth.register({ username: this.username, password: this.password, name: this.name, nickname: this.nickname })
+      ? this.auth.register({ username: this.username, email: this.email.trim(), password: this.password, name: this.name, nickname: this.nickname })
       : this.auth.login(this.username, this.password);
 
     obs.subscribe({

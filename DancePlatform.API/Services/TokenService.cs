@@ -101,11 +101,20 @@ public class TokenService : ITokenService
     private string Write(IEnumerable<Claim> claims, string? audience, TimeSpan lifetime)
     {
         var creds = new SigningCredentials(SigningKey(), SecurityAlgorithms.HmacSha256);
+        var now = DateTime.UtcNow;
+        // "iat" is stamped explicitly — this JwtSecurityToken constructor does not add one, and
+        // revocation (UserTokenGuard) has nothing to compare against without it. A token with no
+        // issue time can never be told apart from one minted before a password change.
+        var withIssuedAt = claims.Append(new Claim(
+            JwtRegisteredClaimNames.Iat,
+            new DateTimeOffset(now).ToUnixTimeSeconds().ToString(),
+            ClaimValueTypes.Integer64));
+
         var token = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
             audience: audience,
-            claims: claims,
-            expires: DateTime.UtcNow.Add(lifetime),
+            claims: withIssuedAt,
+            expires: now.Add(lifetime),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

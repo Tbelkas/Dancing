@@ -34,6 +34,12 @@
       </div>
       @if (isRegister()) {
         <div class="form-group">
+          <label for="signin-email">Email</label>
+          <input id="signin-email" data-testid="signin-email" type="email" [(ngModel)]="email"
+                 name="email" required placeholder="you@example.com" autocomplete="email" />
+          <span class="field-hint">Used only to reset your password</span>
+        </div>
+        <div class="form-group">
           <label for="signin-name">Full Name</label>
           <input id="signin-name" type="text" [(ngModel)]="name" name="name" required
                  placeholder="Your Name" autocomplete="name" />

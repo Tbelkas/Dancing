@@ -24,6 +24,14 @@ export class ProfileService {
     );
   }
 
+  /** Its own endpoint, because it's the only profile field that can collide with another
+   *  account (409) rather than simply saving. */
+  setEmail(email: string): Observable<UserProfile> {
+    return this.http.put<UserProfile>(`${this.base}/email`, { email }).pipe(
+      tap(p => this.viewerPrefs.syncFromProfile(p))
+    );
+  }
+
   getMyDances(): Observable<MyStyleWithDances[]> {
     return this.http.get<MyStyleWithDances[]>(`${this.base}/my-dances`);
   }

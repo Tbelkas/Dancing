@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<UserLogin> UserLogins => Set<UserLogin>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<Dance> Dances => Set<Dance>();
     public DbSet<Style> Styles => Set<Style>();
     public DbSet<MusicalStyle> MusicalStyles => Set<MusicalStyle>();
@@ -238,6 +239,29 @@ public class AppDbContext : DbContext
         // Backs the "which providers is this account linked to?" lookup on the profile page.
         modelBuilder.Entity<UserLogin>()
             .HasIndex(l => l.UserId);
+
+        // Reset tokens die with the account. Nothing else refers to them, and a token that
+        // outlived its user would be a key to a door that no longer exists.
+        modelBuilder.Entity<PasswordResetToken>()
+            .HasOne(t => t.User)
+            .WithMany()
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Lookup is always by hash — the plaintext arrives from the user's mailbox and is
+        // hashed before it is used to find anything.
+        modelBuilder.Entity<PasswordResetToken>()
+            .HasIndex(t => t.TokenHash);
+
+        modelBuilder.Entity<PasswordResetToken>()
+            .HasIndex(t => t.UserId);
+
+        // Emails are unique case-insensitively among accounts that have one, enforced by a
+        // partial functional unique index created in the migration (EF's fluent model can
+        // express neither the LOWER() nor the WHERE). A plain index backs the lookup that
+        // /auth/forgot-password does on every request.
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email);
 
         modelBuilder.Entity<VideoRating>()
             .HasKey(vr => new { vr.UserId, vr.VideoId });

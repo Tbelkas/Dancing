@@ -35,7 +35,7 @@ public class UserService : IUserService
         // Scalar profile fields only — no dance graph pulled onto the tracked User.
         var user = await _db.Users.AsNoTracking()
             .Where(u => u.Id == userId)
-            .Select(u => new { u.Id, u.Username, u.Name, u.Nickname, u.AvatarUrl, u.Visibility, u.UseBetaViewer, u.DateAdded })
+            .Select(u => new { u.Id, u.Username, u.Email, u.Name, u.Nickname, u.AvatarUrl, u.Visibility, u.UseBetaViewer, u.DateAdded })
             .FirstOrDefaultAsync();
         if (user is null) return null;
 
@@ -49,6 +49,7 @@ public class UserService : IUserService
         {
             Id = user.Id,
             Username = user.Username,
+            Email = user.Email,
             Name = user.Name,
             Nickname = user.Nickname,
             AvatarUrl = user.AvatarUrl,
@@ -77,6 +78,33 @@ public class UserService : IUserService
         await _db.SaveChangesAsync();
         return await GetProfileAsync(userId);
     }
+
+    // CA1862: the comparison has to translate to SQL LOWER() to hit the functional unique index
+    // on LOWER("Email"); StringComparison isn't translatable there. Same reasoning as AuthService.
+#pragma warning disable CA1862
+    public async Task<(EmailChangeResult, UserProfileDto?)> SetEmailAsync(int userId, string email)
+    {
+        var user = await _db.Users.FindAsync(userId);
+        if (user is null) return (EmailChangeResult.UserNotFound, null);
+
+        var normalized = email.Trim().ToLower();
+        if (await _db.Users.AnyAsync(u => u.Id != userId && u.Email != null && u.Email.ToLower() == normalized))
+            return (EmailChangeResult.AlreadyTaken, null);
+
+        user.Email = normalized;
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            // Lost a race to the partial unique index on LOWER("Email").
+            return (EmailChangeResult.AlreadyTaken, null);
+        }
+
+        return (EmailChangeResult.Ok, await GetProfileAsync(userId));
+    }
+#pragma warning restore CA1862
 
     public async Task<PublicProfileDto?> GetPublicProfileAsync(string username)
     {

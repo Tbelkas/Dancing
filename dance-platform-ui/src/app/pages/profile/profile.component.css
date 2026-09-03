@@ -213,3 +213,17 @@
 .link-message--error {
   color: var(--color-danger, #ff6b6b);
 }
+
+/* The "you cannot recover this account" notice. Warning-coloured rather than error-coloured:
+   nothing is broken yet, but it will be the day the password is forgotten. */
+.account-warning {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--color-text);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-left: 2px solid var(--color-primary);
+  border-radius: 4px;
+}

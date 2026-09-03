@@ -1,4 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace DancePlatform.API.DTOs.User;
+
+public class SetEmailRequest
+{
+    [Required, EmailAddress] public string Email { get; set; } = string.Empty;
+}
 
 public class UpdateProfileRequest
 {

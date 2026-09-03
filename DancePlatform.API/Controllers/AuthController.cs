@@ -1,6 +1,7 @@
 using DancePlatform.API;
 using DancePlatform.API.DTOs.Auth;
 using DancePlatform.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -9,7 +10,7 @@ namespace DancePlatform.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [EnableRateLimiting(RateLimitPolicies.Auth)]
-public class AuthController : ControllerBase
+public class AuthController : AppControllerBase
 {
     private readonly IAuthService _authService;
     private readonly ILoginThrottle _throttle;
@@ -27,8 +28,6 @@ public class AuthController : ControllerBase
         var ip = ClientAddress();
         if (_throttle.IsLockedOut(ip, request.Username))
         {
-            // Same wording as a wrong password, plus a 429, so this never becomes a way to
-            // discover which usernames exist by watching who gets locked out.
             Response.Headers.RetryAfter = ((int)LoginThrottle.Window.TotalSeconds).ToString();
             return StatusCode(StatusCodes.Status429TooManyRequests,
                 new { message = "Too many sign-in attempts. Try again in a few minutes." });
@@ -48,10 +47,52 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        var result = await _authService.RegisterAsync(request);
-        if (result is null)
-            return Conflict(new { message = "Username already taken." });
-        return CreatedAtAction(nameof(Login), result);
+        var (result, response) = await _authService.RegisterAsync(request);
+        return result switch
+        {
+            RegisterResult.UsernameTaken => Conflict(new { message = "Username already taken." }),
+            RegisterResult.EmailTaken => Conflict(new { message = "That email address already has an account." }),
+            _ => CreatedAtAction(nameof(Login), response)
+        };
+    }
+
+    /// <summary>
+    /// Always 202, whether or not the address belongs to an account. The difference between
+    /// "sent" and "no such account" is exactly the thing an attacker would harvest, so the
+    /// caller is told what will happen, not what did.
+    /// </summary>
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken ct)
+    {
+        await _authService.RequestPasswordResetAsync(request.Email, ct);
+        return Accepted(new { message = "If that address has an account, a reset link is on its way." });
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        var result = await _authService.ResetPasswordAsync(request);
+        return result is null
+            ? BadRequest(new { message = "That reset link has expired or has already been used." })
+            : Ok(result);
+    }
+
+    /// <summary>
+    /// Returns a fresh token: changing the password retires every token issued beforehand,
+    /// so the one the caller authenticated with is dead by the time this responds.
+    /// </summary>
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var (result, response) = await _authService.ChangePasswordAsync(CurrentUserId!.Value, request);
+        return result switch
+        {
+            PasswordChangeResult.UserNotFound => NotFound(),
+            PasswordChangeResult.WrongCurrentPassword =>
+                BadRequest(new { message = "Current password is incorrect." }),
+            _ => Ok(response)
+        };
     }
 
     private string ClientAddress() =>

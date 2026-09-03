@@ -112,6 +112,91 @@
           <a routerLink="/my-dances" class="dance-summary__open">Open My Dances <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
         </div>
 
+        <!-- Account: the two things that decide whether this account can be recovered. -->
+        <div class="card" data-testid="account-card">
+          <h3>Account</h3>
+
+          @if (needsEmail()) {
+            <p class="account-warning" data-testid="account-no-email">
+              This account has no email address. Add one — it is the only way to get back in if
+              you forget your password.
+            </p>
+          }
+
+          @if (emailMessage()) {
+            <p class="link-message" [class.link-message--error]="emailFailed()">{{ emailMessage() }}</p>
+          }
+
+          <div class="setting-row">
+            <div class="setting-text">
+              <span class="setting-label">Email</span>
+              <span class="setting-desc">{{ profile()!.email ?? 'Not set' }}</span>
+            </div>
+            @if (!editingEmail()) {
+              <button type="button" class="btn btn--ghost" data-testid="account-email-edit"
+                      (click)="startEmailEdit()">{{ needsEmail() ? 'Add' : 'Change' }}</button>
+            }
+          </div>
+
+          @if (editingEmail()) {
+            <form (ngSubmit)="saveEmail()" class="edit-form">
+              <div class="form-group">
+                <label for="account-email">Email address</label>
+                <input id="account-email" data-testid="account-email-input" type="email"
+                       [(ngModel)]="emailInput" name="email" autocomplete="email"
+                       placeholder="you@example.com" />
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn--primary" data-testid="account-email-save"
+                        [disabled]="emailBusy()">{{ emailBusy() ? 'Saving...' : 'Save' }}</button>
+                <button type="button" class="btn btn--ghost" (click)="editingEmail.set(false)">Cancel</button>
+              </div>
+            </form>
+          }
+
+          @if (passwordMessage()) {
+            <p class="link-message" [class.link-message--error]="passwordFailed()">{{ passwordMessage() }}</p>
+          }
+
+          <div class="setting-row">
+            <div class="setting-text">
+              <span class="setting-label">Password</span>
+              <span class="setting-desc">Changing it signs out every other device</span>
+            </div>
+            @if (!changingPassword()) {
+              <button type="button" class="btn btn--ghost" data-testid="account-password-edit"
+                      (click)="startPasswordChange()">Change</button>
+            }
+          </div>
+
+          @if (changingPassword()) {
+            <form (ngSubmit)="savePassword()" class="edit-form">
+              <div class="form-group">
+                <label for="account-current-password">Current password</label>
+                <input id="account-current-password" type="password" [(ngModel)]="currentPassword"
+                       name="currentPassword" autocomplete="current-password" />
+                <span class="field-hint">Leave empty if you have only ever signed in with Google or Facebook</span>
+              </div>
+              <div class="form-group">
+                <label for="account-new-password">New password</label>
+                <input id="account-new-password" data-testid="account-new-password" type="password"
+                       [(ngModel)]="newPassword" name="newPassword" autocomplete="new-password" />
+                <span class="field-hint">At least 8 characters</span>
+              </div>
+              <div class="form-group">
+                <label for="account-confirm-password">Repeat new password</label>
+                <input id="account-confirm-password" type="password" [(ngModel)]="confirmPassword"
+                       name="confirmPassword" autocomplete="new-password" />
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn--primary" data-testid="account-password-save"
+                        [disabled]="passwordBusy()">{{ passwordBusy() ? 'Saving...' : 'Change password' }}</button>
+                <button type="button" class="btn btn--ghost" (click)="changingPassword.set(false)">Cancel</button>
+              </div>
+            </form>
+          }
+        </div>
+
         <!-- Player settings -->
         <div class="card">
           <h3>Settings</h3>

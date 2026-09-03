@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using DancePlatform.API;
 using DancePlatform.API.Data;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,6 +44,8 @@ builder.Services.AddSingleton<ITokenService, TokenService>();
 // Singleton: the failed-attempt counters have to outlive the request that incremented them.
 builder.Services.AddSingleton<ILoginThrottle, LoginThrottle>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserTokenGuard, UserTokenGuard>();
+builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IDanceService, DanceService>();
 builder.Services.AddScoped<IStyleService, StyleService>();
 builder.Services.AddScoped<IMusicalStyleService, MusicalStyleService>();
@@ -128,6 +132,33 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+
+        // Signature and expiry are not enough on their own: tokens live 30 days, so a password
+        // change or reset has to be able to retire the ones already out there. UserTokenGuard
+        // compares the token's issue time against the account's cutoff (cached, so this is not
+        // a database round-trip per request).
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var principal = context.Principal!;
+                if (!int.TryParse(principal.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+                {
+                    context.Fail("Token carries no user id.");
+                    return;
+                }
+
+                // "iat" is seconds since the epoch; a token without one predates this check and
+                // is treated as issued at the epoch, i.e. retired by any cutoff at all.
+                var issuedAt = long.TryParse(principal.FindFirstValue(JwtRegisteredClaimNames.Iat), out var iat)
+                    ? DateTimeOffset.FromUnixTimeSeconds(iat).UtcDateTime
+                    : DateTime.UnixEpoch;
+
+                var guard = context.HttpContext.RequestServices.GetRequiredService<IUserTokenGuard>();
+                if (!await guard.IsCurrentAsync(userId, issuedAt))
+                    context.Fail("Token was issued before this account's credentials changed.");
+            }
         };
     });
 

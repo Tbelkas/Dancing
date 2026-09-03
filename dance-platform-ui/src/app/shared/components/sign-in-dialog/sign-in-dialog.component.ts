@@ -34,6 +34,7 @@ export class SignInDialogComponent implements AfterViewInit {
   @ViewChild('firstField') firstField?: ElementRef<HTMLInputElement>;
 
   username = '';
+  email = '';
   password = '';
   name = '';
   nickname = '';
@@ -77,6 +78,10 @@ export class SignInDialogComponent implements AfterViewInit {
         this.error.set('Password must be at least 8 characters.');
         return;
       }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email.trim())) {
+        this.error.set('A valid email address is required — it is the only way to reset a forgotten password.');
+        return;
+      }
       if (!this.name) {
         this.error.set('Full name is required.');
         return;
@@ -90,7 +95,7 @@ export class SignInDialogComponent implements AfterViewInit {
     this.error.set('');
 
     const obs = this.isRegister()
-      ? this.auth.register({ username: this.username, password: this.password, name: this.name, nickname: this.nickname })
+      ? this.auth.register({ username: this.username, email: this.email.trim(), password: this.password, name: this.name, nickname: this.nickname })
       : this.auth.login(this.username, this.password);
 
     obs.subscribe({

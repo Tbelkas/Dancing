@@ -22,6 +22,9 @@ export interface MyStyleWithDances {
 export interface UserProfile {
   id: number;
   username: string;
+  /** Absent on accounts created before an address was collected — those can't be recovered
+   *  until one is added, which is why the profile page nags for it. */
+  email?: string;
   name: string;
   nickname: string;
   avatarUrl?: string;

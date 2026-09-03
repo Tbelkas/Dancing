@@ -51,9 +51,29 @@ export class AuthService {
       .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); this.syncAccountPrefs(); }));
   }
 
-  register(data: { username: string; password: string; name: string; nickname: string }): Observable<AuthResponse> {
+  register(data: { username: string; email: string; password: string; name: string; nickname: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, data)
       .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); this.syncAccountPrefs(); }));
+  }
+
+  /** Asks for a reset link. Always succeeds, even for an address with no account — the server
+   *  deliberately refuses to say which, so this page must not either. */
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/forgot-password`, { email });
+  }
+
+  /** Spends a mailed reset token and signs the user in on the new password. */
+  resetPassword(token: string, newPassword: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/reset-password`, { token, newPassword })
+      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); this.syncAccountPrefs(); }));
+  }
+
+  /** Changes the password of the signed-in user. The response carries a replacement token:
+   *  the server retires every token issued before the change, including the one this request
+   *  was made with, so storing the new one is what keeps this device signed in. */
+  changePassword(currentPassword: string, newPassword: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/change-password`, { currentPassword, newPassword })
+      .pipe(tap(res => { this.storeAuth(res); this.roleService.loadFromToken(res.token); }));
   }
 
   /** Providers with credentials configured server-side. Empty on a dev box with no secrets. */

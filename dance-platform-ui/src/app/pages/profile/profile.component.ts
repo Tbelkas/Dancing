@@ -35,6 +35,25 @@ export class ProfileComponent implements OnInit {
   editAvatarUrl = '';
   editVisibility: 'Public' | 'Private' = 'Private';
 
+  // --- Account: the address the account can be recovered at, and the password itself ---
+  editingEmail = signal(false);
+  emailInput = '';
+  emailBusy = signal(false);
+  emailMessage = signal('');
+  emailFailed = signal(false);
+
+  changingPassword = signal(false);
+  currentPassword = '';
+  newPassword = '';
+  confirmPassword = '';
+  passwordBusy = signal(false);
+  passwordMessage = signal('');
+  passwordFailed = signal(false);
+
+  /** Accounts that predate the email field have no way back in if the password is forgotten,
+   *  so the card says so rather than quietly showing an empty row. */
+  readonly needsEmail = computed(() => !this.profile()?.email);
+
   readonly streak = computed(() => practiceStreak(this.sessions()).current);
 
   readonly totalSessions = computed(() => this.sessions().length);
@@ -171,6 +190,75 @@ export class ProfileComponent implements OnInit {
     }).subscribe(p => {
       this.profile.set(p);
       this.editing.set(false);
+    });
+  }
+
+  startEmailEdit(): void {
+    this.emailInput = this.profile()?.email ?? '';
+    this.emailMessage.set('');
+    this.editingEmail.set(true);
+  }
+
+  saveEmail(): void {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.emailInput.trim())) {
+      this.emailFailed.set(true);
+      this.emailMessage.set('That does not look like an email address.');
+      return;
+    }
+    this.emailBusy.set(true);
+    this.profileService.setEmail(this.emailInput.trim()).subscribe({
+      next: updated => {
+        this.profile.set(updated);
+        this.emailBusy.set(false);
+        this.editingEmail.set(false);
+        this.emailFailed.set(false);
+        this.emailMessage.set('Email saved.');
+      },
+      error: err => {
+        this.emailBusy.set(false);
+        this.emailFailed.set(true);
+        this.emailMessage.set(err.error?.message ?? 'Could not save that address.');
+      }
+    });
+  }
+
+  startPasswordChange(): void {
+    this.currentPassword = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.passwordMessage.set('');
+    this.changingPassword.set(true);
+  }
+
+  savePassword(): void {
+    if (this.newPassword.length < 8) {
+      this.passwordFailed.set(true);
+      this.passwordMessage.set('New password must be at least 8 characters.');
+      return;
+    }
+    if (this.newPassword !== this.confirmPassword) {
+      this.passwordFailed.set(true);
+      this.passwordMessage.set('The two new passwords do not match.');
+      return;
+    }
+    this.passwordBusy.set(true);
+
+    // The response carries a replacement token — the server retires every token issued before
+    // the change, so AuthService storing the new one is what keeps this tab signed in.
+    this.auth.changePassword(this.currentPassword, this.newPassword).subscribe({
+      next: () => {
+        this.passwordBusy.set(false);
+        this.changingPassword.set(false);
+        this.passwordFailed.set(false);
+        this.passwordMessage.set('Password changed. Other devices have been signed out.');
+        this.currentPassword = this.newPassword = this.confirmPassword = '';
+        this.loadLinkedAccounts();
+      },
+      error: err => {
+        this.passwordBusy.set(false);
+        this.passwordFailed.set(true);
+        this.passwordMessage.set(err.error?.message ?? 'Could not change the password.');
+      }
     });
   }
 
