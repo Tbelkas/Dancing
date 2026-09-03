@@ -90,14 +90,16 @@ public class ImportService : IImportService
                     .Select(ms => musicByName[ms.ToLower()])
                     .ToList() ?? [];
 
-                dance = await _danceService.CreateAsync(new CreateDanceRequest
+                // Import is admin-only (see ImportController), so these land approved and
+                // ownerless — they are curated catalogue entries, not somebody's submission.
+                (_, dance) = await _danceService.CreateAsync(new CreateDanceRequest
                 {
                     Name = name,
                     Description = classification?.Description is { Length: > 0 } d ? d : null,
                     Difficulty = classification?.Difficulty ?? "None",
                     StyleIds = styleIds,
                     MusicalStyleIds = musicalStyleIds
-                });
+                }, ownerUserId: null, isAdmin: true);
 
                 if (result.VideoId is not null)
                 {
@@ -106,7 +108,7 @@ public class ImportService : IImportService
                         Title = name,
                         VideoId = result.VideoId,
                         Platform = "youtube",
-                        DanceId = dance.Id,
+                        DanceId = dance!.Id,
                         StartTime = startSeconds,
                         EndTime = endSeconds,
                         Segments = []
@@ -118,7 +120,7 @@ public class ImportService : IImportService
                             : "dance not found for its video");
                 }
 
-                result.Created.Add(dance);
+                result.Created.Add(dance!);
             }
             catch (Exception ex)
             {
@@ -126,7 +128,7 @@ public class ImportService : IImportService
                 // leave an orphaned, video-less entry the user can't tell succeeded.
                 if (dance is not null)
                 {
-                    try { await _danceService.DeleteAsync(dance.Id); } catch { /* best effort */ }
+                    try { await _danceService.DeleteAsync(dance.Id, requesterId: null, isAdmin: true); } catch { /* best effort */ }
                 }
                 result.Errors.Add($"Failed to create '{name}': {ex.Message}");
             }

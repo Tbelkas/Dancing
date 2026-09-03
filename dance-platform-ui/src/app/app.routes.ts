@@ -29,6 +29,7 @@ export const routes: Routes = [
   { path: 'library', title: 'Added Videos · Dance Platform', loadComponent: () => import('./pages/library/library.component').then(m => m.LibraryComponent), canActivate: [authGuard] },
   { path: 'choreos', title: 'My Choreos · Dance Platform', loadComponent: () => import('./pages/my-choreos/my-choreos.component').then(m => m.MyChoreosComponent), canActivate: [authGuard] },
   { path: 'practice', title: 'Practice Log · Dance Platform', loadComponent: () => import('./pages/practice/practice.component').then(m => m.PracticeComponent), canActivate: [authGuard] },
+  { path: 'admin/review', title: 'Review queue · Dance Platform', loadComponent: () => import('./pages/admin-review/admin-review.component').then(m => m.AdminReviewComponent), canActivate: [adminGuard] },
   { path: 'admin/add-video', title: 'Add Video · Dance Platform', loadComponent: () => import('./pages/admin-add-video/admin-add-video.component').then(m => m.AdminAddVideoComponent), canActivate: [adminGuard] },
   { path: 'users/:username', loadComponent: () => import('./pages/user-profile/user-profile.component').then(m => m.UserProfileComponent) },
   { path: '**', title: 'Page not found · Dance Platform', loadComponent: () => import('./pages/not-found/not-found.component').then(m => m.NotFoundComponent) }

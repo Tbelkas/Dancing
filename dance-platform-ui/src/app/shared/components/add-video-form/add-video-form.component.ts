@@ -123,7 +123,21 @@ export class AddVideoFormComponent implements OnInit {
         this.creatingDance.set(false);
         this.danceCreated.emit(dance);
       },
-      error: () => { this.error.set('Failed to create dance. Please try again.'); this.creatingDance.set(false); }
+      error: err => {
+        // 409 means that dance already exists (the API hands back the existing one rather than
+        // minting a duplicate) — select it instead of making the user search again.
+        const existing = err.status === 409 ? err.error?.dance : null;
+        if (existing) {
+          const found = { id: existing.id, name: existing.name };
+          this.danceNames.update(list => list.some(d => d.id === found.id) ? list : [...list, found]);
+          this.selectedDance.set(found);
+          this.danceQuery.set('');
+          this.error.set(`"${found.name}" already exists — selected it for you.`);
+        } else {
+          this.error.set('Failed to create dance. Please try again.');
+        }
+        this.creatingDance.set(false);
+      }
     });
   }
 

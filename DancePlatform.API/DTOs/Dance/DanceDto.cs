@@ -26,4 +26,12 @@ public class DanceDto
     public bool IsFavorite { get; set; }
     public bool IsLearned { get; set; }
     public bool IsInProgress { get; set; }
+
+    /// <summary>"approved" (in the public catalogue) or "pending" (awaiting review). A caller only
+    /// ever sees "pending" on a dance they added themselves, or as an admin.</summary>
+    public string ReviewState { get; set; } = "approved";
+
+    /// <summary>Who added it, when that was a user rather than the seeded catalogue. Present so the
+    /// review queue can say whose submission it is.</summary>
+    public int? OwnerUserId { get; set; }
 }

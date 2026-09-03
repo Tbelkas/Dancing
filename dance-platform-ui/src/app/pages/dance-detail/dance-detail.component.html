@@ -6,6 +6,12 @@
         <!-- Badges and tallies share one line, and a tally only appears once it has
              something to report — three permanent zeroes said nothing. -->
         <div class="styles-row">
+          <!-- Only its author (and an admin) can load a pending dance at all, so this badge is
+               addressed to them: it explains why nobody else can find the page they just made. -->
+          @if (dance()!.reviewState === 'pending') {
+            <span class="badge badge--pending" data-testid="dance-pending"
+                  title="Only you can see this until it is approved">Awaiting review</span>
+          }
           @if (dance()!.difficulty !== 'None') {
             <span class="badge badge--difficulty badge--difficulty-{{ dance()!.difficulty | lowercase }}">{{ dance()!.difficulty }}</span>
           }

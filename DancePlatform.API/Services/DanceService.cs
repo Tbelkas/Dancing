@@ -19,18 +19,33 @@ public class DanceService : IDanceService
         _cache = cache;
     }
 
-    public async Task<List<DanceNameDto>> GetNamesAsync() =>
-        await _db.Dances.OrderBy(d => d.Name).Select(d => new DanceNameDto { Id = d.Id, Name = d.Name }).ToListAsync();
-
-    public async Task<DanceDto?> GetByIdAsync(int id, int? userId)
+    /// <summary>
+    /// The catalogue as one viewer may see it: everything approved, plus their own entries
+    /// awaiting review. An admin sees all of it. Every public read goes through this — a listing
+    /// that forgets it is how an unreviewed dance reaches the browse page.
+    /// </summary>
+    private static IQueryable<Dance> Visible(IQueryable<Dance> source, int? userId, bool isAdmin)
     {
-        var row = await ProjectRows(_db.Dances.Where(d => d.Id == id), userId).FirstOrDefaultAsync();
+        if (isAdmin) return source;
+        return source.Where(d => d.ReviewState == "approved"
+                              || (userId != null && d.OwnerUserId == userId));
+    }
+
+    public async Task<List<DanceNameDto>> GetNamesAsync(int? userId = null, bool isAdmin = false) =>
+        await Visible(_db.Dances, userId, isAdmin)
+            .OrderBy(d => d.Name)
+            .Select(d => new DanceNameDto { Id = d.Id, Name = d.Name })
+            .ToListAsync();
+
+    public async Task<DanceDto?> GetByIdAsync(int id, int? userId, bool isAdmin = false)
+    {
+        var row = await ProjectRows(Visible(_db.Dances, userId, isAdmin).Where(d => d.Id == id), userId).FirstOrDefaultAsync();
         return row is null ? null : ToDto(row);
     }
 
-    public async Task<DanceDto?> GetBySlugAsync(string slug, int? userId)
+    public async Task<DanceDto?> GetBySlugAsync(string slug, int? userId, bool isAdmin = false)
     {
-        var row = await ProjectRows(_db.Dances.Where(d => d.Slug == slug), userId).FirstOrDefaultAsync();
+        var row = await ProjectRows(Visible(_db.Dances, userId, isAdmin).Where(d => d.Slug == slug), userId).FirstOrDefaultAsync();
         return row is null ? null : ToDto(row);
     }
 
@@ -39,10 +54,10 @@ public class DanceService : IDanceService
     /// segment is what disambiguates same-named steps across styles. Falls back to a plain slug
     /// match if the style segment doesn't resolve, so legacy single-segment links still work.
     /// </summary>
-    public async Task<DanceDto?> GetByStyleAndSlugAsync(string styleSlug, string danceSlug, int? userId)
+    public async Task<DanceDto?> GetByStyleAndSlugAsync(string styleSlug, string danceSlug, int? userId, bool isAdmin = false)
     {
         var styleId = await ResolveStyleIdAsync(styleSlug);
-        var query = _db.Dances.Where(d => d.Slug == danceSlug);
+        var query = Visible(_db.Dances, userId, isAdmin).Where(d => d.Slug == danceSlug);
         if (styleId is not null)
             query = query.Where(d => d.DanceStyles.Any(ds => ds.StyleId == styleId));
         var row = await ProjectRows(query, userId).FirstOrDefaultAsync();
@@ -71,7 +86,7 @@ public class DanceService : IDanceService
         var difficulty = await _db.Dances.Where(d => d.Id == id)
             .Select(d => d.Difficulty).FirstOrDefaultAsync();
 
-        var ranked = _db.Dances
+        var ranked = Visible(_db.Dances, userId, false)
             .Where(d => d.Id != id
                      && d.Videos.Any()
                      && d.DanceStyles.Any(ds => styleIds.Contains(ds.StyleId)))
@@ -103,7 +118,7 @@ public class DanceService : IDanceService
 
         // ThenBy(Id) makes the order total (stable) so IndexOf lands on a well-defined position even
         // when two dances in the style share a name — Name alone leaves ties non-deterministic in SQL.
-        var orderedIds = await _db.Dances
+        var orderedIds = await Visible(_db.Dances, userId, false)
             .Where(d => d.DanceStyles.Any(ds => ds.StyleId == styleId.Value))
             .OrderBy(d => d.Name).ThenBy(d => d.Id)
             .Select(d => d.Id)
@@ -180,14 +195,37 @@ public class DanceService : IDanceService
         return changed;
     }
 
-    public async Task<DanceDto> CreateAsync(CreateDanceRequest request)
+    public async Task<(CreateDanceResult Result, DanceDto? Dance)> CreateAsync(
+        CreateDanceRequest request, int? ownerUserId, bool isAdmin)
     {
         if (!Enum.TryParse<DifficultyLevel>(request.Difficulty, true, out var difficulty))
             difficulty = DifficultyLevel.None;
 
+        // Known-issues B: the API accepted duplicate names and quietly auto-suffixed the slug,
+        // which is how prod ended up with Reebok five times. A collision within the same style is
+        // very nearly always someone re-adding a step that already exists, so it's refused with
+        // the id of the dance they meant. Admins are exempt: a deliberate duplicate is curation.
+        if (!isAdmin)
+        {
+#pragma warning disable CA1862 // must translate to SQL LOWER(); StringComparison can't
+            var name = request.Name.Trim();
+            var clash = await _db.Dances
+                .Where(d => d.Name.ToLower() == name.ToLower()
+                         && d.DanceStyles.Any(ds => request.StyleIds.Contains(ds.StyleId)))
+                .Select(d => (int?)d.Id)
+                .FirstOrDefaultAsync();
+            if (clash is not null)
+                return (CreateDanceResult.DuplicateName, await GetByIdAsync(clash.Value, ownerUserId, isAdmin));
+#pragma warning restore CA1862
+        }
+
         var dance = new Dance
         {
             Name = request.Name,
+            // Traceable, and held out of the public catalogue until a person has looked at it —
+            // POST /dances is open to any signed-in user, so this is the whole moderation story.
+            OwnerUserId = ownerUserId,
+            ReviewState = isAdmin ? "approved" : "pending",
             Slug = await GenerateUniqueSlugAsync(request.Name, request.StyleIds),
             Description = request.Description,
             Difficulty = difficulty,
@@ -199,7 +237,28 @@ public class DanceService : IDanceService
         // One SaveChanges in one implicit transaction — the dance and its join rows persist together.
         _db.Dances.Add(dance);
         await _db.SaveChangesAsync();
-        return (await GetByIdAsync(dance.Id, null))!;
+        // Read back as the creator, not anonymously: a pending dance is invisible to nobody-in-
+        // particular, and returning null for the thing just created would break the add form.
+        return (CreateDanceResult.Ok, (await GetByIdAsync(dance.Id, ownerUserId, isAdmin))!);
+    }
+
+    public async Task<List<DanceDto>> GetPendingAsync(int limit = 100)
+    {
+        var rows = await ProjectRows(
+            _db.Dances.Where(d => d.ReviewState == "pending").OrderBy(d => d.DateAdded).Take(limit),
+            null).ToListAsync();
+        return rows.Select(ToDto).ToList();
+    }
+
+    public async Task<DanceDto?> SetReviewStateAsync(int id, string reviewState)
+    {
+        var dance = await _db.Dances.FindAsync(id);
+        if (dance is null) return null;
+        dance.ReviewState = reviewState == "approved" ? "approved" : "pending";
+        await _db.SaveChangesAsync();
+        // Cached catalogue size counts approved dances only, so approving one changes it.
+        _cache.Remove(GrandTotalCacheKey);
+        return await GetByIdAsync(id, null, true);
     }
 
     public async Task<DanceDto?> UpdateAsync(int id, UpdateDanceRequest request)
@@ -248,10 +307,15 @@ public class DanceService : IDanceService
         return await GetByIdAsync(id, null);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id, int? requesterId, bool isAdmin)
     {
         var dance = await _db.Dances.FindAsync(id);
         if (dance is null) return false;
+        // An ordinary user may withdraw their own dance while it is still pending. Once it has
+        // been approved it is part of the catalogue other people are using, and only an admin
+        // can remove it — otherwise a contributor could delete a page others have favourited.
+        if (!isAdmin && (dance.OwnerUserId != requesterId || dance.ReviewState != "pending"))
+            return false;
         _db.Dances.Remove(dance);
         await _db.SaveChangesAsync();
         return true;
@@ -371,7 +435,7 @@ public class DanceService : IDanceService
 
     private IQueryable<Dance> BuildFilteredQuery(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, int? userId, bool favoritesOnly)
     {
-        var entityQ = _db.Dances.AsQueryable();
+        var entityQ = Visible(_db.Dances, userId, false);
 
         if (!string.IsNullOrWhiteSpace(query))
         {
@@ -443,7 +507,7 @@ public class DanceService : IDanceService
     private async Task<int> GetGrandTotalAsync()
     {
         if (_cache.TryGetValue(GrandTotalCacheKey, out int cached)) return cached;
-        var grandTotal = await _db.Dances.CountAsync();
+        var grandTotal = await _db.Dances.CountAsync(d => d.ReviewState == "approved");
         _cache.Set(GrandTotalCacheKey, grandTotal, TimeSpan.FromSeconds(30));
         return grandTotal;
     }
@@ -473,6 +537,8 @@ public class DanceService : IDanceService
             CanonicalStyleName = d.DanceStyles.OrderBy(ds => ds.StyleId).Select(ds => ds.Style.Name).FirstOrDefault(),
             Description = d.Description,
             DateAdded = d.DateAdded,
+            ReviewState = d.ReviewState,
+            OwnerUserId = d.OwnerUserId,
             Difficulty = d.Difficulty,
             Styles = d.DanceStyles.Select(ds => ds.Style.Name).ToList(),
             MusicalStyles = d.DanceMusicalStyles.Select(dms => dms.MusicalStyle.Name).ToList(),
@@ -521,7 +587,9 @@ public class DanceService : IDanceService
         RatingCount = r.RatingCount,
         IsFavorite = r.IsFavorite,
         IsLearned = r.IsLearned,
-        IsInProgress = r.IsInProgress
+        IsInProgress = r.IsInProgress,
+        ReviewState = r.ReviewState,
+        OwnerUserId = r.OwnerUserId
     };
 
     // In-SQL projection target; mapped to DanceDto in memory (enum→string and slug need C#).
@@ -533,6 +601,8 @@ public class DanceService : IDanceService
         public string? CanonicalStyleName { get; set; }
         public string? Description { get; set; }
         public DateTime DateAdded { get; set; }
+        public string ReviewState { get; set; } = "approved";
+        public int? OwnerUserId { get; set; }
         public DifficultyLevel Difficulty { get; set; }
         public List<string> Styles { get; set; } = new();
         public List<string> MusicalStyles { get; set; } = new();

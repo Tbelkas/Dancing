@@ -44,6 +44,23 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Dance>()
             .HasIndex(d => d.Slug);
 
+        // A user-added dance survives its author. Deleting an account must not take catalogue
+        // entries other people have favourited or hung videos on down with it, so the
+        // provenance is cleared (SetNull) rather than the row deleted.
+        modelBuilder.Entity<Dance>()
+            .HasOne(d => d.Owner)
+            .WithMany()
+            .HasForeignKey(d => d.OwnerUserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Dance>()
+            .HasIndex(d => d.OwnerUserId);
+
+        // Every public listing filters on this, so it is worth an index even though almost the
+        // whole catalogue sits on one value.
+        modelBuilder.Entity<Dance>()
+            .HasIndex(d => d.ReviewState);
+
         // --- Intake quarantine -------------------------------------------------
         // A video only reaches a query once it is approved. This is a GLOBAL filter
         // on purpose: Dance.Videos is read directly by DanceService (counts,

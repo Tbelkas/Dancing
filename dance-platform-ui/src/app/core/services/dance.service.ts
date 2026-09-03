@@ -122,6 +122,16 @@ export class DanceService {
     return this.http.post<Dance>(this.base, payload);
   }
 
+  /** The admin review queue: user-added dances not yet in the public catalogue. */
+  pending(): Observable<Dance[]> {
+    return this.http.get<Dance[]>(`${this.base}/pending`);
+  }
+
+  /** Admin only. "approved" publishes the dance; "pending" puts it back in the queue. */
+  review(id: number, reviewState: 'approved' | 'pending'): Observable<Dance> {
+    return this.http.post<Dance>(`${this.base}/${id}/review`, { reviewState });
+  }
+
   update(id: number, payload: UpdateDancePayload): Observable<Dance> {
     return this.http.put<Dance>(`${this.base}/${id}`, payload);
   }

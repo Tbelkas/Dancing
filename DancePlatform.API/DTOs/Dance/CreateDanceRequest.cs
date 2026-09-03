@@ -11,3 +11,9 @@ public class CreateDanceRequest
     public List<int> MusicalStyleIds { get; set; } = new();
     public List<int> InstructorIds { get; set; } = new();
 }
+
+public class ReviewDanceRequest
+{
+    /// "approved" puts the dance into the public catalogue; anything else holds it.
+    [Required] public string ReviewState { get; set; } = string.Empty;
+}

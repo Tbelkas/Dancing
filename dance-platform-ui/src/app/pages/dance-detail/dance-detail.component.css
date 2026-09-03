@@ -844,3 +844,10 @@ a.path-step__row:hover { border-color: var(--color-primary); color: var(--color-
   .detail-body { grid-template-columns: minmax(0, 1fr) 380px; gap: 44px; }
   .recommended-card .dance-card__media { flex: 0 0 152px; }
 }
+
+/* A dance that only its author can see. Reads as a state, not an error — nothing has gone
+   wrong, it just isn't in the catalogue yet. */
+.badge--pending {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}

@@ -1,0 +1,44 @@
+<div class="container">
+  <h1 class="page-title">Review queue</h1>
+  <p class="page-note">
+    Dances added by signed-in users. Each one is visible only to whoever added it until it is
+    approved here.
+  </p>
+
+  @if (message()) {
+    <p class="review-message" data-testid="review-message">{{ message() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="review-empty">Loading…</p>
+  } @else if (loadError()) {
+    <p class="review-empty">Couldn't load the queue. Refresh to try again.</p>
+  } @else if (!pending().length) {
+    <p class="review-empty" data-testid="review-empty">Nothing waiting. The catalogue is current.</p>
+  } @else {
+    <div class="review-list" data-testid="review-list">
+      @for (dance of pending(); track dance.id) {
+        <div class="card review-row">
+          <div class="review-row__main">
+            <a [routerLink]="dance.slug | dancePath:dance.styleSlug" class="review-row__name">{{ dance.name }}</a>
+            <p class="review-row__meta">
+              {{ dance.styles.length ? dance.styles.join(', ') : 'No style' }}
+              · {{ dance.videoCount }} video{{ dance.videoCount === 1 ? '' : 's' }}
+              · added {{ dance.dateAdded | date:'mediumDate' }}
+              @if (dance.ownerUserId) { · by user #{{ dance.ownerUserId }} }
+            </p>
+            @if (dance.description) {
+              <p class="review-row__desc">{{ dance.description }}</p>
+            }
+          </div>
+          <div class="review-row__actions">
+            <button type="button" class="btn btn--primary" data-testid="review-approve"
+                    [disabled]="busyId() === dance.id" (click)="approve(dance)">Approve</button>
+            <button type="button" class="btn btn--ghost" data-testid="review-reject"
+                    [disabled]="busyId() === dance.id" (click)="reject(dance)">Delete</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -51,6 +51,10 @@
              aria-label="Add video" title="Add video" (click)="closeMenu()">
             <i class="fa-solid fa-plus"></i><span class="header__nav-mobile-label">Add Video</span>
           </a>
+          <a routerLink="/admin/review" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__admin-link"
+             aria-label="Review queue" title="Review queue" data-testid="nav-admin-review" (click)="closeMenu()">
+            <i class="fa-solid fa-clipboard-check"></i><span class="header__nav-mobile-label">Review</span>
+          </a>
         }
       } @else {
         <a routerLink="/register" class="btn btn--ghost" (click)="closeMenu()">Sign up</a>

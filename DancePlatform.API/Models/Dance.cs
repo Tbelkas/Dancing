@@ -8,6 +8,23 @@ public class Dance
     public string? Description { get; set; }
     public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
+    /// <summary>
+    /// Who added this. Null for the seeded/curated catalogue, which is most of it. Without this
+    /// there is no way to tell whose dance a junk entry was, and POST /dances is open to any
+    /// signed-in user by design (the My Dances self-service flow).
+    /// </summary>
+    public int? OwnerUserId { get; set; }
+    public User? Owner { get; set; }
+
+    /// <summary>
+    /// "approved" or "pending". A dance added by an ordinary user is pending: reachable by its
+    /// creator and by an admin, absent from browse, search, recommendations and neighbours until
+    /// someone looks at it. Deliberately NOT a global query filter (unlike Video): the creator has
+    /// to keep seeing their own dance in My Dances and be able to hang a video on it, and a filter
+    /// that hides a row from everyone would have to be un-hidden at a dozen call sites.
+    /// </summary>
+    public string ReviewState { get; set; } = "approved";
+
     public DifficultyLevel Difficulty { get; set; } = DifficultyLevel.None;
 
     public int FavoriteCount { get; set; }

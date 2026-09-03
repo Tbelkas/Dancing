@@ -1,0 +1,70 @@
+.page-note {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  max-width: 62ch;
+  margin-bottom: 24px;
+}
+
+.review-message {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: 16px;
+}
+
+.review-empty {
+  color: var(--color-text-muted);
+  padding: 32px 0;
+}
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.review-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+  flex-wrap: wrap; /* the actions drop below the text rather than squeezing it on narrow screens */
+}
+
+.review-row__name {
+  font-family: var(--font-display, var(--font-ui));
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+
+  &:hover { color: var(--color-primary); }
+}
+
+.review-row__meta {
+  margin-top: 6px;
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.review-row__desc {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+  max-width: 70ch;
+}
+
+.review-row__actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}

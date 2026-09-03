@@ -15,24 +15,26 @@ public class DancesController : AppControllerBase
     public DancesController(IDanceService danceService) => _danceService = danceService;
 
     // Catalog-level data that only changes on seeding/admin edits — let browsers reuse it briefly.
+    // No longer publicly cacheable: the list now includes the caller's own dances awaiting
+    // review, so a shared cache entry would hand one user another user's pending entries.
     [HttpGet("names")]
-    [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Any)]
+    [ResponseCache(Duration = 300, Location = ResponseCacheLocation.Client, VaryByHeader = "Authorization")]
     public async Task<IActionResult> GetNames() =>
-        Ok(await _danceService.GetNamesAsync());
+        Ok(await _danceService.GetNamesAsync(CurrentUserId, CurrentUserIsAdmin));
 
     [HttpGet("{idOrSlug}")]
     public async Task<IActionResult> GetByIdOrSlug(string idOrSlug)
     {
         var dance = int.TryParse(idOrSlug, out var id)
-            ? await _danceService.GetByIdAsync(id, CurrentUserId)
-            : await _danceService.GetBySlugAsync(idOrSlug, CurrentUserId);
+            ? await _danceService.GetByIdAsync(id, CurrentUserId, CurrentUserIsAdmin)
+            : await _danceService.GetBySlugAsync(idOrSlug, CurrentUserId, CurrentUserIsAdmin);
         return dance is null ? NotFound() : Ok(dance);
     }
 
     [HttpGet("{styleSlug}/{danceSlug}")]
     public async Task<IActionResult> GetByStyleAndSlug(string styleSlug, string danceSlug)
     {
-        var dance = await _danceService.GetByStyleAndSlugAsync(styleSlug, danceSlug, CurrentUserId);
+        var dance = await _danceService.GetByStyleAndSlugAsync(styleSlug, danceSlug, CurrentUserId, CurrentUserIsAdmin);
         return dance is null ? NotFound() : Ok(dance);
     }
 
@@ -53,12 +55,34 @@ public class DancesController : AppControllerBase
     public async Task<IActionResult> Reslug() =>
         Ok(new { changed = await _danceService.ReslugAllAsync() });
 
+    /// <summary>
+    /// Deliberately [Authorize] and not [RequireAdmin] — the My Dances page is a self-service add
+    /// flow (see known-issues A). What keeps that from being an open door onto the public catalogue
+    /// is that a non-admin's dance is created "pending": theirs to see and to hang a video on,
+    /// invisible to everyone else until it is approved.
+    /// </summary>
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateDanceRequest request)
     {
-        var dance = await _danceService.CreateAsync(request);
-        return CreatedAtAction(nameof(GetByIdOrSlug), new { idOrSlug = dance.Id }, dance);
+        var (result, dance) = await _danceService.CreateAsync(request, CurrentUserId, CurrentUserIsAdmin);
+        if (result == CreateDanceResult.DuplicateName)
+            return Conflict(new { message = $"\"{request.Name}\" already exists in that style.", dance });
+        return CreatedAtAction(nameof(GetByIdOrSlug), new { idOrSlug = dance!.Id }, dance);
+    }
+
+    /// <summary>The review queue: user-added dances not yet in the public catalogue.</summary>
+    [RequireAdmin]
+    [HttpGet("pending")]
+    public async Task<IActionResult> GetPending() =>
+        Ok(await _danceService.GetPendingAsync());
+
+    [RequireAdmin]
+    [HttpPost("{id}/review")]
+    public async Task<IActionResult> Review(int id, [FromBody] ReviewDanceRequest request)
+    {
+        var dance = await _danceService.SetReviewStateAsync(id, request.ReviewState);
+        return dance is null ? NotFound() : Ok(dance);
     }
 
     [RequireAdmin]
@@ -69,11 +93,13 @@ public class DancesController : AppControllerBase
         return dance is null ? NotFound() : Ok(dance);
     }
 
-    [RequireAdmin]
+    /// <summary>[Authorize], not [RequireAdmin]: the service decides. An admin may delete any
+    /// dance; a contributor may withdraw their own while it is still awaiting review.</summary>
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await _danceService.DeleteAsync(id);
+        var deleted = await _danceService.DeleteAsync(id, CurrentUserId, CurrentUserIsAdmin);
         return deleted ? NoContent() : NotFound();
     }
 

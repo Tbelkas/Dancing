@@ -22,4 +22,9 @@ export interface Dance {
   isFavorite: boolean;
   isLearned: boolean;
   isInProgress: boolean;
+  /** "approved" (in the public catalogue) or "pending" (waiting for review). You only ever see
+   *  "pending" on a dance you added yourself, or as an admin. */
+  reviewState: string;
+  /** Who added it; absent for the curated catalogue. */
+  ownerUserId?: number;
 }
