@@ -1,8 +1,10 @@
+using DancePlatform.API;
 using DancePlatform.API.DTOs.Video;
 using DancePlatform.API.Filters;
 using DancePlatform.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace DancePlatform.API.Controllers;
 
@@ -69,6 +71,9 @@ public class VideosController : AppControllerBase
         return video is null ? NotFound() : Ok(video);
     }
 
+    // Anonymous, unauthenticated, and it moves the "recommended" ranking — throttled so a
+    // loop can't promote a video, and so the Pi isn't taking an unbounded write per call.
+    [EnableRateLimiting(RateLimitPolicies.Views)]
     [HttpPost("{id}/view")]
     public async Task<IActionResult> IncrementView(int id)
     {

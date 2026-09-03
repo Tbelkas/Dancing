@@ -1,8 +1,10 @@
 using System.Text;
+using DancePlatform.API;
 using DancePlatform.API.Data;
 using DancePlatform.API.Services;
 using DancePlatform.API.Services.ExternalAuth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +12,14 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddAppRateLimiting();
+// Apache proxies from localhost, so RemoteIpAddress is 127.0.0.1 on every request until the
+// forwarded header is honoured — and every rate-limit partition would be the same bucket.
+// Only the loopback proxy is trusted (the defaults), so a client can't forge its own address.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+});
 // Apache proxies to Kestrel over plain HTTP and passes upstream Content-Encoding through,
 // so compressing here is what the browser ends up receiving.
 builder.Services.AddResponseCompression(options =>
@@ -29,6 +39,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddSingleton<ITokenService, TokenService>();
+// Singleton: the failed-attempt counters have to outlive the request that incremented them.
+builder.Services.AddSingleton<ILoginThrottle, LoginThrottle>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDanceService, DanceService>();
 builder.Services.AddScoped<IStyleService, StyleService>();
@@ -127,6 +139,8 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
+
 // Unhandled exceptions become RFC-7807 ProblemDetails instead of leaking stack traces.
 app.UseExceptionHandler();
 
@@ -140,6 +154,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 app.UseAuthentication();
+// After authentication so an authenticated caller is throttled per account rather than
+// sharing a bucket with everyone else behind the same address.
+app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
 
