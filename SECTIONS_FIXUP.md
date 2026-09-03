@@ -63,6 +63,11 @@ no existing segments). 99 distinct YouTube videos / 106 Videos rows. Live DB, no
 | 2146 | wegRpQ-V4fM | Wrist Rolls | ⏭️ SKIP | – | 1:14 "1 minute tutorial", one move, no sub-topics |
 | 2147 | B0pQQysjOZA | Fixed Points | ✅ DONE | 7 | transcript (TUTdemic) — theory: points recap, orbiting, 3D, recovery |
 | 2148 | vOzWGnvtyVk | Fixed Points | ✅ DONE | 4 | native chapters (RYOGA/XTRAP, JP, no captions) — English halves kept |
+| 2149 | QISey0UTy7c | Four Body Points | ⏭️ SKIP | – | 2:14, one concept + silent demo, garbled captions |
+| 2150 | _IjKj2kteSY | The Four Square | ✅ DONE | 10 | transcript (Icon Sleepy Tut) — four squares one by one + beginner tips |
+| 2151 | rX_Unv9M0HA | The Four Square | ✅ DONE | 11 | transcript (Bajio) — salute start, square-by-square, drill, reverse |
+| 2152 | OO3Z0ILaONA | The Four Square | ✅ DONE | 10 | transcript (TuTCeption) — breakdown + standing/whole-body variations |
+| 2153 | bqGEzcFYpJw | The Grid | ✅ DONE | 9 | transcript (Icon Sleepy Tut) — levels/grid on top of the four square |
 
 ### Batch 2 — chapter-based (reviewed & adopted)
 839 Double Flare · 585 Running Man Variation · 817 Bachata Body Wave · 1665 Tap Dance Basics ·
@@ -374,22 +379,12 @@ Goal: maximize chips across as many dance categories as possible.
   (same ytid, now only on video 2026, which is chipped).
 
 <!-- CHIP-QUEUE:START -->
-## Auto-detected chip queue _(last checked 2026-08-31 12:11)_
+## Auto-detected chip queue _(last checked 2026-09-03 23:33)_
 
-450 tutorial video(s) awaiting section chips (0 new since last check):
+142 tutorial video(s) awaiting section chips (0 new since last check):
 
 | VideoDbId | YtId | Dance |
 |---|---|---|
-| 2144 | iEcQPvvrfNM | Tutting Stretches |
-| 2145 | dz3axgdqaIA | Tutting Stretches |
-| 2146 | wegRpQ-V4fM | Wrist Rolls |
-| 2147 | B0pQQysjOZA | Fixed Points |
-| 2148 | vOzWGnvtyVk | Fixed Points |
-| 2149 | QISey0UTy7c | Four Body Points |
-| 2150 | _IjKj2kteSY | The Four Square |
-| 2151 | rX_Unv9M0HA | The Four Square |
-| 2152 | OO3Z0ILaONA | The Four Square |
-| 2153 | bqGEzcFYpJw | The Grid |
 | 2154 | yDIL5pNT3KQ | Box Tuts |
 | 2155 | c47gWAwQtgY | Box Tuts |
 | 2156 | lnK2pKtyBG0 | Squaring the Boxes |
@@ -470,366 +465,68 @@ Goal: maximize chips across as many dance categories as possible.
 | 2231 | U_R3mOnIVLg | Old Way Vogue |
 | 2233 | DcNz6mbir93 | Waacking Arm Drills |
 | 2244 | hPe9tlc7_gY | Jab Jab |
-| 2247 | RGw3I466nkE | Windmill |
 | 2248 | Y9zWV-Slz6I | Drop it Low |
-| 2249 | 09ibzsU5fRY | Tap Dance Basics |
-| 2250 | vS0uuoIVoXg | Flicks |
-| 2251 | JJ6-j4bf2v0 | Stanky Leg |
-| 2252 | Baaw5SSoQsU | Slide Step |
-| 2253 | 5rRGW71L1kE | Cross Step |
-| 2254 | SarxqLwK_u0 | Charleston Variation |
-| 2255 | l5Xbkogz5xk | T-Step Reverse |
-| 2256 | hm6GIUrGpbM | Spongebob Shuffle Hop |
-| 2257 | bsVUsSnbGqE | Charleston & Running Man |
-| 2258 | b6075roLFmo | Running Man & T-Step |
-| 2259 | mQqUaORggzw | Pin Drop |
-| 2260 | tnNNxRr-0Tw | Garba |
-| 2261 | c7zLOz75g1Y | Box Step |
-| 2262 | k70uyYKlIU0 | Plié |
-| 2274 | FltxXCoxJ0A | Stick and Roll |
-| 2275 | 5lRJ51DnGMI | Kick It |
-| 2276 | ry3zVZm2GQo | Elbows Up |
-| 2277 | M4bMFdLH3FU | Drop Dance |
 | 2278 | 611BmoPoo8s | Creep |
-| 2279 | sW9wqxX6wd4 | Monastery |
-| 2280 | EXh42q4jDBc | Kick Step / Kick Ball Change |
-| 2281 | bOaG7SylhQ0 | Row Di Boat |
-| 2282 | oPKfdtRctp8 | Locking |
-| 2283 | N4STZCPuhf0 | Reebok Hop / Cabbage Patch |
-| 2284 | MRjzecRlVGc | Running Man & Kick |
-| 2285 | ZgWJoLAP73o | The Moonwalk |
-| 2286 | Zh_z7cZxY10 | Juju Step |
-| 2287 | GIuiGVYr7ho | Hip Openers |
-| 2288 | yYgVl5Dsf4o | The Bop |
-| 2289 | sFvnVk9UFv4 | Heel Toe |
-| 2290 | UVKooAlER20 | Cupid Shuffle |
 | 2296 | pJYwmLxTHFE | The Dab |
 | 2300 | fo1XNw1LG-o | Heel Toe Snake |
-| 2302 | ApIVO-1kVzY | The Robot |
-| 2304 | brdrobXPFq0 | Hopak |
-| 2305 | crUWEBFBrSQ | Waist Whine |
-| 2306 | _TlYM3k9EOk | Fouetté |
 | 2307 | 6fkq5MBLD0M | Spongebob Shuffle |
-| 2308 | CqZRVCi6_34 | The Side-To-Side Rock Step |
-| 2309 | ExEXc5kCuG0 | Shut Down |
-| 2310 | HYxQMbsmPaw | Dabke |
 | 2312 | Qj2TevFCLkw | Middle Splits |
-| 2313 | KZvPapgwWzw | Love Dive (IVE) |
-| 2314 | id-Bvcc6YbQ | Haka |
-| 2315 | VImXG8A0snw | Hip Swivel |
-| 2316 | 6Pk9L6lAP70 | Gucci / Reebok |
-| 2317 | bEp2oBM47C0 | Typewriter |
 | 2320 | PLAWTUKO2Vk | Carlton |
-| 2329 | _c4WdMKPIoA | Running Man Reverse |
-| 2330 | oCrGcuaJ6OE | Happy Feet Combo |
-| 2331 | K3IfCgFJ85I | Heel Toe Hop |
-| 2332 | HDdB71xNeqw | Criss Cross Variation |
 | 2333 | VDBkB5Ouxig | Running Man & Stepback |
-| 2334 | 3Yp2_zyCD7Q | Running Man Heel |
-| 2335 | A5AtD6MrSCU | Chest Pop with Rotation |
-| 2336 | 06TJG76UR8k | Lock It Down (Variation) |
-| 2337 | WGrIM2bjJIk | Grapevines |
-| 2338 | M-Ej1XFLIYg | Ke Star |
-| 2339 | c_WI6ySxeb8 | Quick-Quick-Slow |
-| 2340 | l-agmlAGtEM | Arabesque |
-| 2341 | S_kb4RpZJIA | 20s Charleston |
-| 2342 | _O62qLcMWcw | Vaina Loca |
-| 2343 | qXByhRSdeYE | Bharatanatyam Adavu |
-| 2344 | FTgPGsxEjVI | Bourrée |
 | 2347 | NtBqKGXtZSg | Toe Taps |
-| 2356 | HyS6uKrS0mw | Millie Rock |
-| 2357 | _mF5s-JjJ8Q | Forward Knee Slide |
 | 2358 | sFpcX-MCcEY | La Gozadera |
-| 2359 | rEmjtWZM-UA | Pirouette |
-| 2360 | DRwsTajIULI | Do the Wop |
-| 2361 | S9Umewra2ro | Shake Your Hips |
-| 2362 | hQbHbmyspQs | Diagonal Running Man & Flick |
 | 2363 | Y3Wzzjs9ih8 | Pa' Lante |
-| 2364 | cacwri2wio4 | Morning Mobility |
-| 2365 | OS6MhBfs800 | Bedtime Stretch |
 | 2366 | mhQDOPyxX8g | The Watusi |
-| 2367 | 35Z6hZgL2r0 | Lower Back Relief |
-| 2368 | 4gISxG1NNnI | Dancer's Full Body Stretch |
-| 2369 | apCIhoPmHW8 | Ankle & Foot Mobility |
-| 2370 | iRkGYffEnm0 | Slow-Slow-Quick Sequence |
-| 2371 | 3bt5h0dX6nA | Tendu & Shaping Feet |
 | 2377 | S2AJ3tAAjyc | Criss Cross Hop & Tap |
-| 2382 | hH2MZYPcLpA | The Arm Wave Wide |
 | 2383 | qujbNH7Nmek | Mashed Potato |
 | 2384 | 2jOtqCJn9mI | Fan Motion |
-| 2385 | ES2JEkTKarc | Walking Breakdown |
-| 2386 | WIHJHqL77i4 | Dance Floor Bump |
 | 2387 | h3DSYn2jIKE | Honey Dipper |
-| 2388 | CX9LTfMF6NE | The Head Banger |
-| 2389 | pkpvM2AfvTc | Monstas |
 | 2390 | PD9QPJATvRk | 6-Step |
 | 2391 | i4umf_rsJKQ | En avant et en arrière |
-| 2392 | KN32mxI985I | 1-2-3-4-5-6 |
-| 2393 | pddp8OLi7lo | T-Step Angle |
-| 2394 | nbYCfzIdUes | The Knee Slide Sway |
-| 2395 | EdN8S2phxbs | T-Step Heel Toe |
-| 2396 | a85IOUtNQxs | Heel Toe & Toe Twist |
-| 2397 | xOWLBQo_5Lo | Dance Like Me |
 | 2401 | VEE5qqDPVGY | Real Love |
 | 2407 | 0UoK0My9Dx0 | Heels Choreography |
-| 2408 | JWkGdRBX6dI | Promenade |
-| 2409 | pSXDkPHx1_w | Tango |
-| 2410 | pAylQRh63A4 | Tecktonik |
-| 2411 | fubRuAc1V4E | Chest Pop |
-| 2412 | 1xd5IjpNMK0 | Time Step |
-| 2413 | ayDxW68d-VQ | Double Time Step |
-| 2414 | G9vPQLD4W1M | Triple Time Step |
-| 2415 | gGCr0WjmT9E | Drop Top Rock |
-| 2416 | pY2tNHe1XdE | Magnetic (ILLIT) |
-| 2417 | uTaNkOzg9qE | Calm Down |
-| 2418 | xYD62Z0rC7w | Hype Boy (NewJeans) |
-| 2419 | 1BP64ShcOQo | OMG (NewJeans) |
-| 2420 | _MBmXKwlOB8 | Drip (BABYMONSTER) |
-| 2421 | skccFBdK_ZA | Ditto (NewJeans) |
-| 2422 | 8xDMKFvZHGY | Cross-Body Lead |
-| 2423 | g3lN2tiNZfY | Smart (LE SSERAFIM) |
 | 2429 | 9uFWjzalOqY | Vosho |
 | 2434 | 11AFA96QYq4 | Clogging |
-| 2435 | pc_0KVtRgt0 | Swing Flips & Lifts |
-| 2436 | RKtjX3xa6dk | Needle Scale |
-| 2437 | WNSM6Wzg_mQ | Forward Bicep Bounce |
-| 2438 | Ry9PcMonkSg | Hardstyle Shuffle |
 | 2439 | pEEET2SIKEs | Dancer's Hips & Arabesque Stretch |
-| 2440 | Ulnw1WRubX0 | Deep Splits Stretch |
-| 2441 | 1vcvdSxl32I | The Hand Jive |
 | 2442 | oFgER9x40ww | Light Jig Step |
 | 2443 | wwDCOPfl6QM | La Cucaracha |
-| 2444 | c4TGKk8mjMY | Queencard (G-IDLE) |
-| 2445 | 3NomZw-KD34 | Bollywood Basics |
-| 2446 | PSYI1cb8PV8 | Popping Basics |
-| 2447 | 3C4wEZ6fEuU | Kokomma |
-| 2448 | HjOd-2g508k | Chassé Turns |
-| 2449 | YyLh9N6whwQ | Butterfly |
-| 2460 | y4aumyQiD_Y | Pas de Cheval |
-| 2461 | bBEsrMQo-8E | Frappé |
-| 2462 | CgKXn1Evj-o | Grand Battement |
-| 2463 | 2j-L3c4hLz8 | Fondu |
-| 2464 | vfXeKrl3F7Q | The Get Down |
-| 2465 | ApJoU1Jbrkw | Reebok |
-| 2466 | FQBUM-cmM7A | Pop and Lock |
-| 2467 | WcxRnK4-r1s | Flap |
-| 2468 | d1ZgFiq0psY | Boogie Woogie |
 | 2469 | 4S2aouJNw4U | Pony |
 | 2470 | nR393C6ZBos | Floorwork |
 | 2471 | GOi5mI8PXC0 | Tinikling |
-| 2472 | Vad0PPt_GOU | Tap Steps in Place |
-| 2473 | m1t3ZyD3uH4 | Waltz Natural Turn |
-| 2474 | DJO_0o8nQ40 | Triple Step |
-| 2475 | xDSpFBwKvMI | The Shake |
 | 2478 | gBosbQE6fJA | Pancake Stretch |
 | 2482 | Dw7ciI4zGxM | Arabesque penchée |
 | 2485 | yfw_CtVSIFg | Bourrée Turns |
-| 2486 | mesIwHRX17Q | Argentine Tango Gancho |
-| 2487 | E3Ytb1X9Ukk | Soukous |
-| 2488 | mpxJubVNBQA | Scrape |
-| 2489 | eWih4IFM9cY | Hurricane |
-| 2490 | am5RH1WxHEc | Swingout |
 | 2491 | b1RDLjz18FM | Adagio |
 | 2492 | U8DIVLMy8Ko | Rebolation |
-| 2493 | I3aP1J-xH7c | Pliés |
-| 2494 | -NAgnPSnuVQ | Glissade |
-| 2495 | gvbV-Cy7V_k | Jitterbug |
-| 2496 | dS-yMrWBHXI | Battement |
-| 2497 | qVkcaDBnkZs | Cabriole |
-| 2498 | -qR860N5w7s | Tango Backward Walk |
-| 2499 | s3ZyxbrSoKA | Shim Sham |
-| 2500 | bCRneOn3a2U | Airfreeze |
 | 2502 | qCB2PuyuIVc | Toprock |
-| 2508 | tmjCPdDov-4 | Super Shy (NewJeans) |
-| 2509 | t8GqDobvhw8 | Fan Kick |
-| 2510 | 6xRuNeWyntQ | Passinho |
-| 2511 | pCVY2EKgwOY | Armageddon (aespa) |
-| 2512 | DrGbPtS5Ikw | Heels Chair Dance |
-| 2513 | ETWYLBovt4g | Kathak Spins |
-| 2514 | wBBqGpXP7f0 | Tango Walks |
-| 2515 | QuNgch_yCpY | Reggaeton Basic Steps |
-| 2516 | oxXX7h615KU | Hustle Basics |
-| 2517 | DMF6T2s_kIU | Salida |
-| 2518 | X06gKJ4rTSg | Tango Promenade |
-| 2519 | hAuSP3Y8r1Q | Walk-Run Transition |
-| 2520 | UGs-q6lc-Cc | Forward Whip |
-| 2521 | hXY4IonQoqs | Dip with a Kick |
-| 2522 | dYQ95W3wuy8 | Tango Forward Step |
-| 2523 | LOnlV1Ef2Yo | Cobra Stretch |
 | 2524 | vaGje2kxSxc | Floor Roll |
 | 2532 | UvGzR_FL1_I | Gully Side Step |
-| 2540 | hh-Rt6gwjWA | Rocks |
 | 2541 | DgsxAbSZJoA | Eagle Slide |
-| 2542 | OwIxi8PirQk | Tarraxinha |
-| 2543 | g-I5S0ZcfuA | Pirouette en pointe |
-| 2544 | ll6TLKbAnWQ | The Ska |
-| 2545 | RHjYovihigE | Sticky (KISS OF LIFE) |
-| 2546 | 93G5Atj2yV8 | Airchair |
-| 2547 | RNugryE0qvc | Black Bottom |
-| 2548 | ZXmTE4sOtpM | Tacky Annie |
-| 2549 | K5miZeSPv54 | Heels (Digs) |
-| 2550 | DLiENpRVPd8 | Apple Jack |
-| 2551 | XvOww5Thbow | Grinds |
-| 2552 | XgtEOjyEmpY | Charleston (Jump) |
-| 2553 | CnnPOmvC_1k | Kick Step |
 | 2554 | 4_JiMsHziIs | Scarecrow |
 | 2555 | Jz_E6fw7aFY | Stomp off |
-| 2556 | UHOlGEawhv8 | Gaze Afar |
-| 2557 | 3Ovb0Y-NhHo | Boogie Back aka 'Back it up' |
-| 2558 | ed9VGW-1_6U | Cómo bailar Reggaetón |
-| 2559 | jLZo3IViqdQ | Closed Promenade |
-| 2560 | qM9Cs_G5rTs | Savoy Kicks |
 | 2561 | Lg0O4NQ8_lQ | Tabby the Cat |
-| 2562 | BYoGQK4Olv4 | Shorty George |
-| 2563 | BklRTYVvrUk | Shim Sham |
 | 2564 | 0rUlUYuEGSU | Suzie Q |
-| 2565 | LDz3QkutnHE | Charleston (Squat) |
-| 2566 | o9YtSG6CsG0 | Fishtails |
-| 2567 | 8Z0cqcEhDlo | Jig Walks |
-| 2568 | MfZ9kRKZPfQ | Hip Flexor Stretch |
-| 2569 | _f3qI96aBIc | Sailor Kicks |
 | 2571 | R-3df05X4AM | Turkey Trots |
-| 2576 | WR8P4B0GkLI | Mexican Folklorico |
-| 2577 | NBKTN6c_MEQ | Box Step (original) |
-| 2578 | W_g8rZHJEEY | Charleston (1920s) |
 | 2579 | PKlHW3O7Sno | Struttin' |
 | 2580 | Pso2jln-clQ | Shish-ka-boom-ba |
 | 2581 | bCWwrxsJ1dk | Slip Slops |
 | 2582 | 4TtBNA9IY0E | Spank the Baby |
-| 2583 | 0qawNA1UHXg | Mess Around |
-| 2584 | 8lYiqkLcwm0 | Crossovers |
-| 2585 | FQb5ZitLJJ4 | Developpé |
-| 2586 | GrCAQy4irMM | Outside Turn |
-| 2587 | STaxXwZ6PpQ | Throw Out |
-| 2588 | LiywoPdIxRI | Jazz Walk |
-| 2589 | GsXbluBb4A8 | Foxtrot Feather Step |
-| 2591 | IjbIIxbs5Gw | Funky Chicken |
-| 2592 | h3H6yAbylHU | Headspin |
-| 2593 | qbsNWrzjhaI | Rumba Walks |
-| 2594 | DOFjPiYFYOQ | Turn (Natural Turn) |
-| 2595 | hLg47s0GIW8 | Legwork |
-| 2596 | Z-rf5uLwaJc | Inside Turn |
 | 2597 | Y6ZoL3T-IrU | Tarantella |
-| 2598 | 6Ba7k335LDA | Tendu 1st |
-| 2599 | FsZF8PXtFaE | The Head Nod |
 | 2603 | fBMZGO9KVOc | Choppa Style |
-| 2606 | INQxh8xDsqA | Lowdown |
 | 2607 | VOPxjh9AqPI | Contraction |
 | 2608 | lhkQF4TXq-0 | Jive Kicks |
-| 2609 | EmzjYWycrbI | The Wave |
-| 2610 | 4O1iRISeySo | Cuban Motion |
-| 2611 | FOFAMOyGAsE | Tuck Turn |
-| 2612 | erFqCWxtwTo | Ball Change |
-| 2613 | vKstmO5oLzI | Shoki |
-| 2614 | 6BvVvAzy3IY | Waltz Jump |
-| 2615 | rOV-g2jMHxs | Heel Toe (Walk Out) |
-| 2616 | JfdzKvU_A_Q | Jersey Club Top Rock |
-| 2617 | dLPxdftFI3Q | Box Step (Jazz Square) |
-| 2618 | t7W8Xu8si3s | Whip |
-| 2619 | i9IgZW4F3Dk | Sliding Doors |
-| 2620 | DCw7u0cEo3k | Boogie Step |
 | 2621 | gfzC9XMEypg | Cool-Down Stretch |
-| 2622 | dUuZLrUOmhU | Frog Stretch |
-| 2623 | UN2GcYzfUZs | Dégagé 5th |
-| 2624 | JhNPw4DoTxA | The Stutter Step |
-| 2625 | m00u6qmmG2I | Palm Tree Walk |
-| 2626 | 0l-IrUpWEUI | Basic Steps |
-| 2627 | XCrw-6eVAEk | Shoulder Check |
-| 2628 | sMlxHIC3yLQ | Roll Forward |
-| 2635 | xfO-wtsFdPw | Cha Cha New York |
-| 2636 | _6-JoDoYizo | Wheel Pose |
 | 2637 | F5f-_AbJ8dg | Adowa |
-| 2638 | PsoZaj0zQwU | Leader Break Through |
-| 2639 | bSu7QJZ5SLU | Under Arm Turn |
-| 2640 | LX3WPFUpSEc | Forward Tuck Turn |
-| 2641 | drLc7eYNw-E | Basic |
-| 2642 | _B55w-0o0qw | Salsa Setenta |
-| 2643 | FYhUscyS2MA | Twist | Heel Twist - Bedrock |
-| 2644 | l-avoQVmi3g | Balboa Basic |
-| 2645 | dSwBpPkX4rw | Hamstring Stretch |
-| 2646 | jm8Nyk9VEF8 | Genna Bounce |
-| 2647 | jOcns4yR8Ew | Kick Ball Change |
-| 2648 | g0nSxNBuqNA | Knee Up Challenge | Farmer |
-| 2649 | qwQqqaaMhC0 | Knee Up | Standard |
-| 2650 | HEMZGDI_vpM | Skip up |
-| 2651 | lLcxnxulPt4 | Reverse Rad |
-| 2652 | hX8Tj2qPPuk | Twist | Toe Twist |
-| 2653 | l1kVdR4Hl68 | Snap Kick | Standard |
 | 2654 | 9wMOwTspveI | Basic Hold |
-| 2655 | CA00b52i0z4 | Twist | Freeze |
-| 2656 | DGRysd7tAE8 | Twist | Separate |
-| 2657 | ZCoVxLTIDQg | Knock | and Count |
-| 2658 | uyvUCfIT6dc | Knock Challenge | Hurdle |
-| 2659 | NxtNhurnArQ | Twist | Toe Twist - Knee Up |
-| 2660 | -GAuZi9UzWI | Heel Twist Challenge | Jacking in the Box |
-| 2662 | KfL7Y6u6Dcw | Gwara Gwara |
 | 2666 | FM6NtPhb5-w | Sandungueo |
-| 2667 | HAQ7UgD4DTU | Natural Turn |
-| 2668 | GVZZi-Gth_M | Front Splits |
-| 2669 | K5-lwFeTMoI | Deep Squat Mobility |
 | 2670 | RrWEFLUs1vs | Spine Mobility |
-| 2671 | WqZieVvDJx8 | Loko Loko |
-| 2672 | CSADXQfUKGk | Hook Turn |
-| 2673 | p-hvJbSx0fI | Grand Jete |
-| 2674 | IHKfWj4auW8 | Tek Weh Yuhself |
-| 2675 | tjIfkEqn6jg | Tango Forward Walk |
-| 2676 | 8yIuYZPucf4 | Heels Knee Spin |
-| 2677 | jKbWrwPKQtI | Hammer Lock |
 | 2678 | P_kkfQf0mRc | Sirtaki |
-| 2679 | J2KZHT-m_qQ | Heel Clicks |
-| 2680 | YN_Tp8VIaws | Wuk Up |
-| 2681 | g7llm1J9sl0 | Coupé & Tendu |
-| 2682 | XOwwHtdgNpM | Oversplits |
-| 2683 | -ewZ4bWRkVo | Waltz |
-| 2684 | hgkPtziNVeg | Forward and Backward Ocho |
-| 2685 | nElWeylI8H8 | Resistance Band Stretch |
 | 2686 | M7CpRZSVxVc | Lizard Pose |
-| 2687 | P1bLM0ROKSY | Bounce | One Leg |
-| 2688 | BAnCu1NPCIE | Bachata Step to The Wave |
-| 2689 | XKWJ3Flfm8A | Wrist & Forearm Mobility |
-| 2690 | QT8a2dchSOU | Flexibility for High Kicks |
 | 2694 | __W4nJoHhAM | Fouetté à terre |
-| 2697 | qqxGz58GTEA | Highland Fling |
-| 2698 | KA8z4HCoAB8 | Basic Step (Forward Walk) |
 | 2699 | uBsGRFU-Dgk | Tournant jeté |
-| 2700 | oRISWvk66jc | En dehors |
-| 2701 | TfL6ZcpVc9s | Rev Up |
-| 2702 | -ZKEs_zlSok | The Swim |
-| 2703 | e69_AiARMsE | Inside Swivels |
-| 2704 | 7su43Crj2oI | Backward Sway |
-| 2705 | XK_iLYsNFoU | Pivot Turn with Arm Movement |
-| 2706 | WrQdfjaaBBs | The Shoulder Shimmy Shake |
 | 2707 | hI4b_9h9LtY | The Pause |
 | 2708 | CdsFZiQy9Ik | Soapy |
-| 2709 | HCXhlMCywFE | The Chug |
-| 2710 | CwlKhjr25Qg | Up Chest Pop |
-| 2711 | REL4y5a_xF8 | Full Body Mobility Flow |
-| 2712 | BGlVsSheJ7s | Pon Di River |
-| 2713 | kTJGoaOdVa0 | Baddie (IVE) |
-| 2714 | T_yUO4xmz5k | PNF Stretching |
-| 2715 | UkFY-4ickr0 | Buga |
-| 2716 | sRw2Cxuuhbc | Samba Voltas |
-| 2717 | 31kgNdQVrVg | The Chicken |
-| 2718 | mUo-r0dTEpU | Tango Sacada |
-| 2719 | 2Zvz7e_MXXo | Backward Whip |
-| 2720 | KM2UU_bVXGs | Pique Turn |
 | 2721 | AsPhnlXehBk | Flamenco |
-| 2728 | So1yaP90sKQ | Alternating Underarm Turn |
-| 2729 | gtQOIc_mp-0 | Bolero Basics |
-| 2730 | vvmUXbT0rIE | Finger Tutting Combo |
-| 2731 | IuKIoA1tGNw | International Rumba |
-| 2732 | JXybpeZcZz8 | Merengue |
-| 2733 | 25HIps1lYuQ | International Cha Cha |
-| 2734 | _v_pm_ETrVY | Paso Doble |
-| 2735 | BNYLxnVOJak | East Coast Swing |
-| 2736 | di8MMJlg-gE | Bachata Footwork |
-| 2737 | FPwy4X_6uh0 | Jazz Pirouette |
-| 2738 | Uc3O0rPAHSc | American Rumba |
-| 2739 | --jqOdifXrw | Mambo |
-| 2740 | V0UCsRVilbg | American Cha Cha |
-| 2741 | k8hz0F9Ehos | Bolero |
-| 2742 | t17pMfihxvI | Brush and Drags |
-| 2743 | XiqHaURCqHE | Dip and Pop |
 
 _Auto-processed daily at 09:15 by the `DanceChipAuto` task (headless `/find-chips`); or run `/find-chips` manually._
 <!-- CHIP-QUEUE:END -->
