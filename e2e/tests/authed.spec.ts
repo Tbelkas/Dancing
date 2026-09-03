@@ -31,6 +31,66 @@ test.describe('authenticated', () => {
     }
   });
 
+  test('the account card shows the recovery address and offers a password change', async ({ authedPage: page }) => {
+    await page.goto('/profile');
+    const card = page.getByTestId('account-card');
+    await expect(card).toBeVisible();
+
+    // This account has an address, so the "cannot be recovered" warning must NOT be here —
+    // its presence would mean the profile is reading the field wrong.
+    await expect(page.getByTestId('account-no-email')).toHaveCount(0);
+    await expect(card).toContainText('@');
+
+    await page.getByTestId('account-password-edit').click();
+    await expect(page.getByTestId('account-new-password')).toBeVisible();
+    // Deliberately never submitted: this runs against the production account the whole suite
+    // signs in with.
+  });
+
+  test('deleting the account asks for the password first', async ({ authedPage: page }) => {
+    await page.goto('/profile');
+    await page.getByTestId('delete-account-start').click();
+
+    // Stops here, permanently. Clicking through would delete the account every test run —
+    // the confirmation step existing is the whole assertion.
+    await expect(page.getByTestId('delete-account-password')).toBeVisible();
+    await expect(page.getByTestId('delete-account-confirm')).toBeVisible();
+  });
+
+  test('a dance added by a non-admin stays out of the public catalogue', async ({ authedPage: page, request }) => {
+    const login = await request.post(`${API_URL}/auth/login`, {
+      data: { username: USERNAME, password: PASSWORD },
+    });
+    const { token } = await login.json();
+    const auth = { Authorization: `Bearer ${token}` };
+    const name = `e2e-pending-${Date.now()}`;
+
+    const created = await request.post(`${API_URL}/dances`, { headers: auth, data: { name, styleIds: [] } });
+    expect(created.status()).toBe(201);
+    const dance = await created.json();
+
+    try {
+      // The point of the whole review gate: it exists, and nobody else can find it.
+      expect(dance.reviewState).toBe('pending');
+
+      const search = await request.get(`${API_URL}/search/dances?q=${encodeURIComponent(name)}`);
+      const anonymous = (await search.json()).items as Array<{ id: number }>;
+      expect(anonymous.some(d => d.id === dance.id), 'a pending dance must not be searchable').toBe(false);
+
+      const direct = await request.get(`${API_URL}/dances/${dance.id}`);
+      expect(direct.status(), 'a pending dance must 404 for a signed-out visitor').toBe(404);
+
+      // Its author, on the other hand, sees it and is told why nobody else does.
+      await page.goto(`/dances/${dance.slug}`);
+      await expect(page.getByTestId('dance-pending')).toBeVisible();
+    } finally {
+      // Self-cleaning: a contributor may withdraw their own dance while it is still pending,
+      // which is exactly the state this test leaves it in.
+      const removed = await request.delete(`${API_URL}/dances/${dance.id}`, { headers: auth });
+      expect(removed.status(), 'the test dance must not survive the run').toBe(204);
+    }
+  });
+
   test('the account menu shows the signed-in user and can sign out', async ({ authedPage: page }) => {
     await page.goto('/dances');
     // Signed-in-only nav appears; signed-out CTA does not.
