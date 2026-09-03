@@ -2,14 +2,20 @@ using DancePlatform.API.Data;
 using DancePlatform.API.DTOs.User;
 using DancePlatform.API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DancePlatform.API.Services;
 
 public class UserService : IUserService
 {
     private readonly AppDbContext _db;
+    private readonly IMemoryCache _cache;
 
-    public UserService(AppDbContext db) => _db = db;
+    public UserService(AppDbContext db, IMemoryCache cache)
+    {
+        _db = db;
+        _cache = cache;
+    }
 
     /// <summary>
     /// Projects dances to link-ready refs entirely in SQL. The canonical style *name* (lowest StyleId)
@@ -105,6 +111,32 @@ public class UserService : IUserService
         return (EmailChangeResult.Ok, await GetProfileAsync(userId));
     }
 #pragma warning restore CA1862
+
+    public async Task<DeleteAccountResult> DeleteAccountAsync(int userId, string password)
+    {
+        var user = await _db.Users.FindAsync(userId);
+        if (user is null) return DeleteAccountResult.UserNotFound;
+
+        // An account with a password has to prove it. One without (provider-only) can't, and
+        // being signed in through the provider is the proof in that case.
+        if (!string.IsNullOrEmpty(user.PasswordHash) &&
+            !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            return DeleteAccountResult.WrongPassword;
+
+        // Everything personal is wired to cascade from the user row (favourites, learned,
+        // in-progress, my-styles, ratings, notes, loops, choreos, practice sessions, personal
+        // videos, provider links, reset tokens, personal roadmaps), so one delete is the whole
+        // erasure. Dances they contributed are the deliberate exception: those are catalogue
+        // rows other people may be using, so the FK clears the owner instead (SetNull).
+        _db.Users.Remove(user);
+        await _db.SaveChangesAsync();
+
+        // Any token still in someone's browser now belongs to an account that no longer exists;
+        // UserTokenGuard caches "user missing" too, so drop the entry rather than let a deleted
+        // account keep working for up to a minute.
+        UserTokenGuard.Forget(_cache, userId);
+        return DeleteAccountResult.Ok;
+    }
 
     public async Task<PublicProfileDto?> GetPublicProfileAsync(string username)
     {

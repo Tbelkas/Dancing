@@ -32,6 +32,11 @@ export class ProfileService {
     );
   }
 
+  /** Permanent. The password is the confirmation — being signed in isn't enough. */
+  deleteAccount(password: string): Observable<void> {
+    return this.http.delete<void>(this.base, { body: { password } });
+  }
+
   getMyDances(): Observable<MyStyleWithDances[]> {
     return this.http.get<MyStyleWithDances[]>(`${this.base}/my-dances`);
   }

@@ -262,6 +262,32 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  // --- Deleting the account ---
+  confirmingDelete = signal(false);
+  deletePassword = '';
+  deleteBusy = signal(false);
+  deleteError = signal('');
+
+  startDelete(): void {
+    this.deletePassword = '';
+    this.deleteError.set('');
+    this.confirmingDelete.set(true);
+  }
+
+  deleteAccount(): void {
+    this.deleteBusy.set(true);
+    this.deleteError.set('');
+    this.profileService.deleteAccount(this.deletePassword).subscribe({
+      // logout() clears the stored token and routes to /login. The account is already gone;
+      // leaving a dead token in localStorage would just 401 on the next page.
+      next: () => this.auth.logout(),
+      error: err => {
+        this.deleteBusy.set(false);
+        this.deleteError.set(err.error?.message ?? 'Could not delete the account.');
+      }
+    });
+  }
+
   /** Saved on click rather than through the edit form — it's a player preference, not identity. */
   setBetaViewer(value: boolean): void {
     const p = this.profile();

@@ -41,6 +41,22 @@ public class ProfileController : AppControllerBase
         };
     }
 
+    /// <summary>
+    /// Deletes the caller's account. No confirmation dialog on the server side beyond the
+    /// password — the UI asks; this just checks that whoever is asking knows the password.
+    /// </summary>
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequest request)
+    {
+        var result = await _userService.DeleteAccountAsync(CurrentUserId!.Value, request.Password);
+        return result switch
+        {
+            DeleteAccountResult.UserNotFound => NotFound(),
+            DeleteAccountResult.WrongPassword => BadRequest(new { message = "That password is incorrect." }),
+            _ => NoContent()
+        };
+    }
+
     [HttpGet("my-dances")]
     public async Task<IActionResult> GetMyDances() =>
         Ok(await _userService.GetMyDancesAsync(CurrentUserId!.Value));

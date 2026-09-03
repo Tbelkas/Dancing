@@ -1,0 +1,39 @@
+/* A reading page, not an app screen: one measured column, generous leading, and nothing
+   competing with the text. */
+.legal {
+  max-width: 68ch;
+  padding-bottom: 64px;
+}
+
+.legal__updated {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 40px;
+}
+
+.legal h2 {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin: 36px 0 12px;
+}
+
+.legal p {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--color-text-muted);
+  margin-bottom: 14px;
+}
+
+.legal a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

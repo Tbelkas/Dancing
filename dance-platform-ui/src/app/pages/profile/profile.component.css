@@ -227,3 +227,25 @@
   border-left: 2px solid var(--color-primary);
   border-radius: 4px;
 }
+
+/* The one destructive card on the page. Marked by a red edge rather than red everywhere, so it
+   reads as serious without shouting over the rest of the column. */
+.danger-card {
+  border-left: 2px solid var(--color-error);
+}
+
+.danger-card__note {
+  display: block;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.danger-btn {
+  border-color: var(--color-error);
+  color: var(--color-error);
+
+  &:hover:not(:disabled) {
+    background: var(--color-error);
+    color: #fff;
+  }
+}

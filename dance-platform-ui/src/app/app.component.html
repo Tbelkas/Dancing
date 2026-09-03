@@ -97,6 +97,15 @@
 <main id="main-content" class="main" [class.main--tabbar]="auth.isAuthenticated()">
   <router-outlet />
 </main>
+<!-- Small by design: the only reason this footer exists is that the two documents behind it have
+     to be reachable from every page. -->
+<footer class="site-footer" [class.site-footer--tabbar]="auth.isAuthenticated()">
+  <span class="site-footer__note">Videos belong to the creators who made them.</span>
+  <nav class="site-footer__links" aria-label="Legal">
+    <a routerLink="/terms" data-testid="footer-terms">Terms</a>
+    <a routerLink="/privacy" data-testid="footer-privacy">Privacy</a>
+  </nav>
+</footer>
 <app-feedback />
 
 <!-- Mobile: primary destinations live in a fixed bottom tab bar; the hamburger

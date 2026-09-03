@@ -388,3 +388,47 @@
   .header__logo { font-size: 1.25rem; }
   .main { padding: 28px 0; }
 }
+
+/* Site footer. Quiet on purpose — it carries the two documents that must be reachable from
+   everywhere and nothing else. */
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 28px 32px;
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.site-footer__links {
+  display: flex;
+  gap: 20px;
+}
+
+.site-footer__links a {
+  color: var(--color-text-muted);
+  padding: 6px 2px; /* a real tap target without changing the line height */
+  transition: color var(--transition);
+
+  &:hover { color: var(--color-primary); }
+}
+
+/* 720px, matching the breakpoint the tab bar itself appears at — .main--tabbar already
+   reserves 84px, and the footer sits below it, so it needs the same clearance of its own. */
+@media (max-width: 720px) {
+  .site-footer {
+    padding: 24px 20px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Clear the fixed bottom tab bar, which otherwise sits on top of the links. */
+  .site-footer--tabbar { padding-bottom: 84px; }
+}

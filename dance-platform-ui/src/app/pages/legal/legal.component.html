@@ -1,0 +1,95 @@
+<div class="container legal">
+  @if (page() === 'terms') {
+    <h1 class="page-title">Terms of use</h1>
+    <p class="legal__updated">Last updated {{ updated }}</p>
+
+    <h2>What this is</h2>
+    <p>
+      Dance Platform is a personal project that catalogues dance tutorials published on YouTube,
+      TikTok and Instagram, and gives you tools to practise with them — loops, speed control,
+      timestamps, notes and a practice log.
+    </p>
+
+    <h2>The videos are not ours</h2>
+    <p>
+      Every video is embedded from the platform it was published on, and plays from there. We host
+      no video. Credit and rights stay with the people who made them, and their platform's terms
+      apply while you watch. If you are a creator and want a video off the site, say so through the
+      feedback button in the corner of any page and it will be removed.
+    </p>
+
+    <h2>Your account</h2>
+    <p>
+      Keep your password to yourself, and give an email address that reaches you — it is the only
+      way to get back into your account if you forget the password. You can delete your account at
+      any time from your profile, and everything personal goes with it.
+    </p>
+
+    <h2>What you add</h2>
+    <p>
+      You can add dances and videos. Anything you add may be reviewed before it becomes visible to
+      other people, and anything that is spam, abusive, or not a dance video will be removed along
+      with, if it keeps happening, the account that posted it. Don't add material you have no right
+      to link to.
+    </p>
+
+    <h2>No guarantees</h2>
+    <p>
+      This runs on a single small machine, as a hobby. It may be slow, it may be down, and data may
+      occasionally be lost despite nightly backups. Learn to dance at your own risk: warm up, and
+      stop if something hurts.
+    </p>
+  } @else {
+    <h1 class="page-title">Privacy</h1>
+    <p class="legal__updated">Last updated {{ updated }}</p>
+
+    <h2>What is stored</h2>
+    <p>
+      If you make an account: your username, name, optional nickname, email address, an optional
+      avatar URL, and a hash of your password — never the password itself. Then whatever you do
+      here: favourites, what you've learned or are working on, ratings, video notes, loops, your
+      practice log, and anything you add to the catalogue.
+    </p>
+    <p>
+      You can browse the whole catalogue without an account, and nothing about you is stored if you
+      do.
+    </p>
+
+    <h2>What it is used for</h2>
+    <p>
+      Running the site, and nothing else. There is no advertising, no analytics service, no
+      tracking pixels, and nothing is sold or shared with anyone. The single email this site can
+      send you is a password reset link, and only when you ask for one.
+    </p>
+
+    <h2>Who can see it</h2>
+    <p>
+      Your profile is private by default. Setting it to public shares your name, nickname, avatar,
+      the dances you've learned and any skill trees you've chosen to share — nothing else, and
+      never your email address or practice log.
+    </p>
+
+    <h2>Other people's players</h2>
+    <p>
+      Videos play in embedded YouTube, TikTok and Instagram players. Those platforms set their own
+      cookies and see their own requests when a video loads; that part is governed by their privacy
+      policies, not this one. This site itself stores only what it needs in your browser: your
+      sign-in token and a few display preferences.
+    </p>
+
+    <h2>Deleting everything</h2>
+    <p>
+      Profile → Account → Delete account removes your account and everything personal attached to
+      it — practice log, notes, loops, favourites, ratings, personal videos and skill trees —
+      immediately and permanently. Dances you added to the shared catalogue stay, with your name
+      detached from them. Copies can survive in the nightly database backups for a few months
+      before those roll off.
+    </p>
+
+    <h2>Getting in touch</h2>
+    <p>
+      This is a one-person project; the fastest route is the feedback button in the corner of any
+      page. If you want your data removed and can't sign in, use it to say so.
+    </p>
+  }
+</div>

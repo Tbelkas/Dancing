@@ -253,6 +253,38 @@
             }
           </div>
         }
+        <!-- Deleting the account. Last card in the column, and the only destructive control on
+             the page — it asks for the password rather than a typed confirmation phrase, since
+             that also stops someone using a borrowed, still-signed-in browser. -->
+        <div class="card danger-card" data-testid="delete-account-card">
+          <h3>Delete account</h3>
+          <p class="setting-desc danger-card__note">
+            Removes your account and everything personal attached to it — practice log, notes,
+            loops, favourites, ratings, personal videos and skill trees. Permanent, and immediate.
+          </p>
+
+          @if (!confirmingDelete()) {
+            <button type="button" class="btn btn--ghost danger-btn" data-testid="delete-account-start"
+                    (click)="startDelete()">Delete my account</button>
+          } @else {
+            @if (deleteError()) {
+              <p class="link-message link-message--error">{{ deleteError() }}</p>
+            }
+            <form (ngSubmit)="deleteAccount()" class="edit-form">
+              <div class="form-group">
+                <label for="delete-password">Confirm with your password</label>
+                <input id="delete-password" data-testid="delete-account-password" type="password"
+                       [(ngModel)]="deletePassword" name="deletePassword" autocomplete="current-password" />
+                <span class="field-hint">Leave empty if you only sign in with Google or Facebook</span>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn--primary danger-btn" data-testid="delete-account-confirm"
+                        [disabled]="deleteBusy()">{{ deleteBusy() ? 'Deleting...' : 'Delete permanently' }}</button>
+                <button type="button" class="btn btn--ghost" (click)="confirmingDelete.set(false)">Cancel</button>
+              </div>
+            </form>
+          }
+        </div>
       </div>
     </div>
   } @else if (loadError()) {
