@@ -58,6 +58,9 @@ builder.Services.AddScoped<IPracticeService, PracticeService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<IImportService, ImportService>();
+// Runs the real browse query every few minutes so the first visitor after a quiet spell doesn't
+// pay the cold-connection cost for everyone (known-issues C).
+builder.Services.AddHostedService<KeepWarmService>();
 
 // Reads a YouTube video's own chapters when a clip is added. Short timeout and a browser-ish
 // UA: the watch page is the only place chapters are published, and a slow lookup must not

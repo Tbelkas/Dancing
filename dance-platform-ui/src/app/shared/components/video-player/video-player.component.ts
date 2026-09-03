@@ -126,7 +126,13 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
   get isTikTok(): boolean { return this.platform === 'tiktok'; }
   get isInstagram(): boolean { return this.platform === 'instagram'; }
 
+  /** Ids are interpolated into an iframe src, and any signed-in user can supply one, so anything
+   *  that isn't the shape TikTok and Instagram actually use is refused rather than escaped —
+   *  a '/' or '..' in there would point the frame at an arbitrary page on those domains. */
+  private static readonly SAFE_VIDEO_ID = /^[A-Za-z0-9_-]{1,64}$/;
+
   get embedUrl(): string {
+    if (!VideoPlayerComponent.SAFE_VIDEO_ID.test(this.videoId ?? '')) return '';
     if (this.isTikTok) {
       return `https://www.tiktok.com/player/v1/${this.videoId}?music_info=0&description=0&rel=0&native_context_menu=0&closed_caption=0`;
     }
@@ -398,9 +404,12 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
     this.player?.setPlaybackRate(rate);
   }
 
-  /** Where the cropped-out header used to point. */
+  /** Where the cropped-out header used to point. Same id check as embedUrl — this one is an
+   *  href a person clicks, so a malformed id must not become a link off to somewhere else. */
   get instagramPostUrl(): string {
-    return `https://www.instagram.com/p/${this.videoId}/`;
+    return VideoPlayerComponent.SAFE_VIDEO_ID.test(this.videoId ?? '')
+      ? `https://www.instagram.com/p/${this.videoId}/`
+      : '';
   }
 
   /** Looping needs a transport to drive; the Instagram embed exposes none. */

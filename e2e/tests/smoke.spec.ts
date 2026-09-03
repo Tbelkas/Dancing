@@ -91,7 +91,36 @@ test.describe('shell + routing @smoke', () => {
   });
 
   test('admin-only route is not reachable signed out', async ({ page }) => {
-    await page.goto('/admin/add-video');
-    await expect(page).not.toHaveURL(/\/admin\/add-video/);
+    for (const route of ['/admin/add-video', '/admin/review']) {
+      await page.goto(route);
+      await expect(page, `${route} should not render signed out`).not.toHaveURL(new RegExp(route));
+    }
+  });
+
+  // The two documents a public site has to be able to point at. They are reachable from the
+  // footer of every page, so the link is part of the assertion, not just the route.
+  test('terms and privacy are reachable from the footer @smoke', async ({ page }) => {
+    await page.goto('/dances');
+
+    await page.getByTestId('footer-terms').click();
+    await expect(page).toHaveURL(/\/terms/);
+    await expect(page.getByRole('heading', { name: 'Terms of use' })).toBeVisible();
+
+    await page.getByTestId('footer-privacy').click();
+    await expect(page).toHaveURL(/\/privacy/);
+    await expect(page.getByRole('heading', { name: 'Privacy' })).toBeVisible();
+  });
+
+  test('a signed-out visitor can ask for a password reset @smoke', async ({ page }) => {
+    await page.goto('/login');
+    await page.getByTestId('login-forgot').click();
+    await expect(page).toHaveURL(/\/forgot-password/);
+    await expect(page.getByTestId('reset-email')).toBeVisible();
+  });
+
+  test('a reset link with no token explains itself instead of showing a dead form', async ({ page }) => {
+    await page.goto('/reset-password');
+    // The failure this guards against is a form that looks fine and can never succeed.
+    await expect(page.getByTestId('reset-error')).toBeVisible();
   });
 });

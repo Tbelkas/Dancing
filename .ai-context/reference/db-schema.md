@@ -12,12 +12,13 @@ unless a composite key is listed.
 | Id | int PK | |
 | Username | string | **unique index** |
 | PasswordHash | string | BCrypt. **Empty for social-only accounts** — `LoginAsync` rejects an empty hash before calling `BCrypt.Verify`, so the password form can't reach them |
-| Email | string? | From an external provider; null for password registrations. Display/recovery only — **never** the identity key |
+| Email | string? | **Required at registration** since 2026-09-03 and unique case-insensitively via the partial functional index `IX_Users_Email_Lower` (`WHERE "Email" IS NOT NULL` — every account predating the column is NULL and would collide otherwise). The recovery channel, and still **never** the identity key |
 | Name | string | |
 | Nickname | string | |
 | IsAdmin | bool | default `false`; the admin gate. Stamped into the JWT as a signed `isAdmin` claim at issuance — **not** re-read per request, so a grant/revoke takes effect on the user's next login |
 | AvatarUrl | string? | |
 | Visibility | enum `ProfileVisibility` | **default `Private`** (`Public=0, Private=1`) |
+| TokensValidFrom | datetime? | Tokens whose `iat` predates this are refused (`UserTokenGuard`). Moved by a password change, a reset, and deletion — this is the only revocation a 30-day stateless token has |
 | DateAdded | datetime | |
 
 Nav: Logins, FavoriteDances, LearnedDances, InProgressDances, MyStyles, Ratings, PracticeSessions.
@@ -39,11 +40,25 @@ a password.
 sign-in. Without it a race on the callback could mint two accounts for the same Google user.
 Also indexed on UserId for the profile page's "connected accounts" lookup.
 
+### PasswordResetToken
+A single-use permission to set a new password. Only the hash of the mailed token is stored, so a
+database dump — or a backup pulled to a laptop — is not a set of working keys.
+
+| Column | Type | Notes |
+|--------|------|-------|
+| Id | int PK | |
+| UserId | int FK → User | **cascade delete** |
+| TokenHash | string | base64url SHA-256 of the token. Indexed; lookups are always by hash |
+| CreatedAt / ExpiresAt | datetime | 2-hour lifetime |
+| UsedAt | datetime? | Set the moment it is spent. Also set on every outstanding token when a new one is issued, so asking again kills the link already in flight |
+
 ### Dance
 | Column | Type | Notes |
 |--------|------|-------|
 | Id | int PK | |
-| Name | string | duplicates currently allowed (see known-issues #5) |
+| Name | string | Duplicates within one style are refused since 2026-09-03 (known-issues B); the same name in a *different* style is still legal |
+| OwnerUserId | int? FK → User | Who added it; NULL for the seeded catalogue. **SetNull** on delete — a contributed dance outlives its author, since other people may have favourited it |
+| ReviewState | string | `"approved"` / `"pending"`. A non-admin's dance starts pending; every public read filters through `DanceService.Visible(...)`. **Not** a global query filter, unlike Video — the author has to keep seeing their own. Column default is `"approved"` so the psql seeding scripts keep working |
 | Slug | string | **unique index**; from `SlugGenerator` |
 | Description | string? | |
 | Difficulty | enum `DifficultyLevel` | `None=0, Beginner=1, Intermediate=2, Advanced=3` |

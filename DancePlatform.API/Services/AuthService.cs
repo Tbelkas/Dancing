@@ -118,7 +118,13 @@ public class AuthService : IAuthService
         });
         await _db.SaveChangesAsync(ct);
 
-        var uiUrl = (_config["App:UiUrl"] ?? "http://localhost:4200").TrimEnd('/');
+        // App:UiUrl is only *required* to be set when a social provider is configured (see
+        // Program.cs), and social sign-in is dormant — so fall back to Cors:Origin, which
+        // production must already have right or the SPA could not call the API at all. Without
+        // this fallback every reset mail from the Pi would link to localhost.
+        var uiUrl = (_config["App:UiUrl"] is { Length: > 0 } configured && !configured.Contains("localhost", StringComparison.OrdinalIgnoreCase)
+            ? configured
+            : _config["Cors:Origin"] ?? _config["App:UiUrl"] ?? "http://localhost:4200").TrimEnd('/');
         var link = $"{uiUrl}/reset-password?token={Uri.EscapeDataString(token)}";
         var who = string.IsNullOrWhiteSpace(user.Nickname) ? user.Name : user.Nickname;
         var body =

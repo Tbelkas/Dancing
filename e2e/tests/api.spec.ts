@@ -189,3 +189,59 @@ test.describe('api health @smoke', () => {
     expect(res.status()).toBe(401);
   });
 });
+
+/**
+ * Account recovery and the health endpoint. Everything here is safe against the production
+ * database: the reset request names an address that cannot have an account, so no token row is
+ * written and no mail is sent, and the reset attempt uses a token that was never issued.
+ */
+test.describe('account recovery @smoke', () => {
+  test('the health endpoint reports the database', async ({ request }) => {
+    const res = await request.get('health');
+    expect(res.status()).toBe(200);
+    expect((await res.json()).database).toBe(true);
+  });
+
+  test('a reset request answers the same for an address with no account', async ({ request }) => {
+    const res = await request.post('auth/forgot-password', {
+      data: { email: 'nobody-e2e@dance-platform.invalid' },
+    });
+    // 202 and a non-committal message. Anything that distinguished a known address from an
+    // unknown one would turn this endpoint into a way to enumerate who has an account.
+    expect(res.status()).toBe(202);
+    expect(await res.text()).not.toContain('not found');
+  });
+
+  test('an invented reset token is refused', async ({ request }) => {
+    const res = await request.post('auth/reset-password', {
+      data: { token: 'this-token-was-never-issued', newPassword: 'irrelevant-but-long-enough' },
+    });
+    expect(res.status()).toBe(400);
+  });
+
+  test('registration will not create an account without an email', async ({ request }) => {
+    const res = await request.post('auth/register', {
+      data: { username: `e2e-no-email-${Date.now()}`, password: 'password123', name: 'E2E' },
+    });
+    // 400 from model validation — the account must not be creatable, since an account with no
+    // address can never be recovered. A 201 here would leave a real row in production.
+    expect(res.status()).toBe(400);
+  });
+
+  test('changing a password requires authentication', async ({ request }) => {
+    const res = await request.post('auth/change-password', {
+      data: { currentPassword: 'x', newPassword: 'yyyyyyyy' },
+    });
+    expect([401, 403]).toContain(res.status());
+  });
+
+  test('deleting an account requires authentication', async ({ request }) => {
+    const res = await request.delete('profile', { data: { password: 'x' } });
+    expect([401, 403]).toContain(res.status());
+  });
+
+  test('the review queue is admin-only', async ({ request }) => {
+    const res = await request.get('dances/pending');
+    expect([401, 403]).toContain(res.status());
+  });
+});

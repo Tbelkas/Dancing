@@ -6,6 +6,17 @@
   "Jwt": {
     "Key": "a-local-dev-signing-key-at-least-32-characters-long"
   },
+  "_email": "Optional. With no SMTP host the password-reset flow still works end to end — the mail is written to the log at Warning instead of being sent, so the link is in the console. Production sets Email__From and Email__Smtp__* as environment variables.",
+  "Email": {
+    "From": "no-reply@example.com",
+    "Smtp": {
+      "Host": "smtp.example.com",
+      "Port": 587,
+      "User": "YOUR_SMTP_USERNAME",
+      "Password": "YOUR_SMTP_PASSWORD",
+      "UseSsl": true
+    }
+  },
   "_social_signin": "Optional. Leave a provider blank and its sign-in button simply isn't offered. Google redirect URI to register: http://localhost:5000/api/auth/external/google/callback",
   "Authentication": {
     "Google": {

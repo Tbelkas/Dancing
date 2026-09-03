@@ -121,7 +121,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 86 attributes are a contract. Treat them like a public API.**
+**These 112 attributes are a contract. Treat them like a public API.**
 
 The personal-skill-tree rows below (`roadmap-new` … `builder-step-clip`, and
 `profile-shared-roadmaps`) are **dormant**: the markup still carries them, but it is gated on
@@ -133,6 +133,13 @@ they are — the tests come back with the feature.
 | `nav-browse`, `nav-my-dances`, `nav-sign-in`, `nav-roadmaps` | `app.component.html` | Header nav links |
 | `user-menu-button`, `sign-out` | `app.component.html` | Account menu |
 | `login-username`, `login-password`, `login-submit`, `login-error` | `login.component.html` | Sign-in form |
+| `login-email`, `login-forgot` | `login.component.html` | The address field, which appears in register mode only, and the link to `/forgot-password`, which appears in sign-in mode only. Neither is ever visible at the same time as the other |
+| `reset-email`, `reset-submit`, `reset-sent`, `reset-password`, `reset-confirm`, `reset-save`, `reset-error` | `password-reset.component.html` | Both halves of password recovery. `reset-email`/`reset-submit` are the `/forgot-password` form and `reset-sent` replaces them once it is accepted; `reset-password`/`reset-confirm`/`reset-save` are the `/reset-password` form. `reset-error` appears on both, and on `/reset-password` with no token in the URL it is the **only** thing that renders |
+| `footer-terms`, `footer-privacy` | `app.component.html` | The two legal links in the site footer — on every page, at every viewport |
+| `account-card`, `account-no-email`, `account-email-edit`, `account-email-input`, `account-email-save`, `account-password-edit`, `account-new-password`, `account-password-save` | `profile.component.html` | The Account card: the address, the "this account cannot be recovered" warning (**only** on an account with no email), and the password change |
+| `delete-account-card`, `delete-account-start`, `delete-account-password`, `delete-account-confirm` | `profile.component.html` | Account deletion. **Never assert past `delete-account-start` in the authed suite** — the authed tests run against the production database and confirming would delete the test account |
+| `nav-admin-review`, `review-list`, `review-empty`, `review-approve`, `review-reject`, `review-message` | `app.component.html` + `admin-review.component.html` | The review queue. Admin-only, so the anon suite can only assert the route redirects. `review-list` and `review-empty` are mutually exclusive |
+| `dance-pending` | `dance-detail.component.html` | The "Awaiting review" badge. Visible only to a dance's own author or an admin — nobody else can load such a page at all |
 | `login-google`, `login-facebook` | `login.component.html` | Social sign-in buttons. Rendered from `GET /auth/external/providers`, so a provider with no server-side credentials produces **no button at all** — assert on them conditionally, never unconditionally |
 | `finish-signup-username`, `finish-signup-submit`, `finish-signup-error` | `finish-signup.component.html` | The username step a first-time social sign-in lands on. Reachable only with a valid ticket in the URL fragment; without one the page redirects to `/login` |
 | `auth-callback` | `auth-callback.component.ts` | The post-provider landing page. Consumes the token from the fragment and redirects — it is never a resting state |
@@ -153,7 +160,7 @@ they are — the tests come back with the feature.
 | `roadmap-view-tree`, `roadmap-view-list`, `roadmap-detail-panel` | `roadmap-detail.component.html` | The view toggle and the tree's detail panel. **All three are signed-in only** — signed out the page renders the bare tree, so a test that needs the list view or a step's videos must use the `authed` project |
 | `roadmap-tree-hint` | `roadmap-detail.component.html` | The signed-out line under the tree. Its presence is how the anon suite proves the teaser state is still the teaser state |
 | `roadmap-tree`, `tree-node` | `roadmap-tree.component.html` | The skill-tree SVG and each node `<g>` in it. The component is reused as the builder's live preview, so these also match on `/roadmaps/new` and `/roadmaps/:slug/edit` |
-| `signin-dialog`, `signin-username`, `signin-password`, `signin-submit`, `signin-error` | `sign-in-dialog.component.html` | The in-place sign-in modal a signed-out visitor gets when they touch a roadmap node — distinct ids from `login-*`, which anchor the `/login` page |
+| `signin-dialog`, `signin-username`, `signin-email`, `signin-password`, `signin-submit`, `signin-error` | `sign-in-dialog.component.html` | The in-place sign-in modal a signed-out visitor gets when they touch a roadmap node — distinct ids from `login-*`, which anchor the `/login` page |
 | `camera-toggle`, `stage-fullscreen` | `video-player` + `local-video-player` templates | The Camera tool button and the stage-fullscreen button — **on both players** |
 | `camera-pane`, `camera-close`, `camera-error`, `camera-notice`, `camera-replay`, `camera-exit-fullscreen` | `camera-pane.component.html` | The camera pane, its close button, its failure panel, its fallback notice, the delayed-replay `<video>`, and the fullscreen exit it carries |
 

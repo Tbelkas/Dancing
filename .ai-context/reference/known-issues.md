@@ -13,20 +13,51 @@ could create styles) — now fixed to `[Authorize]`. These three are intentional
 add flow. Don't "promote" them to admin-only without reworking that flow. (PUT/DELETE siblings
 and `POST /musicalstyles` / `POST /instructors` remain `[RequireAdmin]`.)
 
-### B. Duplicate dances allowed (data quality) — was known-issues #5
-API accepts duplicate dance names and auto-suffixes the slug (`reebok`, `reebok-2`…). Prod
-had Reebok ×5, Butterfly ×2, etc.; cleaned up by hand on the Pi 2026-06-13 (backup first,
-kept only copies that had videos). **Still suggested:** warn on name collision in the API or
-admin create form. Don't assume dance names are unique.
+Since 2026-09-03 that open door has a gate behind it: a dance created by a non-admin is
+`ReviewState = "pending"` and `OwnerUserId = <them>`. Its author sees it everywhere they already
+would; browse, search, `names`, recommendations, neighbours and the `grandTotal` count skip it
+until an admin approves it at `/admin/review`. This is **not** a global query filter (Video's
+quarantine is) — see the comment on `Dance.ReviewState` for why. Any *new* dance listing must go
+through `DanceService.Visible(...)`, or it will leak unreviewed rows onto the public site.
 
-### C. Cold-start API latency (observation, not a bug)
-First request after idle intermittently takes 2–4 s (cold EF/connection). Loading states
-cover it. A keep-warm ping or server tuning would help first impressions. Earlier-suspected
-"infinite LOADING on dance detail" was just this latency.
+### B. ~~Duplicate dances allowed~~ ✅ RESOLVED (2026-09-03)
+API accepted duplicate dance names and auto-suffixed the slug (`reebok`, `reebok-2`…). Prod had
+Reebok ×5, Butterfly ×2, etc.; cleaned up by hand on the Pi 2026-06-13. `POST /dances` now
+refuses a name that already exists **in one of the requested styles** and returns 409 with the
+existing dance in the body, so the caller can select it instead. Admins are exempt — a
+deliberate duplicate is curation. Same-name-in-a-different-style is still legal (that's what
+per-style slugs are for), so **don't assume dance names are globally unique.**
+
+### C. ~~Cold-start API latency~~ ✅ ADDRESSED (2026-09-03)
+First request after idle intermittently took 2–4 s (cold EF/connection). `KeepWarmService`
+(a hosted background service) now runs the real browse query every 4 minutes, so the pool has a
+live connection and the compiled query stays compiled. In-process on purpose — a cron job or
+systemd timer on the Pi is a thing to remember on a rebuild and a thing that can stop silently.
+Earlier-suspected "infinite LOADING on dance detail" was just this latency.
 
 ### D. Slug doesn't reset on rename
 Admin edit regenerates the slug from the name, but a rename that collides with nothing won't
 free/reset an already-suffixed slug without a manual DB update or small API tweak. Cosmetic.
+
+### E. Nothing watches the Pi
+`GET /api/health` exists now (200 + `{database:true}`, or 503 when Postgres is unreachable) but
+**nothing calls it on a schedule**. There is no alerting: if the Pi goes down, the first anyone
+knows is a person reporting it. The e2e smoke run (`e2e-dance.bat`, schedulable hourly) is the
+closest thing to a monitor.
+
+## Rules the whole auth surface now depends on
+
+- **Tokens carry `iat`, and `TokenService` stamps it explicitly.** The `JwtSecurityToken`
+  constructor does *not* add one. `UserTokenGuard` compares it against `User.TokensValidFrom` to
+  retire tokens issued before a password change/reset — drop the claim and revocation silently
+  stops working (or, worse, retires everybody).
+- **The cutoff is cached for 60s** (`UserTokenGuard`), so anything that moves `TokensValidFrom`
+  must also call `UserTokenGuard.Forget(cache, userId)` or the change takes up to a minute.
+- **`/auth/forgot-password` must answer identically for a known and an unknown address** (202,
+  same body). Any difference — status, wording, timing shape — turns it into an account oracle.
+- **Rate limiting partitions on the caller's address, which only works because
+  `UseForwardedHeaders` runs first.** Apache proxies from localhost; remove it and every visitor
+  shares one bucket, so the first busy minute locks out the whole site.
 
 ## Fixed (kept here as regression tripwires — don't reintroduce)
 

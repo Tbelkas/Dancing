@@ -5,18 +5,30 @@ Auth column: **—** = anonymous · **Auth** = any logged-in user (`[Authorize]`
 **Admin** = `[RequireAdmin]` (DB `IsAdmin` check). Bodies are the `DTOs/` request types;
 responses are `XxxDto` (never raw entities).
 
-> ⚠️ **Known auth gaps (see known-issues):** `POST /dances`, `POST /videos`, `POST /styles`
-> currently have **no** auth attribute → callable anonymously, even though their
-> Update/Delete are Admin-only and the analogous `POST /musicalstyles` & `POST /instructors`
-> *are* Admin-only. Treat this as a bug to fix, not a pattern to copy.
+> The auth gap this warning used to describe is closed (known-issues A): `POST /dances`,
+> `POST /videos` and `POST /styles` are all `[Authorize]`. They are deliberately **not**
+> Admin-only — My Dances is a self-service add flow — and what keeps that safe is that a
+> non-admin's dance is created `pending` and stays out of every public listing until reviewed.
+
+> **Throttling.** `/auth/*` is capped at 10 requests / 5 min per caller, `/auth/login` at 60
+> (guessing is caught by failed-attempt counting in `LoginThrottle`, not by volume),
+> `POST /videos/{id}/view` at 30/min, and everything else at 600/min. Over the limit is a **429**
+> with `Retry-After`. Partitioning is per signed-in user, else per IP — which depends on
+> `UseForwardedHeaders`, since Apache proxies from localhost.
 
 ## Auth — `/api/auth`
 | Method | Path | Auth | Body | Returns |
 |--------|------|------|------|---------|
 | POST | `/auth/login` | — | `LoginRequest { username, password }` | `AuthResponse { token, userId, username }` (400 on bad creds) |
-| POST | `/auth/register` | — | `RegisterRequest { username, password, name, nickname }` | `AuthResponse` |
+| POST | `/auth/register` | — | `RegisterRequest { username, email, password, name, nickname }` | `AuthResponse`; **409** username taken *or* email already registered. `email` is required |
+| POST | `/auth/forgot-password` | — | `{ email }` | **202 always**, known address or not. Mails a single-use link valid 2 h; only its SHA-256 is stored |
+| POST | `/auth/reset-password` | — | `{ token, newPassword }` | `AuthResponse` (signs them straight in); 400 if the token is unknown, expired, superseded or spent |
+| POST | `/auth/change-password` | Auth | `{ currentPassword, newPassword }` | `AuthResponse` — **a new token**, because the change retires every token issued before it, including the caller's. `currentPassword` may be empty for a provider-only account setting one |
 
-JWT claims: `NameIdentifier`=userId, `Name`=username, `isAdmin`=`"true"`/`"false"` (signed).
+JWT claims: `NameIdentifier`=userId, `Name`=username, `isAdmin`=`"true"`/`"false"` (signed),
+plus `iat` (stamped explicitly in `TokenService.Write` — the constructor does not add one).
+`UserTokenGuard` rejects any token whose `iat` predates `User.TokensValidFrom`, which is how a
+password change, a reset, or a deletion signs other devices out of a 30-day stateless token.
 The FE reads admin from the token claim (`jwtIsAdmin()`); there is no role endpoint.
 All tokens — password *and* social — are issued by `ITokenService.CreateAccessToken`.
 
@@ -45,9 +57,11 @@ sent to the server, so it stays out of Apache's access log and out of `Referer` 
 |--------|------|------|-------|
 | GET | `/dances` | — | all dances (`DanceDto[]`) |
 | GET | `/dances/{idOrSlug}` | — | by numeric id **or** slug; 404 if missing |
-| POST | `/dances` | ⚠️ **none** | `CreateDanceRequest` → created `DanceDto` |
+| POST | `/dances` | Auth | `CreateDanceRequest` → created `DanceDto`. A non-admin's lands `reviewState: "pending"` with `ownerUserId` set. **409** when the name already exists in one of the requested styles — the body carries `{ message, dance }` with the existing one |
+| GET | `/dances/pending` | Admin | The review queue (`DanceDto[]`, oldest first) |
+| POST | `/dances/{id}/review` | Admin | `{ reviewState: "approved" \| "pending" }` |
 | PUT | `/dances/{id}` | Admin | `UpdateDanceRequest` |
-| DELETE | `/dances/{id}` | Admin | |
+| DELETE | `/dances/{id}` | Auth | Admin deletes anything; a contributor may withdraw **their own dance while it is still pending**, otherwise 404 |
 | POST | `/dances/{id}/favorite` | Auth | toggle favorite for current user |
 | POST | `/dances/{id}/learned` | Auth | toggle learned |
 | POST | `/dances/{id}/inprogress` | Auth | toggle in-progress |
@@ -55,6 +69,14 @@ sent to the server, so it stays out of Apache's access log and out of `Referer` 
 Ratings are **per video**, not per dance — see `POST /videos/{id}/rate` below. `DanceDto`
 still exposes `averageRating`/`ratingCount`, now aggregated from the dance's videos' ratings,
 plus per-user status flags when authenticated.
+
+Every dance read is scoped by `DanceService.Visible(...)`: approved dances, plus the caller's
+own pending ones, plus everything for an admin. `grandTotal` counts approved only.
+
+## Health — `/api/health`
+| Method | Path | Auth | Returns |
+|--------|------|------|---------|
+| GET | `/health` | — | `200 { status: "healthy", database: true }`, or **503** `{ status: "degraded", database: false }` when Postgres is unreachable |
 
 ## Search — `/api/search`
 | Method | Path | Auth | Query params |
@@ -155,7 +177,9 @@ per-request**, not stored. `dance` is null when the catalog has no move for the 
 | Method | Path | Auth | Returns |
 |--------|------|------|---------|
 | GET | `/profile` | Auth | `UserProfileDto` (own profile) |
-| PUT | `/profile` | Auth | `UpdateProfileRequest { name, nickname, avatarUrl, visibility }` |
+| PUT | `/profile` | Auth | `UpdateProfileRequest { name, nickname, avatarUrl, visibility, useBetaViewer }` |
+| PUT | `/profile/email` | Auth | `{ email }` → `UserProfileDto`; **409** if another account already has that address. Its own endpoint because it is the one profile field that can collide |
+| DELETE | `/profile` | Auth | `{ password }` → 204. Erases the account and everything personal by cascade; contributed dances survive with `ownerUserId` cleared. **400** on a wrong password; an empty one is accepted only for a provider-only account |
 | GET | `/profile/my-dances` | Auth | `MyDancesDto` (favorites / learned / in-progress lists) |
 
 ## Public users — `/api/users`

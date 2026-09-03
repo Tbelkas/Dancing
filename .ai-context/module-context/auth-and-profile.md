@@ -4,22 +4,28 @@
 > profile editing, or public profiles.
 
 ## Backend
-- Controllers: `AuthController` (`/auth/login`, `/auth/register`),
+- Controllers: `AuthController` (`/auth/login`, `/auth/register`, `/auth/forgot-password`,
+  `/auth/reset-password`, `/auth/change-password`),
   `ExternalAuthController` (`/auth/external/*` — social sign-in),
-  `ProfileController` (`[Authorize]`: `/profile`, `PUT /profile`, `/profile/my-dances`),
+  `ProfileController` (`[Authorize]`: `/profile`, `PUT /profile`, `PUT /profile/email`,
+  `DELETE /profile`, `/profile/my-dances`),
   `UsersController` (`/users/{username}` — public)
 - Services: `IAuthService`/`AuthService` (BCrypt verification), `ITokenService`/`TokenService`
   (**all** JWT issuance — both the password and social paths go through it, so the `isAdmin`
   claim is stamped in exactly one place), `IUserService`/`UserService`,
   `ExternalAuth/` (`IExternalAuthProvider` + `GoogleAuthProvider`, `FacebookAuthProvider`,
-  `ExternalAuthService`, `OAuthStateProtector`)
+  `ExternalAuthService`, `OAuthStateProtector`), `ILoginThrottle`/`LoginThrottle` (failed-attempt
+  counting), `IUserTokenGuard`/`UserTokenGuard` (revocation), `IEmailSender`/`SmtpEmailSender`
 - Filter: `Filters/RequireAdminAttribute.cs` (checks the signed `isAdmin` claim)
-- Models: `User` (+ `ProfileVisibility` enum), `UserLogin`
+- Models: `User` (+ `ProfileVisibility` enum; `Email`, `TokensValidFrom`), `UserLogin`,
+  `PasswordResetToken`
 - DTOs: `DTOs/Auth/` (`LoginRequest`, `RegisterRequest`, `AuthResponse`, `ExternalAuthDtos`),
   `DTOs/User/` (`UserProfileDto`, `PublicProfileDto`, `UpdateProfileRequest`, `MyDancesDto`)
 
 ## Frontend
-- Pages: `pages/login/` (login+register toggle + social buttons), `pages/auth-callback/`
+- Pages: `pages/login/` (login+register toggle + social buttons),
+  `pages/password-reset/` (both `/forgot-password` and `/reset-password`),
+  `pages/legal/` (both `/terms` and `/privacy`), `pages/auth-callback/`
   (consumes the token from the redirect fragment), `pages/finish-signup/` (username step for a
   first-time social sign-in), `pages/profile/` (guarded, own profile — also "Connected accounts"),
   `pages/user-profile/` (public, `/users/:username`)
@@ -65,7 +71,22 @@ no email, so personal accounts — nearly all of them — have no API path. Don'
   bearer token fails audience validation before reaching any `[Authorize]` endpoint.
 - **A social-only account has an empty `PasswordHash`.** `AuthService.LoginAsync` rejects an
   empty hash *before* calling `BCrypt.Verify` — otherwise the password form could reach it.
-- Unlinking the last login method is refused (`UnlinkResult.WouldLockOut`); there is no password
-  reset to fall back on. The Facebook data-deletion callback bypasses that guard by design.
+- Unlinking the last login method is refused (`UnlinkResult.WouldLockOut`). The Facebook
+  data-deletion callback bypasses that guard by design.
+- **Every password account has an email**, required at registration and unique case-insensitively
+  (partial functional index `IX_Users_Email_Lower`, `WHERE "Email" IS NOT NULL` — accounts that
+  predate the column are all NULL and would collide under a plain unique index). Accounts created
+  before 2026-09-03 have none and cannot be recovered until they add one; the profile page says so.
+- **Reset tokens are stored as SHA-256 only**, are single-use, expire in 2 h, and a new request
+  retires any still in flight. `/auth/forgot-password` answers 202 for every address — a
+  different answer for a known one is an account oracle.
+- **Setting a password retires the tokens issued before it.** `User.TokensValidFrom` + the `iat`
+  claim, checked in `UserTokenGuard` from `OnTokenValidated` (cached 60 s; anything that moves the
+  cutoff must call `UserTokenGuard.Forget`). Change/reset hand back a **fresh token**, so the
+  caller's own session survives its own invalidation.
+- **Guessing is caught by failure count, not volume.** `LoginThrottle` locks out after 8 failures
+  in 15 min, counted per address *and* per username; a correct password clears both counters. The
+  rate limiter in front of `/auth/login` only bounds BCrypt work — a limit tight enough to catch a
+  dictionary run would also lock out a shared address and the e2e suite.
 - A provider with no configured credentials is absent from `/auth/external/providers`, renders no
   button, and 404s on `/start` — so a dev box with no secrets degrades to the password form.
