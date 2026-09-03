@@ -200,6 +200,24 @@
         <!-- Player settings -->
         <div class="card">
           <h3>Settings</h3>
+          <!-- Only an account that actually has the claim sees this; for everyone else the
+               row does not exist, so it never advertises a mode they cannot enter. -->
+          @if (role.isSuperAdmin()) {
+            <div class="setting-row" data-testid="setting-admin-mode">
+              <div class="setting-text">
+                <span class="setting-label">Admin mode</span>
+                <span class="setting-desc">On, you get the review queue, Add Video, and the edit controls throughout the catalogue. Off, the site looks exactly as it does to a normal user — useful for checking a page the way people actually meet it. Your account keeps its rights either way, and this is remembered on this device.</span>
+              </div>
+              <div class="setting-choice" role="group" aria-label="Admin mode">
+                <button type="button" class="choice-btn" [class.active]="role.adminMode()"
+                        (click)="setAdminMode(true)"
+                        [attr.aria-pressed]="role.adminMode()">On</button>
+                <button type="button" class="choice-btn" [class.active]="!role.adminMode()"
+                        (click)="setAdminMode(false)"
+                        [attr.aria-pressed]="!role.adminMode()">Off</button>
+              </div>
+            </div>
+          }
           <div class="setting-row">
             <div class="setting-text">
               <span class="setting-label">Use Dance Platform video viewer (beta) where possible</span>

@@ -57,6 +57,15 @@ test.describe('authenticated', () => {
     await expect(page.getByTestId('delete-account-confirm')).toBeVisible();
   });
 
+  test('the admin-mode switch is not offered to an ordinary account', async ({ authedPage: page }) => {
+    // This suite signs in as a non-admin, which is exactly the case worth pinning: the
+    // switch that hides the admin UI must not appear for someone who has no admin UI to
+    // hide. If the @if guarding it is ever loosened to "signed in", this fails.
+    await page.goto('/profile');
+    await expect(page.getByRole('heading', { name: 'My Profile', level: 1 })).toBeVisible();
+    await expect(page.getByTestId('setting-admin-mode')).toHaveCount(0);
+  });
+
   test('a dance added by a non-admin stays out of the public catalogue', async ({ authedPage: page, request }) => {
     const login = await request.post(`${API_URL}/auth/login`, {
       data: { username: USERNAME, password: PASSWORD },

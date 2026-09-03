@@ -8,6 +8,7 @@ import { catchError } from 'rxjs/operators';
 import { ProfileService } from '../../core/services/profile.service';
 import { PracticeService } from '../../core/services/practice.service';
 import { AuthService } from '../../core/services/auth.service';
+import { RoleService } from '../../core/services/role.service';
 import { UserProfile } from '../../models/user.model';
 import { ExternalProvider, LinkedAccounts } from '../../models/external-auth.model';
 import { PracticeSession } from '../../models/practice-session.model';
@@ -87,7 +88,8 @@ export class ProfileComponent implements OnInit {
     private profileService: ProfileService,
     private practiceService: PracticeService,
     private auth: AuthService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    public role: RoleService
   ) {}
 
   /** False when a single social login is the account's only way in — disconnecting it would
@@ -289,6 +291,12 @@ export class ProfileComponent implements OnInit {
   }
 
   /** Saved on click rather than through the edit form — it's a player preference, not identity. */
+  /** UI-only: hides the admin surfaces so the site can be walked as a normal user meets
+   *  it. The account keeps its rights and the toggle stays here to switch back. */
+  setAdminMode(value: boolean): void {
+    this.role.setAdminMode(value);
+  }
+
   setBetaViewer(value: boolean): void {
     const p = this.profile();
     if (!p || p.useBetaViewer === value || this.savingViewerPref()) return;
