@@ -36,6 +36,104 @@ public class VideoService : IVideoService
     public Task<List<VideoLibraryItemDto>> GetGlobalAsync() =>
         ProjectLibraryAsync(_db.Videos.Where(v => v.OwnerUserId == null));
 
+    // --- The intake review queue -------------------------------------------
+    // Both of these run IgnoreQueryFilters(): the global filter in AppDbContext exists to keep
+    // held-back videos off the site, so the one surface whose whole job is to look at them has
+    // to opt out. Scoped to global videos — someone's private addition is theirs, not queue work.
+
+    public async Task<List<PendingVideoDto>> GetPendingAsync(string state)
+    {
+        var wanted = NormalizeReviewState(state) ?? "pending";
+        var rows = await ProjectPending(
+                _db.Videos.IgnoreQueryFilters()
+                    .Where(v => v.OwnerUserId == null && v.ReviewState == wanted))
+            // Reach first: a video on a dance people have favourited is worth the reviewer's
+            // attention before one on a dance nobody has found. Then the dances with no
+            // approved video at all, which are empty pages until something here is let through.
+            .OrderByDescending(v => v.DanceFavoriteCount)
+            .ThenBy(v => v.DanceVideoCount)
+            .ThenByDescending(v => v.ViewCount)
+            .ThenBy(v => v.Id)
+            .ToListAsync();
+        return Finish(rows);
+    }
+
+    public async Task<PendingVideoDto?> SetReviewStateAsync(int id, string state, string? note)
+    {
+        var normalized = NormalizeReviewState(state);
+        if (normalized is null) return null;
+
+        var video = await _db.Videos.IgnoreQueryFilters().FirstOrDefaultAsync(v => v.Id == id);
+        if (video is null) return null;
+
+        video.ReviewState = normalized;
+        // Stamped even when re-opening a decision: "looked at, and put back" is itself a fact
+        // worth keeping, and a blank note clears a stale one rather than leaving it to mislead.
+        video.ReviewedAt = DateTime.UtcNow;
+        video.ReviewNote = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+        await _db.SaveChangesAsync();
+
+        // A newly approved video joins its dance's rating average, which is denormalized.
+        await RecomputeDanceRatingAsync(video.DanceId);
+
+        var rows = await ProjectPending(_db.Videos.IgnoreQueryFilters().Where(v => v.Id == id)).ToListAsync();
+        return Finish(rows).FirstOrDefault();
+    }
+
+    private static string? NormalizeReviewState(string? state) => state?.Trim().ToLowerInvariant() switch
+    {
+        "approved" => "approved",
+        "rejected" => "rejected",
+        "pending" => "pending",
+        _ => null
+    };
+
+    // Style slug and the flag list are both post-processing: SlugGenerator can't run inside an
+    // EF query, and QualityFlags is a comma-joined column that only means anything split.
+    private static List<PendingVideoDto> Finish(List<PendingVideoDto> rows)
+    {
+        foreach (var r in rows)
+        {
+            r.StyleSlug = string.IsNullOrEmpty(r.StyleSlug) ? string.Empty : SlugGenerator.Slugify(r.StyleSlug);
+            r.QualityFlags = r.RawFlags is null
+                ? new List<string>()
+                : r.RawFlags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        }
+        return rows;
+    }
+
+    private static IQueryable<PendingVideoDto> ProjectPending(IQueryable<Video> source) =>
+        source.Select(v => new PendingVideoDto
+        {
+            Id = v.Id,
+            Title = v.Title,
+            VideoId = v.VideoId,
+            Platform = v.Platform,
+            VideoType = v.VideoType,
+            Description = v.Description,
+            DateAdded = v.DateAdded,
+            ViewCount = v.ViewCount,
+            StartTime = v.StartTime,
+            EndTime = v.EndTime,
+            DurationSeconds = v.DurationSeconds,
+            ReviewState = v.ReviewState,
+            QualityScore = v.QualityScore,
+            RawFlags = v.QualityFlags,
+            ReviewedAt = v.ReviewedAt,
+            ReviewNote = v.ReviewNote,
+            DanceId = v.DanceId,
+            DanceName = v.Dance.Name,
+            DanceSlug = v.Dance.Slug,
+            // The style NAME here; Finish() slugifies it in memory.
+            StyleSlug = v.Dance.DanceStyles.OrderBy(ds => ds.StyleId).Select(ds => ds.Style.Name).FirstOrDefault() ?? string.Empty,
+            DanceFavoriteCount = v.Dance.FavoriteCount,
+            DanceVideoCount = v.Dance.Videos.Count(o => o.ReviewState == "approved" && o.OwnerUserId == null),
+            Segments = v.Segments
+                .OrderBy(s => s.StartTime)
+                .Select(s => new VideoSegmentDto { Id = s.Id, Label = s.Label, StartTime = s.StartTime, EndTime = s.EndTime })
+                .ToList()
+        });
+
     // Library listing: newest first, with the fields needed to render a row and link back to
     // the dance. StyleSlug is slugified in memory (SlugGenerator can't run inside an EF query),
     // so we pull the primary style name in the projection and convert after materializing.

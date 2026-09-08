@@ -18,6 +18,20 @@ public interface IVideoService
     Task<List<VideoLibraryItemDto>> GetMineAsync(int userId);
     /// <summary>All global (curated) videos, newest first — admin library view.</summary>
     Task<List<VideoLibraryItemDto>> GetGlobalAsync();
+
+    /// <summary>
+    /// Videos the intake gate is holding back, highest-reach first — the review queue. Reaches
+    /// past the global query filter by design; these rows exist precisely because they are
+    /// invisible to every other query.
+    /// </summary>
+    /// <param name="state">"pending" (default) or "rejected", to look back over refusals.</param>
+    Task<List<PendingVideoDto>> GetPendingAsync(string state);
+
+    /// <summary>
+    /// Publishes or refuses a held-back video, stamping who-looked-and-when. Returns null when
+    /// there is no such video.
+    /// </summary>
+    Task<PendingVideoDto?> SetReviewStateAsync(int id, string state, string? note);
     Task<List<VideoChapterDto>> GetRelatedAsync(int id, int? userId);
     Task<VideoDto?> GetByIdAsync(int id, int? userId);
     /// <param name="honourGate">

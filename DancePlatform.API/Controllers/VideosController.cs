@@ -52,6 +52,24 @@ public class VideosController : AppControllerBase
     public async Task<IActionResult> GetGlobal() =>
         Ok(await _videoService.GetGlobalAsync());
 
+    /// <summary>
+    /// The intake review queue: videos the quality gate quarantined, highest-reach first.
+    /// Until this existed the only way to clear that queue was scripts/chip_ui.py on the
+    /// machine the pipeline runs on, which meant the queue could only be worked at a desk.
+    /// </summary>
+    [RequireAdmin]
+    [HttpGet("pending")]
+    public async Task<IActionResult> GetPending([FromQuery] string state = "pending") =>
+        Ok(await _videoService.GetPendingAsync(state));
+
+    [RequireAdmin]
+    [HttpPost("{id}/review")]
+    public async Task<IActionResult> Review(int id, [FromBody] ReviewVideoRequest request)
+    {
+        var video = await _videoService.SetReviewStateAsync(id, request.ReviewState, request.Note);
+        return video is null ? NotFound() : Ok(video);
+    }
+
     [HttpGet("{id}/related")]
     public async Task<IActionResult> GetRelated(int id) =>
         Ok(await _videoService.GetRelatedAsync(id, CurrentUserId));

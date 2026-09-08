@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Video, VideoChapter, VideoLibraryItem, VideoNote, VideoSegment, VideoType, YoutubeChapters } from '../../models/video.model';
+import { PendingVideo } from '../../models/pending-video.model';
 import { environment } from '../../../environments/environment';
 
 export interface SegmentPayload {
@@ -59,6 +60,19 @@ export class VideoService {
   /** All global (curated) videos — admin only. */
   getGlobal(): Observable<VideoLibraryItem[]> {
     return this.http.get<VideoLibraryItem[]>(`${this.base}/global`);
+  }
+
+  /**
+   * Admin: the intake review queue — videos the quality gate quarantined, highest-reach first.
+   * `state` looks back over refusals ('rejected') instead of the open queue.
+   */
+  getPending(state: 'pending' | 'rejected' = 'pending'): Observable<PendingVideo[]> {
+    return this.http.get<PendingVideo[]>(`${this.base}/pending`, { params: { state } });
+  }
+
+  /** Admin: publish or refuse a held-back video. Resolves to the row in its new state. */
+  review(id: number, reviewState: 'approved' | 'rejected' | 'pending', note?: string): Observable<PendingVideo> {
+    return this.http.post<PendingVideo>(`${this.base}/${id}/review`, { reviewState, note });
   }
 
   /** Other dances cut from the same source video as this one (includes itself). */
