@@ -13,8 +13,8 @@ interface SegmentRow {
 }
 
 /**
- * Admin form to edit a video's start/end bounds, its Steps/Tutorial type and its tutorial
- * sections, extracted from DanceDetailComponent (it was the shared `#editVideoForm` template
+ * Admin form to edit a video's title and description, its start/end bounds, its Steps/Tutorial
+ * type and its tutorial sections, extracted from DanceDetailComponent (it was the shared `#editVideoForm` template
  * reused by both the single- and multi-video layouts). Seeds itself from the passed-in video,
  * owns the update call, and emits the server's updated video (or a cancel) for the parent to
  * apply to its list and the open player.
@@ -26,6 +26,16 @@ interface SegmentRow {
   template: `
     <div class="admin-form card admin-form--inline">
       @if (error()) { <div class="error-message">{{ error() }}</div> }
+      <div class="admin-form__fields">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" [(ngModel)]="title" placeholder="Video title" data-testid="edit-video-title" />
+        </div>
+        <div class="form-group">
+          <label>Description <span class="optional">(optional)</span></label>
+          <input type="text" [(ngModel)]="description" placeholder="Brief description" data-testid="edit-video-description" />
+        </div>
+      </div>
       <div class="admin-form__fields admin-form__fields--row">
         <div class="form-group">
           <label>Start Time <span class="optional">(m:ss or seconds, blank to clear)</span></label>
@@ -105,6 +115,8 @@ export class EditVideoFormComponent implements OnInit {
   /** Emitted when the admin cancels; the parent closes the inline editor. */
   @Output() cancelled = new EventEmitter<void>();
 
+  title = '';
+  description = '';
   startTime = '';
   endTime = '';
   videoType: VideoType = 'steps';
@@ -116,6 +128,8 @@ export class EditVideoFormComponent implements OnInit {
 
   ngOnInit(): void {
     const v = this.video;
+    this.title = v.title;
+    this.description = v.description ?? '';
     this.startTime = v.startTime != null ? formatTimeSecs(v.startTime) : '';
     this.endTime = v.endTime != null ? formatTimeSecs(v.endTime) : '';
     this.videoType = v.videoType === 'tutorial' ? 'tutorial' : 'steps';
@@ -162,9 +176,15 @@ export class EditVideoFormComponent implements OnInit {
     // The form only edits sections for tutorials; for other types leave segments untouched
     // so admin-saved loops aren't wiped when just changing the time.
     const updateSegments = this.videoType === 'tutorial';
+    const title = this.title.trim();
+    if (!title) { this.error.set('A video needs a title.'); return; }
     this.saving.set(true);
     this.error.set('');
     this.videoService.update(this.video.id, {
+      title,
+      // Sent even when blank: the API treats null as "leave alone", so clearing the box has to
+      // arrive as an empty string or a description could never be removed.
+      description: this.description.trim(),
       updateTimes: true,
       startTime,
       endTime,

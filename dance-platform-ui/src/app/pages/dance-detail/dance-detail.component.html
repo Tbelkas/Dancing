@@ -151,7 +151,7 @@
                     <span class="badge badge--personal"><i class="fa-solid fa-lock"></i> Personal</span>
                   }
                   @if (role.isAdmin()) {
-                    <button class="btn btn--ghost btn--sm" (click)="toggleEditVideoTime(video)"><i class="fa-solid fa-clock"></i> Edit Time</button>
+                    <button class="btn btn--ghost btn--sm" (click)="toggleEditVideoTime(video)"><i class="fa-solid fa-pencil"></i> Edit Video</button>
                     <button class="btn btn--ghost btn--sm" (click)="toggleMoveVideo(video)"><i class="fa-solid fa-arrow-right-arrow-left"></i> Move</button>
                   }
                   @if (canDeleteVideo(video)) {
