@@ -37,7 +37,7 @@ Four stages, and the order is the point — nothing is written before it is judg
 |---|---|---|
 | 1 find | `scripts/find_videos.py` | `Videos` rows as `ReviewState='pending'` |
 | 2 verify | `scripts/verify_intake.py` | `QualityScore` / `QualityFlags` / `ReviewNote` only |
-| 3 review | Intake tab in `scripts/chip_ui.py` | `ReviewState` — **a human, never a script** |
+| 3 review | `/admin/intake` on the site (or the Intake tab in `scripts/chip_ui.py`) | `ReviewState` — **a human, never a script** |
 | 4 chip | `/find-chips` → `apply_sections.py` | `VideoSegments` |
 
 - **Nothing reaches the site on a search engine's say-so.** Raw inserts default to `pending`
@@ -62,6 +62,37 @@ Four stages, and the order is the point — nothing is written before it is judg
   boundary, not low; wordless mirrored walkthroughs are a real tutorial format.
 - **Re-score after any bulk change**, then `enrich_views.py` and `backfill_durations.py`
   (see the seeding-pitfalls notes).
+
+## The admin surface on the site (2026-09-08)
+
+Everything below is `[RequireAdmin]` and hangs off `/admin`, which is both the dashboard and the
+hub — every queue is a tile with its depth on it, so adding a surface costs no header space.
+
+| Route | Endpoint | What it is |
+|---|---|---|
+| `/admin` | `GET /admin/health` | Catalogue health. The checks that used to be `audit_labels.py`, `chip_health.py`, `verify_intake.py` and `backfill_durations.py`, run on demand and ordered worst-first. Samples cap at 25 per check — the count is the real figure |
+| `/admin/intake` | `GET /videos/pending`, `POST /videos/{id}/review` | The intake queue, on the site rather than only in `chip_ui.py`. Ordered by reach (dance favourites, then dances with no live video). Capped at 100 per request; J/K/A/R work it from the keyboard |
+| `/admin/flags` | `GET /videos/flags`, `POST /videos/flags/{id}/resolve` | Problem reports, from viewers and from `check_dead_videos.py` |
+| `/admin/tags` | `GET/PUT/DELETE /admin/tags/{kind}/{id}`, `POST .../merge` | Rename and merge styles and music tags |
+| `/admin/review` | `GET /dances/pending` | Unchanged: user-submitted dances |
+
+Three things worth knowing before touching any of it:
+
+- **`QualityFlags` is not a list of objections.** Three writers share the column and disagree:
+  `VideoQualityGate.Grade` writes complaints, `verify_intake.py` writes its *verdict* (in prod
+  `confirmed` is the single most common value) plus `core-N`, the count of dance-teaching terms
+  in the transcript, and `verify_visual.py` writes a `visual:` verdict. `pending-video.model.ts`
+  classifies each as a concern or as evidence; extend that table when a script starts writing a
+  new flag, or the queue will render it as an accusation.
+- **`VideoFlag` deliberately carries no query filter**, unlike Video's five other dependents — a
+  report about a video that has since been quarantined is the one most worth reading. EF can't
+  tell that from an oversight, so the warning is silenced at the DbContext registration in
+  `Program.cs` with the reason written there.
+- **Deleting a tag that's still in use is refused, not cascaded.** The FK would take the
+  `DanceStyles` rows with it and silently untag every dance under the style, and an untagged
+  dance has no `/dances/{style}/{slug}` URL at all. Merge is the operation that exists for that;
+  it re-slugs afterwards, because slugs are unique *per style* and folding two styles together
+  can collide them inside the survivor.
 
 ## Data-cleanup precedent (do it this way)
 One-off **production data** fixes are done by hand on the Pi against the `dancing` DB, **after

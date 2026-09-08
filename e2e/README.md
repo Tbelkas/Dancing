@@ -121,7 +121,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 112 attributes are a contract. Treat them like a public API.**
+**These 115 attributes are a contract. Treat them like a public API.**
 
 The personal-skill-tree rows below (`roadmap-new` … `builder-step-clip`, and
 `profile-shared-roadmaps`) are **dormant**: the markup still carries them, but it is gated on
@@ -139,6 +139,10 @@ they are — the tests come back with the feature.
 | `account-card`, `account-no-email`, `account-email-edit`, `account-email-input`, `account-email-save`, `account-password-edit`, `account-new-password`, `account-password-save` | `profile.component.html` | The Account card: the address, the "this account cannot be recovered" warning (**only** on an account with no email), and the password change |
 | `delete-account-card`, `delete-account-start`, `delete-account-password`, `delete-account-confirm` | `profile.component.html` | Account deletion. **Never assert past `delete-account-start` in the authed suite** — the authed tests run against the production database and confirming would delete the test account |
 | `nav-admin-review`, `review-list`, `review-empty`, `review-approve`, `review-reject`, `review-message` | `app.component.html` + `admin-review.component.html` | The review queue. Admin-only, so the anon suite can only assert the route redirects. `review-list` and `review-empty` are mutually exclusive |
+| `nav-admin`, `tile-intake`, `tile-review`, `tile-flags`, `tile-tags`, `tile-add-video`, `health-checks`, `health-all-clear`, `health-clean` | `app.component.html` + `admin-dashboard.component.html` | The admin home and its queue tiles. Same limitation as the review queue — **there is no admin fixture**, so nothing in the suite selects these yet. They are here so a declutter pass doesn't strip them before the fixture exists |
+| `intake-list`, `intake-empty`, `intake-approve`, `intake-reject`, `intake-note`, `intake-message`, `intake-cap`, `intake-tab-pending`, `intake-tab-rejected` | `admin-video-review.component.html` | The intake queue. Admin-only and unselected for the same reason. `intake-list` and `intake-empty` are mutually exclusive |
+| `flags-list`, `flags-empty`, `flags-message`, `flag-resolution`, `flag-fixed`, `flag-dismiss`, `flags-tab-open`, `flags-tab-resolved` | `admin-flags.component.html` | The reports queue. Admin-only |
+| `tag-list-style`, `tag-list-music`, `tag-rename`, `tag-rename-input`, `tag-rename-save`, `tag-merge`, `tag-merge-target`, `tag-merge-save`, `tag-delete` | `admin-tags.component.html` | The tag manager. Admin-only. **Never let a test reach `tag-merge-save` against production** — a merge moves every dance off one tag and deletes it, and nothing here puts it back |
 | `dance-pending` | `dance-detail.component.html` | The "Awaiting review" badge. Visible only to a dance's own author or an admin — nobody else can load such a page at all |
 | `login-google`, `login-facebook` | `login.component.html` | Social sign-in buttons. Rendered from `GET /auth/external/providers`, so a provider with no server-side credentials produces **no button at all** — assert on them conditionally, never unconditionally |
 | `finish-signup-username`, `finish-signup-submit`, `finish-signup-error` | `finish-signup.component.html` | The username step a first-time social sign-in lands on. Reachable only with a valid ticket in the URL fragment; without one the page redirects to `/login` |
@@ -162,6 +166,7 @@ they are — the tests come back with the feature.
 | `roadmap-tree`, `tree-node` | `roadmap-tree.component.html` | The skill-tree SVG and each node `<g>` in it. The component is reused as the builder's live preview, so these also match on `/roadmaps/new` and `/roadmaps/:slug/edit` |
 | `signin-dialog`, `signin-username`, `signin-email`, `signin-password`, `signin-submit`, `signin-error` | `sign-in-dialog.component.html` | The in-place sign-in modal a signed-out visitor gets when they touch a roadmap node — distinct ids from `login-*`, which anchor the `/login` page |
 | `camera-toggle`, `stage-fullscreen` | `video-player` + `local-video-player` templates | The Camera tool button and the stage-fullscreen button — **on both players** |
+| `report-video-open`, `report-video-detail`, `report-video-send` | `report-video.component.ts` | "Something wrong?" under the playing video, and the form it opens. **Anonymous-visible** — that is the point of them, and the anon suite asserting them is what proves the control isn't quietly gated behind a sign-in. The test stops at Cancel: sending writes a real `VideoFlag` row to production |
 | `camera-pane`, `camera-close`, `camera-error`, `camera-notice`, `camera-replay`, `camera-exit-fullscreen` | `camera-pane.component.html` | The camera pane, its close button, its failure panel, its fallback notice, the delayed-replay `<video>`, and the fullscreen exit it carries |
 
 Everything else is selected by ARIA role or accessible name (`getByRole('button', { name:
