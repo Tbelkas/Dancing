@@ -51,13 +51,17 @@
              aria-label="Add video" title="Add video" (click)="closeMenu()">
             <i class="fa-solid fa-plus"></i><span class="header__nav-mobile-label">Add Video</span>
           </a>
+          <!-- One way in. Every admin surface (the two review queues, reports, tags) is a tile on
+               the dashboard, so adding another doesn't cost another icon up here. The Review link
+               stays because it is what the e2e suite navigates by. -->
           <a routerLink="/admin/review" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__admin-link"
              aria-label="Review queue" title="Review queue" data-testid="nav-admin-review" (click)="closeMenu()">
             <i class="fa-solid fa-clipboard-check"></i><span class="header__nav-mobile-label">Review</span>
           </a>
-          <a routerLink="/admin/intake" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="header__admin-link"
-             aria-label="Intake queue" title="Intake queue" data-testid="nav-admin-intake" (click)="closeMenu()">
-            <i class="fa-solid fa-filter-circle-xmark"></i><span class="header__nav-mobile-label">Intake</span>
+          <a routerLink="/admin" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }"
+             ariaCurrentWhenActive="page" class="header__admin-link"
+             aria-label="Admin" title="Admin" data-testid="nav-admin" (click)="closeMenu()">
+            <i class="fa-solid fa-gauge"></i><span class="header__nav-mobile-label">Admin</span>
           </a>
         }
       } @else {

@@ -1,0 +1,70 @@
+<div class="container">
+  <h1 class="page-title">Tags</h1>
+  <p class="page-note">
+    Every style and music tag with the number of dances on it. Renaming a <strong>style</strong>
+    changes the <code>{{ '{' }}style{{ '}' }}</code> segment of every dance URL under it, so old
+    links stop resolving — music tags don't appear in URLs and are safe to rename. Merging moves
+    the dances across and deletes the tag it came from.
+  </p>
+
+  @if (loading()) {
+    <p class="review-empty">Loading…</p>
+  } @else if (loadError()) {
+    <p class="review-empty">Couldn't load the tags. Refresh to try again.</p>
+  } @else {
+    @for (group of groups(); track group.kind) {
+      <h2 class="section-title">{{ group.title }} <span class="section-count">{{ group.list.length }}</span></h2>
+
+      <div class="tag-list" [attr.data-testid]="'tag-list-' + group.kind">
+        @for (tag of group.list; track tag.id) {
+          <div class="card tag-row">
+            <div class="tag-row__head">
+              <span class="tag-row__name">{{ tag.name }}</span>
+              <span class="tag-row__count" [class.tag-row__count--zero]="tag.danceCount === 0">
+                {{ tag.danceCount }} dance{{ tag.danceCount === 1 ? '' : 's' }}
+              </span>
+              @if (group.kind === 'style') {
+                <code class="tag-row__slug">/dances/{{ tag.slug }}/…</code>
+              }
+              <span class="tag-row__actions">
+                <button type="button" class="btn btn--ghost btn--sm" data-testid="tag-rename"
+                        (click)="startRename(group.kind, tag)">Rename</button>
+                @if (group.list.length > 1) {
+                  <button type="button" class="btn btn--ghost btn--sm" data-testid="tag-merge"
+                          (click)="startMerge(group.kind, tag)">Merge</button>
+                }
+                @if (tag.danceCount === 0) {
+                  <button type="button" class="btn btn--danger btn--sm" data-testid="tag-delete"
+                          [disabled]="busy()" (click)="remove(group.kind, tag)">Delete</button>
+                }
+              </span>
+            </div>
+
+            @if (editing() === key(group.kind, tag)) {
+              <div class="tag-row__form">
+                <input type="text" [(ngModel)]="editName" placeholder="Tag name" data-testid="tag-rename-input" />
+                <button type="button" class="btn btn--primary btn--sm" [disabled]="busy()"
+                        data-testid="tag-rename-save" (click)="rename(group.kind, tag)">Save</button>
+                <button type="button" class="btn btn--ghost btn--sm" (click)="cancel()">Cancel</button>
+              </div>
+            }
+
+            @if (merging() === key(group.kind, tag)) {
+              <div class="tag-row__form">
+                <select [(ngModel)]="mergeTargetId" data-testid="tag-merge-target">
+                  <option [ngValue]="null">Merge into…</option>
+                  @for (other of others(group.kind, tag); track other.id) {
+                    <option [ngValue]="other.id">{{ other.name }} ({{ other.danceCount }})</option>
+                  }
+                </select>
+                <button type="button" class="btn btn--primary btn--sm" [disabled]="busy() || !mergeTargetId"
+                        data-testid="tag-merge-save" (click)="merge(group.kind, tag)">Merge</button>
+                <button type="button" class="btn btn--ghost btn--sm" (click)="cancel()">Cancel</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

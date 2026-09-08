@@ -58,6 +58,8 @@ builder.Services.AddScoped<IStyleService, StyleService>();
 builder.Services.AddScoped<IMusicalStyleService, MusicalStyleService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 builder.Services.AddScoped<IVideoFlagService, VideoFlagService>();
+builder.Services.AddScoped<IAdminHealthService, AdminHealthService>();
+builder.Services.AddScoped<ITagAdminService, TagAdminService>();
 builder.Services.AddScoped<IUserVideoLoopService, UserVideoLoopService>();
 builder.Services.AddScoped<IVideoNoteService, VideoNoteService>();
 builder.Services.AddScoped<IChoreoService, ChoreoService>();

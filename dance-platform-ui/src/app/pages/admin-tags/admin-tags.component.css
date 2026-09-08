@@ -1,0 +1,93 @@
+.page-note {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  max-width: 70ch;
+  margin-bottom: 28px;
+}
+
+.page-note code {
+  font-size: 0.85em;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--color-surface-2, rgba(127, 127, 127, 0.12));
+}
+
+.section-title {
+  font-size: 1.15rem;
+  margin: 28px 0 12px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.section-count {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.review-empty {
+  color: var(--color-text-muted);
+  padding: 32px 0;
+}
+
+.tag-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tag-row { padding: 14px 18px; }
+
+.tag-row__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.tag-row__name {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.tag-row__count {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* An unused tag is the one worth deleting — worth spotting without reading the number. */
+.tag-row__count--zero { color: var(--color-danger, #c0392b); }
+
+.tag-row__slug {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
+.tag-row__actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.tag-row__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  animation: slideDown 0.18s ease both;
+}
+
+.tag-row__form input,
+.tag-row__form select {
+  flex: 1 1 220px;
+  min-width: 0;
+}

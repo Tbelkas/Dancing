@@ -1,0 +1,90 @@
+<div class="container">
+  <h1 class="page-title">Admin</h1>
+
+  <!-- The queues first: work that is waiting on a person, with its depth on the tile. -->
+  <div class="admin-tiles">
+    <a routerLink="/admin/intake" class="card tile" data-testid="tile-intake">
+      <span class="tile__count">{{ health()?.totals?.pendingVideos ?? '—' }}</span>
+      <span class="tile__label">Intake queue</span>
+      <span class="tile__note">Videos the gate held back</span>
+    </a>
+    <a routerLink="/admin/review" class="card tile" data-testid="tile-review">
+      <span class="tile__count">{{ health()?.totals?.pendingDances ?? '—' }}</span>
+      <span class="tile__label">Submitted dances</span>
+      <span class="tile__note">Added by signed-in users</span>
+    </a>
+    <a routerLink="/admin/flags" class="card tile" data-testid="tile-flags">
+      <span class="tile__count">{{ health()?.totals?.openFlags ?? '—' }}</span>
+      <span class="tile__label">Reports</span>
+      <span class="tile__note">From viewers and the link checker</span>
+    </a>
+    <a routerLink="/admin/tags" class="card tile" data-testid="tile-tags">
+      <span class="tile__count">{{ health()?.totals?.styles ?? '—' }}</span>
+      <span class="tile__label">Tags</span>
+      <span class="tile__note">Styles and music, with their counts</span>
+    </a>
+    <a routerLink="/admin/add-video" class="card tile" data-testid="tile-add-video">
+      <span class="tile__count"><i class="fa-solid fa-plus"></i></span>
+      <span class="tile__label">Add a video</span>
+      <span class="tile__note">Straight onto a dance</span>
+    </a>
+  </div>
+
+  @if (health(); as h) {
+    <p class="admin-totals">
+      {{ h.totals.dances }} dances · {{ h.totals.videos }} videos · {{ h.totals.styles }} styles
+      · {{ h.totals.instructors }} instructors · {{ h.totals.rejectedVideos }} videos rejected
+    </p>
+  }
+
+  <h2 class="section-title">Catalogue health</h2>
+
+  @if (loading()) {
+    <p class="review-empty">Checking…</p>
+  } @else if (loadError()) {
+    <p class="review-empty">Couldn't run the checks. <button type="button" class="btn btn--ghost btn--sm" (click)="load()">Try again</button></p>
+  } @else {
+    @if (!problems().length) {
+      <p class="review-empty" data-testid="health-all-clear">Every check is clear.</p>
+    }
+
+    <div class="check-list" data-testid="health-checks">
+      @for (check of problems(); track check.key) {
+        <div class="card check" [class.is-open]="openCheck() === check.key">
+          <button type="button" class="check__head" (click)="toggle(check)"
+                  [attr.aria-expanded]="openCheck() === check.key">
+            <span class="check__count" [class.check__count--warn]="check.severity === 'warn'">{{ check.count }}</span>
+            <span class="check__text">
+              <span class="check__title">{{ check.title }}</span>
+              <span class="check__detail">{{ check.detail }}</span>
+            </span>
+            <i class="fa-solid" [class.fa-chevron-down]="openCheck() !== check.key" [class.fa-chevron-up]="openCheck() === check.key"></i>
+          </button>
+
+          @if (openCheck() === check.key) {
+            <div class="check__items">
+              @for (item of check.items; track $index) {
+                <a class="check__item" [routerLink]="['/dances', item.styleSlug, item.danceSlug]">
+                  <span class="check__item-name">{{ item.danceName }}</span>
+                  @if (item.videoTitle) { <span class="check__item-sub">{{ item.videoTitle }}</span> }
+                  @if (item.note) { <span class="check__item-note">{{ item.note }}</span> }
+                </a>
+              }
+              @if (check.count > check.items.length) {
+                <p class="check__more">
+                  …and {{ check.count - check.items.length }} more. The list is capped — fix these and reload.
+                </p>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (clean().length) {
+      <p class="check-clean" data-testid="health-clean">
+        Clear: @for (check of clean(); track check.key) {<span>{{ check.title }}@if (!$last) {, }</span>}
+      </p>
+    }
+  }
+</div>
