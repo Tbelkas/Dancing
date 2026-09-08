@@ -1,0 +1,84 @@
+<div class="container">
+  <h1 class="page-title">Reports</h1>
+  <p class="page-note">
+    What viewers said is wrong with a video, and what the nightly link checker found. Fixing one
+    usually means opening the dance and editing the video in place — this page only tracks that
+    it was dealt with.
+  </p>
+
+  <div class="queue-tabs" role="tablist">
+    <button type="button" role="tab" class="queue-tab" [class.is-active]="queue() === 'open'"
+            [attr.aria-selected]="queue() === 'open'" data-testid="flags-tab-open"
+            (click)="switchQueue('open')">Open</button>
+    <button type="button" role="tab" class="queue-tab" [class.is-active]="queue() === 'resolved'"
+            [attr.aria-selected]="queue() === 'resolved'" data-testid="flags-tab-resolved"
+            (click)="switchQueue('resolved')">Closed</button>
+  </div>
+
+  @if (message()) {
+    <p class="review-message" data-testid="flags-message">{{ message() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="review-empty">Loading…</p>
+  } @else if (loadError()) {
+    <p class="review-empty">Couldn't load the reports. Refresh to try again.</p>
+  } @else if (!flags().length) {
+    <p class="review-empty" data-testid="flags-empty">
+      @if (queue() === 'open') { Nothing reported. Either it's all working or nobody's looking. }
+      @else { Nothing has been closed yet. }
+    </p>
+  } @else {
+    <div class="flag-list" data-testid="flags-list">
+      @for (flag of flags(); track flag.id) {
+        <div class="card flag-row">
+          <div class="flag-row__main">
+            <p class="flag-row__reason">
+              {{ flag.reasonLabel }}
+              @if (flag.openFlagsOnVideo > 1) {
+                <span class="flag-row__count">{{ flag.openFlagsOnVideo }} open reports on this video</span>
+              }
+              @if (flag.source === 'checker') {
+                <span class="flag-row__count">found by the link checker</span>
+              }
+              @if (flag.videoReviewState !== 'approved') {
+                <span class="flag-row__count">this video is already held back</span>
+              }
+            </p>
+
+            @if (flag.detail) {
+              <p class="flag-row__detail">"{{ flag.detail }}"</p>
+            }
+
+            <p class="flag-row__meta">
+              <a [routerLink]="['/dances', flag.styleSlug, flag.danceSlug]">{{ flag.danceName }}</a>
+              · {{ flag.videoTitle }}
+              · {{ flag.createdAt | date:'mediumDate' }}
+              @if (flag.reportedByUsername) { · by {{ flag.reportedByUsername }} }
+              @else if (flag.source === 'viewer') { · anonymous }
+            </p>
+
+            @if (flag.resolvedAt) {
+              <p class="flag-row__meta">Closed {{ flag.resolvedAt | date:'mediumDate' }} as {{ flag.resolution }}</p>
+            }
+          </div>
+
+          @if (queue() === 'open') {
+            <div class="flag-row__actions">
+              <input type="text" class="flag-row__note" [(ngModel)]="resolutions[flag.id]"
+                     placeholder="What you did (optional)" data-testid="flag-resolution" />
+              <a class="btn btn--ghost btn--sm" [href]="sourceUrl(flag)" target="_blank" rel="noopener">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Source
+              </a>
+              <a class="btn btn--ghost btn--sm" [routerLink]="['/dances', flag.styleSlug, flag.danceSlug]">Open dance</a>
+              <button type="button" class="btn btn--primary btn--sm" data-testid="flag-fixed"
+                      [disabled]="busyId() === flag.id" (click)="resolve(flag, 'fixed')">Fixed</button>
+              <button type="button" class="btn btn--ghost btn--sm" data-testid="flag-dismiss"
+                      [disabled]="busyId() === flag.id" (click)="resolve(flag, 'dismissed')">Dismiss</button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

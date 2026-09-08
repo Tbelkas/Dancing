@@ -29,6 +29,7 @@ import { AddVideoFormComponent } from '../../shared/components/add-video-form/ad
 import { EditDanceFormComponent } from '../../shared/components/edit-dance-form/edit-dance-form.component';
 import { EditVideoFormComponent } from '../../shared/components/edit-video-form/edit-video-form.component';
 import { MoveVideoPickerComponent } from '../../shared/components/move-video-picker/move-video-picker.component';
+import { ReportVideoComponent } from '../../shared/components/report-video/report-video.component';
 import { DIFFICULTY_LEVELS } from '../../core/constants/dance.constants';
 import { youtubeThumbUrl } from '../../core/utils/youtube-thumb.utils';
 import { ThumbFallback } from '../../core/utils/thumb-fallback';
@@ -44,7 +45,8 @@ const RAIL_STEPS = 4;
   // The admin/authoring forms are used only inside @defer blocks below, so Angular
   // code-splits them out of the eager bundle.
   imports: [CommonModule, RouterLink, VideoPlayerComponent, DancePathPipe,
-    AddVideoFormComponent, EditDanceFormComponent, EditVideoFormComponent, MoveVideoPickerComponent],
+    AddVideoFormComponent, EditDanceFormComponent, EditVideoFormComponent, MoveVideoPickerComponent,
+    ReportVideoComponent],
   templateUrl: './dance-detail.component.html',
   styleUrls: ['./dance-detail.component.css']
 })

@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<VideoSegment> VideoSegments => Set<VideoSegment>();
     public DbSet<UserVideoLoop> UserVideoLoops => Set<UserVideoLoop>();
     public DbSet<VideoNote> VideoNotes => Set<VideoNote>();
+    public DbSet<VideoFlag> VideoFlags => Set<VideoFlag>();
     public DbSet<UserChoreo> UserChoreos => Set<UserChoreo>();
     public DbSet<UserChoreoLoop> UserChoreoLoops => Set<UserChoreoLoop>();
     public DbSet<DanceStyle> DanceStyles => Set<DanceStyle>();
@@ -85,6 +86,36 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Video>()
             .HasIndex(v => v.ReviewState);
+
+        // Problem reports. Unlike the five dependents above, VideoFlag deliberately carries NO
+        // query filter: a flag on a video that has since been quarantined is the flag most worth
+        // reading, and only the admin queue ever selects from this table.
+        modelBuilder.Entity<VideoFlag>()
+            .HasOne(f => f.Video)
+            .WithMany()
+            .HasForeignKey(f => f.VideoId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // The reporter survives being deleted as a user; the report is still true.
+        modelBuilder.Entity<VideoFlag>()
+            .HasOne(f => f.ReportedBy)
+            .WithMany()
+            .HasForeignKey(f => f.ReportedByUserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<VideoFlag>()
+            .HasOne(f => f.ResolvedBy)
+            .WithMany()
+            .HasForeignKey(f => f.ResolvedByUserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // The queue reads open flags oldest-first; the dashboard counts them. Both hit this.
+        modelBuilder.Entity<VideoFlag>()
+            .HasIndex(f => new { f.ResolvedAt, f.CreatedAt });
+
+        // Backs the duplicate check on report (same video, same reason, still open).
+        modelBuilder.Entity<VideoFlag>()
+            .HasIndex(f => new { f.VideoId, f.Reason });
 
         modelBuilder.Entity<VideoSegment>()
             .HasOne(vs => vs.Video)

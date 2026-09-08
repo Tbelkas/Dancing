@@ -16,17 +16,20 @@ public class VideosController : AppControllerBase
     private readonly IUserVideoLoopService _loopService;
     private readonly IVideoNoteService _noteService;
     private readonly IYoutubeChapterService _chapterService;
+    private readonly IVideoFlagService _flagService;
 
     public VideosController(
         IVideoService videoService,
         IUserVideoLoopService loopService,
         IVideoNoteService noteService,
-        IYoutubeChapterService chapterService)
+        IYoutubeChapterService chapterService,
+        IVideoFlagService flagService)
     {
         _videoService = videoService;
         _loopService = loopService;
         _noteService = noteService;
         _chapterService = chapterService;
+        _flagService = flagService;
     }
 
     // Chapters a YouTube video already publishes, offered as ready-made sections in the add
@@ -161,6 +164,39 @@ public class VideosController : AppControllerBase
             DeleteVideoResult.Forbidden => Forbid(),
             _ => NotFound()
         };
+    }
+
+    // --- Problem reports -------------------------------------------------
+    // Anonymous by design: before this there was no way for anyone but an admin to say a video
+    // was broken, so a dead embed stayed dead until someone happened to click it. Throttled,
+    // and duplicate reports on the same video collapse in the service.
+
+    [EnableRateLimiting(RateLimitPolicies.Reports)]
+    [HttpPost("{id}/flag")]
+    public async Task<IActionResult> Report(int id, [FromBody] ReportVideoRequest request)
+    {
+        var result = await _flagService.ReportAsync(id, request, CurrentUserId);
+        return result switch
+        {
+            ReportVideoResult.VideoNotFound => NotFound(),
+            // A second report of something already queued isn't an error the reporter should see.
+            ReportVideoResult.Duplicate => Ok(new { message = "Thanks — that one is already on the list." }),
+            _ => Ok(new { message = "Thanks. Someone will take a look." })
+        };
+    }
+
+    /// <summary>The flags queue: open reports oldest first, or the closed ones as history.</summary>
+    [RequireAdmin]
+    [HttpGet("flags")]
+    public async Task<IActionResult> GetFlags([FromQuery] string state = "open") =>
+        Ok(await _flagService.GetAsync(state));
+
+    [RequireAdmin]
+    [HttpPost("flags/{flagId}/resolve")]
+    public async Task<IActionResult> ResolveFlag(int flagId, [FromBody] ResolveFlagRequest request)
+    {
+        var flag = await _flagService.ResolveAsync(flagId, request.Resolution, CurrentUserId);
+        return flag is null ? NotFound() : Ok(flag);
     }
 
     // --- Personal loops: any authenticated user saves loops for their own account ---

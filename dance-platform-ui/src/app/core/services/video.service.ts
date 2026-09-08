@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Video, VideoChapter, VideoLibraryItem, VideoNote, VideoSegment, VideoType, YoutubeChapters } from '../../models/video.model';
 import { PendingVideo } from '../../models/pending-video.model';
+import { ReportReason, VideoFlag } from '../../models/video-flag.model';
 import { environment } from '../../../environments/environment';
 
 export interface SegmentPayload {
@@ -73,6 +74,24 @@ export class VideoService {
   /** Admin: publish or refuse a held-back video. Resolves to the row in its new state. */
   review(id: number, reviewState: 'approved' | 'rejected' | 'pending', note?: string): Observable<PendingVideo> {
     return this.http.post<PendingVideo>(`${this.base}/${id}/review`, { reviewState, note });
+  }
+
+  /**
+   * Report a problem with a video. Open to anonymous viewers on purpose — throttled server-side,
+   * and a repeat report of something already queued answers the same way as a fresh one.
+   */
+  report(id: number, reason: ReportReason, detail?: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.base}/${id}/flag`, { reason, detail });
+  }
+
+  /** Admin: the problem-report queue — open reports oldest first, or closed ones as history. */
+  getFlags(state: 'open' | 'resolved' = 'open'): Observable<VideoFlag[]> {
+    return this.http.get<VideoFlag[]>(`${this.base}/flags`, { params: { state } });
+  }
+
+  /** Admin: close a report, recording what was done about it. */
+  resolveFlag(flagId: number, resolution?: string): Observable<VideoFlag> {
+    return this.http.post<VideoFlag>(`${this.base}/flags/${flagId}/resolve`, { resolution });
   }
 
   /** Other dances cut from the same source video as this one (includes itself). */

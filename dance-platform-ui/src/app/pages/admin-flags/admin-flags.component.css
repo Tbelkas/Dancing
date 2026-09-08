@@ -1,0 +1,113 @@
+.page-note {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  max-width: 66ch;
+  margin-bottom: 20px;
+}
+
+.queue-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.queue-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.queue-tab.is-active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.review-message {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: 16px;
+}
+
+.review-empty {
+  color: var(--color-text-muted);
+  padding: 32px 0;
+}
+
+.flag-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flag-row { padding: 18px 20px; }
+
+.flag-row__reason {
+  font-family: var(--font-display, var(--font-ui));
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.flag-row__count {
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.flag-row__detail {
+  margin-top: 8px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--color-text);
+  max-width: 70ch;
+}
+
+.flag-row__meta {
+  margin-top: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.flag-row__meta a { color: inherit; }
+.flag-row__meta a:hover { color: var(--color-primary); }
+
+.flag-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.flag-row__note {
+  flex: 1 1 200px;
+  min-width: 0;
+}

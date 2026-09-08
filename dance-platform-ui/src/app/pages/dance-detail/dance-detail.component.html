@@ -173,6 +173,9 @@
                 }
                 <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="playerStart(video)" [endTime]="video.endTime" [segments]="video.segments" [chapters]="chapters()" [activeVideoId]="video.id" [sharedSource]="(video.sharedSourceCount ?? 1) > 1" [canSaveLoops]="role.isAdmin()" [personalLoops]="personalLoopsFor(video.id)" [canSavePersonal]="auth.isAuthenticated()" [personalNotes]="personalNotesFor(video.id)" [canTakeNotes]="auth.isAuthenticated()" (saveLoop)="onSaveLoop(video, $event)" (deleteLoop)="onDeleteLoop(video, $event)" (savePersonalLoop)="onSavePersonalLoop(video, $event)" (deletePersonalLoop)="onDeletePersonalLoop(video, $event)" (saveNote)="onSaveNote(video, $event)" (updateNote)="onUpdateNote(video, $event)" (deleteNote)="onDeleteNote(video, $event)" (playingChange)="onPlayerPlaying($event)" />
                 <ng-container [ngTemplateOutlet]="videoRating" [ngTemplateOutletContext]="{ $implicit: video }"></ng-container>
+                <!-- Only under the video that's actually playing. It's a report about what you
+                     just watched, and one per collapsed row would be five flags on a page. -->
+                <app-report-video [videoId]="video.id" />
               </div>
             }
 

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
@@ -38,7 +39,13 @@ builder.Services.AddProblemDetails();
 builder.Services.AddMemoryCache();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
+        // VideoFlag is required-related to Video, which carries the intake query filter, and it
+        // deliberately does NOT carry a matching one: a report about a video that has since been
+        // quarantined is the report most worth reading. EF can't tell that apart from an
+        // oversight, so it warns on every model build -- silence it here rather than let real
+        // warnings drown in it. See the comment on the entity in AppDbContext.
+        .ConfigureWarnings(w => w.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning)));
 
 builder.Services.AddSingleton<ITokenService, TokenService>();
 // Singleton: the failed-attempt counters have to outlive the request that incremented them.
@@ -50,6 +57,7 @@ builder.Services.AddScoped<IDanceService, DanceService>();
 builder.Services.AddScoped<IStyleService, StyleService>();
 builder.Services.AddScoped<IMusicalStyleService, MusicalStyleService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
+builder.Services.AddScoped<IVideoFlagService, VideoFlagService>();
 builder.Services.AddScoped<IUserVideoLoopService, UserVideoLoopService>();
 builder.Services.AddScoped<IVideoNoteService, VideoNoteService>();
 builder.Services.AddScoped<IChoreoService, ChoreoService>();

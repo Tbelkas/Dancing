@@ -25,6 +25,9 @@ public static class RateLimitPolicies
     /// <summary>The anonymous view-count bump, which feeds the "recommended" ranking.</summary>
     public const string Views = "views";
 
+    /// <summary>Reporting a problem with a video — open to anonymous viewers, so it needs a ceiling.</summary>
+    public const string Reports = "reports";
+
     public static IServiceCollection AddAppRateLimiting(this IServiceCollection services) =>
         services.AddRateLimiter(options =>
         {
@@ -62,6 +65,17 @@ public static class RateLimitPolicies
                 {
                     PermitLimit = 60,
                     Window = TimeSpan.FromMinutes(5)
+                }));
+
+            // Reporting is deliberately open to anonymous viewers -- a visitor who finds a dead
+            // embed is the cheapest signal there is, and making them sign in first loses most of
+            // them. This is what keeps that from being an open sewer. Duplicate reports are
+            // already collapsed in VideoFlagService, so the honest ceiling is low.
+            options.AddPolicy(Reports, context =>
+                RateLimitPartition.GetFixedWindowLimiter(ClientKey(context), _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 10,
+                    Window = TimeSpan.FromMinutes(10)
                 }));
 
             // One person watching videos bumps this a handful of times a minute. The limit is
