@@ -7,6 +7,13 @@
     <span class="keys"><kbd>J</kbd>/<kbd>K</kbd> move · <kbd>A</kbd> approve · <kbd>R</kbd> reject</span>
   </p>
 
+  @if (atCap()) {
+    <p class="queue-cap" data-testid="intake-cap">
+      Showing the top {{ videos().length }} by reach. Clear these and reload for the next batch —
+      the Admin page has the true depth.
+    </p>
+  }
+
   <div class="queue-tabs" role="tablist">
     <button type="button" role="tab" class="queue-tab" [class.is-active]="queue() === 'pending'"
             [attr.aria-selected]="queue() === 'pending'" data-testid="intake-tab-pending"
@@ -43,12 +50,19 @@
                 · {{ video.danceVideoCount }} live video{{ video.danceVideoCount === 1 ? '' : 's' }} on it
                 @if (runtime(video) !== null) { · {{ runtimeLabel(video) }} }
               </span>
+              <!-- Concerns and evidence are told apart deliberately. QualityFlags is whatever the
+                   last pipeline stage stamped on the row, and "confirmed" sits in it beside "not a
+                   dance video" -- rendering both as objections teaches the reviewer to ignore all
+                   of them. -->
               <span class="intake-row__flags">
                 @if (scorePercent(video) !== null) {
                   <span class="flag flag--score" [class.flag--bad]="scorePercent(video)! < 65">Score {{ scorePercent(video) }}</span>
                 }
-                @for (flag of video.qualityFlags; track flag) {
-                  <span class="flag">{{ flagLabel(flag) }}</span>
+                @for (flag of concerns(video); track flag) {
+                  <span class="flag flag--bad">{{ label(flag) }}</span>
+                }
+                @for (flag of evidence(video); track flag) {
+                  <span class="flag">{{ label(flag) }}</span>
                 }
                 @if (!video.qualityFlags.length && video.qualityScore == null) {
                   <span class="flag">Never graded — held back by the pipeline</span>

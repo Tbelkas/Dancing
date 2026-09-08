@@ -41,6 +41,9 @@ public class VideoService : IVideoService
     // held-back videos off the site, so the one surface whose whole job is to look at them has
     // to opt out. Scoped to global videos — someone's private addition is theirs, not queue work.
 
+    /// <summary>How many held-back videos one request returns. See the comment at the Take().</summary>
+    private const int PendingPageSize = 100;
+
     public async Task<List<PendingVideoDto>> GetPendingAsync(string state)
     {
         var wanted = NormalizeReviewState(state) ?? "pending";
@@ -54,6 +57,10 @@ public class VideoService : IVideoService
             .ThenBy(v => v.DanceVideoCount)
             .ThenByDescending(v => v.ViewCount)
             .ThenBy(v => v.Id)
+            // The queue runs to hundreds. Shipping all of them costs the Pi a megabyte of JSON
+            // and several hundred rows of segments to render, for a page that is worked from the
+            // top down and never scrolled to the end. The dashboard tile carries the true depth.
+            .Take(PendingPageSize)
             .ToListAsync();
         return Finish(rows);
     }

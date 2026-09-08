@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { VideoService } from '../../core/services/video.service';
-import { PendingVideo, flagLabel } from '../../models/pending-video.model';
+import { PendingVideo, concerns, evidence, flagMeaning } from '../../models/pending-video.model';
 import { VideoPlayerComponent } from '../../shared/components/video-player/video-player.component';
 
 type Queue = 'pending' | 'rejected';
@@ -37,9 +37,22 @@ export class AdminVideoReviewComponent implements OnInit {
   focused = signal(-1);
   note = '';
 
-  readonly flagLabel = flagLabel;
+  readonly concerns = concerns;
+  readonly evidence = evidence;
+
+  /** A flag in words. The pill's colour comes from `concerns`/`evidence`, not from here. */
+  label(flag: string): string {
+    return flagMeaning(flag).label;
+  }
 
   focusedVideo = computed(() => this.videos()[this.focused()] ?? null);
+
+  /**
+   * A full page back from the server means there are almost certainly more behind it — the API
+   * caps a request at 100 rather than ship the whole queue. Worth saying, so an empty-looking
+   * queue after a session of approving isn't mistaken for a cleared one.
+   */
+  atCap = computed(() => this.videos().length >= 100);
 
   constructor(private videoService: VideoService) {}
 
