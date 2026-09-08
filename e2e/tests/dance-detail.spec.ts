@@ -51,6 +51,35 @@ test.describe('dance detail', () => {
     await expect(page.locator('.empty', { hasText: 'No videos available' })).toHaveCount(0);
   });
 
+  test('a signed-out visitor can open the report form on the playing video', async ({ page }) => {
+    // Deliberately stops at "open, then cancel". Sending would write a real VideoFlag row to
+    // the production database, and a scheduled run repeats forever -- the suite's rule is that
+    // an authed or write-capable test restores whatever it changed, and the cheapest way to
+    // obey it here is not to write at all. What matters is that the control reaches an
+    // anonymous viewer, which is the whole reason it isn't behind a sign-in.
+    const res = await page.request.get(`${API_URL}/search/dances?sort=tutorials&pageSize=20`);
+    expect(res.ok()).toBe(true);
+    const withVideo = (await res.json()).items.find((d: { videoCount: number }) => d.videoCount > 0);
+    expect(withVideo, 'catalog should contain at least one dance with a video').toBeTruthy();
+
+    await page.goto(`/dances/${withVideo.styleSlug}/${withVideo.slug}`);
+    await expect(page.getByTestId('dance-title')).toBeVisible();
+
+    const trigger = page.getByTestId('report-video-open');
+    await expect(trigger).toBeVisible({ timeout: 15_000 });
+    await trigger.click();
+
+    await expect(page.getByTestId('report-video-detail')).toBeVisible();
+    // Nothing picked yet, so there is nothing to send.
+    await expect(page.getByTestId('report-video-send')).toBeDisabled();
+
+    await page.getByRole('radio', { name: "It won't play" }).check();
+    await expect(page.getByTestId('report-video-send')).toBeEnabled();
+
+    await page.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page.getByTestId('report-video-detail')).toHaveCount(0);
+  });
+
   test('favorite and progress controls are hidden when signed out', async ({ page }) => {
     await openFirstDance(page);
     await expect(page.getByTestId('favorite-button')).toHaveCount(0);
