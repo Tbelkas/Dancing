@@ -60,6 +60,8 @@ if sys.stdout is not None:
     except (AttributeError, ValueError):
         pass
 
+# Defaults for a run from the PC, where the Pi is a LAN address. On the Pi itself the
+# connection string comes from the environment (see _connection below) and points at localhost.
 PG_HOST = "192.168.0.197"
 PG_USER = "dance_user"
 PG_DB = "dancing"
@@ -79,22 +81,40 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESTORE_LOG = os.path.join(ROOT, "_proto", "deleted_videos.jsonl")
 
 
-def _prod_password():
-    """Read the live password out of the gitignored appsettings, never from a literal here."""
+def _connection():
+    """
+    (host, password) for the prod database, from whichever source this machine has. Never a
+    literal here -- the password lives only in gitignored config and in the Pi's unit file.
+
+    Two sources because the job runs in two places. On the PC it is the gitignored
+    appsettings.Development.json, as every other script in here does it. On the Pi that file does
+    not exist (only the tracked base does); the service keeps its connection string in the systemd
+    unit, so the cron entry passes it in as ConnectionStrings__Default and this reads it from the
+    environment. That path also points at localhost rather than the LAN address.
+    """
+    env = os.environ.get("ConnectionStrings__Default")
+    if env:
+        host = re.search(r"Host=([^;]+)", env)
+        password = re.search(r"Password=([^;]+)", env)
+        if password:
+            return (host.group(1) if host else PG_HOST), password.group(1)
+
     cfg_path = os.path.join(ROOT, "DancePlatform.API", "appsettings.Development.json")
     with open(cfg_path, encoding="utf-8") as fh:
         cfg = json.load(fh)
-    return re.search(r"Password=([^;]+)", cfg["ConnectionStrings"]["Default"]).group(1)
+    connection = cfg["ConnectionStrings"]["Default"]
+    host = re.search(r"Host=([^;]+)", connection)
+    return (host.group(1) if host else PG_HOST), re.search(r"Password=([^;]+)", connection).group(1)
 
 
-PW = _prod_password()
+HOST, PW = _connection()
 
 
 def psql(sql):
     env = dict(os.environ)
     env["PGPASSWORD"] = PW
     p = subprocess.run(
-        ["psql", "-h", PG_HOST, "-U", PG_USER, "-d", PG_DB,
+        ["psql", "-h", HOST, "-U", PG_USER, "-d", PG_DB,
          "-v", "ON_ERROR_STOP=1", "-At", "-F", "\t"],
         input=sql, capture_output=True, text=True, encoding="utf-8", env=env)
     if p.returncode:
