@@ -124,18 +124,21 @@ def main():
     if args.limit:
         rows = rows[:args.limit]
 
-    print(f"checking {len(rows)} video(s)")
+    # flush= on every progress line: this is meant to run nightly with its output
+    # redirected to a log, and print() to a pipe is block-buffered -- without it a
+    # ten-minute run shows nothing at all until it exits, which reads as a hang.
+    print(f"checking {len(rows)} video(s)", flush=True)
 
     dead, unknown = [], 0
     for index, (row_id, source_id, title, dance) in enumerate(rows, 1):
         state = availability(source_id)
         if state in ("gone", "private"):
             dead.append((int(row_id), source_id, title, dance, state))
-            print(f"  DEAD  [{state}] {dance} — {title} ({source_id})")
+            print(f"  DEAD  [{state}] {dance} — {title} ({source_id})", flush=True)
         elif state == "unknown":
             unknown += 1
         if index % 50 == 0:
-            print(f"  ...{index}/{len(rows)}")
+            print(f"  ...{index}/{len(rows)}", flush=True)
         time.sleep(DELAY_SECONDS)
 
     print(f"\n{len(dead)} dead, {unknown} inconclusive, {len(rows) - len(dead) - unknown} fine")
