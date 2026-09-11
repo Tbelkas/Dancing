@@ -277,6 +277,11 @@
 
 .segments-bar--expanded .segments-toggle__caret { transform: rotate(180deg); }
 
+/* Wrapped out, the chips are a block: the label belongs at its top, not floating
+   against the middle row. */
+.segments-bar--expanded { align-items: flex-start; }
+.segments-bar--expanded .segments-toggle { padding-top: 9px; }
+
 /* Collapsed: a single line you swipe. Expanded: every chip at once. */
 .segment-track {
   display: flex;
