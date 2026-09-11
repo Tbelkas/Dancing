@@ -324,8 +324,7 @@
   flex-shrink: 0;
   max-width: 260px;
   background: none;
-  border: 1px solid transparent;
-  border-radius: 999px;
+  border: none;
   color: var(--color-text);
   font-family: var(--font-ui);
   font-size: 0.83rem;
@@ -333,7 +332,7 @@
   padding: 5px 11px;
   cursor: pointer;
   white-space: nowrap;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  transition: color var(--transition);
 }
 
 .segment-chip__label {
@@ -341,17 +340,9 @@
   text-overflow: ellipsis;
 }
 
-.segment-chip:hover {
-  background: rgba(255,255,255,0.08);
-  color: var(--color-primary);
-}
+.segment-chip-wrap:hover .segment-chip { color: var(--color-primary); }
 
-.segment-chip.active {
-  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
-  border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
-  color: var(--color-primary);
-  font-weight: 600;
-}
+.segment-chip.active { color: var(--color-primary); }
 
 /* The timestamp is the secondary half of the pair, so it steps down in size and
    colour — but via the muted token, not an opacity that would sink it into the
@@ -364,22 +355,36 @@
   font-variant-numeric: tabular-nums;
 }
 
-.segment-chip:hover .segment-chip__time,
+.segment-chip-wrap:hover .segment-chip__time,
 .segment-chip.active .segment-chip__time { color: inherit; opacity: 0.75; }
 
 .segment-chip__mine { font-size: 0.62rem; opacity: 0.8; }
 
-/* Admin: the delete sits inside the chip's own hover area rather than bolting a
-   second bordered button onto it — two boxes per section is what made the bar
-   look like a toolbar in the first place. */
+/* The wrap, not the chip, is the pill: the admin delete has to sit *inside* the
+   highlight or it floats past the rounded end, and the pill has to keep the same
+   inset on both sides whether or not a delete is showing. So the chip hands its
+   right padding to the delete rather than losing it. */
 .segment-chip-wrap {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
+  border: 1px solid transparent;
   border-radius: 999px;
+  transition: background var(--transition), border-color var(--transition);
 }
 
-.segment-chip-wrap:has(.segment-chip__delete) .segment-chip { padding-right: 4px; }
+.segment-chip-wrap:hover { background: rgba(255,255,255,0.08); }
+
+.segment-chip-wrap--active {
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+}
+
+.segment-chip-wrap:has(.segment-chip--personal):hover {
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+
+.segment-chip-wrap:has(.segment-chip__delete) .segment-chip { padding-right: 5px; }
 
 .segment-chip__delete {
   display: inline-flex;
@@ -390,7 +395,9 @@
   border-radius: 999px;
   color: var(--color-text-muted);
   font-size: 0.62rem;
-  padding: 4px 8px 4px 4px;
+  /* 11px on the right mirrors the chip's own left padding, so the pill stays
+     symmetrical with the delete revealed. */
+  padding: 4px 11px 4px 4px;
   cursor: pointer;
   opacity: 0;
   transition: opacity var(--transition), color var(--transition);
@@ -405,13 +412,13 @@
    apart from the global (admin) sections sharing the bar. */
 .segment-chip--personal { color: var(--color-accent); }
 
-.segment-chip--personal:hover { color: var(--color-accent); }
 
-.segment-chip--personal.active {
+.segment-chip-wrap--active:has(.segment-chip--personal) {
   background: color-mix(in srgb, var(--color-accent) 16%, transparent);
   border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
-  color: var(--color-accent);
 }
+
+.segment-chip--personal.active { color: var(--color-accent); }
 
 @media (max-width: 640px) {
   .segments-bar { padding: 8px 14px; gap: 10px; }
