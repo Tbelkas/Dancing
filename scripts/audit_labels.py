@@ -54,7 +54,9 @@ SIGS = {
     "Vogue":          [r"\bvogu", r"\bvoguing", r"\bball(room)? culture"],
     "Dancehall":      [r"\bdancehall", r"\bragga", r"\breggae danc"],
     "Hip-hop":        [r"\bhip[ -]?hop"],
-    "Breakdance":     [r"\bbreak(danc|ing)\b", r"\bbboy", r"\bb-boy", r"\bbreaking\b"],
+    # \bbreak(danc|ing)\b never matched the word "breakdance" itself (the \b
+    # fails on the trailing "e"), so breaking clips read as having no style.
+    "Breakdance":     [r"\bbreakdanc", r"\bbreakin", r"\bbboy", r"\bb-boy"],
     "House":          [r"\bhouse danc"],
     "Popping":        [r"\bpopping\b", r"\bpoppin\b"],
     "Locking":        [r"\block(ing|in)\b"],
@@ -92,6 +94,15 @@ SIGS = {
     "Zumba":          [r"\bzumba\b"],
     "Disco":          [r"\bdisco\b", r"\bhustle\b"],
     "Techno":         [r"\btechno\b", r"\brave\b", r"\bhakken\b", r"\bgabber\b", r"\bjumpstyle\b"],
+}
+
+# DB style name -> the SIGS key that means the same thing. Without this the
+# style's own keywords can never match its own tag, so every video of e.g. a
+# "Classical / Ballet" dance whose title says "ballet" was flagged.
+ALIAS = {
+    "Classical / Ballet": "Ballet",
+    "Afrobeats":          "Afro",
+    "Bhangra":            "Bollywood",   # the DB's home for all Indian dance
 }
 
 # Styles whose umbrella covers others: a hit on the value list is NOT a
@@ -132,7 +143,26 @@ ALLOW = {
     "Brazilian Funk": {"Latin", "Twerk"},
     "Jersey Club":   {"Hip-hop", "Litefeet"},
     "Disco":         {"Waacking", "Locking", "Ballroom"},
+    # "Ballroom" in a Vogue title is the ballroom/house scene (Paris Is Burning),
+    # not the ballroom-dance discipline. Every Vogue flag was this.
+    "Vogue+":        {"Ballroom"},
+    # Tutting is a popping sub-style, is taught inside hip-hop classes, and has
+    # its own hand/wrist stretch entries.
+    "Tutting":       {"Popping", "Hip-hop", "Stretching", "Breakdance"},
+    # Folk / Traditional is this DB's catch-all umbrella: Irish, line/country,
+    # belly dance, flamenco, Ballet Folklorico, and the African-American social
+    # line dances that show up in hip-hop vocabulary montages.
+    "Folk / Traditional": {"Irish", "Country", "Belly Dance", "Flamenco", "Bollywood",
+                           "Ballet", "Hip-hop", "Shuffle", "Disco", "Swing", "Salsa"},
+    "Bollywood":     {"Bollywood"},
+    # "shuffle" is a tap step (shuffle off to Buffalo) long before it was a genre.
+    "Tap+":          {"Shuffle"},
 }
+ALLOW["Vogue"] = ALLOW["Vogue"] | ALLOW.pop("Vogue+")
+ALLOW["Tap"] = ALLOW["Tap"] | ALLOW.pop("Tap+")
+# Stretch / warm-up / mobility content is style-agnostic: a "stretches for X"
+# video never means the dance is filed under the wrong style.
+UNIVERSAL_ALLOW = {"Stretching"}
 
 
 def yt_title(ytid, fetch=False):
@@ -160,6 +190,18 @@ def hits(text):
     return {s for s, pats in SIGS.items() if any(re.search(p, t) for p in pats)}
 
 
+def own_styles(style):
+    """The set of SIGS keys that count as 'this dance's own style'."""
+    return {style} | ({ALIAS[style]} if style in ALIAS else set())
+
+
+def allowed_for(style):
+    a = set(UNIVERSAL_ALLOW)
+    for s in own_styles(style):
+        a |= ALLOW.get(s, set()) | {s}
+    return a
+
+
 def main():
     fetch = "--fetch-missing" in sys.argv
     rows = psql('''
@@ -170,27 +212,52 @@ def main():
         JOIN "Styles" s ON s."Id"=ds."StyleId"
         JOIN "Videos" v ON v."DanceId"=d."Id"
         ORDER BY s."Name", d."Id";''')
-    flagged, nometa = [], 0
-    out = open(OUT, "w", encoding="utf-8")
-    out.write("danceId\tdance\tslug\tstyle\tvideoDbId\tytid\tstart\tytTitle\tchannel\ttitleStyles\tverdict\n")
+    # Pass 1: resolve every row's title, its title-hits and its channel-hits.
+    # A conflict may only be raised by the TITLE - channel names ("Brian Shuffle",
+    # "2 to Tango", "line dance sl, ut", "Sleek Ballet Fitness") produce hits that
+    # describe the uploader, not the clip. The channel still counts as positive
+    # evidence FOR the dance's own style, which is the safe direction.
+    resolved, nometa = [], 0
+    corroborated = set()     # danceIds where some video confirms the tag
     for did, dname, slug, style, vid, ytid, plat, start in rows:
         if plat.lower() != "youtube":
             continue
         title, channel = yt_title(ytid, fetch)
         if title is None:
             nometa += 1
+            resolved.append((did, dname, slug, style, vid, ytid, start, None, "", set(), set()))
+            continue
+        t_hits, c_hits = hits(title), hits(f"{title} {channel}")
+        # Corroboration: this video either names the dance's own style, or its
+        # style signals are all inside the tag's allowed family (e.g. a
+        # "How to Breakdance ... Footwork 101" clip on a Hip-hop dance).
+        if (own_styles(style) & c_hits) or (c_hits and not c_hits - allowed_for(style)):
+            corroborated.add(did)
+        resolved.append((did, dname, slug, style, vid, ytid, start, title, channel, t_hits, c_hits))
+
+    # Pass 2: verdicts. The question is "is this DANCE mis-styled", not "does
+    # this one clip's title name the style" - so if ANY video of the dance
+    # confirms the tag, an off-brand extra video is a sourcing problem, not a
+    # label problem, and is reported as EXTRA rather than MISMATCH.
+    flagged, extra = [], 0
+    out = open(OUT, "w", encoding="utf-8")
+    out.write("danceId\tdance\tslug\tstyle\tvideoDbId\tytid\tstart\tytTitle\tchannel\ttitleStyles\tverdict\n")
+    for did, dname, slug, style, vid, ytid, start, title, channel, t_hits, c_hits in resolved:
+        if title is None:
             out.write(f"{did}\t{dname}\t{slug}\t{style}\t{vid}\t{ytid}\t{start}\t(no metadata)\t\t\tNOMETA\n")
             continue
-        found = hits(f"{title} {channel}")
-        allowed = ALLOW.get(style, set()) | {style}
-        conflicts = found - allowed
-        # If the dance's own style also appears in the title, don't flag.
-        verdict = "MISMATCH" if conflicts and style not in found else "ok"
-        out.write(f"{did}\t{dname}\t{slug}\t{style}\t{vid}\t{ytid}\t{start}\t{title}\t{channel}\t{','.join(sorted(found))}\t{verdict}\n")
-        if verdict == "MISMATCH":
+        conflicts = t_hits - allowed_for(style)
+        if not conflicts or own_styles(style) & c_hits:
+            verdict = "ok"
+        elif did in corroborated:
+            verdict = "EXTRA"; extra += 1
+        else:
+            verdict = "MISMATCH"
             flagged.append((did, dname, slug, style, vid, ytid, start, title, sorted(conflicts)))
+        out.write(f"{did}\t{dname}\t{slug}\t{style}\t{vid}\t{ytid}\t{start}\t{title}\t{channel}\t{','.join(sorted(t_hits))}\t{verdict}\n")
     out.close()
-    print(f"rows={len(rows)} flagged={len(flagged)} no-metadata={nometa}  -> {OUT}\n")
+    print(f"rows={len(rows)} flagged={len(flagged)} off-style-extra-video={extra} "
+          f"no-metadata={nometa}  -> {OUT}\n")
     for f in flagged:
         print(f"dance {f[0]} [{f[3]}] {f[1]} (/{f[2]})  video {f[4]} yt={f[5]} start={f[6]}\n"
               f"    YT: {f[7]}\n    title says: {', '.join(f[8])}")

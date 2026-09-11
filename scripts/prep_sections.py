@@ -22,28 +22,52 @@ vtt = f"_proto/loose_{vid}.en.vtt" if vid == "1dQxTwiPQkg" else f"_proto/sub_{vi
 def hhmmss(t):
     return f"{int(t)//60:02d}:{int(t)%60:02d}"
 
+# YouTube intermittently blocks yt-dlp's default player client, and when it does the
+# error is indistinguishable from a deleted video ("This video is not available", or
+# "Sign in to confirm you're not a bot"). That is a dangerous failure here: the caller
+# reads it as "dead link" and skips a perfectly good tutorial forever. So try the other
+# clients before believing it. Confirmed 2026-09-09, when 11 videos reported unavailable
+# and all 11 answered 200 from oEmbed.
+CLIENTS = [[], ["--extractor-args", "youtube:player_client=ios"],
+           ["--extractor-args", "youtube:player_client=android"]]
+
+
+def ytdlp(args):
+    """Run yt-dlp, retrying across player clients while the failure looks like a block."""
+    last = None
+    for extra in CLIENTS:
+        last = subprocess.run(["yt-dlp", "--skip-download", "--no-warnings",
+                               "--ignore-no-formats-error"] + extra + args,
+                              capture_output=True, text=True, encoding="utf-8")
+        if last.returncode == 0:
+            return last
+    return last
+
+
 # metadata
 if not os.path.exists(meta):
-    p = subprocess.run(["yt-dlp", "--skip-download", "--no-warnings", "-J",
-                        f"https://www.youtube.com/watch?v={vid}"],
-                       capture_output=True, text=True, encoding="utf-8")
-    if p.returncode:
+    p = ytdlp(["-J", f"https://www.youtube.com/watch?v={vid}"])
+    if p.returncode or not (p.stdout or "").strip():
         sys.stderr.write((p.stderr or "")[-400:])
         print("FETCH_FAILED")
         raise SystemExit(2)
     open(meta, "w", encoding="utf-8").write(p.stdout)
 d = json.load(open(meta, encoding="utf-8"))
+# A cached file holding literal "null" crashed a batch with AttributeError instead of
+# reporting a clean failure; treat it as no cache at all.
+if not isinstance(d, dict):
+    os.remove(meta)
+    print("FETCH_FAILED")
+    raise SystemExit(2)
 title = d.get("title")
 dur = d.get("duration") or 0
 chapters = [(int(c["start_time"]), c["title"]) for c in (d.get("chapters") or [])]
 
 # captions
 if not os.path.exists(vtt):
-    subprocess.run(["yt-dlp", "--skip-download", "--no-warnings", "--write-auto-subs",
-                    "--sub-langs", "en", "--sub-format", "vtt",
-                    "-o", f"_proto/sub_{vid}.%(ext)s",
-                    f"https://www.youtube.com/watch?v={vid}"],
-                   capture_output=True, text=True, encoding="utf-8")
+    ytdlp(["--write-auto-subs", "--sub-langs", "en", "--sub-format", "vtt",
+           "-o", f"_proto/sub_{vid}.%(ext)s",
+           f"https://www.youtube.com/watch?v={vid}"])
 
 def parse_vtt(path):
     if not os.path.exists(path):

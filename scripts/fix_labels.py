@@ -89,6 +89,12 @@ SINGLES = {
     1451:"Stretching", 1455:"Stretching", 1567:"Tap", 1571:"Tap",
     1619:"Swing", 1623:"Swing", 1625:"Ballroom", 1626:"Swing", 1630:"Swing",
     1632:"Swing", 1634:"Ballroom", 1653:"Swing", 1657:"Swing", 1658:"Swing", 1659:"Swing",
+    # --- 2026-09-09 re-audit. Only these three survived triage as genuine
+    # mistags; every other flag was a parent-style/scene-name false positive or
+    # an off-style *extra* video on a correctly-tagged dance.
+    153:"Breakdance",   # "Stomach": sole video is "25 EASY Breakdance Moves with Name"
+    423:"Breakdance",   # "The Monkey": breaking footwork ("Reverse Monkey Swing"), not krump
+    1027:"Dancehall",   # "Wuk Up": both videos are Jamaican dancehall
 }
 
 

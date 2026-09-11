@@ -379,7 +379,7 @@ Goal: maximize chips across as many dance categories as possible.
   (same ytid, now only on video 2026, which is chipped).
 
 <!-- CHIP-QUEUE:START -->
-## Auto-detected chip queue _(last checked 2026-09-03 23:33)_
+## Auto-detected chip queue _(last checked 2026-09-09 04:22)_
 
 142 tutorial video(s) awaiting section chips (0 new since last check):
 
