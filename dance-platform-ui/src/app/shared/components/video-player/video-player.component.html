@@ -1,43 +1,49 @@
 <div class="player-wrapper">
 
   @if ((segments.length > 0 || personalLoops.length > 0) && !isInstagram) {
-    <div class="segments-bar">
-      @if (segments.length > 0) {
-        <span class="segments-label">Sections</span>
-        <div class="segment-chips">
-          @for (seg of segments; track seg.id) {
-            <div class="segment-chip-wrap" [class.segment-chip-wrap--active]="activeSegmentId() === seg.id">
-              <button class="segment-chip" [class.active]="activeSegmentId() === seg.id" (click)="jumpToSegment(seg)">
-                {{ seg.label }}
-                <span class="segment-chip__time">{{ formatTime(seg.startTime) }}@if (seg.endTime != null) { – {{ formatTime(seg.endTime) }}}</span>
+    <div class="segments-bar" [class.segments-bar--expanded]="segmentsExpanded()">
+      <button class="segments-toggle" (click)="segmentsExpanded.set(!segmentsExpanded())"
+              [attr.aria-expanded]="segmentsExpanded()"
+              [title]="segmentsExpanded() ? 'Collapse sections' : 'Show every section'">
+        <span class="segments-toggle__text">Sections</span>
+        <span class="segments-toggle__count">{{ segments.length + personalLoops.length }}</span>
+        <i class="fa-solid fa-chevron-down segments-toggle__caret" aria-hidden="true"></i>
+      </button>
+
+      <div class="segment-track">
+        @for (seg of segments; track seg.id) {
+          <div class="segment-chip-wrap" [class.segment-chip-wrap--active]="activeSegmentId() === seg.id">
+            <button class="segment-chip" [class.active]="activeSegmentId() === seg.id" (click)="jumpToSegment(seg)">
+              <span class="segment-chip__label">{{ seg.label }}</span>
+              <span class="segment-chip__time">{{ formatTime(seg.startTime) }}</span>
+            </button>
+            @if (canSaveLoops) {
+              <button class="segment-chip__delete" (click)="emitDeleteLoop($event, seg)" title="Delete section" aria-label="Delete section">
+                <i class="fa-solid fa-xmark"></i>
               </button>
-              @if (canSaveLoops) {
-                <button class="segment-chip__delete" (click)="emitDeleteLoop($event, seg)" title="Delete section" aria-label="Delete section">
-                  <i class="fa-solid fa-xmark"></i>
-                </button>
-              }
-            </div>
-          }
-        </div>
-      }
-      @if (personalLoops.length > 0) {
-        <span class="segments-label"><i class="fa-solid fa-user"></i> My loops</span>
-        <div class="segment-chips">
-          @for (loop of personalLoops; track loop.id) {
-            <div class="segment-chip-wrap" [class.segment-chip-wrap--active]="activePersonalLoopId() === loop.id">
-              <button class="segment-chip segment-chip--personal" [class.active]="activePersonalLoopId() === loop.id" (click)="jumpToPersonalLoop(loop)">
-                {{ loop.label }}
-                <span class="segment-chip__time">{{ formatTime(loop.startTime) }}@if (loop.endTime != null) { – {{ formatTime(loop.endTime) }}}</span>
+            }
+          </div>
+        }
+
+        @if (segments.length > 0 && personalLoops.length > 0) {
+          <span class="segment-track__divider" aria-hidden="true"></span>
+        }
+
+        @for (loop of personalLoops; track loop.id) {
+          <div class="segment-chip-wrap" [class.segment-chip-wrap--active]="activePersonalLoopId() === loop.id">
+            <button class="segment-chip segment-chip--personal" [class.active]="activePersonalLoopId() === loop.id" (click)="jumpToPersonalLoop(loop)">
+              <i class="fa-solid fa-user segment-chip__mine" aria-hidden="true"></i>
+              <span class="segment-chip__label">{{ loop.label }}</span>
+              <span class="segment-chip__time">{{ formatTime(loop.startTime) }}</span>
+            </button>
+            @if (canSavePersonal) {
+              <button class="segment-chip__delete" (click)="emitDeletePersonalLoop($event, loop)" title="Delete loop" aria-label="Delete loop">
+                <i class="fa-solid fa-xmark"></i>
               </button>
-              @if (canSavePersonal) {
-                <button class="segment-chip__delete" (click)="emitDeletePersonalLoop($event, loop)" title="Delete loop" aria-label="Delete loop">
-                  <i class="fa-solid fa-xmark"></i>
-                </button>
-              }
-            </div>
-          }
-        </div>
-      }
+            }
+          </div>
+        }
+      </div>
     </div>
   }
 

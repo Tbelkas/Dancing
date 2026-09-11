@@ -375,8 +375,11 @@
                     } @else {
                       <span class="dance-card__media-fallback"><i class="fa-solid fa-music"></i></span>
                     }
-                    @if (rec.videoCount > 0) {
-                      <span class="dance-card__media-count"><i class="fa-solid fa-play"></i> {{ rec.videoCount }} video{{ rec.videoCount !== 1 ? 's' : '' }}</span>
+                    @if (recDuration(rec); as runtime) {
+                      <span class="dance-card__runtime">{{ runtime }}</span>
+                    }
+                    @if (rec.videoCount > 1) {
+                      <span class="dance-card__media-count"><i class="fa-solid fa-layer-group"></i> {{ rec.videoCount }}</span>
                     }
                   </span>
                   <span class="dance-card__body">

@@ -422,6 +422,19 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     return youtubeThumbUrl(dance.thumbnailVideoId, dance.thumbnailPlatform);
   }
 
+  /** "10:19" / "1:04:22" for the rail card's thumbnail badge. Empty when the
+   *  catalogue doesn't know the runtime yet — a badge reading 0:00 is worse than
+   *  no badge. */
+  recDuration(dance: Dance): string {
+    const total = dance.totalDurationSeconds ?? 0;
+    if (total < 1) return '';
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+  }
+
   onRecThumbError(danceId: number): void {
     this.recThumbs.markFailed(danceId);
   }

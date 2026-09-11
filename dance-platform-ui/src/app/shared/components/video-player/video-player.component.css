@@ -223,115 +223,186 @@
   .loop-flash { animation: none; opacity: 0; }
 }
 
-/* Tutorial segments */
+/* Tutorial segments.
+
+   A well-chipped tutorial carries 12-20 sections. Boxed, capitalised and wrapped
+   they read as a wall of buttons above the video and push the player itself below
+   the fold — the section list ends up shouting louder than the thing it indexes.
+   So: one quiet scrollable line by default, chips that read as text rather than
+   controls, and a toggle that wraps them all out when you actually want the map. */
 .segments-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 12px 22px;
+  gap: 14px;
+  padding: 10px 22px;
   border-bottom: 1px solid var(--color-border);
+  min-width: 0;
 }
 
-.segments-label {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  flex-shrink: 0;
-}
-
-/* Chipped tutorials can carry a dozen sections; capped at ~two rows so the bar
-   never grows tall enough to push the video itself below the fold. */
-.segment-chips {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  max-height: 5.5rem;
-  overflow-y: auto;
-}
-
-.segment-chip {
+.segments-toggle {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  transition: color var(--transition);
+}
+
+.segments-toggle:hover { color: var(--color-text); }
+
+.segments-toggle__count {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--color-text-muted);
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+.segments-toggle__caret {
+  font-size: 0.6rem;
+  transition: transform var(--transition);
+}
+
+.segments-bar--expanded .segments-toggle__caret { transform: rotate(180deg); }
+
+/* Collapsed: a single line you swipe. Expanded: every chip at once. */
+.segment-track {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  /* The last chip fades out rather than being cut, so there's a hint of more. */
+  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent 100%);
+}
+
+.segment-track::-webkit-scrollbar { display: none; }
+
+.segments-bar--expanded .segment-track {
+  flex-wrap: wrap;
+  row-gap: 2px;
+  overflow: visible;
+  max-height: none;
+  mask-image: none;
+}
+
+.segment-track__divider {
+  flex-shrink: 0;
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 8px;
+  background: var(--color-border);
+}
+
+/* Text first, control second: no box until you point at it. */
+.segment-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  flex-shrink: 0;
+  max-width: 260px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 999px;
   color: var(--color-text-muted);
   font-family: var(--font-ui);
   font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 6px 12px;
+  font-weight: 500;
+  padding: 5px 11px;
   cursor: pointer;
-  transition: all var(--transition);
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
 
-.segment-chip:hover,
+.segment-chip__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.segment-chip:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--color-text);
+}
+
 .segment-chip.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #07070D;
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .segment-chip__time {
-  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
   font-weight: 500;
-  opacity: 0.75;
+  opacity: 0.6;
   font-variant-numeric: tabular-nums;
 }
 
-/* Admin: a section chip pairs with an inline delete button; they read as one
-   unit, so drop the radius/border where they meet. */
+.segment-chip__mine { font-size: 0.62rem; opacity: 0.8; }
+
+/* Admin: the delete sits inside the chip's own hover area rather than bolting a
+   second bordered button onto it — two boxes per section is what made the bar
+   look like a toolbar in the first place. */
 .segment-chip-wrap {
   display: inline-flex;
-  align-items: stretch;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: 999px;
 }
 
-.segment-chip-wrap:has(.segment-chip__delete) .segment-chip {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border-right: none;
-}
+.segment-chip-wrap:has(.segment-chip__delete) .segment-chip { padding-right: 4px; }
 
 .segment-chip__delete {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--color-border);
-  border-left: none;
-  border-top-right-radius: var(--radius);
-  border-bottom-right-radius: var(--radius);
+  background: none;
+  border: none;
+  border-radius: 999px;
   color: var(--color-text-muted);
-  font-size: 0.72rem;
-  padding: 0 9px;
+  font-size: 0.62rem;
+  padding: 4px 8px 4px 4px;
   cursor: pointer;
-  transition: all var(--transition);
+  opacity: 0;
+  transition: opacity var(--transition), color var(--transition);
 }
 
-.segment-chip__delete:hover {
-  background: var(--color-error);
-  border-color: var(--color-error);
-  color: #07070D;
-}
+.segment-chip-wrap:hover .segment-chip__delete,
+.segment-chip__delete:focus-visible { opacity: 1; }
+
+.segment-chip__delete:hover { color: var(--color-error); }
 
 /* Personal loops read as the user's own, tinted with the accent so they stand
    apart from the global (admin) sections sharing the bar. */
-.segment-chip--personal {
-  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+.segment-chip--personal { color: color-mix(in srgb, var(--color-accent) 80%, var(--color-text-muted)); }
+
+.segment-chip--personal:hover { color: var(--color-accent); }
+
+.segment-chip--personal.active {
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
   color: var(--color-accent);
 }
 
-.segment-chip--personal:hover,
-.segment-chip--personal.active {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: #07070D;
+@media (max-width: 640px) {
+  .segments-bar { padding: 8px 14px; gap: 10px; }
+  .segments-toggle__text { display: none; }
 }
 
 /* Jump between the dances cut from one shared source video. The list collapses

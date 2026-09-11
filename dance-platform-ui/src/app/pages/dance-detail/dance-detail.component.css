@@ -558,21 +558,28 @@
     radial-gradient(ellipse 80% 60% at 50% 40%, rgba(245, 200, 66, 0.06), transparent 70%),
     var(--color-surface-2);
 }
+/* Runtime bottom-right, video count top-left: the two things you want off a
+   thumbnail before you click it. The runtime is the one that was missing — a rail
+   of eight cards with no times gives you no way to pick a short one. */
+.recommended-card .dance-card__runtime,
 .recommended-card .dance-card__media-count {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 8px;
-  border-radius: 2px;
-  background: rgba(7, 7, 13, 0.82);
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(7, 7, 13, 0.86);
   color: var(--color-text);
   font-family: var(--font-mono);
   font-size: 0.68rem;
+  line-height: 1.35;
   letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
 }
+
+.recommended-card .dance-card__runtime { bottom: 6px; right: 6px; }
+.recommended-card .dance-card__media-count { top: 6px; left: 6px; }
 .recommended-card .dance-card__body { display: flex; flex-direction: column; gap: .5rem; padding: 16px 20px 20px; }
 .recommended-card .dance-card__name { margin: 0; }
 .recommended-card .styles-row { display: flex; flex-wrap: wrap; gap: .35rem; }
@@ -836,8 +843,10 @@ a.path-step__row:hover { border-color: var(--color-primary); color: var(--color-
     padding: 10px 12px;
   }
   .recommended-card .dance-card__name { font-size: 0.92rem; }
-  /* At 132px wide the count pill sits on top of whatever the thumbnail shows. */
-  .recommended-card .dance-card__media-count { display: none; }
+  /* At 132px the badges have to shrink, but the runtime stays — it's the reason
+     the rail is scannable at all. */
+  .recommended-card .dance-card__runtime,
+  .recommended-card .dance-card__media-count { font-size: 0.62rem; padding: 1px 5px; }
 }
 
 @media (min-width: 1860px) {

@@ -78,6 +78,11 @@ export class VideoPlayerComponent extends PlayerBaseComponent implements OnInit,
   activeChapterId = signal<number | null>(null);
   chaptersExpanded = signal(false);
 
+  /** A chipped tutorial can carry a dozen-plus sections. Wrapped, they read as a
+   *  wall of buttons and shove the video below the fold, so the bar rides on one
+   *  scrollable line and only wraps out when you ask it to. */
+  segmentsExpanded = signal(false);
+
   /** Notes fold away behind a toolbar toggle alongside the inherited Loop panel;
    *  the toggle carries the note count, so nothing is hidden, only folded. */
   notesOpen = signal(false);
