@@ -250,10 +250,10 @@
   cursor: pointer;
   color: var(--color-text-muted);
   font-family: var(--font-ui);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.08em;
   transition: color var(--transition);
 }
 
@@ -314,7 +314,9 @@
   background: var(--color-border);
 }
 
-/* Text first, control second: no box until you point at it. */
+/* Text first, control second: no box until you point at it. The label is body-bright
+   at full weight — dropping the boxes was meant to calm the bar down, not to make the
+   section names hard to read, and muted-on-dark at 0.78rem was doing exactly that. */
 .segment-chip {
   display: inline-flex;
   align-items: baseline;
@@ -324,10 +326,10 @@
   background: none;
   border: 1px solid transparent;
   border-radius: 999px;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   font-family: var(--font-ui);
-  font-size: 0.78rem;
-  font-weight: 500;
+  font-size: 0.83rem;
+  font-weight: 600;
   padding: 5px 11px;
   cursor: pointer;
   white-space: nowrap;
@@ -340,8 +342,8 @@
 }
 
 .segment-chip:hover {
-  background: rgba(255,255,255,0.06);
-  color: var(--color-text);
+  background: rgba(255,255,255,0.08);
+  color: var(--color-primary);
 }
 
 .segment-chip.active {
@@ -351,13 +353,19 @@
   font-weight: 600;
 }
 
+/* The timestamp is the secondary half of the pair, so it steps down in size and
+   colour — but via the muted token, not an opacity that would sink it into the
+   background. */
 .segment-chip__time {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 500;
-  opacity: 0.6;
+  color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }
+
+.segment-chip:hover .segment-chip__time,
+.segment-chip.active .segment-chip__time { color: inherit; opacity: 0.75; }
 
 .segment-chip__mine { font-size: 0.62rem; opacity: 0.8; }
 
@@ -395,7 +403,7 @@
 
 /* Personal loops read as the user's own, tinted with the accent so they stand
    apart from the global (admin) sections sharing the bar. */
-.segment-chip--personal { color: color-mix(in srgb, var(--color-accent) 80%, var(--color-text-muted)); }
+.segment-chip--personal { color: var(--color-accent); }
 
 .segment-chip--personal:hover { color: var(--color-accent); }
 
