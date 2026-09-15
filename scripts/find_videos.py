@@ -1,5 +1,6 @@
 """
-find_videos.py [--limit N] [--per-dance K] [--min-views N] [apply]
+find_videos.py [--limit N] [--per-dance K] [--min-views N] [--max-videos N]
+                [--require-move] [apply]
 
 Find a SECOND teaching video for dances that only have one.
 
@@ -56,7 +57,13 @@ SEARCH_N = 6
 # instruction. Not fatal on their own, but they lower the score.
 NOT_TEACHING = re.compile(
     r"\b(official (video|audio)|music video|lyrics|remix|live (at|from)|concert"
-    r"|full performance|episode \d+|reaction|vlog)\b", re.I)
+    r"|full performance|episode \d+|reaction|vlog"
+    # Music releases are the junk class that survives the title gate on a bare
+    # name match: "Officixl RSA - Jab Jab Feat Scotts Maphuma" scores 0.55 for
+    # the move "Jab Jab" because the words line up exactly. A credit line or a
+    # workout routine is never a teaching video.
+    r"|feat\.?|ft\.|song|mix|mixtape|megamix|compilation"
+    r"|workout|album|visualizer)\b", re.I)
 TEACHING = re.compile(
     r"\b(tutorial|how to|learn|lesson|breakdown|step by step|basics|beginner"
     r"|technique|drill|explained)\b", re.I)
@@ -73,7 +80,7 @@ select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
          (select string_agg(v."VideoId", ',') from "Videos" v
            where v."DanceId" = d."Id") as "existing"
   from "Dances" d
-  where (select count(*) from "Videos" v where v."DanceId" = d."Id") <= 1
+  where (select count(*) from "Videos" v where v."DanceId" = d."Id") <= %d
   order by (select max(coalesce(v."ViewCount",0)) from "Videos" v
             where v."DanceId" = d."Id") desc nulls last
 ) t;
@@ -143,6 +150,17 @@ def main():
     ap.add_argument("--per-dance", type=int, default=1)
     ap.add_argument("--min-views", type=int, default=1000)
     ap.add_argument("--min-score", type=float, default=0.55)
+    ap.add_argument("--max-videos", type=int, default=1,
+                    help="target dances with at most this many videos (default 1, "
+                         "the thin ones). Raise it to give well-covered moves a "
+                         "further instructor - the small styles have no thin "
+                         "dances left, so they are unreachable at 1.")
+    ap.add_argument("--require-move", action="store_true",
+                    help="drop candidates whose title shares no word with the "
+                         "dance NAME. Without it a title can clear --min-score on "
+                         "style plus reach alone, which is how a generic "
+                         "'Bachata Basic Steps' gets attached to 'Over-the-Top "
+                         "with a Lift'.")
     ap.add_argument("--from-file", action="store_true",
                     help="insert exactly what the last dry run found, without "
                          "searching again")
@@ -156,7 +174,7 @@ def main():
         insert(found, args)
         return
 
-    targets = json.loads(ch.psql(TARGETS).strip() or "[]")[:args.limit]
+    targets = json.loads(ch.psql(TARGETS % args.max_videos).strip() or "[]")[:args.limit]
     known = catalogue_ids()
     print(f"{len(targets)} dance(s) with one video or none; "
           f"{len(known)} clips already in the catalogue")
@@ -185,6 +203,9 @@ def main():
                 continue
             sc, flags = score_candidate(c, t["dance"], t["styles"])
             if sc < args.min_score:
+                continue
+            if args.require_move and not any(
+                    f.startswith("names-the-move") for f in flags):
                 continue
             kept.append({**c, "score": sc, "flags": flags,
                          "danceid": t["danceid"], "dance": t["dance"],
