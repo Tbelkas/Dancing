@@ -435,7 +435,8 @@ STYLES = {
         "id": 1,
         "desc": None,
         "music": "Samba",
-        "words": ["samba", "latin", "brazilian", "brazil"],
+        "words": ["samba", "latin", "brazilian", "brazil", "cha cha", "chacha",
+                  "cha-cha", "rumba", "paso doble", "pasodoble"],
         "query": "samba",
         "adopt": [],
         "moves": [
@@ -454,6 +455,33 @@ STYLES = {
             ("Samba Botafogo", 2,
              "A crossing, travelling figure of ballroom samba named after a Rio "
              "neighbourhood."),
+            ("Cha Cha Hockey Stick", 2,
+             "The follower travels out from fan position and turns under the arm, "
+             "tracing a hockey-stick shape.", "Salsa"),
+            ("Cha Cha Fan", 1,
+             "The follower steps back to the leader's left side, opening to an L "
+             "shape - the position half the syllabus starts from.", "Salsa"),
+            ("Cha Cha Alemana", 2,
+             "The follower's turn under the arm from fan position, turning to the "
+             "right.", "Salsa"),
+            ("Cha Cha Time Step", 1,
+             "The cha cha basic danced in place, apart - the chasse and check that "
+             "every figure is built on.", "Salsa"),
+            ("Rumba Fan", 1,
+             "The rumba version of the fan: slow and stretched, with Cuban motion "
+             "through the hips.", "Salsa"),
+            ("Rumba Alemana", 2,
+             "The follower's underarm turn from fan, slow enough in rumba to show "
+             "every ounce of hip action.", "Salsa"),
+            ("Rumba Hockey Stick", 2,
+             "Out of fan, the follower closes, turns under and walks away along the "
+             "shape of a hockey stick.", "Salsa"),
+            ("Paso Doble Sur Place", 1,
+             "Marching on the spot on the balls of the feet - the paso doble's "
+             "stamp-and-hold matador posture.", "Salsa"),
+            ("Paso Doble Appel", 1,
+             "A stamp that marks a change of direction - the matador calling the "
+             "bull's attention.", "Salsa"),
         ],
     },
 
@@ -1043,6 +1071,118 @@ STYLES = {
             ("Bombershay", 2,
              "A traditional step travelling sideways - step, shuffle, ball change - "
              "danced in the old soft-shoe routines."),
+        ],
+    },
+
+    # ================================================================== round 4
+    "Ballroom": {
+        "id": 2,
+        "desc": None,
+        "music": "Classical / Orchestral",
+        "words": ["ballroom", "waltz", "foxtrot", "quickstep", "jive", "viennese",
+                  "standard"],
+        "query": "ballroom",
+        "adopt": [],
+        "moves": [
+            ("Waltz Reverse Turn", 2,
+             "The waltz's turn to the left, six steps over two bars, the partner of "
+             "the natural turn."),
+            ("Waltz Whisk", 2,
+             "A figure crossing the feet behind into promenade position, usually "
+             "followed by a chasse from promenade."),
+            ("Waltz Spin Turn", 3,
+             "A natural pivoting turn that spins the couple round and sends them off "
+             "in a new direction."),
+            ("Foxtrot Three Step", 2,
+             "Three forward walking steps in foxtrot's smooth, gliding rise and fall, "
+             "the leader passing outside."),
+            ("Foxtrot Reverse Turn", 2,
+             "The foxtrot's turn to the left with a heel turn for the follower."),
+            ("Quickstep Quarter Turns", 1,
+             "The first quickstep figure: a natural and a progressive chasse, each "
+             "turning a quarter.", "Jazz"),
+            ("Quickstep Tipple Chasse", 2,
+             "A turning chasse travelling round a corner - the quickstep's quick "
+             "footwork at its most typical.", "Jazz"),
+            ("Viennese Waltz Reverse Turn", 2,
+             "The fast rotating turn to the left that, with the natural turn, makes "
+             "up most of a Viennese waltz."),
+            ("Viennese Waltz Fleckerl", 3,
+             "Spinning on the spot in the middle of the floor, the most advanced "
+             "figure in the Viennese waltz."),
+            ("Jive Basic Step", 1,
+             "Triple step, triple step, rock step - chasse left, chasse right, back "
+             "rock - the basic of ballroom jive.", "Jazz"),
+            ("Jive Change of Places", 1,
+             "The follower passes under the leader's arm from right to left and back "
+             "- the first jive figure.", "Jazz"),
+            ("Jive American Spin", 2,
+             "The follower is pushed off into a full spin and recaught in the leader's "
+             "right hand.", "Jazz"),
+            ("Jive Chicken Walks", 2,
+             "The follower walks backward with swivelling kicks as the leader draws "
+             "her in.", "Jazz"),
+        ],
+    },
+
+    "Swing": {
+        "id": 6,
+        "desc": None,
+        "music": "Jazz",
+        "words": ["swing", "wcs", "lindy", "west coast"],
+        "query": "west coast swing",
+        "adopt": [],
+        "moves": [
+            ("Sugar Push", 1,
+             "The West Coast Swing basic: the follower is drawn in, compressed and "
+             "sent back along the slot on six counts."),
+            ("Left Side Pass", 1,
+             "The follower passes the leader on his left side, travelling down the "
+             "slot - the second WCS basic."),
+            ("Right Side Pass", 1,
+             "The follower passes on the leader's right side, with an underarm turn."),
+            ("West Coast Swing Whip", 2,
+             "An eight-count figure in which the couple rotate a half turn together "
+             "in closed position before the follower is sent out."),
+            ("Tuck Turn", 2,
+             "The follower is tucked in and released into a turn on the anchor, a "
+             "basic WCS turn pattern."),
+            ("Anchor Step", 1,
+             "The triple step at the end of every WCS pattern, where the couple settle "
+             "into the connection before the next figure."),
+            ("Starter Step", 1,
+             "The two-count preparation at the start of a WCS dance or pattern - how "
+             "the couple begin on the same beat."),
+        ],
+    },
+
+    "Scottish Highland": {
+        "id": None,
+        "desc": "Scottish Highland dancing: a competitive solo style danced on the "
+                "balls of the feet to bagpipes, with precise footwork, high elevation "
+                "and fixed dances such as the Fling and the Sword Dance.",
+        "music": "Classical / Orchestral",
+        "words": ["highland", "scottish", "scotland"],
+        "query": "highland dance",
+        "adopt": [2048],
+        "moves": [
+            ("Highland Sword Dance", 2,
+             "Ghillie Callum: danced over two crossed swords on the floor without "
+             "touching them, speeding up for the final steps."),
+            ("Seann Triubhas", 2,
+             "A Highland dance whose slow part mimes shaking off the trousers banned "
+             "after 1746, followed by a quick-time finish."),
+            ("Highland Reel", 2,
+             "A dance for four in figure-eight travelling steps and setting steps."),
+            ("Highland Pas de Basque", 1,
+             "The Highland setting step, sprung onto the ball of the foot - the first "
+             "thing a Highland class teaches."),
+            ("Highland Shedding", 2,
+             "A foundation step of the Fling: the foot cutting behind and in front of "
+             "the supporting leg."),
+            ("Highland Backstep", 2,
+             "A step travelling backwards with the working foot cutting behind the "
+             "supporting leg."),
         ],
     },
 }
