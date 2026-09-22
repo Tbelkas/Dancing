@@ -166,9 +166,12 @@ select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
 """
 
 
-DEAD = re.compile(r"(not available|unavailable|private video|has been removed"
-                  r"|terminated|does not exist|age.?restricted"
-                  r"|sign in to confirm your age)", re.I)
+# Phrases that mean the VIDEO is gone - not bare "not available", which also matches
+# yt-dlp's transient "Requested format is not available". That false match stamped
+# playable videos video-unavailable on 2026-09-22 (probed afterwards: they downloaded).
+DEAD = re.compile(r"(video unavailable|this video is (not available|unavailable|private)"
+                  r"|private video|has been removed|account .*terminated"
+                  r"|does not exist|age.?restricted|sign in to confirm your age)", re.I)
 # "Sign in to confirm you're not a bot" is YouTube throttling US, not the video being
 # gone. On 2026-09-22 it fired for every request after ~440 in a row and stamped 113
 # perfectly good videos "video-unavailable" in a few minutes. It must never be read
