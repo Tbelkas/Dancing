@@ -3,6 +3,7 @@ seed_style_moves.py search [--styles A,B] [--per-move 2]   find tutorials (dry r
 seed_style_moves.py insert                                  insert them as PENDING
 seed_style_moves.py promote [apply]                         take verified styles live
 seed_style_moves.py status                                  where every style stands
+seed_style_moves.py retry [apply]                           new candidates for stuck moves
 
 Grow the catalogue into dance styles it lacks, from the authored move lists in
 style_catalog.py.
@@ -129,8 +130,14 @@ def gate(c, name, style):
     key = move_key_tokens(name, style)
     # The move: every distinctive token, or the whole name written without spaces
     # ("Twist-o-Flex" vs "twistoflex").
-    names_move = key <= tt or flat(name) in ft or \
-        all(flat(k) in ft for k in key)
+    if not key:
+        # A name toks() cannot see at all - "Au" is under its three-letter floor - and
+        # an empty key is a subset of every title. It picked "How to Do the Bancao"
+        # and an aerial tutorial for Au. Such a name must appear as a whole word.
+        names_move = bool(re.search(rf"\b{re.escape(name)}\b", title, re.I))
+    else:
+        names_move = key <= tt or flat(name) in ft or \
+            all(flat(k) in ft for k in key)
     if not names_move:
         return False, 0, "move-not-in-title"
     # The style must be named by a word OTHER than the move's own. "The Lock" is in
@@ -403,6 +410,61 @@ def cmd_promote(args):
         print("\ndry run - pass 'apply' to take these live")
 
 
+def cmd_retry(args):
+    """More candidates for pending moves none of whose videos verified.
+
+    A move sticks when every video it got came back silent, unclear or
+    unnamed - often a non-English teacher, whom the English-only ASR can never
+    confirm (asr-english-only). Differently phrased English queries give it
+    fresh chances. New videos attach to the existing pending dance.
+    """
+    stuck = [p for p in ours_pending() if p["live"] == 0]
+    if args.styles:
+        want = {x.strip().lower() for x in args.styles.split(",")}
+        stuck = [p for p in stuck if p["style"].lower() in want]
+    known = set(json.loads(ch.psql(
+        'select coalesce(json_agg("VideoId"), \'[]\'::json) from "Videos";'
+    ).strip() or "[]"))
+    added = 0
+    for p in stuck:
+        spec = STYLES[p["style"]]
+        queries = [f"how to do {p['name']} {spec['query']}",
+                   f"{p['name']} {spec['query']} lesson for beginners"]
+        pick, chans = [], set()
+        for qy in queries:
+            try:
+                cands = search(qy)
+            except subprocess.TimeoutExpired:
+                continue
+            for c in sorted(cands, key=lambda c: -c["views"]):
+                if c["ytid"] in known or c["channel"] in chans:
+                    continue
+                ok, sc, _ = gate(c, p["name"], p["style"])
+                if ok:
+                    pick.append(c)
+                    chans.add(c["channel"])
+                    known.add(c["ytid"])
+                if len(pick) >= args.per_move:
+                    break
+            if len(pick) >= args.per_move:
+                break
+            time.sleep(0.4)
+        print(f"   {len(pick)} new  {p['style'][:14]:<15} {p['name'][:28]:<29}"
+              + (f" {pick[0]['title'][:50]}" if pick else ""))
+        if args.apply != "apply":
+            continue
+        for v in pick:
+            ch.psql(f"""
+            insert into "Videos"("Title","VideoId","Platform","VideoType","DateAdded",
+                                 "ViewCount","DurationSeconds","DanceId")
+            values ('{q(v["title"])[:300]}','{v["ytid"]}','youtube','tutorial', now(),
+                    {int(v["views"])}, {int(v["dur"])}, {int(p["id"])});""")
+            added += 1
+    print(f"\n{len(stuck)} stuck move(s); "
+          + (f"inserted {added} pending video(s)" if args.apply == "apply"
+             else "dry run - pass 'apply' to insert"))
+
+
 def cmd_status(args):
     pend = ours_pending()
     for style, spec in STYLES.items():
@@ -419,13 +481,13 @@ def cmd_status(args):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["search", "insert", "promote", "status"])
+    ap.add_argument("cmd", choices=["search", "insert", "promote", "status", "retry"])
     ap.add_argument("apply", nargs="?")
     ap.add_argument("--styles")
     ap.add_argument("--per-move", type=int, default=2)
     args = ap.parse_args()
     {"search": cmd_search, "insert": cmd_insert, "promote": cmd_promote,
-     "status": cmd_status}[args.cmd](args)
+     "status": cmd_status, "retry": cmd_retry}[args.cmd](args)
 
 
 if __name__ == "__main__":
