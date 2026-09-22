@@ -276,6 +276,34 @@ public class DanceServiceTests : IDisposable
         }
     }
 
+    [Fact]
+    public async Task Search_ByChannel_MatchesVisibleVideosOnly()
+    {
+        // Dance 40 has a global video from the channel; dance 41 only a personal one owned by
+        // user 1; dance 42 a video from somebody else.
+        await using (var ctx = NewCtx())
+        {
+            ctx.Dances.AddRange(
+                new Dance { Id = 40, Name = "Split Stretch", Slug = "split-stretch" },
+                new Dance { Id = 41, Name = "Hip Opener", Slug = "hip-opener" },
+                new Dance { Id = 42, Name = "Other", Slug = "other" });
+            ctx.Videos.AddRange(
+                new Video { Title = "a", VideoId = "aaaaaaaaaaa", DanceId = 40, ChannelName = "blogilates" },
+                new Video { Title = "b", VideoId = "bbbbbbbbbbb", DanceId = 41, ChannelName = "blogilates", OwnerUserId = 1 },
+                new Video { Title = "c", VideoId = "ccccccccccc", DanceId = 42, ChannelName = "someone else" });
+            await ctx.SaveChangesAsync();
+        }
+        await using (var ctx = NewCtx())
+        {
+            var svc = Svc(ctx);
+            var anon = await svc.SearchAsync("", null, null, null, null, "name", null, channel: "blogilates");
+            Assert.Equal(new[] { 40 }, anon.Items.Select(d => d.Id));
+
+            var owner = await svc.SearchAsync("", null, null, null, null, "name", 1, channel: "blogilates");
+            Assert.Equal(new[] { 41, 40 }, owner.Items.Select(d => d.Id));
+        }
+    }
+
     public void Dispose()
     {
         _conn.Dispose();

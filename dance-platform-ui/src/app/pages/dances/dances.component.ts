@@ -105,6 +105,8 @@ export class DancesComponent implements OnInit, OnDestroy {
   selectedDifficulty = signal<string | null>(null);
   selectedStatus = signal<string>('all');
   favoritesOnly = signal(false);
+  /** "by <channel>" — set by the creator credit under a video; URL-only, never restored from storage. */
+  selectedChannel = signal<string | null>(null);
   sortBy = signal<string>('recommended');
 
   styleQuery = signal('');
@@ -192,7 +194,8 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.selectedMusicalStyleId() !== null ||
     this.selectedDifficulty() !== null ||
     this.selectedStatus() !== 'all' ||
-    this.favoritesOnly()
+    this.favoritesOnly() ||
+    this.selectedChannel() !== null
   );
 
   /** One chip per active filter, each individually removable. */
@@ -218,6 +221,8 @@ export class DancesComponent implements OnInit, OnDestroy {
       chips.push({ key: 'status', label: opt?.label ?? status });
     }
     if (this.favoritesOnly()) chips.push({ key: 'favorites', label: 'Favorites' });
+    const channel = this.selectedChannel();
+    if (channel) chips.push({ key: 'channel', label: `by ${channel}` });
     return chips;
   });
 
@@ -329,6 +334,14 @@ export class DancesComponent implements OnInit, OnDestroy {
         sanitize: v => authed() ? v : false
       },
       {
+        // A creator filter is something you follow a link into, not a standing preference —
+        // restoring it on a plain revisit would leave browse mysteriously showing one channel.
+        param: 'channel', storageKey: 'selectedChannel', signal: this.selectedChannel,
+        fromParam: raw => raw?.trim() || null,
+        toParam: v => v,
+        fromStored: () => undefined
+      },
+      {
         param: 'sort', storageKey: 'sortBy', signal: this.sortBy,
         fromParam: raw => raw || 'recommended',
         toParam: v => v !== 'recommended' ? v : null,
@@ -412,6 +425,7 @@ export class DancesComponent implements OnInit, OnDestroy {
       difficulty: this.selectedDifficulty() ?? undefined,
       status: this.selectedStatus(),
       favoritesOnly: this.favoritesOnly(),
+      channel: this.selectedChannel(),
       sortBy: this.sortBy(),
       page: this.currentPage(),
       pageSize: this.PAGE_SIZE
@@ -484,6 +498,7 @@ export class DancesComponent implements OnInit, OnDestroy {
       case 'level': this.selectedDifficulty.set(null); break;
       case 'status': this.selectedStatus.set('all'); break;
       case 'favorites': this.favoritesOnly.set(false); break;
+      case 'channel': this.selectedChannel.set(null); break;
     }
     this.currentPage.set(1);
     this.runSearch();
@@ -499,7 +514,8 @@ export class DancesComponent implements OnInit, OnDestroy {
       musicalStyleId: this.selectedMusicalStyleId(),
       difficulty: this.selectedDifficulty() ?? undefined,
       status: this.selectedStatus(),
-      favoritesOnly: this.favoritesOnly()
+      favoritesOnly: this.favoritesOnly(),
+      channel: this.selectedChannel()
     }).subscribe({
       next: dance => {
         this.surprising.set(false);
@@ -528,6 +544,7 @@ export class DancesComponent implements OnInit, OnDestroy {
     this.selectedDifficulty.set(null);
     this.selectedStatus.set('all');
     this.favoritesOnly.set(false);
+    this.selectedChannel.set(null);
     this.currentPage.set(1);
     this.runSearch();
   }

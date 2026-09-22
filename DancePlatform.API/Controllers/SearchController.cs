@@ -21,10 +21,11 @@ public class SearchController : AppControllerBase
         [FromQuery] string? sortBy,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 24,
-        [FromQuery] bool favoritesOnly = false)
+        [FromQuery] bool favoritesOnly = false,
+        [FromQuery] string? channel = null)
     {
         var clamped = Math.Min(Math.Max(pageSize, 1), 100);
-        var result = await _danceService.SearchAsync(q ?? string.Empty, styleId, musicalStyleId, difficulty, status, sortBy, CurrentUserId, page, clamped, favoritesOnly);
+        var result = await _danceService.SearchAsync(q ?? string.Empty, styleId, musicalStyleId, difficulty, status, sortBy, CurrentUserId, page, clamped, favoritesOnly, channel);
         return Ok(result);
     }
 
@@ -35,9 +36,10 @@ public class SearchController : AppControllerBase
         [FromQuery] int? musicalStyleId,
         [FromQuery] string? difficulty,
         [FromQuery] string? status,
-        [FromQuery] bool favoritesOnly = false)
+        [FromQuery] bool favoritesOnly = false,
+        [FromQuery] string? channel = null)
     {
-        var dance = await _danceService.RandomAsync(q ?? string.Empty, styleId, musicalStyleId, difficulty, status, CurrentUserId, favoritesOnly);
+        var dance = await _danceService.RandomAsync(q ?? string.Empty, styleId, musicalStyleId, difficulty, status, CurrentUserId, favoritesOnly, channel);
         return dance is null ? NotFound(new { message = "No dances match the filters." }) : Ok(dance);
     }
 }

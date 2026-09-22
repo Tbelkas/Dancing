@@ -46,6 +46,8 @@ export interface SearchDancesParams {
   difficulty?: string | null;
   status?: string;
   favoritesOnly?: boolean;
+  /** Exact channel name — dances with a video from that creator. */
+  channel?: string | null;
   sortBy?: string;
   page?: number;
   pageSize?: number;
@@ -112,6 +114,7 @@ export class DanceService {
     if (p.difficulty) params = params.set('difficulty', p.difficulty);
     if (p.status && p.status !== 'all') params = params.set('status', p.status);
     if (p.favoritesOnly) params = params.set('favoritesOnly', 'true');
+    if (p.channel) params = params.set('channel', p.channel);
     if (p.sortBy) params = params.set('sortBy', p.sortBy);
     if (p.page) params = params.set('page', p.page.toString());
     if (p.pageSize) params = params.set('pageSize', p.pageSize.toString());

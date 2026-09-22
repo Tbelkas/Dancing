@@ -135,6 +135,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Video>()
             .HasIndex(v => v.OwnerUserId);
 
+        // Browse's "by <channel>" filter matches on this.
+        modelBuilder.Entity<Video>()
+            .HasIndex(v => v.ChannelName);
+
         // Personal loops: removed when either the owning user or the video is deleted.
         modelBuilder.Entity<UserVideoLoop>()
             .HasOne(l => l.User)

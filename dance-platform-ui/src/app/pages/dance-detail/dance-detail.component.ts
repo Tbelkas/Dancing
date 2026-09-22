@@ -740,6 +740,11 @@ export class DanceDetailComponent implements OnInit, OnDestroy {
     this.showAddVideo.set(false);
   }
 
+  /** Display name of a video platform, for the creator credit's "open on …" link. */
+  platformName(platform: string): string {
+    return platform === 'tiktok' ? 'TikTok' : platform === 'instagram' ? 'Instagram' : 'YouTube';
+  }
+
   /** A personal (private) video is visible only to its owner. */
   isPersonalVideo(video: Video): boolean {
     return video.ownerUserId != null;

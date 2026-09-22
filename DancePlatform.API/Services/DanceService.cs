@@ -375,9 +375,9 @@ public class DanceService : IDanceService
         return new DanceStatusDto(wantLearned, wantInProgress);
     }
 
-    public async Task<SearchDancesResult> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, string? sortBy, int? userId, int page = 1, int pageSize = 24, bool favoritesOnly = false)
+    public async Task<SearchDancesResult> SearchAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, string? sortBy, int? userId, int page = 1, int pageSize = 24, bool favoritesOnly = false, string? channel = null)
     {
-        var entityQ = BuildFilteredQuery(query, styleId, musicalStyleId, difficulty, status, userId, favoritesOnly);
+        var entityQ = BuildFilteredQuery(query, styleId, musicalStyleId, difficulty, status, userId, favoritesOnly, channel);
         var clampedPage = Math.Max(1, page);
 
         // Sorts push ORDER BY + COUNT + SKIP/TAKE to the database. "recommended"/"tutorials" rank on
@@ -421,9 +421,9 @@ public class DanceService : IDanceService
         return new SearchDancesResult { Items = rows.Select(ToDto).ToList(), Total = total, GrandTotal = grandTotal, Page = clampedPage, PageSize = pageSize };
     }
 
-    public async Task<DanceDto?> RandomAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, int? userId, bool favoritesOnly = false)
+    public async Task<DanceDto?> RandomAsync(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, int? userId, bool favoritesOnly = false, string? channel = null)
     {
-        var entityQ = BuildFilteredQuery(query, styleId, musicalStyleId, difficulty, status, userId, favoritesOnly);
+        var entityQ = BuildFilteredQuery(query, styleId, musicalStyleId, difficulty, status, userId, favoritesOnly, channel);
         var total = await entityQ.CountAsync();
         if (total == 0) return null;
 
@@ -433,7 +433,7 @@ public class DanceService : IDanceService
         return row is null ? null : ToDto(row);
     }
 
-    private IQueryable<Dance> BuildFilteredQuery(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, int? userId, bool favoritesOnly)
+    private IQueryable<Dance> BuildFilteredQuery(string query, int? styleId, int? musicalStyleId, string? difficulty, string? status, int? userId, bool favoritesOnly, string? channel)
     {
         var entityQ = Visible(_db.Dances, userId, false);
 
@@ -456,6 +456,15 @@ public class DanceService : IDanceService
 
         if (favoritesOnly && userId.HasValue)
             entityQ = entityQ.Where(d => d.FavoritedBy.Any(f => f.UserId == userId.Value));
+
+        // "by <channel>": dances with a video from that creator the viewer can see. Exact match -
+        // the value comes from a credit link, not typing, so a substring would only add strangers.
+        if (!string.IsNullOrWhiteSpace(channel))
+        {
+            var name = channel.Trim();
+            entityQ = entityQ.Where(d => d.Videos.Any(v =>
+                v.ChannelName == name && (v.OwnerUserId == null || v.OwnerUserId == userId)));
+        }
 
         if (!string.IsNullOrWhiteSpace(status) && userId.HasValue)
         {

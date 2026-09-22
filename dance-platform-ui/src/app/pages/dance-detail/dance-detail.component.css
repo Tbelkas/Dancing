@@ -244,6 +244,57 @@
   line-height: 1.65;
 }
 
+/* Under the player: rating on the left, the creator credit pushed to the right edge. */
+.video-under {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: 0.75rem;
+}
+
+.video-under .rating-section { margin-top: 0; }
+
+.video-credit {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  min-width: 0;
+}
+
+.video-credit__name {
+  font-weight: 600;
+  color: var(--color-text);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 22ch;
+}
+
+.video-credit__name:hover,
+.video-credit__name:focus-visible {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.video-credit__ext {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.video-credit__ext:hover,
+.video-credit__ext:focus-visible { color: var(--color-accent); }
+
+.video-list-item__channel {
+  color: var(--color-text);
+  opacity: 0.8;
+}
+
 /* Video list (multiple videos) */
 .video-list {
   display: flex;

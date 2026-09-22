@@ -121,7 +121,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 115 attributes are a contract. Treat them like a public API.**
+**These 116 attributes are a contract. Treat them like a public API.**
 
 The personal-skill-tree rows below (`roadmap-new` … `builder-step-clip`, and
 `profile-shared-roadmaps`) are **dormant**: the markup still carries them, but it is gated on
@@ -152,6 +152,7 @@ they are — the tests come back with the feature.
 | `style-filter-pills` | `dances.component.html` | The Style filter row — `.style-filters` alone also matches the Level row |
 | `dance-card`, `dance-card-link` | `dances.component.html` | Result cards — **on both the grid card and the list row** |
 | `dance-title`, `favorite-button`, `progress-learned` | `dance-detail.component.html` | Detail page |
+| `video-channel` | `dance-detail.component.html` | The "by <channel>" credit under the playing video — links to browse filtered to that creator. **Absent** on a video with no channel recorded (Instagram, or not yet backfilled) |
 | `roadmap-card`, `roadmap-card-link` | `roadmaps.component.html` | Roadmap index cards |
 | `roadmap-new`, `my-roadmaps` | `roadmaps.component.html` | The "Build a skill tree" button and the grid of the user's own trees. **Both signed-in only** |
 | `roadmap-owned-badge`, `roadmap-edit`, `roadmap-delete`, `roadmap-delete-confirm`, `roadmap-copy` | `roadmap-detail.component.html` | Owner controls. `roadmap-edit`/`roadmap-delete` appear only on a tree the viewer owns; `roadmap-copy` only on one they don't. Their **absence** is the assertion that a curated path can't be edited in place |

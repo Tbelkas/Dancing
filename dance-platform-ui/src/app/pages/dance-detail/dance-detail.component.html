@@ -172,7 +172,25 @@
                   <p class="video-desc">{{ video.description }}</p>
                 }
                 <app-video-player [videoId]="video.videoId" [platform]="video.platform" [startTime]="playerStart(video)" [endTime]="video.endTime" [segments]="video.segments" [chapters]="chapters()" [activeVideoId]="video.id" [sharedSource]="(video.sharedSourceCount ?? 1) > 1" [canSaveLoops]="role.isAdmin()" [personalLoops]="personalLoopsFor(video.id)" [canSavePersonal]="auth.isAuthenticated()" [personalNotes]="personalNotesFor(video.id)" [canTakeNotes]="auth.isAuthenticated()" (saveLoop)="onSaveLoop(video, $event)" (deleteLoop)="onDeleteLoop(video, $event)" (savePersonalLoop)="onSavePersonalLoop(video, $event)" (deletePersonalLoop)="onDeletePersonalLoop(video, $event)" (saveNote)="onSaveNote(video, $event)" (updateNote)="onUpdateNote(video, $event)" (deleteNote)="onDeleteNote(video, $event)" (playingChange)="onPlayerPlaying($event)" />
-                <ng-container [ngTemplateOutlet]="videoRating" [ngTemplateOutletContext]="{ $implicit: video }"></ng-container>
+                <div class="video-under">
+                  <ng-container [ngTemplateOutlet]="videoRating" [ngTemplateOutletContext]="{ $implicit: video }"></ng-container>
+                  <!-- Credit the creator. The name opens everything of theirs on the site; the
+                       small arrow is for their own channel, so the credit also sends people back. -->
+                  @if (video.channelName) {
+                    <span class="video-credit">
+                      by
+                      <a class="video-credit__name" data-testid="video-channel" routerLink="/dances" [queryParams]="{ channel: video.channelName }"
+                         [title]="'All videos from ' + video.channelName">{{ video.channelName }}</a>
+                      @if (video.channelUrl) {
+                        <a class="video-credit__ext" [href]="video.channelUrl" target="_blank" rel="noopener"
+                           [title]="'Open ' + video.channelName + ' on ' + platformName(video.platform)"
+                           [attr.aria-label]="'Open ' + video.channelName + ' on ' + platformName(video.platform)">
+                          <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                        </a>
+                      }
+                    </span>
+                  }
+                </div>
                 <!-- Only under the video that's actually playing. It's a report about what you
                      just watched, and one per collapsed row would be five flags on a page. -->
                 <app-report-video [videoId]="video.id" />
@@ -201,6 +219,9 @@
                              one, and length is what the choice actually turns on. -->
                         @if (runtimeLabel(video); as runtime) {
                           <span class="runtime-badge"><i class="fa-solid fa-clock"></i> {{ runtime }}</span>
+                        }
+                        @if (video.channelName) {
+                          <span class="video-list-item__channel">{{ video.channelName }}</span>
                         }
                         <span>{{ video.dateAdded | date:'mediumDate' }}</span>
                         <span class="views-badge"><i class="fa-solid fa-eye"></i> {{ viewCountBucket(video.viewCount) }}</span>

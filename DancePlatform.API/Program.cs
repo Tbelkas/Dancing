@@ -85,6 +85,11 @@ builder.Services.AddHttpClient<IYoutubeChapterService, YoutubeChapterService>(cl
     client.DefaultRequestHeaders.Add("Cookie", "CONSENT=YES+cb; SOCS=CAI");
 });
 
+// Credits a new video to its channel via the platform's oEmbed endpoint. Short timeout for the
+// same reason as the chapter lookup: it runs inside the add-video request.
+builder.Services.AddHttpClient<IVideoChannelService, VideoChannelService>(client =>
+    client.Timeout = TimeSpan.FromSeconds(5));
+
 // Social sign-in. Each provider is registered against the shared IExternalAuthProvider contract
 // so ExternalAuthService can enumerate whichever ones actually have credentials — an unconfigured
 // provider is simply absent from /auth/external/providers and gets no button.

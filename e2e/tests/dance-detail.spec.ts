@@ -101,6 +101,29 @@ test.describe('dance detail', () => {
     await expect(page.getByTestId('dance-title')).not.toHaveText(name);
   });
 
+  test('the creator credit under the player opens that channel on browse', async ({ page }) => {
+    // Find a dance whose leading video - the one the page opens on - is credited. Asking the
+    // API rather than trusting the first card keeps this from skipping on an uncredited dance.
+    const res = await page.request.get(`${API_URL}/search/dances?sort=tutorials&pageSize=20`);
+    expect(res.ok()).toBe(true);
+    let target: { styleSlug: string; slug: string; channel: string } | null = null;
+    for (const d of (await res.json()).items as { id: number; slug: string; styleSlug: string; videoCount: number }[]) {
+      if (d.videoCount === 0) continue;
+      const vids = await (await page.request.get(`${API_URL}/videos/dance/${d.id}`)).json();
+      if (vids[0]?.channelName) { target = { styleSlug: d.styleSlug, slug: d.slug, channel: vids[0].channelName }; break; }
+    }
+    expect(target, 'some dance near the top of the catalog should have a credited video').toBeTruthy();
+
+    await page.goto(`/dances/${target!.styleSlug}/${target!.slug}`);
+    const credit = page.getByTestId('video-channel');
+    await expect(credit).toHaveText(target!.channel, { timeout: 15_000 });
+    await credit.click();
+
+    await expect(page).toHaveURL(/\/dances\?(.*&)?channel=/);
+    await expect(page.getByRole('button', { name: `Remove filter by ${target!.channel}` })).toBeVisible();
+    await expect(page.getByTestId('dance-card').first()).toBeVisible();
+  });
+
   test('a nonexistent dance slug shows the not-found panel, not a crash', async ({ page }) => {
     await page.goto('/dances/definitely-not-a-real-dance-slug-xyz');
     await expect(page.locator('.dance-missing__msg')).toBeVisible();

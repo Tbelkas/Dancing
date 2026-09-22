@@ -8,8 +8,15 @@ namespace DancePlatform.API.Services;
 public class VideoService : IVideoService
 {
     private readonly AppDbContext _db;
+    private readonly IVideoChannelService? _channels;
 
-    public VideoService(AppDbContext db) => _db = db;
+    // The channel lookup is optional so unit tests can build the service without an HttpClient;
+    // without it a new video simply starts with no channel until the backfill script runs.
+    public VideoService(AppDbContext db, IVideoChannelService? channels = null)
+    {
+        _db = db;
+        _channels = channels;
+    }
 
     // A viewer sees global videos (OwnerUserId == null) plus their own personal ones.
     // Anonymous viewers (userId == null) see only global. Used everywhere videos are
@@ -279,6 +286,8 @@ public class VideoService : IVideoService
         if (video.ReviewState == "pending")
             video.ReviewNote = $"held by intake gate at {score:0.00}";
 
+        (video.ChannelName, video.ChannelUrl) = await ResolveChannelAsync(request.Platform, request.VideoId);
+
         _db.Videos.Add(video);
 
         // Adding a personal video to a dance starts tracking it (In Progress) so it shows
@@ -294,6 +303,20 @@ public class VideoService : IVideoService
             _db.Videos.IgnoreQueryFilters().Where(v => v.Id == video.Id), userId)
             .FirstOrDefaultAsync();
         return (CreateVideoResult.Success, created);
+    }
+
+    // Another cut of the same upload already knows its creator - reuse that before going out to
+    // the network. Otherwise one oEmbed call, best-effort: a failed lookup never blocks the add.
+    private async Task<(string?, string?)> ResolveChannelAsync(string platform, string videoId)
+    {
+        var known = await _db.Videos.IgnoreQueryFilters()
+            .Where(o => o.VideoId == videoId && o.Platform == platform && o.ChannelName != null)
+            .Select(o => new { o.ChannelName, o.ChannelUrl })
+            .FirstOrDefaultAsync();
+        if (known is not null) return (known.ChannelName, known.ChannelUrl);
+        if (_channels is null) return (null, null);
+        var found = await _channels.LookupAsync(platform, videoId);
+        return found is null ? (null, null) : (found.Value.Name, found.Value.Url);
     }
 
     // Marks a dance In Progress for a user if they aren't already tracking or have learned it.
@@ -500,6 +523,8 @@ public class VideoService : IVideoService
             // Not scoped to the viewer - a private cut someone else made still means the source
             // runs past this dance's end, which is all this count is asked to decide.
             SharedSourceCount = _db.Videos.Count(o => o.VideoId == v.VideoId && o.Platform == v.Platform),
+            ChannelName = v.ChannelName,
+            ChannelUrl = v.ChannelUrl,
             AverageRating = v.AverageRating,
             RatingCount = v.RatingCount,
             UserRating = userId == null

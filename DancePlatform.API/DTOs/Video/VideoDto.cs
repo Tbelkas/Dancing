@@ -22,6 +22,9 @@ public class VideoDto
     /// the player to be built around them, so the decision rides along with the video instead.
     /// </summary>
     public int SharedSourceCount { get; set; }
+    /// <summary>The source upload's creator. Null when unknown.</summary>
+    public string? ChannelName { get; set; }
+    public string? ChannelUrl { get; set; }
     public double AverageRating { get; set; }
     public int RatingCount { get; set; }
     public int? UserRating { get; set; }

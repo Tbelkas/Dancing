@@ -17,6 +17,15 @@ public class Video
     /// <summary>Full source-video length in seconds (from yt-dlp metadata); null when unknown.</summary>
     public int? DurationSeconds { get; set; }
 
+    /// <summary>
+    /// Who published the source upload, as the platform names them ("blogilates"), and a link
+    /// to their channel there. Filled from the platform's oEmbed endpoint on create, and by
+    /// scripts/backfill_channels.py for rows that arrived by raw insert. Null = not looked up
+    /// yet, or the platform has no public lookup (Instagram).
+    /// </summary>
+    public string? ChannelName { get; set; }
+    public string? ChannelUrl { get; set; }
+
     // --- Intake quality gate ---------------------------------------------
     // Bulk-seeded videos land as "pending" and are held out of every public
     // query by the global filter in AppDbContext until someone reviews them.
