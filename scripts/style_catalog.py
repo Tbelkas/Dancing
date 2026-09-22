@@ -1129,7 +1129,8 @@ STYLES = {
         "id": 6,
         "desc": None,
         "music": "Jazz",
-        "words": ["swing", "wcs", "lindy", "west coast"],
+        "words": ["swing", "wcs", "lindy", "west coast", "shag", "steppin",
+                  "stepping"],
         "query": "west coast swing",
         "adopt": [],
         "moves": [
@@ -1150,6 +1151,27 @@ STYLES = {
             ("Anchor Step", 1,
              "The triple step at the end of every WCS pattern, where the couple settle "
              "into the connection before the next figure."),
+            ("Carolina Shag", 1,
+             "The South Carolina beach dance: a smooth six-count partner swing to "
+             "beach music, all footwork and hardly any turns.", "Jazz"),
+            ("St. Louis Shag", 2,
+             "A fast, bouncy solo-ish swing to up-tempo jazz, built on kicks and "
+             "double-time triples."),
+            ("Lindy Circle", 2,
+             "Leader and follower rotating together through an eight-count circle in "
+             "closed position - the swingout's rotating sibling."),
+            ("Texas Tommy", 2,
+             "A Lindy Hop figure where the follower's hand is passed behind her back "
+             "and the leader turns her out of it."),
+            ("Sugar Tuck", 2,
+             "A West Coast Swing sugar push with a tuck and underarm turn at the "
+             "end."),
+            ("Basket Whip", 3,
+             "A West Coast Swing whip with the follower wrapped in the leader's arm "
+             "before she is released."),
+            ("Chicago Steppin", 1,
+             "Smooth partner dance from Chicago's South Side, a descendant of swing "
+             "and the Bop, danced to R&B and steppers' music.", "Hip-Hop"),
             ("Starter Step", 1,
              "The two-count preparation at the start of a WCS dance or pattern - how "
              "the couple begin on the same beat."),
@@ -1183,6 +1205,72 @@ STYLES = {
             ("Highland Backstep", 2,
              "A step travelling backwards with the working foot cutting behind the "
              "supporting leg."),
+        ],
+    },
+
+    # ================================================================== round 5
+    "Hip-hop": {
+        "id": 10,
+        "desc": None,
+        "music": "Hip-Hop",
+        # Viral dances are titled "How to do the Griddy", with no style word at all,
+        # so "dance" has to count here. The move names are distinctive enough to
+        # carry the match on their own.
+        "words": ["hip hop", "hip-hop", "hiphop", "dance", "dancing"],
+        "query": "dance",
+        "adopt": [],
+        "moves": [
+            ("Griddy", 1,
+             "Heels tapped alternately while the arms swing and the hands make "
+             "glasses over the eyes - created by Allen 'Griddy' Davis, made famous by "
+             "NFL touchdown celebrations."),
+            ("Hitting the Woah", 1,
+             "A sharp, snapping pose - fists pulled in and the shoulders hit - from the "
+             "late-2010s Florida and Atlanta scene."),
+            ("Shoot Dance", 1,
+             "Hopping on one foot while the opposite arm swings and punches up, "
+             "popularised by BlocBoy JB's 'Shoot' in 2018."),
+            ("Hit Dem Folks", 1,
+             "An Atlanta dance where one arm swings across like a punch while the knee "
+             "lifts - from the 2010s."),
+            ("Crank That", 1,
+             "Soulja Boy's 2007 dance: the leans, the 'Superman' jump and the stomps, "
+             "one of the first dances to spread through YouTube."),
+            ("Tootsie Roll", 1,
+             "Rolling the hips while stepping side to side, hands rolling at the knees "
+             "- from the 69 Boyz song, 1994."),
+            ("Hit the Quan", 1,
+             "The 2015 dance from iLoveMemphis's song: a bounce with rolling shoulders "
+             "and a hand wave."),
+            ("Sturdy", 2,
+             "The New York drill-era dance: a hunched, stomping bounce with the arms "
+             "swinging, from the early 2020s."),
+        ],
+    },
+
+    "Forro": {
+        "id": None,
+        "desc": "Partner dance from north-east Brazil, danced close to accordion, "
+                "zabumba and triangle: a two-step with a sway, ranging from rootsy pe "
+                "de serra to the turn-heavy universitario style.",
+        "music": "Forro",
+        "words": ["forro", "xote", "baiao"],
+        "query": "forro",
+        "adopt": [],
+        "moves": [
+            ("Forro Basic Step", 1,
+             "Two quick steps and a slow one, side to side or forward and back, the "
+             "hips swaying with the zabumba."),
+            ("Xote", 1,
+             "The slower forro rhythm, danced close with small steps - the first forro "
+             "most people learn."),
+            ("Baiao", 2,
+             "The faster, bouncier forro rhythm popularised by Luiz Gonzaga."),
+            ("Forro Universitario", 2,
+             "The urban style from 1990s Sao Paulo, with more turns and open figures "
+             "than traditional forro."),
+            ("Forro Giro", 2,
+             "The follower's basic turn out of the embrace, led from the basic."),
         ],
     },
 }

@@ -121,7 +121,9 @@ def move_key_tokens(name, style):
 
 def gate(c, name, style):
     """Is this search result a tutorial of this move in this style? -> (ok, score, why)"""
-    title = c["title"]
+    # Fold accents first: "Forró" and "Bênção" in a title must meet "Forro" and
+    # "Bencao" in the catalogue, and flat()/toks() simply drop non-ASCII letters.
+    title = unicodedata.normalize("NFKD", c["title"]).encode("ascii", "ignore").decode()
     tt = vg.toks(title)
     ft = flat(title)
     key = move_key_tokens(name, style)
