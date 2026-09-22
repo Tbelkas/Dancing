@@ -281,12 +281,17 @@ def main():
     ap.add_argument("--state", default="pending")
     ap.add_argument("--only-unscored", action="store_true",
                     help="skip rows that already carry a verdict")
+    ap.add_argument("--min-id", type=int,
+                    help="only rows with Videos.Id >= this - verify a fresh batch "
+                         "without queueing behind an older backlog")
     args = ap.parse_args()
 
     rows = json.loads(ch.psql(FETCH % args.state).strip() or "[]")
     total_in_state = len(rows)
     if args.only_unscored:
         rows = [r for r in rows if r.get("score") is None]
+    if args.min_id:
+        rows = [r for r in rows if int(r["vid"]) >= args.min_id]
     if args.limit:
         rows = rows[:args.limit]
     if not rows:
