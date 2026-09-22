@@ -988,8 +988,6 @@ STYLES = {
             ("Passe", 1,
              "The working foot drawn up to the knee of the standing leg, the position "
              "pirouettes are turned in."),
-            ("Balance", 1,
-             "A waltz step rocking side to side - down, up, down - in three counts."),
             ("Pas de Basque", 2,
              "A travelling step in three, the leg sweeping round in a half circle - "
              "from the folk dances of the Basque country."),
