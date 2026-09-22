@@ -166,9 +166,10 @@ select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
 """
 
 
-# Phrases that mean the VIDEO is gone - not bare "not available", which also matches
-# yt-dlp's transient "Requested format is not available". That false match stamped
-# playable videos video-unavailable on 2026-09-22 (probed afterwards: they downloaded).
+# Phrases that mean the VIDEO is gone - not bare "not available", which would also
+# match yt-dlp's transient "Requested format is not available". (The 35 rows that
+# prompted this on 2026-09-22 turned out to be genuinely "This video is not available"
+# - still matched here - so this is a guard, not a fix for an observed miscount.)
 DEAD = re.compile(r"(video unavailable|this video is (not available|unavailable|private)"
                   r"|private video|has been removed|account .*terminated"
                   r"|does not exist|age.?restricted|sign in to confirm your age)", re.I)
