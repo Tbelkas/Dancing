@@ -805,4 +805,246 @@ STYLES = {
              "opposition, the pose of temple sculpture."),
         ],
     },
+
+    # ================================================================== round 3
+    # The big styles, filling the canonical vocabulary they were missing.
+
+    "Dancehall": {
+        "id": 14,
+        "desc": None,
+        "music": "Dancehall",
+        "words": ["dancehall", "jamaica", "jamaican"],
+        "query": "dancehall",
+        "adopt": [],
+        "moves": [
+            ("Signal di Plane", 1,
+             "Arms waved overhead like marshalling an aircraft while the feet bounce - "
+             "one of the early-2000s moves out of Bogle's generation."),
+            ("Log On", 1,
+             "The foot stepping as though pressing into the ground and twisting out, "
+             "from Elephant Man's 2002 song."),
+            ("Sweep", 1,
+             "Sweeping one foot across the floor on the beat while the body leans with "
+             "it, from the Elephant Man tune."),
+            ("World Dance", 2,
+             "A sequence move popularised by Beenie Man's song, the arms turning like "
+             "the globe."),
+            ("Zip It Up", 1,
+             "Miming zipping up a jacket from waist to chin, in time, with a bounce."),
+            ("Chaka Chaka", 2,
+             "A dancehall step with a rhythmic knee and hip action, from the Ding Dong "
+             "era."),
+            ("Dancehall Butterfly", 2,
+             "Knees opening and closing like wings - the 1990s dancehall queen move."),
+            ("Shampoo", 1,
+             "Hands scrubbing the head as if washing hair, while the feet keep the "
+             "bounce."),
+            ("Pelpa", 2,
+             "A later Ding Dong move, all quick feet and shoulders, from the Ravers "
+             "Clavers crew."),
+        ],
+    },
+
+    "Afrobeats": {
+        "id": 13,
+        "desc": None,
+        "music": "Afrobeats",
+        "words": ["afro", "afrobeats", "afrobeat", "afrodance", "naija", "nigerian",
+                  "nigeria", "ghana", "african"],
+        "query": "afro dance",
+        "adopt": [],
+        "moves": [
+            ("Etighi", 1,
+             "A shoulder-and-chest wiggle with small steps, from Iyanya's 2012 'Kukere' "
+             "era - Calabar in origin."),
+            ("Alkayida", 1,
+             "The Nigerian street move of rocking the torso with arms swinging loosely, "
+             "popular in 2012-13."),
+            ("Skelewu", 1,
+             "The dance from Davido's 2013 song, released with a video tutorial and a "
+             "contest - loose, bouncy and all shoulders."),
+            ("Gbese", 1,
+             "A leg-lifting, bouncing Lagos street move, the knee swinging out and in."),
+            ("Odi Dance", 1,
+             "The Kenyan dance from the Odi wa Muranga crew: a swaying, shoulder-led "
+             "groove that spread through Nairobi."),
+        ],
+    },
+
+    "Breakdance": {
+        "id": 12,
+        "desc": None,
+        "music": "Hip-Hop",
+        "words": ["breakdance", "breakdancing", "bboy", "b-boy", "breaking", "bgirl",
+                  "b-girl", "breakin"],
+        "query": "breakdance",
+        "adopt": [],
+        "moves": [
+            ("Indian Step", 1,
+             "A toprock: crossing one foot in front, then stepping back out with the "
+             "arms opening - after the 'Indian' step of early Bronx b-boys."),
+            ("Three Step", 1,
+             "The shorter footwork circle - three steps round instead of six - used to "
+             "change direction quickly."),
+            ("Kick Out", 1,
+             "From the crouch, one leg kicks straight out while the hand supports - the "
+             "simplest downrock accent."),
+            ("Shoulder Freeze", 2,
+             "A freeze balanced on one shoulder and the hand, legs in the air."),
+            ("Hollowback", 3,
+             "A handstand with the back arched and the legs dropped over towards the "
+             "head."),
+            ("Jackhammer", 3,
+             "Bouncing on one hand while the body spins in a pike, the legs held up."),
+            ("Halo", 3,
+             "A power move spinning round the head in a tilted circle, the body swept "
+             "from the back of the head to the forehead."),
+            ("Airflare", 3,
+             "An aerial power move: the body flips in the air between hand contacts "
+             "while the legs circle wide."),
+            ("Hand Glide", 2,
+             "Spinning horizontally on one hand, the elbow planted in the stomach."),
+            ("Crickets", 3,
+             "Spinning in a series of hops on the hands, the elbow tucked into the hip."),
+        ],
+    },
+
+    "House": {
+        "id": 11,
+        "desc": None,
+        "music": "Electronic / EDM",
+        "words": ["house"],
+        "query": "house dance",
+        "adopt": [],
+        "moves": [
+            ("Loose Legs", 2,
+             "House footwork with the legs kept relaxed and flicking out, the knees "
+             "leading, loose as the name says."),
+            ("House Skate", 2,
+             "A gliding step pushed off like ice skating, travelling side to side."),
+            ("Salsa Hop", 2,
+             "A hopping house step with a salsa-like cross, landing on the beat."),
+            ("Crossroads", 2,
+             "Crossing and uncrossing the feet in a square pattern - a house footwork "
+             "foundation."),
+            ("Train", 2,
+             "A travelling house step, the feet stepping and pulling like a train's "
+             "pistons."),
+            ("Scribble Legs", 3,
+             "Fast, scrambled footwork that looks like the legs are scribbling on the "
+             "floor."),
+            ("Sidewalk", 2,
+             "A travelling house step moving laterally, heel and toe alternating."),
+        ],
+    },
+
+    "Jazz": {
+        "id": 20,
+        "desc": None,
+        "music": "Jazz",
+        "words": ["jazz"],
+        "query": "jazz dance",
+        "adopt": [],
+        "moves": [
+            ("Calypso Leap", 3,
+             "A turning leap: the front leg in attitude, the body turning in the air "
+             "and landing as the back leg extends."),
+            ("Hitch Kick", 2,
+             "A scissor kick in the air - the first leg kicks up, the second follows as "
+             "the first comes down."),
+            ("Jazz Layout", 3,
+             "One leg kicked high as the torso tips back, making a long diagonal line."),
+            ("Toe Touch Jump", 2,
+             "A straddle jump with the arms reaching towards the toes."),
+            ("Jazz Isolations", 1,
+             "Moving the head, shoulders, ribcage and hips independently - the warm-up "
+             "every jazz class opens with."),
+            ("Jazz Hinge", 3,
+             "Leaning back on the knees with a straight line from knees to head, "
+             "lowered and recovered with control."),
+            ("Illusion Turn", 3,
+             "A turn on one leg in which the body folds down into a split and back up "
+             "as it goes round."),
+            ("Jazz Pencil Turn", 2,
+             "A turn with both legs straight together like a pencil, arms tight to "
+             "the body."),
+        ],
+    },
+
+    "Classical / Ballet": {
+        "id": 4,
+        "desc": None,
+        "music": "Classical / Orchestral",
+        "words": ["ballet"],
+        "query": "ballet",
+        "adopt": [],
+        "moves": [
+            ("Five Positions of the Feet", 1,
+             "First to fifth position - the five basic placements of the feet every "
+             "ballet step starts and ends in."),
+            ("Port de Bras", 1,
+             "The carriage of the arms: moving through the arm positions with the head "
+             "and upper body following."),
+            ("Passe", 1,
+             "The working foot drawn up to the knee of the standing leg, the position "
+             "pirouettes are turned in."),
+            ("Balance", 1,
+             "A waltz step rocking side to side - down, up, down - in three counts."),
+            ("Pas de Basque", 2,
+             "A travelling step in three, the leg sweeping round in a half circle - "
+             "from the folk dances of the Basque country."),
+            ("Changement", 1,
+             "A jump from fifth position, changing feet in the air to land in fifth "
+             "with the other foot in front."),
+            ("Soubresaut", 2,
+             "A jump from fifth to fifth without changing feet, the legs held tightly "
+             "together in the air."),
+            ("Saute", 1,
+             "A basic jump from two feet, landing in the same position - the first "
+             "allegro step."),
+            ("Temps Leve", 1,
+             "A hop on one foot, the other held in position."),
+            ("Sissonne", 2,
+             "A jump from two feet landing on one, the legs opening in the air like "
+             "scissors."),
+            ("Entrechat Quatre", 3,
+             "A vertical jump beating the legs so they cross twice in the air."),
+            ("Brise", 3,
+             "A small travelling beaten jump, the legs beating in the air before "
+             "landing."),
+        ],
+    },
+
+    "Tap": {
+        "id": 19,
+        "desc": None,
+        "music": "Jazz",
+        "words": ["tap"],
+        "query": "tap dance",
+        "adopt": [],
+        "moves": [
+            ("Paradiddle", 2,
+             "Heel dig, toe scuff, heel drop, toe drop - four sounds that roll like a "
+             "drummer's paradiddle."),
+            ("Drawback", 2,
+             "A backward brush and step that pulls the foot back under the body with "
+             "two sounds."),
+            ("Scuffle", 1,
+             "A scuff and brush back - a shuffle that strikes the heel first."),
+            ("Waltz Clog", 2,
+             "A classic tap combination in three, danced to waltz time."),
+            ("Cincinnati", 2,
+             "A traditional tap step combining a shuffle, hop and flap - a standard "
+             "of the old tap repertoire."),
+            ("Over the Top", 3,
+             "Leaping over the standing foot from one side to the other, the classic "
+             "flash step of the Nicholas Brothers era."),
+            ("Trenches", 3,
+             "Running steps with the body leaning forward and the feet sliding back, "
+             "a flash step of the 1930s."),
+            ("Bombershay", 2,
+             "A traditional step travelling sideways - step, shuffle, ball change - "
+             "danced in the old soft-shoe routines."),
+        ],
+    },
 }

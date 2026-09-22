@@ -44,6 +44,7 @@ import re
 import subprocess
 import sys
 import time
+import unicodedata
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 if sys.stdout is not None:
@@ -91,7 +92,8 @@ def name_key(s):
     """Dedupe key for a dance name: "The Cha Cha Slide" == "Cha Cha Slide" and
     "Grapevines" == "Grapevine". flat() alone missed both, and the first became a
     duplicate entry in the dry run."""
-    n = re.sub(r"^the\s+", "", (s or "").strip().lower())
+    n = unicodedata.normalize("NFKD", (s or "")).encode("ascii", "ignore").decode()
+    n = re.sub(r"^the\s+", "", n.strip().lower())
     k = flat(n)
     return k[:-1] if k.endswith("s") and len(k) > 4 else k
 
