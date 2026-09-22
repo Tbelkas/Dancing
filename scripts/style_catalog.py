@@ -153,7 +153,8 @@ STYLES = {
         "music": "Salsa",
         "words": ["salsa", "casino", "rueda", "on1", "on2", "mambo"],
         "query": "salsa",
-        "adopt": [1, 259, 269, 1825, 2023, 2024, 2031, 839, 738],
+        "adopt": [1, 259, 269, 1825, 2023, 2024, 2031, 839, 738, 1700, 1706,
+                  1707, 488],
         "moves": [
             ("Salsa Basic Step", 1,
              "Forward and back: step, step, close on 1-2-3, pause on 4, mirrored on "
@@ -203,7 +204,7 @@ STYLES = {
         "music": "Tango",
         "words": ["tango", "milonga", "argentine", "argentino"],
         "query": "argentine tango",
-        "adopt": [1963, 2025, 2026, 271],
+        "adopt": [1963, 2025, 2026, 271, 2027],
         "moves": [
             ("Tango Embrace", 1,
              "The abrazo: how the couple holds, from open to close embrace. Everything "
@@ -424,6 +425,384 @@ STYLES = {
             ("Wobble", 1,
              "A hip-hop line dance to V.I.C.'s song, the wobble the recurring move.",
              "Hip-Hop"),
+        ],
+    },
+
+    # ================================================================== round 2
+    # Existing styles that were thin. "id" is set, so promote() links straight in.
+
+    "Latin": {
+        "id": 1,
+        "desc": None,
+        "music": "Samba",
+        "words": ["samba", "latin", "brazilian", "brazil"],
+        "query": "samba",
+        "adopt": [],
+        "moves": [
+            ("Samba no Pe", 2,
+             "Brazilian carnival samba: fast, tiny steps on the balls of the feet, "
+             "three weight changes to every two beats, danced solo."),
+            ("Samba Reggae", 2,
+             "The Bahian street samba of Salvador's blocos, grounded and driven by big "
+             "drum lines - slower and heavier than Rio samba."),
+            ("Samba Walks", 1,
+             "The basic travelling figure of ballroom samba, with the pelvic tilt that "
+             "gives the dance its bounce."),
+            ("Samba Bounce Action", 1,
+             "The knee-flexing bounce under every samba figure. Without it samba is "
+             "just walking in time."),
+            ("Samba Botafogo", 2,
+             "A crossing, travelling figure of ballroom samba named after a Rio "
+             "neighbourhood."),
+        ],
+    },
+
+    "Bachata": {
+        "id": 36,
+        "desc": None,
+        "music": "Bachata",
+        "words": ["bachata"],
+        "query": "bachata",
+        "adopt": [],
+        "moves": [
+            ("Bachata Box Step", 1,
+             "The basic danced as a square - forward and back halves joined up - the "
+             "usual base for turning as a couple."),
+            ("Bachata Hip Motion", 1,
+             "The hip that lands on the tap of every fourth count, produced by the "
+             "knees rather than pushed."),
+            ("Bachata Cross Body Lead", 2,
+             "The leader opens a path and passes the follower across to his other side "
+             "- the salsa figure translated to bachata's timing."),
+            ("Bachata Hammerlock", 2,
+             "The follower's arm is wrapped behind her back in a turn and unwound in the "
+             "next."),
+            ("Bachata Shadow Position", 2,
+             "Both partners facing the same way, the leader behind - the position a lot "
+             "of sensual bachata styling happens in."),
+            ("Bachata Body Roll", 2,
+             "A wave rolled down the body from chest to hips, the signature of sensual "
+             "bachata."),
+            ("Bachata Ladies Styling", 2,
+             "Arm, hair and hip styling the follower adds over the basic and turns."),
+            ("Dominican Bachata", 2,
+             "The original bachata of the Dominican Republic: quick, syncopated "
+             "footwork and a looser, more playful hold than sensual."),
+        ],
+    },
+
+    "Flamenco": {
+        "id": 18,
+        "desc": None,
+        "music": "Flamenco",
+        "words": ["flamenco", "sevillanas"],
+        "query": "flamenco",
+        "adopt": [],
+        "moves": [
+            ("Flamenco Compas", 1,
+             "The rhythmic cycle every flamenco form is built on - usually twelve beats "
+             "with accents that differ by palo. Counting it comes before any steps."),
+            ("Flamenco Palmas", 1,
+             "Flamenco hand-clapping, sharp (claras) or muffled (sordas), in compas - "
+             "how dancers keep time and how everyone else takes part."),
+            ("Flamenco Golpe", 1,
+             "A flat-footed stamp with the whole sole, the loudest of the footwork "
+             "sounds alongside planta and tacon."),
+            ("Flamenco Tangos", 2,
+             "The four-beat palo most beginners learn first - earthy, grounded and "
+             "festive."),
+            ("Flamenco Rumba", 1,
+             "Rumba flamenca: a light, four-beat palo close to Latin music, danced "
+             "loosely and socially."),
+            ("Flamenco Alegrias", 3,
+             "The bright, twelve-beat palo from Cadiz, with its own fixed structure of "
+             "sections and the escobilla footwork passage."),
+            ("Flamenco Bulerias", 3,
+             "The fastest, most improvised twelve-beat palo, full of breaks and "
+             "desplantes - the one flamencos dance at the end of the night."),
+            ("Flamenco Solea", 3,
+             "The slow, deep twelve-beat palo often called the mother of flamenco."),
+            ("Flamenco Skirt Work", 2,
+             "Manejo de falda: using the skirt to frame and extend the movement, "
+             "especially in alegrias and with the bata de cola."),
+            ("Flamenco Castanets", 2,
+             "Playing castanets (palillos) while dancing - more common in classical "
+             "Spanish dance and sevillanas than in flamenco puro."),
+        ],
+    },
+
+    "Bhangra": {
+        "id": 17,
+        "desc": None,
+        "music": "Bhangra",
+        "words": ["bhangra", "punjabi", "bollywood", "giddha", "indian"],
+        "query": "bhangra",
+        "adopt": [],
+        "moves": [
+            ("Bhangra Basic Step", 1,
+             "Hop on one foot with the other kicked forward, arms raised - the step "
+             "every Bhangra class opens with."),
+            ("Dhamaal", 2,
+             "The high-energy Bhangra move of jumping and turning with both arms thrown "
+             "up to the dhol beat."),
+            ("Jhoomar", 2,
+             "A slower, swaying Punjabi folk dance from the west of the region, danced "
+             "in a circle."),
+            ("Luddi", 1,
+             "A victory dance with one hand behind the back and the other in front of "
+             "the face, swaying the head and shoulders."),
+            ("Mirza", 2,
+             "A Bhangra step named after the folk hero Mirza, danced with a rhythmic "
+             "shoulder and arm action."),
+            ("Giddha", 1,
+             "The Punjabi women's folk dance, performed in a circle with clapping and "
+             "sung boliyan verses."),
+            ("Thumka", 1,
+             "The Bollywood hip jerk, landed on the beat with a hand on the hip or "
+             "waist - small and sharp, not a hip roll."),
+        ],
+    },
+
+    "Kizomba": {
+        "id": 39,
+        "desc": None,
+        "music": "Kizomba",
+        "words": ["kizomba", "semba", "tarraxo", "kiz", "kizz"],
+        "query": "kizomba",
+        "adopt": [],
+        "moves": [
+            ("Kizomba Walk", 1,
+             "Walking in the close embrace - the smooth, grounded step the whole dance "
+             "is made of."),
+            ("Semba", 2,
+             "The older Angolan dance kizomba grew out of: faster, more playful, with "
+             "tricks and a bouncier walk."),
+            ("Urban Kiz", 2,
+             "The French-born offshoot of kizomba: straighter lines, sharper stops and "
+             "more footwork, danced to electronic ghetto zouk."),
+            ("Tarraxo", 2,
+             "A slow, minimal style danced to tarraxo music - almost all hip and "
+             "connection, very little travel."),
+            ("Kizomba Ladies Styling", 2,
+             "What the follower adds inside the lead - hip isolations, foot "
+             "embellishments - without breaking the connection."),
+        ],
+    },
+
+    "Krump": {
+        "id": 15,
+        "desc": None,
+        "music": "Hip-Hop",
+        "words": ["krump", "krumping"],
+        "query": "krump",
+        "adopt": [],
+        "moves": [
+            ("Krump Stomp", 1,
+             "The heavy, driving stomp that krump's groove is built on."),
+            ("Krump Arm Swing", 1,
+             "Big, powerful arm swings thrown from the back - with the stomp and the "
+             "chest pop, one of the three foundations."),
+            ("Buck Hop", 2,
+             "A krump footwork move: a hopping step with the knees driven up hard."),
+        ],
+    },
+
+    "Contemporary": {
+        "id": 7,
+        "desc": None,
+        "music": "Classical / Orchestral",
+        "words": ["contemporary", "lyrical", "modern"],
+        "query": "contemporary dance",
+        "adopt": [],
+        "moves": [
+            ("Fall and Recovery", 2,
+             "Giving in to gravity and rebounding out of it - Doris Humphrey's "
+             "principle, and one of the ideas contemporary dance is built on."),
+            ("Release Technique", 2,
+             "Moving through efficiency and breath rather than held muscle, letting "
+             "weight and momentum carry the movement."),
+            ("Contemporary Improvisation", 2,
+             "Generating movement live from a task or an image - how contemporary "
+             "dancers find material, and a class in its own right."),
+        ],
+    },
+
+    "Litefeet": {
+        "id": 30,
+        "desc": None,
+        "music": "Hip-Hop",
+        "words": ["litefeet", "lite feet", "lite"],
+        "query": "litefeet",
+        "adopt": [],
+        "moves": [
+            ("Aunt Jackie", 2,
+             "A Harlem litefeet move from the mid-2000s, a staple alongside the Harlem "
+             "Shake and Chicken Noodle Soup."),
+        ],
+    },
+
+    # ------------------------------------------------------------------ new in round 2
+    "Capoeira": {
+        "id": None,
+        "desc": "Afro-Brazilian art that is dance, fight and game at once, played in a "
+                "roda to the berimbau. Kicks, escapes and acrobatics flow out of the "
+                "ginga, and the aim is to outplay, not to strike.",
+        "music": "Capoeira",
+        "words": ["capoeira"],
+        "query": "capoeira",
+        "adopt": [1985],
+        "moves": [
+            ("Meia Lua de Frente", 1,
+             "The front half-moon kick: the straight leg swept across in front of the "
+             "body from outside to in."),
+            ("Armada", 2,
+             "A spinning outside kick - turn the back, then the straight leg sweeps "
+             "round at head height."),
+            ("Queixada", 2,
+             "An outside crescent kick thrown from a step across, sweeping out and "
+             "away."),
+            ("Esquiva", 1,
+             "The dodges: lowering and turning out of the line of a kick, the reason "
+             "capoeira looks like a dance and not a fight."),
+            ("Au", 1,
+             "Capoeira's cartwheel, done slower and lower than gymnastics, looking at "
+             "the other player the whole time."),
+            ("Negativa", 2,
+             "A low ground position, one leg extended and the body close to the floor, "
+             "used to escape and to set up takedowns."),
+            ("Role", 1,
+             "A low turning movement along the ground, used to travel and to recover "
+             "from negativa."),
+            ("Martelo", 2,
+             "The hammer kick - a roundhouse struck with the instep."),
+            ("Macaco", 3,
+             "The monkey: a back handspring thrown from a crouch, one hand on the floor "
+             "behind."),
+            ("Bencao", 1,
+             "The blessing: a straight front push kick with the sole of the foot."),
+        ],
+    },
+
+    "Disco": {
+        "id": None,
+        "desc": "1970s nightclub dance: the Hustle in all its forms, the line dances "
+                "that went with it, and the points, spins and struts of the Saturday "
+                "Night Fever era.",
+        "music": "Disco",
+        "words": ["disco", "70s", "hustle"],
+        "query": "disco dance",
+        "adopt": [1994],
+        "moves": [
+            ("The Bus Stop", 1,
+             "The 1975 disco line dance - taps, walks, the bump and a turn - the "
+             "grandparent of every line dance at a wedding."),
+            ("The Hustle Line Dance", 1,
+             "The line dance to Van McCoy's 'The Hustle', distinct from the partner "
+             "dance of the same name."),
+            ("Latin Hustle", 2,
+             "The partner hustle, danced on a six-count 'and-1, 2, 3' with continuous "
+             "turns - disco's answer to swing."),
+            ("Disco Point", 1,
+             "The Saturday Night Fever point: arm thrust diagonally up, then down across "
+             "the body, in time."),
+        ],
+    },
+
+    "Memphis Jookin": {
+        "id": None,
+        "desc": "Street dance from Memphis, Tennessee, grown out of the Gangsta Walk: "
+                "smooth gliding, bouncing and toe stands to Memphis rap, famous through "
+                "Lil Buck.",
+        "music": "Hip-Hop",
+        "words": ["jookin", "jook", "jooking", "memphis"],
+        "query": "memphis jookin",
+        "adopt": [],
+        "moves": [
+            ("Gangsta Walk", 1,
+             "The Memphis walk jookin grew from - a bouncing, stomping stride to "
+             "crunk and Memphis rap."),
+            ("Jookin Bounce", 1,
+             "The constant bounce that sits under all jookin footwork."),
+            ("Jookin Glide", 2,
+             "Sliding across the floor on the sides and balls of the feet, smoother "
+             "and lower than a popping glide."),
+            ("Jookin Toe Stand", 3,
+             "Standing and turning on the tips of the toes in sneakers - the move that "
+             "made Lil Buck famous."),
+        ],
+    },
+
+    "Polynesian": {
+        "id": None,
+        "desc": "Dances of the Pacific islands - Hawaiian hula, Tahitian ori, Maori "
+                "haka and poi. Hands tell the story in hula; hips drive the drum "
+                "dances of Tahiti.",
+        "music": "Polynesian",
+        "words": ["hula", "tahitian", "polynesian", "hawaiian", "ori", "maori", "poi"],
+        "query": "hula",
+        "adopt": [1975, 1984, 2011],
+        "moves": [
+            ("Hula Kaholo", 1,
+             "The basic side-to-side vamp step of hula, step-together-step-touch with "
+             "the hips swaying."),
+            ("Hula Hela", 1,
+             "Point one foot forward to the diagonal and back, the hips moving with the "
+             "weight."),
+            ("Hula Ami", 2,
+             "A continuous circular rotation of the hips, clockwise or counter-"
+             "clockwise, the knees bent."),
+            ("Hula Uwehe", 2,
+             "Lift both heels and push the knees forward to snap the hips up, a sharp "
+             "accent move."),
+            ("Hula Hand Motions", 1,
+             "The hand gestures that tell the story of the song - the sea, the rain, a "
+             "flower - which is what hula is actually about."),
+            ("Tahitian Faarapu", 3,
+             "The fast, driving hip circle of Tahitian ote'a, danced to the toere "
+             "drums."),
+            ("Tahitian Varu", 2,
+             "A figure-eight of the hips traced side to side, one of the core ote'a "
+             "hip movements."),
+            ("Maori Poi", 2,
+             "Swinging poi - balls on cords - in rhythmic patterns, a Maori performance "
+             "art taught for coordination as much as display."),
+        ],
+    },
+
+    "Indian Classical": {
+        "id": None,
+        "desc": "The classical dance traditions of India - Bharatanatyam, Kathak, "
+                "Odissi and others - combining rhythmic footwork, sculptural poses and "
+                "hand gestures (mudras) that tell stories.",
+        "music": "Indian Classical",
+        "words": ["kathak", "bharatanatyam", "odissi", "kuchipudi", "mohiniyattam",
+                  "indian classical", "classical indian"],
+        "query": "indian classical dance",
+        "adopt": [2018, 1987],
+        "moves": [
+            ("Kathak Tatkar", 1,
+             "Kathak's foundational footwork: flat-footed rhythmic stamping in time "
+             "with the bols, the first thing every class drills."),
+            ("Kathak Tihai", 2,
+             "A rhythmic phrase repeated three times to land exactly on sam, the first "
+             "beat of the cycle."),
+            ("Kathak Hastak", 2,
+             "The hand and arm movements of Kathak, precise and flowing, that frame the "
+             "footwork."),
+            ("Bharatanatyam Aramandi", 1,
+             "The half-seated position with knees turned out - the base posture of "
+             "Bharatanatyam."),
+            ("Bharatanatyam Mudras", 1,
+             "The hand gestures (hastas) of Bharatanatyam, each with its own name and "
+             "meaning - the vocabulary the storytelling is written in."),
+            ("Bharatanatyam Natta Adavu", 2,
+             "Adavus stretching the leg to the side on the heel - the second set after "
+             "Tatta Adavu."),
+            ("Odissi Chauka", 1,
+             "The square, wide-legged stance of Odissi - one of its two base positions."),
+            ("Odissi Tribhanga", 2,
+             "The three-bend posture of Odissi - head, torso and hips curved in "
+             "opposition, the pose of temple sculpture."),
         ],
     },
 }

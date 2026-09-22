@@ -167,7 +167,17 @@ select coalesce(json_agg(row_to_json(t)), '[]'::json) from (
 
 
 DEAD = re.compile(r"(not available|unavailable|private video|has been removed"
-                  r"|terminated|does not exist|age.?restricted|sign in to confirm)", re.I)
+                  r"|terminated|does not exist|age.?restricted"
+                  r"|sign in to confirm your age)", re.I)
+# "Sign in to confirm you're not a bot" is YouTube throttling US, not the video being
+# gone. On 2026-09-22 it fired for every request after ~440 in a row and stamped 113
+# perfectly good videos "video-unavailable" in a few minutes. It must never be read
+# as a verdict; the run stops instead, so the rest is retried after the block lifts.
+THROTTLED = re.compile(r"not a bot|sign in to confirm(?! your age)", re.I)
+
+
+class Throttled(Exception):
+    pass
 
 
 def is_dead(ytid):
@@ -185,6 +195,8 @@ def is_dead(ytid):
         capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
     if p.returncode == 0:
         return None
+    if THROTTLED.search((p.stderr or "") + (p.stdout or "")):
+        raise Throttled(ytid)
     m = DEAD.search((p.stderr or "") + (p.stdout or ""))
     return m.group(0).lower() if m else None
 
@@ -305,7 +317,12 @@ def main():
     tally = {}
     for n, r in enumerate(rows, 1):
         t0 = time.time()
-        verdict, d = judge(r)
+        try:
+            verdict, d = judge(r)
+        except Throttled:
+            print(f"\nYouTube is throttling ('not a bot') at #{r['vid']} - stopping so "
+                  "nothing is misjudged. Rerun with --only-unscored once it lifts.")
+            break
         score = VERDICT_SCORE.get(verdict, 0.35)
         tally[verdict] = tally.get(verdict, 0) + 1
         print(f"  [{n}/{len(rows)}] #{r['vid']:<5} {r['dance'][:20]:<22} "
