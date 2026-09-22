@@ -344,7 +344,7 @@ def main():
     if not args.apply:
         print("\ndry run - pass 'apply' to write scores and flags")
         return
-    print(f"\nwrote evidence to {len(rows)} row(s). "
+    print(f"\nwrote evidence to {sum(tally.values())} row(s). "
           "Nothing was approved - promote from the Intake tab.")
 
 
