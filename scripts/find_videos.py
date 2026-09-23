@@ -155,6 +155,11 @@ def main():
                          "the thin ones). Raise it to give well-covered moves a "
                          "further instructor - the small styles have no thin "
                          "dances left, so they are unreachable at 1.")
+    ap.add_argument("--search-n", type=int, default=SEARCH_N,
+                    help="how many search results to consider per dance "
+                         f"(default {SEARCH_N}). A second pass over a catalogue "
+                         "that already took the best few needs a wider net, or "
+                         "every result it sees is one it already rejected.")
     ap.add_argument("--require-move", action="store_true",
                     help="drop candidates whose title shares no word with the "
                          "dance NAME. Without it a title can clear --min-score on "
@@ -188,7 +193,7 @@ def main():
         style_word = (t["styles"] or "").split(" ")[0]
         query = f"{t['dance']} {style_word} dance tutorial".strip()
         try:
-            cands = search(query)
+            cands = search(query, args.search_n)
         except subprocess.TimeoutExpired:
             rs.done_one(ok=False, msg=f"{t['dance']}: search timed out")
             continue

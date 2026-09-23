@@ -1273,4 +1273,63 @@ STYLES = {
              "The follower's basic turn out of the embrace, led from the basic."),
         ],
     },
+
+    # ================================================================== round 6
+    # The thin Afro and Jersey styles. I could not author these names from
+    # knowledge, so each was corroborated first the way find_trending does it:
+    # kept only if several separate channels teach a move by that name (Tobetsa 6,
+    # Sika Lekhekhe 5, Snokonoko 5, Abrir 5, Jafi Rock 4, Jersey Rock 3).
+    # "Betha Kick", "Gqoz Gqoz" and "Fee Bounce" came from one channel each and
+    # were dropped - one channel cannot tell a move from a song title.
+
+    "Amapiano": {
+        "id": 28,
+        "desc": None,
+        "music": "Amapiano",
+        "words": ["amapiano", "piano", "south africa", "sa "],
+        "query": "amapiano dance",
+        "adopt": [],
+        "moves": [
+            ("Tobetsa", 1,
+             "A stamping amapiano step - the name is Sesotho for 'press' - danced with "
+             "the weight driving down into the floor on the log-drum beat."),
+            ("Sika Lekhekhe", 1,
+             "An amapiano move whose name means 'cut the cake', the arms slicing "
+             "across while the feet keep the piano bounce."),
+            ("Snokonoko", 1,
+             "A 2020s amapiano dance that spread from the Al Xapo track of the same "
+             "name."),
+        ],
+    },
+
+    "Afro House": {
+        "id": 40,
+        "desc": None,
+        "music": "Afro House",
+        "words": ["afro house", "afrohouse", "afro"],
+        "query": "afro house dance",
+        "adopt": [],
+        "moves": [
+            ("Abrir", 1,
+             "An Afro house step named with the Portuguese for 'to open': the legs "
+             "open out and close again in time with the drums."),
+        ],
+    },
+
+    "Jersey Club": {
+        "id": 35,
+        "desc": None,
+        "music": "Electronic / EDM",
+        "words": ["jersey club", "jerseyclub", "jersey"],
+        "query": "jersey club dance",
+        "adopt": [],
+        "moves": [
+            ("Jersey Rock", 1,
+             "The rocking, bouncing footwork that Jersey club dancing is built on, "
+             "danced to the kick pattern of the music."),
+            ("Jafi Rock", 2,
+             "A Jersey club rock variation, part of the footwork vocabulary taught "
+             "alongside the basic rock and the bounce."),
+        ],
+    },
 }

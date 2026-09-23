@@ -76,6 +76,16 @@ TEACHING = re.compile(
 # A lesson on PLAYING the music. Dance names are also tune types - a reel, a slip jig
 # and a hornpipe are all things a fiddle teacher teaches - so "Irish Reel lesson" is
 # as likely to be about bowing as about feet.
+# Making the music, not dancing to it. "HOW I PRODUCED 'SNOKONOKO'" names the move,
+# names the style and says "tutorial" - and is a beat-making video.
+PRODUCING = re.compile(
+    r"\b(produced?|producing|producer|beat ?mak\w+|fl studio|ableton|instrumental"
+    r"|remake|sample pack|type beat)\b", re.I)
+# Move names whose only distinctive token is an everyday dance word; for these the
+# whole name must appear in the title (see gate()).
+GENERIC_MOVE_WORD = {"rock", "bounce", "walk", "step", "kick", "slide", "turn",
+                     "spin", "drop", "roll", "wave", "hop", "jump", "point",
+                     "clap", "stomp", "lock", "pop", "glide", "swing", "shake"}
 INSTRUMENT = re.compile(
     r"\b(guitar|fiddle|violin|bowing|piano|chords?|tin whistle|whistle|flute|banjo"
     r"|accordion|mandolin|ukulele|bodhran|drums?|sheet music|playing|play)\b", re.I)
@@ -135,6 +145,11 @@ def gate(c, name, style):
         # an empty key is a subset of every title. It picked "How to Do the Bancao"
         # and an aerial tutorial for Au. Such a name must appear as a whole word.
         names_move = bool(re.search(rf"\b{re.escape(name)}\b", title, re.I))
+    elif key <= GENERIC_MOVE_WORD:
+        # The only distinctive token is an everyday dance word: require the whole
+        # name. "Jersey Rock" reduces to {rock}, which also matched "JAFI ROCK |
+        # JERSEYCLUB" - a different move in the same style.
+        names_move = flat(name) in ft
     else:
         names_move = key <= tt or flat(name) in ft or \
             all(flat(k) in ft for k in key)
@@ -152,7 +167,7 @@ def gate(c, name, style):
         return False, 0, "duration"
     if c["views"] < MIN_VIEWS:
         return False, 0, "reach"
-    if INSTRUMENT.search(title):
+    if INSTRUMENT.search(title) or PRODUCING.search(title):
         return False, 0, "music-lesson"
     # An instructional word is REQUIRED. "Shahrzad dances Taqsim" names move and style
     # and is a performance; the title is all we have at this stage.
