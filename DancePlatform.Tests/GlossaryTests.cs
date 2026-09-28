@@ -36,7 +36,13 @@ public class GlossaryTests : IDisposable
         ctx.Database.EnsureCreated();
         ctx.Users.Add(new User { Id = User, Username = "u", PasswordHash = "x", Name = "U", Nickname = "" });
         ctx.Styles.Add(new Style { Id = HouseStyle, Name = "House" });
+        ctx.Styles.Add(new Style { Id = 11, Name = "Hip-hop" });
         ctx.Dances.Add(new Dance { Id = 100, Name = "House Jack", Slug = "house-jack" });
+        // Same slug in another style, with a lower id: slugs are unique per style only, and a
+        // global lookup keyed on slug crashed the boot in production.
+        ctx.Dances.Add(new Dance { Id = 50, Name = "Other Jack", Slug = "house-jack" });
+        ctx.DanceStyles.Add(new DanceStyle { DanceId = 100, StyleId = HouseStyle });
+        ctx.DanceStyles.Add(new DanceStyle { DanceId = 50, StyleId = 11 });
         ctx.Videos.Add(new Video { Id = 1, DanceId = 100, Title = "Jack", VideoId = "abc", Platform = "youtube" });
         ctx.SaveChanges();
 
@@ -94,7 +100,7 @@ public class GlossaryTests : IDisposable
         Assert.Equal("jack", jack.Slug);
         Assert.Equal(new[] { "one", "two" }, jack.Steps);
         Assert.Equal("Beginner", jack.Difficulty);
-        Assert.Equal("house-jack", jack.Dance?.Slug);
+        Assert.Equal(100, jack.Dance?.Id);
         Assert.Equal(new[] { "bounce" }, jack.Related.Select(r => r.Slug));
     }
 

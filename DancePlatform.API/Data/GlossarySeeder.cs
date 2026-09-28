@@ -61,7 +61,16 @@ public static class GlossarySeeder
                 continue;
             }
 
-            await SeedOneAsync(db, file, style.Id, Path.GetFileName(path), logger);
+            // A glossary is reference content — a bad file must cost that glossary, never the boot.
+            try
+            {
+                await SeedOneAsync(db, file, style.Id, Path.GetFileName(path), logger);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Glossary {File} failed to seed; skipping it.", Path.GetFileName(path));
+                db.ChangeTracker.Clear();
+            }
         }
     }
 
@@ -80,11 +89,15 @@ public static class GlossarySeeder
             return;
         }
 
+        // Dance slugs are unique per style, not globally ("spiral" exists in more than one), so
+        // prefer the glossary's own style and fall back to the lowest id elsewhere.
         var danceSlugs = authored.Select(a => a.Term.DanceSlug).Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToList();
-        var dances = await db.Dances
-            .Where(d => danceSlugs.Contains(d.Slug) && d.ReviewState == "approved")
-            .Select(d => new { d.Id, d.Slug })
-            .ToDictionaryAsync(d => d.Slug, d => d.Id);
+        var dances = (await db.Dances
+                .Where(d => danceSlugs.Contains(d.Slug) && d.ReviewState == "approved")
+                .Select(d => new { d.Id, d.Slug, InStyle = d.DanceStyles.Any(ds => ds.StyleId == styleId) })
+                .ToListAsync())
+            .GroupBy(d => d.Slug)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(d => d.InStyle).ThenBy(d => d.Id).First().Id);
 
         var existing = await db.GlossaryTerms.Where(t => t.StyleId == styleId).ToListAsync();
         var bySlug = existing.ToDictionary(t => t.Slug, StringComparer.OrdinalIgnoreCase);
