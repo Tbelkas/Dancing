@@ -1,0 +1,47 @@
+<div class="container container--reading">
+  <div class="page-header">
+    <h1 class="page-title">Glossary</h1>
+    <p class="page-subtitle">
+      The vocabulary of each style, move by move — what it's called, what it is, and how to do it.
+      More styles are on the way.
+    </p>
+  </div>
+
+  @if (showSkeleton()) {
+    <div class="glossary-list" aria-busy="true" aria-label="Loading glossaries">
+      <div class="glossary-card"><div class="skeleton skeleton-line skeleton-line--title"></div></div>
+    </div>
+  } @else if (loading()) {
+    <!-- Too quick to be worth a skeleton — hold the space empty. -->
+  } @else if (failed()) {
+    <div class="empty-state card">
+      <div class="empty-state__icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <h2>Couldn't load the glossaries</h2>
+      <p>Something went wrong reaching the server. Refresh to try again.</p>
+    </div>
+  } @else if (glossaries().length === 0) {
+    <div class="empty-state card">
+      <div class="empty-state__icon"><i class="fa-solid fa-book-open"></i></div>
+      <h2>No glossaries yet</h2>
+      <p>They're being written style by style.</p>
+    </div>
+  } @else {
+    <div class="glossary-list">
+      @for (g of glossaries(); track g.styleId) {
+        <a class="glossary-card" [routerLink]="['/glossary', g.styleSlug]" data-testid="glossary-card">
+          <div class="glossary-card__main">
+            <span class="glossary-card__name">{{ g.styleName }}</span>
+            <span class="glossary-card__count">{{ g.moveCount }} moves · {{ g.termCount - g.moveCount }} concepts</span>
+          </div>
+          @if (auth.isAuthenticated()) {
+            <div class="glossary-card__progress">
+              <span>{{ g.learnedCount }} / {{ g.moveCount }} learned</span>
+              <div class="glossary-card__track"><div class="glossary-card__fill" [style.width.%]="progressPercent(g)"></div></div>
+            </div>
+          }
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </a>
+      }
+    </div>
+  }
+</div>

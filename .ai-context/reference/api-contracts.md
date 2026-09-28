@@ -107,6 +107,13 @@ some client-side filtering; see module-context/dances-catalog.md.)
 | DELETE | `/styles/{id}` | Admin |
 | POST | `/styles/{id}/mystyle` | Auth | toggle style in user's "my styles" |
 
+## Glossary — `/api/glossary`  (per-style move glossaries)
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| GET | `/glossary` | — | `GlossarySummaryDto[]`; styles that have a glossary, with the caller's learned counts |
+| GET | `/glossary/{styleSlug}` | — | `GlossaryDto` (categories → terms, each with `isLearned`, `related`, optional `dance`); 404 if the style has none |
+| PUT | `/glossary/terms/{id}/learned` | User | `{ learned }` → 204; sets, not toggles; 404 for a concept or unknown id |
+
 ## Roadmaps — `/api/roadmaps`  (curated learning paths + personal skill trees)
 | Method | Path | Auth | Notes |
 |--------|------|------|-------|

@@ -1,0 +1,187 @@
+<div class="container container--reading">
+  @if (showSkeleton()) {
+    <div class="page-header" aria-busy="true" aria-label="Loading glossary">
+      <div class="skeleton skeleton-line skeleton-line--title"></div>
+      <div class="skeleton skeleton-line skeleton-line--short"></div>
+    </div>
+  } @else if (loading()) {
+    <!-- Too quick to be worth a skeleton — hold the space empty. -->
+  } @else if (notFound()) {
+    <div class="empty-state card">
+      <div class="empty-state__icon"><i class="fa-solid fa-book-open"></i></div>
+      <h2>No glossary for this style yet</h2>
+      <p>Glossaries are being written style by style. <a routerLink="/glossary">See which ones are ready</a>.</p>
+    </div>
+  } @else if (failed()) {
+    <div class="empty-state card">
+      <div class="empty-state__icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <h2>Couldn't load the glossary</h2>
+      <p>Something went wrong reaching the server. Refresh to try again.</p>
+    </div>
+  } @else {
+  @if (glossary(); as g) {
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a routerLink="/glossary">Glossary</a>
+      <span aria-hidden="true">/</span>
+      <span>{{ g.styleName }}</span>
+    </nav>
+
+    <div class="page-header">
+      <h1 class="page-title">{{ g.styleName }} glossary</h1>
+      <p class="page-subtitle">
+        Every move in the vocabulary, what it is and how to do it. Tick a move off once it's in
+        your body.
+      </p>
+
+      @if (auth.isAuthenticated()) {
+        <div class="progress" data-testid="glossary-progress">
+          <div class="progress__label">
+            <span><strong>{{ learnedCount() }}</strong> of {{ moveCount() }} moves learned</span>
+            <span class="progress__pct">{{ progressPercent() }}%</span>
+          </div>
+          <div class="progress__track" role="progressbar" [attr.aria-valuenow]="progressPercent()" aria-valuemin="0" aria-valuemax="100" aria-label="Moves learned">
+            <div class="progress__fill" [style.width.%]="progressPercent()"></div>
+          </div>
+        </div>
+      } @else {
+        <p class="signin-prompt">
+          <button type="button" class="link" (click)="signInOpen.set(true)">Sign in</button>
+          to tick moves off as you learn them.
+        </p>
+      }
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar__search">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" placeholder="Search moves" aria-label="Search moves" data-testid="glossary-search"
+               [value]="query()" (input)="onSearch($event)" />
+      </div>
+      <div class="toolbar__chips" role="group" aria-label="Category">
+        <button type="button" class="chip" [class.is-on]="category() === null" (click)="category.set(null)">All</button>
+        @for (c of g.categories; track c.name) {
+          <button type="button" class="chip" [class.is-on]="category() === c.name"
+                  (click)="category.set(category() === c.name ? null : c.name)">{{ c.name }}</button>
+        }
+      </div>
+      <div class="toolbar__actions">
+        @if (auth.isAuthenticated()) {
+          <label class="hide-learned">
+            <input type="checkbox" [checked]="hideLearned()" (change)="hideLearned.set(!hideLearned())" />
+            Hide learned
+          </label>
+        }
+        <button type="button" class="link" (click)="expandAll()">Expand all</button>
+        <button type="button" class="link" (click)="collapseAll()">Collapse all</button>
+      </div>
+    </div>
+
+    @if (visibleCount() === 0) {
+      <p class="no-results">
+        @if (hideLearned() && !query()) { You've learned every move here. }
+        @else { No moves match that. }
+      </p>
+    }
+
+    @for (c of visible(); track c.name) {
+      <section class="category">
+        <h2 class="section-heading">{{ c.name }}</h2>
+        <ul class="terms">
+          @for (t of c.terms; track t.slug) {
+            <li class="term" [id]="t.slug" [class.is-open]="isExpanded(t.slug)" [class.is-learned]="t.isLearned"
+                data-testid="glossary-term" [attr.data-slug]="t.slug">
+              <div class="term__row">
+                @if (t.isLearnable) {
+                  <button type="button" class="learn-toggle" [class.is-on]="t.isLearned"
+                          [attr.aria-pressed]="t.isLearned"
+                          [attr.aria-label]="(t.isLearned ? 'Unmark ' : 'Mark ') + t.name + ' as learned'"
+                          [attr.title]="t.isLearned ? 'Learned — click to unmark' : 'Mark as learned'"
+                          data-testid="glossary-learned-toggle"
+                          (click)="setLearned(t, !t.isLearned)">
+                    <i class="fa-solid fa-check" aria-hidden="true"></i>
+                  </button>
+                } @else {
+                  <span class="concept-mark" title="A concept, not a move"><i class="fa-solid fa-lightbulb" aria-hidden="true"></i></span>
+                }
+
+                <button type="button" class="term__head" [attr.aria-expanded]="isExpanded(t.slug)"
+                        [attr.aria-controls]="t.slug + '-body'" (click)="toggle(t.slug)">
+                  <span class="term__name">{{ t.name }}</span>
+                  @if (t.aliases.length) {
+                    <span class="term__aliases">aka {{ t.aliases.join(', ') }}</span>
+                  }
+                  <span class="term__summary">{{ t.summary }}</span>
+                </button>
+
+                <div class="term__meta">
+                  @if (!t.isLearnable) {
+                    <span class="badge badge--concept">Concept</span>
+                  } @else if (t.difficulty !== 'None') {
+                    <span class="badge" [ngClass]="'badge--difficulty-' + t.difficulty.toLowerCase()">{{ t.difficulty }}</span>
+                  }
+                  @if (t.dance) {
+                    <i class="fa-solid fa-circle-play term__has-video" title="Has a video" aria-label="Has a video"></i>
+                  }
+                  <i class="fa-solid fa-chevron-down term__chevron" aria-hidden="true"></i>
+                </div>
+              </div>
+
+              @if (isExpanded(t.slug)) {
+                <div class="term__body" [id]="t.slug + '-body'">
+                  <p class="term__desc">{{ t.description }}</p>
+
+                  @if (t.steps.length) {
+                    <h3 class="term__label">How to do it</h3>
+                    <ol class="term__steps">
+                      @for (s of t.steps; track $index) { <li>{{ s }}</li> }
+                    </ol>
+                  }
+
+                  @if (t.tips.length) {
+                    <h3 class="term__label">Tips</h3>
+                    <ul class="term__tips">
+                      @for (tip of t.tips; track $index) { <li>{{ tip }}</li> }
+                    </ul>
+                  }
+
+                  @if (t.dance; as d) {
+                    <a class="watch" [routerLink]="d.slug | dancePath:d.styleSlug">
+                      @if (thumbnailUrl(t); as src) {
+                        <img class="watch__thumb" [src]="src" alt="" loading="lazy" />
+                      } @else {
+                        <span class="watch__thumb watch__thumb--blank"><i class="fa-solid fa-play" aria-hidden="true"></i></span>
+                      }
+                      <span class="watch__text">
+                        <span class="watch__title">Watch {{ t.name }}</span>
+                        <span class="watch__sub">{{ d.videoCount }} {{ d.videoCount === 1 ? 'video' : 'videos' }} with loop and slow-down</span>
+                      </span>
+                      <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                  }
+
+                  @if (t.related.length) {
+                    <div class="related">
+                      <span class="term__label">Related</span>
+                      @for (r of t.related; track r.slug) {
+                        <button type="button" class="chip chip--sm" (click)="open(r.slug)">{{ r.name }}</button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+  }
+</div>
+
+@if (signInOpen()) {
+  <app-sign-in-dialog
+    heading="Sign in to track your moves"
+    message="Tick moves off as you learn them and watch the glossary fill up."
+    (signedIn)="onSignedIn()"
+    (dismissed)="signInOpen.set(false)" />
+}

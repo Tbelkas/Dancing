@@ -1,0 +1,892 @@
+// House glossary. Read by GlossarySeeder on every boot; the file is the source of truth.
+// Slugs are the stable key that users' learned marks hang off — never rename one.
+// "danceSlug" borrows a catalog dance for its videos. Only link a dance whose video really
+// teaches the move; leaving a term unlinked is better than pointing at a wrong clip.
+// "learnable": false marks a concept (nothing to tick off).
+{
+  "styleName": "House",
+  "categories": [
+    {
+      "name": "Foundations",
+      "terms": [
+        {
+          "slug": "house-dance",
+          "name": "House dance",
+          "learnable": false,
+          "summary": "The club dance that grew up with house music in Chicago and New York in the 1980s.",
+          "description": "House dance was born on the floors of underground clubs — The Warehouse in Chicago, where the music got its name, and New York's Loft and Paradise Garage. Dancers pulled in whatever they already knew: tap and jazz footwork, salsa and Latin steps, breaking and capoeira floorwork, African and Caribbean grooves, and the swing of Lindy Hop. What holds it all together is the music — a steady four-on-the-floor kick at roughly 118 to 128 BPM — and the idea that the dancer never stops riding it. It is overwhelmingly a freestyle dance: people learn vocabulary so they can improvise with it, not to repeat set routines.",
+          "tips": [
+            "Think of house as three elements that mix freely: jacking (the groove), footwork, and lofting (the floor).",
+            "Every step on this page is meant to be done on top of a running bounce or jack. If the groove stops, it is no longer house."
+          ],
+          "related": ["jacking", "footwork", "lofting", "on-the-one"]
+        },
+        {
+          "slug": "jacking",
+          "name": "Jacking",
+          "learnable": false,
+          "summary": "The groove element: a continuous wave through the torso that rides the kick drum.",
+          "description": "Jacking is the heartbeat of house — the upper body rocking forward, back, side to side or in circles on every beat. It comes from Chicago, where tracks literally told dancers to \"jack your body\". Jacking is what keeps you connected to the music while your feet are busy, and what you fall back on when you run out of ideas. Every other element sits on top of it.",
+          "tips": [
+            "A good jack is visible from across the room but costs almost no effort — it is a release, not a push.",
+            "Practise jacking for a whole track without footwork. It builds the stamina the rest of the dance needs."
+          ],
+          "related": ["jack", "side-jack", "rolling-jack", "bounce"]
+        },
+        {
+          "slug": "footwork",
+          "name": "Footwork",
+          "learnable": false,
+          "summary": "The element people picture first: fast, light, rhythmic steps on the balls of the feet.",
+          "description": "House footwork is dense, quick and grounded, borrowing from tap, jazz, salsa and Latin social dance. Most steps live on the balls of the feet so they can change direction instantly, and most are short — two, four or eight counts — so they can be chained into longer phrases on the fly. The goal is not to collect steps but to be able to move between them without a visible seam.",
+          "tips": [
+            "Learn each step slowly on the spot, then at tempo, then travelling, then out of and into another step.",
+            "Keep the heels light and the knees soft. Locked knees make every step look heavy and slow you down."
+          ],
+          "related": ["heel-toe", "toe-twist", "loose-legs", "shuffle"]
+        },
+        {
+          "slug": "lofting",
+          "name": "Lofting",
+          "learnable": false,
+          "summary": "The floor element: drops, spins, rolls and glides that take the dance to the ground and back.",
+          "description": "Lofting is named after The Loft, David Mancuso's New York party, and covers everything that takes a house dancer down to the floor and back up. It borrows from breaking, capoeira and contemporary dance, but the priority is different: lofting should flow in and out of footwork without breaking the groove, and it should look light — the dancer seems to float down and bounce back rather than crash. Good lofting is as much about the entry and exit as the move itself.",
+          "tips": [
+            "Learn to get down and up smoothly before learning anything that happens on the floor.",
+            "Protect knees, wrists and the neck. Land on muscle — thighs, shins, shoulder blades — never on bone or the kneecap."
+          ],
+          "related": ["knee-drop", "back-roll", "seat-spin", "spiral"]
+        }
+      ]
+    },
+    {
+      "name": "Grooves",
+      "terms": [
+        {
+          "slug": "bounce",
+          "name": "Bounce",
+          "aliases": ["down bounce", "up bounce", "pulse"],
+          "difficulty": "Beginner",
+          "summary": "Knees giving and returning on every beat — the pulse under everything.",
+          "description": "The bounce is the simplest groove in house and the one that never switches off. In a down bounce the knees bend on the beat; in an up bounce you rise on the beat and sink on the \"and\". It is small and elastic, driven from the knees and ankles, and it is what every step on this page is layered on top of. Before the jack, before any footwork, the bounce is how you show you are hearing the kick drum.",
+          "steps": [
+            "Stand with feet hip-width apart, weight on the balls of the feet, knees soft.",
+            "On each beat, let the knees give a few centimetres and spring back — a down bounce.",
+            "Keep the upper body relaxed and let it ride the bounce rather than holding it still.",
+            "Switch to an up bounce: rise onto the beat, sink on the \"and\" between beats.",
+            "Hold either bounce for a full track without it drifting off the kick."
+          ],
+          "tips": [
+            "Small is better. A big bounce is tiring and pulls everything else off time.",
+            "If you lose the beat mid-step, drop back to just the bounce until you find it again."
+          ],
+          "related": ["jack", "one-leg-bounce", "on-the-one"]
+        },
+        {
+          "slug": "jack",
+          "name": "The jack",
+          "aliases": ["front jack", "forward jack", "jacking"],
+          "difficulty": "Beginner",
+          "danceSlug": "house-jack",
+          "summary": "The core torso wave — chest and pelvis rocking in opposition on every beat.",
+          "description": "The jack is the signature groove of house. The chest and the pelvis move in opposition: as the chest drops back and down, the hips tip forward and the knees bend; as the chest rolls forward and up, the knees straighten. Done continuously it looks like a wave running through the body on every kick. Dancers accent it both ways — contracting on the beat or releasing on the beat — and switch between them to change the feel of the same step.",
+          "steps": [
+            "Start in a relaxed bounce: feet hip-width, knees soft, weight forward on the balls of the feet.",
+            "On the beat, let the chest sink back and down as the knees bend; the pelvis tips forward.",
+            "On the \"and\", release: the chest rolls forward and up while the knees straighten slightly.",
+            "Keep it continuous — no pause at either end — so the motion rolls chest to hips like a wave.",
+            "Let the head and arms hang loose and ride on top; do not drive the move with a nod.",
+            "Flip the accent so the chest hits forward on the beat instead, and practise switching between the two."
+          ],
+          "tips": [
+            "Learn it at half-time first — one jack every two beats — then double it.",
+            "The most common mistake is nodding the head and calling it a jack. The movement lives in the chest and the knees.",
+            "Keep it going under every footwork step you learn next. That is the whole point of it."
+          ],
+          "related": ["side-jack", "rolling-jack", "bounce", "jacking"]
+        },
+        {
+          "slug": "side-jack",
+          "name": "Side jack",
+          "aliases": ["lateral jack"],
+          "difficulty": "Beginner",
+          "summary": "The jack turned sideways — ribcage and hips swaying across the body on the beat.",
+          "description": "The side jack takes the same opposition as the front jack and turns it ninety degrees. The ribcage shifts to one side while the hips answer to the other, and the knees keep bouncing underneath. It pairs naturally with footwork that travels sideways, like the skate and the sidewalk, and switching between the front and side jack is the first step towards the rolling jack.",
+          "steps": [
+            "Start in a bounce with feet a little wider than hip-width.",
+            "On the beat, slide the ribcage to the right while the hips shift slightly left; the knees bend.",
+            "On the next beat, send the ribcage left and the hips right.",
+            "Keep the shoulders level — the ribcage slides, it does not tilt.",
+            "Alternate front jack and side jack every eight counts to practise switching."
+          ],
+          "tips": [
+            "Isolate the ribcage in front of a mirror first; many people tilt the shoulders instead of sliding.",
+            "Let the arms swing with the ribcage rather than holding them away from the body."
+          ],
+          "related": ["jack", "rolling-jack", "skate", "sidewalk"]
+        },
+        {
+          "slug": "rolling-jack",
+          "name": "Rolling jack",
+          "aliases": ["circle jack", "circular jack"],
+          "difficulty": "Intermediate",
+          "summary": "Front and side jacks joined into a continuous circle of the torso.",
+          "description": "The rolling jack links the directions of the jack into one circle: forward, to the side, back, to the other side. It usually takes two or four beats to complete a circle, and it can run in either direction. It is less about hitting each beat than about a smooth, unbroken roll — a good way to fill space in a groove or ride a long melodic section of a track.",
+          "steps": [
+            "Start with a front jack to find the timing.",
+            "Push the chest forward, then carry it round to the right side.",
+            "Continue the chest back, then round to the left side, and forward again — one full circle.",
+            "Let the hips circle in opposition to the chest, knees bending as the chest passes back.",
+            "Reverse the direction of the circle, then practise changing direction mid-phrase."
+          ],
+          "tips": [
+            "Keep the circle even — people often rush the back half.",
+            "Start with a small circle. A bigger one looks good only when it stays smooth."
+          ],
+          "related": ["jack", "side-jack"]
+        },
+        {
+          "slug": "one-leg-bounce",
+          "name": "Bounce on one leg",
+          "aliases": ["one-leg bounce", "single-leg bounce"],
+          "difficulty": "Beginner",
+          "danceSlug": "bounce-one-leg",
+          "summary": "Keeping the pulse going with all your weight on one side.",
+          "description": "Most footwork needs one foot free while the other supports you, and the groove has to survive that. The one-leg bounce is the bounce or jack done entirely on the standing leg, with the free foot lifted or resting lightly on the floor. It builds the balance and leg strength that knee-ups, kicks and the farmer all depend on.",
+          "steps": [
+            "Start in a bounce, then shift all your weight onto the left leg.",
+            "Lift the right foot slightly off the floor, knee relaxed.",
+            "Keep bouncing on the left leg on every beat without the upper body bracing.",
+            "Add a jack on top once the balance is steady.",
+            "Switch legs every eight counts."
+          ],
+          "tips": [
+            "Keep the standing knee soft — a straight leg kills the bounce.",
+            "Find a point to look at; balance is much harder with the eyes on the floor."
+          ],
+          "related": ["bounce", "knee-up", "farmer"]
+        },
+        {
+          "slug": "stomp",
+          "name": "Stomp",
+          "aliases": ["stomping"],
+          "difficulty": "Beginner",
+          "summary": "A flat, heavy step into the floor that makes the kick drum visible.",
+          "description": "The stomp is the most direct way to dance the kick: a flat-footed step driven down into the floor on the beat, with the jack sinking into it. It is used alone as a groove, to punctuate the end of a phrase, and inside other steps where a hard accent is wanted. The contrast between stomps and light footwork is one of the easiest ways to add dynamics to a freestyle.",
+          "steps": [
+            "Start in a jack with your weight centred.",
+            "Lift the right foot a few centimetres and put it down flat and firm on the beat, sinking the knees.",
+            "Repeat with the left foot on the next beat.",
+            "Try stomping only on beats 1 and 3, and bouncing lightly on 2 and 4."
+          ],
+          "tips": [
+            "The weight goes down through the leg, not just the foot slapping the floor — the sound is a by-product.",
+            "Be kind to your neighbours and your joints: sink into the stomp rather than locking the knee on impact."
+          ],
+          "related": ["jack", "on-the-one"]
+        },
+        {
+          "slug": "jack-in-the-box",
+          "name": "Jack in the box",
+          "aliases": ["box step", "jazz box with a jack"],
+          "difficulty": "Intermediate",
+          "summary": "A four-step box pattern with a jack on every step.",
+          "description": "Jack in the box puts the jack onto a square floor pattern taken from the jazz box: the feet step across, back, out and together, returning to where they started after four counts. Every step lands with a jack, so the pattern tests whether the groove survives the feet moving in four directions. Turning the box a quarter each time is a common variation.",
+          "steps": [
+            "Start in a jack, feet together.",
+            "Count 1: cross the right foot over in front of the left, jacking into it.",
+            "Count 2: step the left foot back.",
+            "Count 3: step the right foot out to the side.",
+            "Count 4: bring the left foot forward to close the box, then repeat.",
+            "Once it is smooth, add a quarter turn on each repeat."
+          ],
+          "tips": [
+            "The torso keeps jacking forward even when the feet go backwards — that disconnection is the skill.",
+            "Keep the box small. A wide box drags you off the beat."
+          ],
+          "related": ["jack", "crossroads", "pas-de-bourree"]
+        }
+      ]
+    },
+    {
+      "name": "Footwork",
+      "terms": [
+        {
+          "slug": "heel-toe",
+          "name": "Heel-toe",
+          "aliases": ["heel toe"],
+          "difficulty": "Beginner",
+          "summary": "Tap the heel, then the toe, alternating sides over a bounce.",
+          "description": "Heel-toe is one of the first footwork patterns most house dancers learn. The free foot taps its heel out in front, then its toe (either in the same place or back beside the standing foot), before the feet change over. It trains weight changes on the \"and\", which almost every faster step needs, and it has many variations — crossing the heel over, tapping the toe behind, or swivelling heel and toe to travel sideways.",
+          "steps": [
+            "Start in a bounce, weight on the left foot.",
+            "On 1, tap the right heel forward on the floor, toes lifted.",
+            "On \"and\", bring the right foot back and tap its toe beside the left foot.",
+            "On 2, change weight onto the right foot and tap the left heel forward.",
+            "Keep alternating, then try crossing the heel slightly in front of the standing foot."
+          ],
+          "tips": [
+            "The weight change is the hard part — make sure you are genuinely standing on the other foot before the next heel.",
+            "Keep the taps light; the standing leg carries the bounce."
+          ],
+          "related": ["toe-twist", "heel-twist", "sidewalk", "shuffle"]
+        },
+        {
+          "slug": "toe-twist",
+          "name": "Toe twist",
+          "aliases": ["twist"],
+          "difficulty": "Beginner",
+          "danceSlug": "twist-toe-twist",
+          "summary": "Pivot on the balls of both feet, swinging the heels in and out.",
+          "description": "The toe twist is the foundation of the twist family. Weight stays on the balls of both feet while the heels swing out and in together, so the legs rotate beneath a quiet upper body. It is fast, small and loose, and it combines with almost everything — into a knee-up, into a leg curl, into a freeze.",
+          "steps": [
+            "Stand with feet together, weight on the balls of both feet, heels just off the floor.",
+            "On the beat, swing both heels out so the toes point in.",
+            "On the next beat, swing the heels back in so the feet are parallel.",
+            "Speed it up to a twist on every beat, then every half beat.",
+            "Keep the hips and chest facing forward while the legs rotate."
+          ],
+          "tips": [
+            "Let the knees follow the feet — forcing them straight twists the joint.",
+            "Keep a small bounce running; a toe twist on stiff legs looks mechanical."
+          ],
+          "related": ["heel-twist", "knee-up", "charleston", "freeze"]
+        },
+        {
+          "slug": "heel-twist",
+          "name": "Heel twist",
+          "difficulty": "Beginner",
+          "danceSlug": "twist-heel-twist",
+          "summary": "The mirror of the toe twist: pivot on the heels, swinging the toes in and out.",
+          "description": "In the heel twist the weight sits back on the heels and the toes fan out and in. It feels heavier and more grounded than the toe twist, and alternating the two — toes, heels, toes, heels — lets the feet walk sideways across the floor. Many combos switch between them to change texture without changing tempo.",
+          "steps": [
+            "Stand with feet together, weight back on the heels, toes just off the floor.",
+            "On the beat, fan both toes out.",
+            "On the next beat, bring the toes back in.",
+            "Alternate toe twist and heel twist to travel: heels out, toes out, heels out, toes out moves you sideways."
+          ],
+          "tips": [
+            "Sit slightly into the knees so the weight can reach the heels without leaning back.",
+            "Keep both feet moving together at first; staggering them is a variation, not the basic."
+          ],
+          "related": ["toe-twist", "sidewalk", "charleston"]
+        },
+        {
+          "slug": "knee-up",
+          "name": "Knee up",
+          "aliases": ["knee lift", "knee raise"],
+          "difficulty": "Beginner",
+          "danceSlug": "knee-up-standard",
+          "summary": "Alternating knee lifts on the beat, with the standing leg still bouncing.",
+          "description": "The knee up is the first step where the jack and the legs have to agree. One knee lifts to around hip height on the beat while the standing leg keeps bouncing, then the feet change. It builds the balance of the one-leg bounce into something rhythmic, and it is the entry point for kicks, the farmer and many twist combinations.",
+          "steps": [
+            "Start in a jack, weight on the left foot.",
+            "On 1, lift the right knee in front of you, thigh roughly level with the floor.",
+            "On 2, put the right foot down and shift your weight onto it.",
+            "On 3, lift the left knee; on 4, put it down.",
+            "Keep the jack running — the chest can contract as the knee comes up."
+          ],
+          "tips": [
+            "Do not lean back to get the knee higher. A lower knee with an upright torso looks better.",
+            "Let the arms swing naturally in opposition to the legs."
+          ],
+          "related": ["one-leg-bounce", "farmer", "snap-kick", "loose-legs"]
+        },
+        {
+          "slug": "loose-legs",
+          "name": "Loose legs",
+          "aliases": ["loose leg"],
+          "difficulty": "Intermediate",
+          "summary": "The knee swings in and the lower leg flicks out, relaxed, alternating sides.",
+          "description": "Loose legs is less a single step than a way of moving the legs that shows up across house. The free knee turns in towards the standing leg and then the lower leg flicks out to the side, loose from the knee down, before the weight changes and the other leg does the same. It only works when the legs stop bracing — which is why it is often taught early, as permission to relax the whole lower body.",
+          "steps": [
+            "Start in a bounce, weight on the left leg.",
+            "Lift the right foot slightly and let the right knee turn in towards the left knee.",
+            "Flick the right lower leg out to the side, keeping it loose, as the knee opens.",
+            "Put the right foot down, change weight, and repeat with the left leg.",
+            "Speed it up until the legs look like they are swinging on their own."
+          ],
+          "tips": [
+            "The flick comes from letting go, not kicking. If your thigh is tense, it is a kick.",
+            "Keep the upper body easy — tension travels down."
+          ],
+          "related": ["knee-up", "toe-twist", "footwork"]
+        },
+        {
+          "slug": "farmer",
+          "name": "Farmer",
+          "difficulty": "Intermediate",
+          "danceSlug": "knee-up-challenge-farmer",
+          "summary": "A heel dig out on the diagonal, back in, then a knee up — alternating sides.",
+          "description": "The farmer is a classic house step built from a heel dig and a knee lift. The free foot digs its heel out on a diagonal, comes back in, and the opposite knee lifts before the pattern repeats on the other side. It has a steady, stomping character that sits well on tracks with a heavy kick. Teachers vary the details — some add a hop, some cross the heel in front — so learn the basic shape and watch the video for the version shown.",
+          "steps": [
+            "Start in a jack, weight on the left foot.",
+            "On 1, dig the right heel out on the forward-right diagonal.",
+            "On 2, bring the right foot back in and take your weight onto it.",
+            "On 3 and 4, lift the left knee and put it down.",
+            "Repeat to the other side, digging the left heel out on the forward-left diagonal."
+          ],
+          "tips": [
+            "Keep the heel dig crisp and the knee up relaxed — the contrast is what makes the step read.",
+            "Stay over your standing leg; leaning towards the heel throws the knee up off balance."
+          ],
+          "related": ["knee-up", "heel-toe", "stomp"]
+        },
+        {
+          "slug": "shuffle",
+          "name": "House shuffle",
+          "aliases": ["shuffle", "brush step"],
+          "difficulty": "Intermediate",
+          "danceSlug": "bounce-challenge-shuffle",
+          "summary": "The ball of the free foot brushes forward and back along the floor over a hop.",
+          "description": "The house shuffle is a brushing step: the ball of the free foot sweeps forward and then back along the floor while the standing leg bounces or hops. It comes out of tap and jazz, and it is a building block for faster footwork and many travelling variations. Do not confuse it with the Melbourne shuffle or hardstyle shuffle, which grew out of rave scenes and use different mechanics.",
+          "steps": [
+            "Start with your weight on the left foot, bouncing.",
+            "On \"and\", brush the ball of the right foot forward along the floor.",
+            "On the beat, brush it back as the left leg gives a small hop.",
+            "Change weight and repeat with the left foot.",
+            "Try it travelling backwards by taking a small step back after each brush."
+          ],
+          "tips": [
+            "Keep the brush on the floor — the sound of the ball of the foot is part of the step.",
+            "The hop is tiny. If you are jumping, it will fall behind the music."
+          ],
+          "related": ["heel-toe", "happy-feet", "ball-change"]
+        },
+        {
+          "slug": "happy-feet",
+          "name": "Happy feet",
+          "difficulty": "Intermediate",
+          "summary": "Fast, tiny, alternating steps on the balls of the feet — like running in place on hot ground.",
+          "description": "Happy feet is quick alternating footwork on the balls of the feet, done with loose ankles and knees so the feet seem to patter over the floor. It is often used to fill a phrase with energy, to cover a transition, or to travel a short distance quickly. Speed is the point, but only if it stays even and on the music.",
+          "steps": [
+            "Start on the balls of both feet, knees soft, heels just off the floor.",
+            "Take tiny alternating steps — right, left, right, left — on every half beat.",
+            "Let the heels swivel slightly with each step so the feet stay loose.",
+            "Keep the upper body jacking gently while the feet go double time."
+          ],
+          "tips": [
+            "Start at the beat and double it only when it is even. Uneven fast steps look like stumbling.",
+            "Keep the steps under your hips; reaching out makes them slow."
+          ],
+          "related": ["shuffle", "toe-twist", "heel-toe"]
+        },
+        {
+          "slug": "pas-de-bourree",
+          "name": "Pas de bourrée",
+          "aliases": ["pas de bourree", "bourrée"],
+          "difficulty": "Intermediate",
+          "summary": "Three quick weight changes — behind, side, front — taken from jazz.",
+          "description": "The pas de bourrée comes from ballet and jazz, where it links other steps together, and house uses it the same way but grounded and bouncing. The classic version steps behind, to the side, then in front, changing weight on each, over \"1 and 2\". It is invaluable for changing which foot is free without breaking the rhythm.",
+          "steps": [
+            "Start with your weight on the left foot.",
+            "On 1, step the right foot behind the left.",
+            "On \"and\", step the left foot out to the side.",
+            "On 2, step the right foot in front, taking your weight onto it.",
+            "Repeat starting with the left foot behind."
+          ],
+          "tips": [
+            "All three steps are on the balls of the feet — flat feet make it clumsy.",
+            "Keep a jack running underneath so it looks like house, not jazz."
+          ],
+          "related": ["ball-change", "jack-in-the-box", "crossroads"]
+        },
+        {
+          "slug": "ball-change",
+          "name": "Ball change",
+          "aliases": ["kick ball change"],
+          "difficulty": "Beginner",
+          "danceSlug": "ball-change",
+          "summary": "A quick step onto the ball of one foot and straight back onto the other.",
+          "description": "The ball change is a fast weight change: step onto the ball of one foot on the \"and\", then change straight back onto the other foot on the beat. With a kick in front of it, it becomes the kick ball change, one of the most common connectors in house. It is how dancers switch lead foot or add a syncopated accent without stopping.",
+          "steps": [
+            "Start with your weight on the left foot.",
+            "On \"and\", step onto the ball of the right foot, just behind the left.",
+            "On 1, change your weight back onto the left foot.",
+            "For a kick ball change, kick the right foot forward on the count before, then do the ball change."
+          ],
+          "tips": [
+            "The ball step is quick and light — do not settle into it.",
+            "Practise both sides; most people only ever do it off one foot."
+          ],
+          "related": ["pas-de-bourree", "snap-kick", "shuffle"]
+        },
+        {
+          "slug": "snap-kick",
+          "name": "Snap kick",
+          "aliases": ["kick out", "flick kick"],
+          "difficulty": "Beginner",
+          "danceSlug": "snap-kick-standard",
+          "summary": "A quick kick from the knee, the lower leg snapping out and straight back.",
+          "description": "The snap kick is a short, sharp kick where the thigh stays still and only the lower leg snaps out and back. It is used to hit accents — often a snare or clap — and fits naturally after a knee up or before a ball change. Low and fast reads better than high and slow.",
+          "steps": [
+            "Start in a bounce, weight on the left leg.",
+            "Lift the right knee a little.",
+            "On the accent, snap the right lower leg forward from the knee.",
+            "Pull it straight back under the knee and put the foot down.",
+            "Alternate legs, then try kicking to the side and diagonals."
+          ],
+          "tips": [
+            "Do not lock the knee at full extension — snap to almost straight and return.",
+            "Let the jack contract as the leg snaps out; it gives the kick more punch."
+          ],
+          "related": ["knee-up", "ball-change", "loose-legs"]
+        },
+        {
+          "slug": "salsa-hop",
+          "name": "Salsa hop",
+          "aliases": ["salsa step", "salsa"],
+          "difficulty": "Intermediate",
+          "danceSlug": "salsa-hop",
+          "summary": "A rock step taken from salsa, driven by a little hop.",
+          "description": "House took a lot from Latin social dance, and the salsa hop is the clearest example. The free foot rocks back or across behind the standing foot, the weight replaces forward, and a small hop on the standing leg carries you into the other side. It has a bouncy, syncopated feel and is a favourite for moving side to side while staying on the spot.",
+          "steps": [
+            "Start with your weight on the left foot.",
+            "On \"and\", give a small hop on the left leg.",
+            "On 1, rock the right foot back behind the left, taking some weight.",
+            "On 2, replace your weight onto the left foot.",
+            "Hop and repeat, rocking the left foot back behind the right."
+          ],
+          "tips": [
+            "The rock is a partial weight change — you should be able to leave it immediately.",
+            "Let the hips move a little, as in salsa. Stiff hips make it look like a drill."
+          ],
+          "related": ["ball-change", "crossroads", "pas-de-bourree"]
+        },
+        {
+          "slug": "crossroads",
+          "name": "Crossroads",
+          "aliases": ["crossroad", "cross step"],
+          "difficulty": "Intermediate",
+          "danceSlug": "crossroads",
+          "summary": "Crossing and uncrossing the feet, alternating which foot goes in front.",
+          "description": "Crossroads works through the crossed and open positions of the feet: cross, open, cross the other way, open. The feet mark out four points, and the change of which leg is in front gives it a checkerboard look. It is a good test of footwork on the balls of the feet and it combines easily with twists and the pas de bourrée.",
+          "steps": [
+            "Start with feet hip-width apart, bouncing.",
+            "On 1, jump or step the feet into a cross, right in front of left.",
+            "On 2, open them back out to hip-width.",
+            "On 3, cross them again, left in front of right.",
+            "On 4, open them. Repeat, then try it with a quarter turn each time."
+          ],
+          "tips": [
+            "Keep the crosses tight and the landings quiet.",
+            "Stay on the balls of the feet so the crosses can happen quickly."
+          ],
+          "related": ["jack-in-the-box", "pas-de-bourree", "cross-over"]
+        },
+        {
+          "slug": "charleston",
+          "name": "Charleston",
+          "aliases": ["house charleston"],
+          "difficulty": "Intermediate",
+          "summary": "A swivelling tap forward and back from 1920s swing, done low and fast.",
+          "description": "The Charleston came into house through swing and Lindy Hop. The standing foot swivels while the free foot taps forward, comes back through, and taps behind — with the heels twisting as the weight shifts. House dancers keep it low, fast and loose rather than bright and upright, and chain it with toe twists.",
+          "steps": [
+            "Start with your weight on the left foot, heels free to swivel.",
+            "On 1, tap the right foot forward as the left heel swivels out.",
+            "On 2, bring the right foot back and step onto it.",
+            "On 3, tap the left foot behind you as the right heel swivels.",
+            "On 4, bring the left foot back to step, and repeat."
+          ],
+          "tips": [
+            "The swivel of the standing heel is what makes it a Charleston rather than a tap step.",
+            "Keep the knees soft and turning in and out with the swivel."
+          ],
+          "related": ["toe-twist", "heel-twist", "heel-toe"]
+        }
+      ]
+    },
+    {
+      "name": "Travelling",
+      "terms": [
+        {
+          "slug": "skate",
+          "name": "Skate",
+          "aliases": ["skating", "house skate"],
+          "difficulty": "Intermediate",
+          "danceSlug": "house-skate",
+          "summary": "Push off one foot and glide the other out sideways, like ice skating.",
+          "description": "The skate is a smooth, gliding step that travels side to side. One foot pushes off along its edge while the other slides out and takes the weight, and the arms swing with the torso as they would on ice. It is one of the most useful ways to cover distance in a cypher without the groove dropping.",
+          "steps": [
+            "Start in a bounce with your weight on the left foot.",
+            "Push off the inside edge of the left foot and slide the right foot out to the right.",
+            "Take your weight onto the right foot and let the left foot trail in.",
+            "Push off the right foot and slide the left out to the left.",
+            "Let the upper body lean slightly into each glide and the arms swing across."
+          ],
+          "tips": [
+            "Works best in socks or on a smooth floor — on grip you have to lift the foot and it becomes a step.",
+            "Stay low in the knees; skating upright looks stiff."
+          ],
+          "related": ["side-jack", "slide", "sidewalk", "train"]
+        },
+        {
+          "slug": "train",
+          "name": "Train",
+          "aliases": ["the train"],
+          "difficulty": "Intermediate",
+          "danceSlug": "train",
+          "summary": "A travelling step where the feet step and pull like a train's pistons.",
+          "description": "The train travels forward (or back) with a rhythmic step-and-pull: one foot steps, the other is drawn along the floor after it, and the arms pump beside the body like the connecting rods on a locomotive's wheels. It has a driving, repetitive feel and is often used to move into the centre of a cypher.",
+          "steps": [
+            "Start in a bounce, weight on the left foot.",
+            "Step forward on the right foot.",
+            "Pull the left foot along the floor up behind the right, keeping it low.",
+            "Step forward again on the right, or change lead and step with the left.",
+            "Add the arms: bent elbows pumping in small circles by the ribs."
+          ],
+          "tips": [
+            "The pull is the step — keep the trailing foot in contact with the floor.",
+            "Keep the pace steady. The point of a train is that it does not change speed."
+          ],
+          "related": ["chug", "skate", "slide"]
+        },
+        {
+          "slug": "sidewalk",
+          "name": "Sidewalk",
+          "difficulty": "Intermediate",
+          "danceSlug": "sidewalk",
+          "summary": "Travelling sideways by alternating heel and toe swivels.",
+          "description": "The sidewalk moves you laterally along a line by swivelling the feet on heels and toes in turn, so that each swivel carries you a little further. It is the heel and toe twists put to work, and a clean way to cross the floor while the upper body keeps jacking.",
+          "steps": [
+            "Stand with feet together, bouncing.",
+            "Swivel both toes out to the right, pivoting on the heels.",
+            "Swivel both heels out to the right, pivoting on the toes.",
+            "Repeat toes, heels, toes, heels — you travel to the right.",
+            "Reverse the order to travel back to the left."
+          ],
+          "tips": [
+            "Keep the feet close together so the swivels move you rather than just splaying.",
+            "Add a side jack in the direction you are travelling."
+          ],
+          "related": ["heel-twist", "toe-twist", "side-jack", "skate"]
+        },
+        {
+          "slug": "slide",
+          "name": "Slide",
+          "aliases": ["side slide", "glide"],
+          "difficulty": "Intermediate",
+          "danceSlug": "the-slide",
+          "summary": "One foot slides out along the floor while the other stays planted, then closes.",
+          "description": "The slide moves one foot along the floor — usually on its ball or outside edge — while the other stays grounded, then brings the feet back together. Done in sequence it lets a dancer glide across the floor smoothly, and it is a common way to make an entrance or finish a phrase with a sweeping movement.",
+          "steps": [
+            "Start with your weight on the left foot.",
+            "Slide the right foot out to the side along the floor, keeping contact.",
+            "Shift your weight towards the right as the slide finishes.",
+            "Draw the left foot in to meet it and repeat.",
+            "Try a slow two-count slide, then a quick one-count slide."
+          ],
+          "tips": [
+            "The floor matters: practise on a surface that lets the foot slide.",
+            "Keep a bounce underneath so the slide lands on the beat rather than drifting."
+          ],
+          "related": ["skate", "cross-over", "chug"]
+        },
+        {
+          "slug": "cross-over",
+          "name": "Cross over",
+          "aliases": ["forward cross over", "crossover"],
+          "difficulty": "Intermediate",
+          "danceSlug": "forward-cross-over",
+          "summary": "Travelling forward with each step crossing over in front of the other foot.",
+          "description": "In the cross over, each step lands across the front of the other foot as you move forward, with the hips twisting slightly to allow it and the bounce continuing. It gives a winding, weaving path and pairs with the crossroads and the slide.",
+          "steps": [
+            "Start in a bounce, weight on the left foot.",
+            "Step the right foot forward and across in front of the left.",
+            "Step the left foot forward and across in front of the right.",
+            "Let the hips turn a little towards each crossing step.",
+            "Keep the jack going as you travel."
+          ],
+          "tips": [
+            "Land on the ball of the foot; a heel landing makes it a walk.",
+            "Keep the steps short so you can stop or change direction instantly."
+          ],
+          "related": ["crossroads", "slide", "train"]
+        },
+        {
+          "slug": "chug",
+          "name": "Chug",
+          "aliases": ["scoot"],
+          "difficulty": "Intermediate",
+          "danceSlug": "the-chug",
+          "summary": "A small scoot along the floor on one foot, driven by a knee pop.",
+          "description": "The chug comes from tap and jazz: with the weight on one foot, the knee pops and the foot scoots a few centimetres forward or back along the floor without lifting. Repeated, it moves you with a pulsing, mechanical feel. It is often combined with the train or used to drift across the floor while the other leg does something else.",
+          "steps": [
+            "Stand on the right foot with the left foot lifted.",
+            "Bend the right knee slightly.",
+            "Straighten it sharply while pushing the right foot forward along the floor — a small scoot.",
+            "Repeat on each beat to travel forward, then try scooting back."
+          ],
+          "tips": [
+            "The foot stays in contact with the floor. If you hop, it is a hop, not a chug.",
+            "Keep each chug small and even."
+          ],
+          "related": ["train", "slide"]
+        }
+      ]
+    },
+    {
+      "name": "Turns and spins",
+      "terms": [
+        {
+          "slug": "pivot-turn",
+          "name": "Pivot turn",
+          "aliases": ["pivot"],
+          "difficulty": "Beginner",
+          "summary": "Step forward and pivot on the balls of both feet to face the other way.",
+          "description": "The pivot turn is the simplest way to change direction: step forward, turn on the balls of both feet, and let the weight land on the back foot facing the opposite way. It is used constantly in house to reset, to face a new person in the cypher, or to set up the next step.",
+          "steps": [
+            "Step forward with the right foot.",
+            "Keeping weight on the balls of both feet, turn half a turn to the left.",
+            "Finish with your weight on the left foot, now facing the way you came.",
+            "Repeat to travel in a line, or pivot back the other way."
+          ],
+          "tips": [
+            "Keep the knees soft so the turn stays grounded.",
+            "Turn the head a fraction ahead of the body to keep your balance."
+          ],
+          "related": ["spin", "spiral"]
+        },
+        {
+          "slug": "spin",
+          "name": "Spins",
+          "aliases": ["turns", "house spin"],
+          "difficulty": "Intermediate",
+          "summary": "Single and multiple rotations on the ball of one foot, entered and left through footwork.",
+          "description": "House spins are quick rotations on the ball of one foot, usually with a softer, more grounded body than a ballet pirouette. Dancers spin out of a step, land back into the groove and keep going, so the entry and exit matter as much as the turn. Multiple spins, spins that drop to the floor, and spins that stop dead on a break are all common.",
+          "steps": [
+            "From a bounce, place the right foot slightly in front, weight between the feet.",
+            "Wind the arms and shoulders a little to the right.",
+            "Push off the left foot and turn to the left on the ball of the right foot, drawing the left foot up to the right ankle.",
+            "Snap the head round to spot a point in front of you.",
+            "Land on both feet back in the bounce. Add a second turn once one is clean."
+          ],
+          "tips": [
+            "Spot — pick a point and whip your head to find it every turn. It is what stops dizziness.",
+            "A clean single landed on the beat beats a messy triple."
+          ],
+          "related": ["pivot-turn", "spiral", "freeze"]
+        },
+        {
+          "slug": "spiral",
+          "name": "Spiral",
+          "difficulty": "Intermediate",
+          "danceSlug": "spiral",
+          "summary": "A corkscrew down towards the floor through a turn, and back up again.",
+          "description": "The spiral combines a turn with a change of level: the body winds round while descending towards the floor, often touching down with a hand or knee, then unwinds on the way back up. It is a natural bridge between standing footwork and lofting, and a good way to make a turn feel like more than a turn.",
+          "steps": [
+            "From a bounce, step across with the right foot so the legs cross.",
+            "Turn to the left on the balls of both feet, letting the knees bend as you unwind.",
+            "Keep turning and lowering until you are close to the floor.",
+            "Reverse or continue the rotation to come back up to standing.",
+            "Land back in the groove on a strong beat."
+          ],
+          "tips": [
+            "Go down on the outside edges of the feet and the thighs, not the knees.",
+            "Control the speed — a slow spiral is harder and more impressive than a fast one."
+          ],
+          "related": ["spin", "knee-drop", "lofting"]
+        }
+      ]
+    },
+    {
+      "name": "Lofting and floorwork",
+      "terms": [
+        {
+          "slug": "knee-drop",
+          "name": "Knee drop",
+          "aliases": ["drop"],
+          "difficulty": "Intermediate",
+          "summary": "A controlled drop to the floor that lands on the shin and thigh, never the kneecap.",
+          "description": "The knee drop takes you from standing to the floor in one movement, landing on the side of the shin and thigh with the weight absorbed by the legs. It looks sudden but should feel soft. It is often the first lofting skill taught because it is the way down into almost everything else on the floor.",
+          "steps": [
+            "Stand with your weight on the left leg.",
+            "Turn the right knee out slightly so the side of the shin faces the floor.",
+            "Bend the left knee and lower yourself, letting the right shin and outer thigh meet the floor first.",
+            "Absorb the landing through the left leg; the right kneecap never touches the floor.",
+            "Push back up through the left leg to standing."
+          ],
+          "tips": [
+            "Wear knee pads while you learn it.",
+            "Practise it slowly and silently first. If you can hear the landing, you are not controlling it."
+          ],
+          "related": ["back-roll", "seat-spin", "lofting"]
+        },
+        {
+          "slug": "back-roll",
+          "name": "Back roll",
+          "aliases": ["shoulder roll"],
+          "difficulty": "Intermediate",
+          "summary": "Rolling back and over one shoulder to come up on your knees or feet.",
+          "description": "The back roll passes over one shoulder rather than the head, so the neck never takes weight. From sitting or crouching, the dancer rolls back along the spine, tips the legs over one shoulder and comes out on the knees or feet. It is a basic of lofting and a smooth way to change level or direction on the floor.",
+          "steps": [
+            "Sit on the floor with knees bent and chin tucked.",
+            "Roll back along the spine, arms out to the sides for balance.",
+            "Turn your head to the left and let the legs pass over your right shoulder.",
+            "Land on your knees or feet and come back up into a bounce."
+          ],
+          "tips": [
+            "Never roll straight over the top of the head or neck.",
+            "Learn it on a mat before trying it on a hard floor."
+          ],
+          "related": ["knee-drop", "seat-spin", "lofting"]
+        },
+        {
+          "slug": "seat-spin",
+          "name": "Seat spin",
+          "aliases": ["butt spin"],
+          "difficulty": "Intermediate",
+          "summary": "Spinning on the backside with the legs tucked, pushed off by a hand.",
+          "description": "In the seat spin the dancer sits and rotates on their backside with the knees drawn in, using a hand to push off and the arms and legs to control speed — pulling in to go faster, opening out to slow. It is a simple floor spin that looks dynamic and links easily between knee drops and back rolls.",
+          "steps": [
+            "Sit on the floor with knees bent, feet off the floor.",
+            "Place one hand on the floor behind you and push off to start rotating.",
+            "Draw the knees and arms in to the chest to spin faster.",
+            "Open the legs and arms out to slow down.",
+            "Plant a foot and a hand to stop, and come back up."
+          ],
+          "tips": [
+            "A smooth floor and loose-fitting trousers make this far easier.",
+            "Keep the back straight rather than rounding — it keeps you on a single point."
+          ],
+          "related": ["knee-drop", "back-roll", "helicopter"]
+        },
+        {
+          "slug": "helicopter",
+          "name": "Helicopter",
+          "difficulty": "Advanced",
+          "danceSlug": "helicopter",
+          "summary": "A leg sweeps in a full circle under the body while the hands lift to let it pass.",
+          "description": "Borrowed from breaking, the helicopter is a crouched leg sweep: one leg circles round close to the floor while the dancer supports themselves on the other leg and briefly lifts the hands so the sweeping leg can pass underneath. Repeated, it looks like rotor blades. In house it is usually done lighter and faster, and exited straight back into footwork.",
+          "steps": [
+            "Crouch low on the left leg with the right leg extended out to the side and both hands on the floor.",
+            "Sweep the right leg forward in a circle, keeping it low.",
+            "As it reaches your hands, lift them so the leg passes underneath.",
+            "Hop the left foot as the leg reaches it, so the sweep continues behind you.",
+            "Replace the hands and let the leg complete the circle."
+          ],
+          "tips": [
+            "Learn each part slowly — the hand lift and the hop are the timing that makes it a full circle.",
+            "Keep the sweeping leg straight and the hips low."
+          ],
+          "related": ["seat-spin", "lofting", "freeze"]
+        },
+        {
+          "slug": "split",
+          "name": "Split drop",
+          "aliases": ["jazz split", "drop split"],
+          "difficulty": "Advanced",
+          "summary": "Dropping from standing into a split and pulling straight back up.",
+          "description": "The split drop takes a standing dancer down into a split — often a jazz split with the back knee bent — and straight back up, all within the rhythm. It is a flashy accent, usually saved for a big hit in the music. It needs real flexibility and strength, so it is the last thing on this page to try.",
+          "steps": [
+            "Warm up thoroughly and make sure you can already sit in the split slowly.",
+            "From a bounce, slide one foot forward and the other back.",
+            "Lower into the split with control, hands ready to take weight.",
+            "Bend the back knee (jazz split) to make the drop safer.",
+            "Drive up through the front leg and back foot to stand, back into the groove."
+          ],
+          "tips": [
+            "Never drop into a split cold — it is one of the easiest ways to tear a hamstring.",
+            "Hitting the floor on a big accent in the music matters more than how deep the split is."
+          ],
+          "related": ["knee-drop", "freeze", "lofting"]
+        }
+      ]
+    },
+    {
+      "name": "Accents",
+      "terms": [
+        {
+          "slug": "freeze",
+          "name": "Freeze",
+          "aliases": ["stop", "pose"],
+          "difficulty": "Intermediate",
+          "danceSlug": "twist-freeze",
+          "summary": "Stopping dead in a held pose, usually when the music stops or hits.",
+          "description": "A freeze is a sudden stop in a clear, held shape — standing, crouched or on the floor. In house it is most often used to catch a break, a drop or the end of a phrase, and the contrast with continuous movement is what makes it work. Coming out of the freeze cleanly and straight back onto the beat is part of the move.",
+          "steps": [
+            "Pick a shape you can hold without wobbling — for example, a low crouch after a twist.",
+            "Dance into it from a step such as a toe twist.",
+            "On the accent, stop completely: feet, torso, head and hands.",
+            "Hold for the length of the break.",
+            "Release straight back into the jack as the beat comes back in."
+          ],
+          "tips": [
+            "Listen ahead. A freeze that lands late is worse than no freeze.",
+            "Even the eyes should stop moving."
+          ],
+          "related": ["toe-twist", "spin", "musicality"]
+        }
+      ]
+    },
+    {
+      "name": "Musicality and culture",
+      "terms": [
+        {
+          "slug": "on-the-one",
+          "name": "On the one",
+          "learnable": false,
+          "summary": "Starting and landing phrases on the first beat of the bar.",
+          "description": "House is counted in fours over a steady kick: 1, 2, 3, 4. \"The one\" is the first beat of the bar, and above that the first beat of each eight-count and of each longer phrase. Starting steps on the one and ending combinations there makes a dancer look locked into the track. The \"and\" between the beats is where most weight changes happen.",
+          "tips": [
+            "Clap on every beat, then only on the one, until you can hear it without counting.",
+            "When in doubt, wait for the one before starting something new."
+          ],
+          "related": ["phrasing", "musicality", "bounce"]
+        },
+        {
+          "slug": "phrasing",
+          "name": "Eight-counts and phrases",
+          "aliases": ["phrasing", "32-count phrase"],
+          "learnable": false,
+          "summary": "How house tracks are built: bars of four, eight-counts, and 32-count phrases.",
+          "description": "Dancers count house in eight-counts, two bars of four beats each. Four eight-counts make a 32-count phrase, and tracks usually change something — a new instrument, a filter opening, a break — at the start of a phrase. Knowing where you are in the phrase lets you save a freeze or a spin for exactly when the music changes.",
+          "tips": [
+            "Count eight-counts through a whole track and note where the changes land.",
+            "Start new ideas at the top of a phrase and finish them at the end of one."
+          ],
+          "related": ["on-the-one", "musicality"]
+        },
+        {
+          "slug": "musicality",
+          "name": "Musicality",
+          "aliases": ["riding the music"],
+          "learnable": false,
+          "summary": "Choosing which layer of the track to dance to at any moment.",
+          "description": "A house track has layers: the kick, the hi-hats and claps, the bassline, vocals, and melodic or percussion loops. Musicality is choosing which one you are dancing to — jacking the kick, running footwork on the hi-hats, stretching a slow roll over a vocal — and switching as the track moves. It is what separates a dancer who knows steps from one who dances the song.",
+          "tips": [
+            "Listen to one track several times, each time following a single instrument.",
+            "Match the texture: sharp steps for sharp sounds, smooth movement for pads and vocals."
+          ],
+          "related": ["on-the-one", "phrasing", "freeze"]
+        },
+        {
+          "slug": "cypher",
+          "name": "Cypher",
+          "aliases": ["circle", "cipher"],
+          "learnable": false,
+          "summary": "The circle dancers form on the floor, taking turns in the middle.",
+          "description": "A cypher is the circle that forms when dancers gather, with people taking turns stepping into the middle to freestyle. It is where house lives outside of battles and classes. There is an etiquette to it: wait for the person in the middle to finish, keep your round reasonable, and support the others around the circle.",
+          "tips": [
+            "Enter with something you can do comfortably — the first few seconds set the tone.",
+            "Watch as much as you dance; half of what people learn comes from other dancers' rounds."
+          ],
+          "related": ["freestyle", "musicality"]
+        },
+        {
+          "slug": "freestyle",
+          "name": "Freestyle",
+          "aliases": ["improvisation"],
+          "learnable": false,
+          "summary": "Dancing without set choreography — the main way house is danced.",
+          "description": "Freestyle means making up the dance as the music plays, drawing on your vocabulary, your groove and what you hear. In house it is the default rather than the exception, which is why steps are learned so they can be broken apart, varied and combined in the moment. The skill is less about how many steps you know than how freely you can move between them.",
+          "tips": [
+            "Practise transitions: take two random steps and find three different ways to link them.",
+            "Record yourself freestyling to a full track and watch where the groove drops."
+          ],
+          "related": ["cypher", "musicality", "house-dance"]
+        }
+      ]
+    }
+  ]
+}

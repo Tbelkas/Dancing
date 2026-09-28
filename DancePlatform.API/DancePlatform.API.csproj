@@ -21,5 +21,7 @@
   <ItemGroup>
     <!-- Authored roadmap content, read at boot by RoadmapSeeder — must ship next to the DLL. -->
     <Content Update="Data\Roadmaps\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Same for the style glossaries (GlossarySeeder). -->
+    <Content Update="Data\Glossary\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

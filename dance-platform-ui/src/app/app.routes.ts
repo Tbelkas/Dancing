@@ -24,6 +24,8 @@ export const routes: Routes = [
   { path: 'roadmaps/new', title: 'New skill tree · Dance Platform', loadComponent: () => import('./pages/roadmap-builder/roadmap-builder.component').then(m => m.RoadmapBuilderComponent), canActivate: [personalRoadmapsGuard, authGuard], canDeactivate: [unsavedChangesGuard] },
   { path: 'roadmaps/:slug/edit', loadComponent: () => import('./pages/roadmap-builder/roadmap-builder.component').then(m => m.RoadmapBuilderComponent), canActivate: [personalRoadmapsGuard, authGuard], canDeactivate: [unsavedChangesGuard] },
   { path: 'roadmaps/:slug', loadComponent: () => import('./pages/roadmap-detail/roadmap-detail.component').then(m => m.RoadmapDetailComponent) },
+  { path: 'glossary', title: 'Glossary · Dance Platform', loadComponent: () => import('./pages/glossary/glossary.component').then(m => m.GlossaryComponent) },
+  { path: 'glossary/:style', loadComponent: () => import('./pages/glossary-detail/glossary-detail.component').then(m => m.GlossaryDetailComponent) },
   { path: 'dances/:style/:slug', loadComponent: () => import('./pages/dance-detail/dance-detail.component').then(m => m.DanceDetailComponent) },
   { path: 'dances/:slug', loadComponent: () => import('./pages/dance-detail/dance-detail.component').then(m => m.DanceDetailComponent) },
   { path: 'profile', title: 'My Profile · Dance Platform', loadComponent: () => import('./pages/profile/profile.component').then(m => m.ProfileComponent), canActivate: [authGuard] },

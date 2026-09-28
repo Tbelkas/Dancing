@@ -296,6 +296,36 @@ test.describe('authenticated', () => {
   });
 
   /**
+   * Writes to production, so it flips one glossary mark and flips it back — the finally block
+   * restores it even when an assertion in between fails. The reload in the middle is the point:
+   * an optimistic toggle that never reached the server would pass without it.
+   */
+  test('a glossary move can be marked learned, persists, and is restored', async ({ authedPage: page }) => {
+    const toggleFor = () => page.locator('[data-testid="glossary-term"][data-slug="stomp"]')
+      .getByTestId('glossary-learned-toggle');
+    const flip = async () => {
+      const saved = page.waitForResponse(r => r.url().includes('/glossary/terms/') && r.request().method() === 'PUT');
+      await toggleFor().click();
+      expect((await saved).ok()).toBe(true);
+    };
+
+    await page.goto('/glossary/house');
+    await expect(page.getByTestId('glossary-progress')).toBeVisible();
+    await expect(toggleFor()).toBeVisible();
+    const initial = await toggleFor().getAttribute('aria-pressed');
+
+    await flip();
+    try {
+      await page.reload();
+      await expect(toggleFor()).not.toHaveAttribute('aria-pressed', initial!);
+    } finally {
+      if ((await toggleFor().getAttribute('aria-pressed')) !== initial) await flip();
+    }
+    await page.reload();
+    await expect(toggleFor()).toHaveAttribute('aria-pressed', initial!);
+  });
+
+  /**
    * The contents of a path — the view toggle, the branch headings, every step's videos — are
    * signed-in only; a signed-out visitor gets the bare tree (see roadmaps.spec.ts). The three
    * tests below therefore live here rather than in the anon suite. All read-only: they click

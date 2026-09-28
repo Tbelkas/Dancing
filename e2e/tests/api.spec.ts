@@ -244,4 +244,21 @@ test.describe('account recovery @smoke', () => {
     const res = await request.get('dances/pending');
     expect([401, 403]).toContain(res.status());
   });
+
+  test('the house glossary serves categorised terms, and the learned mark needs an account', async ({ request }) => {
+    const res = await request.get('glossary/house');
+    expect(res.status()).toBe(200);
+    const g = await res.json();
+    expect(g.styleSlug).toBe('house');
+    expect(g.categories.length).toBeGreaterThan(0);
+    const terms = g.categories.flatMap((c: any) => c.terms);
+    const jack = terms.find((t: any) => t.slug === 'jack');
+    expect(jack, 'the jack term (its slug is load-bearing)').toBeTruthy();
+    expect(jack.isLearnable).toBe(true);
+    expect(jack.isLearned).toBe(false);
+    expect(jack.steps.length).toBeGreaterThan(0);
+
+    const put = await request.put(`glossary/terms/${jack.id}/learned`, { data: { learned: true } });
+    expect(put.status()).toBe(401);
+  });
 });

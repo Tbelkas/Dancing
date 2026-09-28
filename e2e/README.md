@@ -121,7 +121,7 @@ The UI churns — declutter passes reshuffle markup regularly. Tests keyed on CS
 visible text would break on every one of those and teach you to ignore them. So the suite
 anchors on a small, deliberate set of `data-testid` attributes.
 
-**These 116 attributes are a contract. Treat them like a public API.**
+**These 122 attributes are a contract. Treat them like a public API.**
 
 The personal-skill-tree rows below (`roadmap-new` … `builder-step-clip`, and
 `profile-shared-roadmaps`) are **dormant**: the markup still carries them, but it is gated on
@@ -130,7 +130,7 @@ they are — the tests come back with the feature.
 
 | Test id | Lives in | Anchors |
 |---|---|---|
-| `nav-browse`, `nav-my-dances`, `nav-sign-in`, `nav-roadmaps` | `app.component.html` | Header nav links |
+| `nav-browse`, `nav-my-dances`, `nav-sign-in`, `nav-roadmaps`, `nav-glossary` | `app.component.html` | Header nav links |
 | `user-menu-button`, `sign-out` | `app.component.html` | Account menu |
 | `login-username`, `login-password`, `login-submit`, `login-error` | `login.component.html` | Sign-in form |
 | `login-email`, `login-forgot` | `login.component.html` | The address field, which appears in register mode only, and the link to `/forgot-password`, which appears in sign-in mode only. Neither is ever visible at the same time as the other |
@@ -163,6 +163,8 @@ they are — the tests come back with the feature.
 | `builder-step-pin`, `builder-clip-picker`, `builder-step-clip` | `roadmap-builder.component.html` | Pinning a step to one section of a video: the button, the picker, and the resulting clip chip. All three need the step to have a linked move first |
 | `roadmap-title`, `roadmap-progress`, `roadmap-step`, `roadmap-step-videos`, `roadmap-step-learned` | `roadmap-detail.component.html` | A path: its title, the progress bar, each step row (list view), a step's video list, and the Learned chip (signed-in only) |
 | `roadmap-view-tree`, `roadmap-view-list`, `roadmap-detail-panel` | `roadmap-detail.component.html` | The view toggle and the tree's detail panel. **All three are signed-in only** — signed out the page renders the bare tree, so a test that needs the list view or a step's videos must use the `authed` project |
+| `glossary-card` | `glossary.component.html` | A style on the glossary index; its `href` is `/glossary/{styleSlug}` |
+| `glossary-term`, `glossary-search`, `glossary-learned-toggle`, `glossary-progress` | `glossary-detail.component.html` | A style's glossary: each term row (carries `data-slug` — select a term by slug, never by wording), the search box, the learned toggle (`aria-pressed` is its state; signed out it opens the sign-in dialog), and the progress bar (**signed-in only**) |
 | `roadmap-tree-hint` | `roadmap-detail.component.html` | The signed-out line under the tree. Its presence is how the anon suite proves the teaser state is still the teaser state |
 | `roadmap-tree`, `tree-node` | `roadmap-tree.component.html` | The skill-tree SVG and each node `<g>` in it. The component is reused as the builder's live preview, so these also match on `/roadmaps/new` and `/roadmaps/:slug/edit` |
 | `signin-dialog`, `signin-username`, `signin-email`, `signin-password`, `signin-submit`, `signin-error` | `sign-in-dialog.component.html` | The in-place sign-in modal a signed-out visitor gets when they touch a roadmap node — distinct ids from `login-*`, which anchor the `/login` page |

@@ -1,0 +1,99 @@
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-subtitle {
+  max-width: 62ch;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  margin-top: 10px;
+}
+
+.glossary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.glossary-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: border-color var(--transition);
+
+  &:hover { border-color: var(--color-primary); }
+  > i { color: var(--color-text-muted); }
+}
+
+.glossary-card__main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.glossary-card__name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: 1.6rem;
+}
+
+.glossary-card__count {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.glossary-card__progress {
+  flex: 0 0 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.glossary-card__track {
+  height: 5px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.glossary-card__fill {
+  height: 100%;
+  background: var(--color-primary);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.empty-state__icon {
+  font-size: 2rem;
+  color: var(--color-border-light);
+  margin-bottom: 4px;
+}
+
+.empty-state h2 { color: var(--color-text); }
+
+.empty-state p {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 640px) {
+  .glossary-card { flex-wrap: wrap; gap: 12px; }
+  .glossary-card__progress { flex-basis: 100%; order: 3; }
+}

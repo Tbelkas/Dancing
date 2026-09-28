@@ -47,6 +47,7 @@ to drop into a session alongside core-context:
 - `module-context/practice-log.md`
 - `module-context/videos.md`
 - `module-context/roadmaps.md`
+- `module-context/glossary.md`
 - `module-context/styles-instructors.md`
 - `module-context/import-admin.md`
 

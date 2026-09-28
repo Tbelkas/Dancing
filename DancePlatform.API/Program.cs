@@ -67,6 +67,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPracticeService, PracticeService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
+builder.Services.AddScoped<IGlossaryService, GlossaryService>();
 builder.Services.AddScoped<IImportService, ImportService>();
 // Runs the real browse query every few minutes so the first visitor after a quiet spell doesn't
 // pay the cold-connection cost for everyone (known-issues C).
@@ -221,6 +222,10 @@ using (var scope = app.Services.CreateScope())
         db,
         app.Environment.ContentRootPath,
         scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(RoadmapSeeder)));
+    await GlossarySeeder.SeedAsync(
+        db,
+        app.Environment.ContentRootPath,
+        scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(GlossarySeeder)));
 }
 
 app.Run();

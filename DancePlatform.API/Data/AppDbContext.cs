@@ -35,6 +35,8 @@ public class AppDbContext : DbContext
     public DbSet<RoadmapStage> RoadmapStages => Set<RoadmapStage>();
     public DbSet<RoadmapStep> RoadmapSteps => Set<RoadmapStep>();
     public DbSet<RoadmapStepPrerequisite> RoadmapStepPrerequisites => Set<RoadmapStepPrerequisite>();
+    public DbSet<GlossaryTerm> GlossaryTerms => Set<GlossaryTerm>();
+    public DbSet<UserLearnedGlossaryTerm> UserLearnedGlossaryTerms => Set<UserLearnedGlossaryTerm>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -474,5 +476,38 @@ public class AppDbContext : DbContext
             .HasIndex(s => s.ChildRoadmapId)
             .IsUnique()
             .HasFilter("\"ChildRoadmapId\" IS NOT NULL");
+
+        // The seeder upserts on this pair, and the page is addressed by style.
+        modelBuilder.Entity<GlossaryTerm>()
+            .HasIndex(t => new { t.StyleId, t.Slug })
+            .IsUnique();
+
+        modelBuilder.Entity<GlossaryTerm>()
+            .HasOne(t => t.Style)
+            .WithMany()
+            .HasForeignKey(t => t.StyleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Same contract as a roadmap step: losing the dance only loses the video link.
+        modelBuilder.Entity<GlossaryTerm>()
+            .HasOne(t => t.Dance)
+            .WithMany()
+            .HasForeignKey(t => t.DanceId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<UserLearnedGlossaryTerm>()
+            .HasKey(l => new { l.UserId, l.GlossaryTermId });
+
+        modelBuilder.Entity<UserLearnedGlossaryTerm>()
+            .HasOne(l => l.User)
+            .WithMany()
+            .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserLearnedGlossaryTerm>()
+            .HasOne(l => l.GlossaryTerm)
+            .WithMany(t => t.LearnedBy)
+            .HasForeignKey(l => l.GlossaryTermId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

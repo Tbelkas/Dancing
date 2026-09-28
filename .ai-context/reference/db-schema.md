@@ -193,6 +193,17 @@ There is no roadmap-progress table: progress is read from the existing
 `UserLearnedDances` / `UserInProgressDances` joins via the step's linked dance. A step's
 depth and locked/available state are computed per-request in `RoadmapService`, not stored.
 
+### GlossaryTerm  (one entry in a style's glossary — a move, or a concept)
+`Id`, `StyleId` (FK → Style, cascade), `Slug`, `Name`, `Aliases` text[], `Category`, `Summary`,
+`Description`, `Steps` text[], `Tips` text[], `Related` text[] (sibling slugs), `Difficulty`,
+`IsLearnable` (false = concept), `DanceId` (FK → Dance, **SetNull** — the video source only),
+`SortOrder`, `DateAdded`. Unique **(StyleId, Slug)**. Seeded from `Data/Glossary/*.json` by
+`GlossarySeeder` — upserted, never rebuilt, because learned marks hang off the rows.
+
+### UserLearnedGlossaryTerm  (a glossary move the user has ticked off)
+Composite PK **(UserId, GlossaryTermId)**, both cascade. Separate from `UserLearnedDances` on
+purpose: most terms have no dance, and one dance can back several terms.
+
 ## Join entities (explicit, composite keys)
 
 | Entity | Key | Meaning |
