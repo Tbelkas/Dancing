@@ -55,7 +55,7 @@
             "Learn to get down and up smoothly before learning anything that happens on the floor.",
             "Protect knees, wrists and the neck. Land on muscle — thighs, shins, shoulder blades — never on bone or the kneecap."
           ],
-          "related": ["knee-drop", "back-roll", "seat-spin", "spiral"]
+          "related": ["knee-drop", "back-roll", "seat-spin", "spiral", "kip-up"]
         }
       ]
     },
@@ -183,7 +183,30 @@
             "The weight goes down through the leg, not just the foot slapping the floor — the sound is a by-product.",
             "Be kind to your neighbours and your joints: sink into the stomp rather than locking the knee on impact."
           ],
-          "related": ["jack", "on-the-one"]
+          "related": ["jack", "on-the-one", "knock"]
+        },
+        {
+          "slug": "knock",
+          "name": "Knock",
+          "aliases": ["toe knock", "toe tap"],
+          "difficulty": "Beginner",
+          "danceSlug": "knock-and-count",
+          "summary": "A soft tap of the toes on the floor on the \"and\" — the groove that teaches you to feel the off-beat.",
+          "description": "The knock is one of the basic grooves in the Japanese house syllabus that BANRI Jackin and others teach: while the standing leg bounces, the free foot knocks the tip of its toes lightly on the floor between the beats. It is tiny, but it is everywhere — the tap inside a shuffle, a chase, a cross step or a salsa step is a knock. Practising it on its own trains you to put something on the \"and\" without losing the kick drum underneath. Common variations knock with the free leg crossed behind the standing leg, knock twice, or bounce sideways and knock on each landing.",
+          "steps": [
+            "Stand with your weight on the left foot, bouncing lightly.",
+            "On \"and\", touch the tip of the right toes to the floor beside the left foot — no weight on it.",
+            "On the beat, lift the right foot off again as the left knee bounces.",
+            "After a few, change weight and knock with the left foot.",
+            "Variation: cross the free foot behind the standing leg and knock there, once and then twice.",
+            "Variation: hop small to the side on the beat and knock the free toes on the \"and\"."
+          ],
+          "tips": [
+            "Knock softly. It is a touch, not a stamp — if it makes a noise, it is too heavy.",
+            "Keep the knee of the knocking leg relaxed, especially when it is crossed behind.",
+            "Count it out loud (\"and one, and two\") until the knock sits on the \"and\" by itself."
+          ],
+          "related": ["bounce", "stomp", "hurdle", "chase", "cross-step"]
         },
         {
           "slug": "jack-in-the-box",
@@ -214,7 +237,7 @@
         {
           "slug": "heel-toe",
           "name": "Heel-toe",
-          "aliases": ["heel toe"],
+          "aliases": ["heel toe", "gallop"],
           "difficulty": "Beginner",
           "summary": "Tap the heel, then the toe, alternating sides over a bounce.",
           "description": "Heel-toe is one of the first footwork patterns most house dancers learn. The free foot taps its heel out in front, then its toe (either in the same place or back beside the standing foot), before the feet change over. It trains weight changes on the \"and\", which almost every faster step needs, and it has many variations — crossing the heel over, tapping the toe behind, or swivelling heel and toe to travel sideways.",
@@ -229,7 +252,7 @@
             "The weight change is the hard part — make sure you are genuinely standing on the other foot before the next heel.",
             "Keep the taps light; the standing leg carries the bounce."
           ],
-          "related": ["toe-twist", "heel-twist", "sidewalk", "shuffle"]
+          "related": ["toe-twist", "heel-twist", "sidewalk", "shuffle", "heel-step"]
         },
         {
           "slug": "toe-twist",
@@ -250,7 +273,27 @@
             "Let the knees follow the feet — forcing them straight twists the joint.",
             "Keep a small bounce running; a toe twist on stiff legs looks mechanical."
           ],
-          "related": ["heel-twist", "knee-up", "charleston", "freeze"]
+          "related": ["heel-twist", "knee-up", "charleston", "freeze", "swirl", "leg-curl"]
+        },
+        {
+          "slug": "leg-curl",
+          "name": "Toe twist with leg curl",
+          "aliases": ["leg curl", "toe twist - leg curl"],
+          "difficulty": "Beginner",
+          "danceSlug": "twist-toe-twist-leg-curl",
+          "summary": "Toe twists broken up by one leg curling up behind you, heel towards the seat.",
+          "description": "One of the toe-twist variations in BANRI Jackin's 30 basics: between runs of toe twists, the weight goes onto one foot and the other leg curls up behind, heel lifting towards the seat, before it comes down and the twisting starts again. It teaches you to get in and out of a twist cleanly and gives the step a visible shape, so it is a useful first step into combining moves.",
+          "steps": [
+            "Start with a few toe twists, feet together, on the balls of the feet.",
+            "On a count, shift your weight onto the left foot and curl the right leg up behind you, heel towards the seat.",
+            "Put the right foot back down beside the left and twist again.",
+            "Repeat the curl with the other leg."
+          ],
+          "tips": [
+            "Keep the knees together as the leg curls. It should be a lift from the knee down, not a kick back.",
+            "Keep bouncing on the standing leg during the curl so the groove doesn't stop."
+          ],
+          "related": ["toe-twist", "knee-up", "swirl"]
         },
         {
           "slug": "heel-twist",
@@ -269,7 +312,7 @@
             "Sit slightly into the knees so the weight can reach the heels without leaning back.",
             "Keep both feet moving together at first; staggering them is a variation, not the basic."
           ],
-          "related": ["toe-twist", "sidewalk", "charleston"]
+          "related": ["toe-twist", "sidewalk", "charleston", "bedrock"]
         },
         {
           "slug": "knee-up",
@@ -310,7 +353,7 @@
             "The flick comes from letting go, not kicking. If your thigh is tense, it is a kick.",
             "Keep the upper body easy — tension travels down."
           ],
-          "related": ["knee-up", "toe-twist", "footwork"]
+          "related": ["knee-up", "toe-twist", "footwork", "chase", "scribble-foot"]
         },
         {
           "slug": "farmer",
@@ -330,7 +373,7 @@
             "Keep the heel dig crisp and the knee up relaxed — the contrast is what makes the step read.",
             "Stay over your standing leg; leaning towards the heel throws the knee up off balance."
           ],
-          "related": ["knee-up", "heel-toe", "stomp"]
+          "related": ["knee-up", "heel-toe", "stomp", "hurdle"]
         },
         {
           "slug": "shuffle",
@@ -389,7 +432,7 @@
             "All three steps are on the balls of the feet — flat feet make it clumsy.",
             "Keep a jack running underneath so it looks like house, not jazz."
           ],
-          "related": ["ball-change", "jack-in-the-box", "crossroads"]
+          "related": ["ball-change", "jack-in-the-box", "crossroads", "scribble-foot", "cross-step"]
         },
         {
           "slug": "ball-change",
@@ -430,7 +473,7 @@
             "Do not lock the knee at full extension — snap to almost straight and return.",
             "Let the jack contract as the leg snaps out; it gives the kick more punch."
           ],
-          "related": ["knee-up", "ball-change", "loose-legs"]
+          "related": ["knee-up", "ball-change", "loose-legs", "pow-wow"]
         },
         {
           "slug": "salsa-hop",
@@ -456,7 +499,7 @@
         {
           "slug": "crossroads",
           "name": "Crossroads",
-          "aliases": ["crossroad", "cross step"],
+          "aliases": ["crossroad", "criss cross"],
           "difficulty": "Intermediate",
           "danceSlug": "crossroads",
           "summary": "Crossing and uncrossing the feet, alternating which foot goes in front.",
@@ -479,6 +522,7 @@
           "name": "Charleston",
           "aliases": ["house charleston"],
           "difficulty": "Intermediate",
+          "danceSlug": "toe-twist-challenge-charleston",
           "summary": "A swivelling tap forward and back from 1920s swing, done low and fast.",
           "description": "The Charleston came into house through swing and Lindy Hop. The standing foot swivels while the free foot taps forward, comes back through, and taps behind — with the heels twisting as the weight shifts. House dancers keep it low, fast and loose rather than bright and upright, and chain it with toe twists.",
           "steps": [
@@ -493,6 +537,261 @@
             "Keep the knees soft and turning in and out with the swivel."
           ],
           "related": ["toe-twist", "heel-twist", "heel-toe"]
+        },
+        {
+          "slug": "heel-step",
+          "name": "Heel step",
+          "aliases": ["heel dig"],
+          "difficulty": "Beginner",
+          "summary": "A heel placed out on the beat while the torso jacks forward — the simplest step to layer on a jack.",
+          "description": "The heel step is about as simple as house footwork gets: on every beat one heel steps out in front, toes lifted, and the body jacks forward over it; then the foot comes back and the other heel goes out. What makes it house rather than an exercise is the jack. Teachers describe the body acting like a door hinge on each beat, and the trick for speed is a small lift onto the ball of the standing foot between heels, so the jack carries straight into the next one. It is also the base of many variations — crossed heels, the can opener, and the gallop.",
+          "steps": [
+            "Start in a jack with feet under you.",
+            "On 1, step the right heel forward, toes up, and jack the chest forward over it.",
+            "On \"and\", bring the right foot back and rise slightly onto the balls of both feet.",
+            "On 2, step the left heel forward and jack again.",
+            "Keep alternating, then try placing the heel diagonally across the other foot."
+          ],
+          "tips": [
+            "The jack is the step. Without it the heel step looks like a warm-up.",
+            "Lift onto the toes between heels to keep the momentum going at speed — flat-footed, it gets stuck.",
+            "Try using the same arm as the heel — it looks odd written down but it suits this step."
+          ],
+          "related": ["jack", "heel-toe", "heel-twist", "bedrock"]
+        },
+        {
+          "slug": "cross-step",
+          "name": "Cross step",
+          "aliases": ["cross step x2", "house cross step"],
+          "difficulty": "Beginner",
+          "summary": "Step out, step back, cross over in front — a three-weight-change phrase on each side.",
+          "description": "The cross step is a staple of house footwork: the right foot steps out to the side, the left steps back in place, and the right crosses over in front of the left, then the pattern repeats to the other side. Counted \"1 and 2\", the first two changes are on the balls of the feet and the cross lands flatter. Jardy Santiago teaches it slow (letting the head drift side to side) and fast (keeping the head still so only the legs move), and BANRI Jackin builds variations on it, including toe-twist and heel-twist versions and a turn. It shows up inside many other steps, so it is worth making automatic.",
+          "steps": [
+            "Start in a bounce with your weight on the left foot.",
+            "On 1, step the right foot out to the side on the ball of the foot.",
+            "On \"and\", step the left foot back in place.",
+            "On 2, cross the right foot over in front of the left, landing flatter.",
+            "Repeat to the other side: left out, right back, left crosses in front.",
+            "Speed it up to \"1 e and\" and keep your head still."
+          ],
+          "tips": [
+            "Pause for a moment after the cross — if you don't, the step blurs and slips off the beat.",
+            "Try landing the cross on a sound in the music, so the phrase has a clear accent.",
+            "Once it is automatic, twist the toes or heels on the cross for the twist versions."
+          ],
+          "related": ["pas-de-bourree", "crossroads", "chase", "bedrock", "knock"]
+        },
+        {
+          "slug": "bedrock",
+          "name": "Bedrock",
+          "aliases": ["bed rock"],
+          "difficulty": "Beginner",
+          "danceSlug": "twist-heel-twist-bedrock",
+          "summary": "A heel twist followed by a lifted knee and a toe tap, alternating sides.",
+          "description": "Bedrock builds on the heel twist. With the feet together the heels twist to one side, then the free knee lifts and rolls and the toe taps down, and the whole phrase is repeated to the other side. BANRI Jackin's beginner syllabus places it straight after the heel twist, and teaches forward, backward and double versions. A common variation adds an extra twist between repeats or finishes on a diagonal, leaning back, with the front foot flat and the back foot on its toe.",
+          "steps": [
+            "Stand with feet together, knees soft, bouncing.",
+            "Twist both heels to the right, keeping the balls of the feet in place.",
+            "Lift the left knee, roll it in, and tap the left toe down.",
+            "Twist the heels back and repeat with the other leg.",
+            "Once it is smooth, add an extra heel twist before each tap, or travel it forward and back."
+          ],
+          "tips": [
+            "The heel twist and the knee roll are one motion — don't stop between them.",
+            "Keep it compact. Bedrock looks best small and quick."
+          ],
+          "related": ["heel-twist", "toe-twist", "heel-step", "cross-step"]
+        },
+        {
+          "slug": "swirl",
+          "name": "Swirl",
+          "aliases": ["toe cross"],
+          "difficulty": "Intermediate",
+          "danceSlug": "swirl",
+          "summary": "Toes crossing in front on the balls of the feet while the hips and shoulders twist — a samba-flavoured figure eight.",
+          "description": "The swirl is all hips. Up on the balls of the feet, the free foot crosses in front of the standing foot and the hips and upper body twist with it, then it steps back and the other side crosses. Harry \"Full Out\" Weston notes it is sometimes simply called the toe cross, and BANRI Jackin describes it as inspired by samba. Underneath, the feet are just crossing; the swirl is the figure-eight twist of the hips, the knees rotating out, and a clear up-down on every step. It is danced with a jack, kept tight, and it gets better the more the middle of the body moves.",
+          "steps": [
+            "Start in a bounce, high on the balls of both feet, heels off the floor.",
+            "On 1, cross the right foot in front of the left on its toe, twisting the hips and chest to the left.",
+            "On \"and\", step the right foot back and let the knee rotate out as you land.",
+            "On 2, cross the left foot in front, twisting the hips and chest the other way.",
+            "Keep alternating, rising on each cross and sinking as the foot returns.",
+            "Speed it up while keeping it small."
+          ],
+          "tips": [
+            "Think of the shoulder meeting the crossing toe — right shoulder to right toe, left to left.",
+            "Stay on the balls of the feet the whole time. Heels on the floor stop the swirl.",
+            "Keep the level change: up on the cross, down on the return."
+          ],
+          "related": ["toe-twist", "cross-step", "charleston", "jack"]
+        },
+        {
+          "slug": "scribble-foot",
+          "name": "Scribble foot",
+          "aliases": ["scribble legs", "scribble"],
+          "difficulty": "Intermediate",
+          "danceSlug": "scribble-legs",
+          "summary": "A fast pas de bourrée without the turn: tiny steps back on every count so the feet seem to scribble on the floor.",
+          "description": "Scribble foot is quick, compact footwork that Jardy Santiago describes as essentially a fast pas de bourrée. Unlike the pas de bourrée, the body does not turn: the feet stay facing forward and one foot steps back on every count, with two quick changes in between (\"1 e and, 2 e and\"). It is one of the few house steps where leaning forward is fine. The smaller the steps, the faster it goes. There is also a reverse scribble foot, and it chains naturally with loose legs.",
+          "steps": [
+            "Start in a bounce, weight on the balls of the feet, leaning slightly forward.",
+            "On 1, step the left foot back a little.",
+            "On \"e\" and \"and\", take two quick weight changes — right, left — in place.",
+            "On 2, step back again, and keep repeating.",
+            "Keep the feet facing forward throughout."
+          ],
+          "tips": [
+            "Keep the movements tiny. Big steps make scribble foot slow and messy.",
+            "Learn the pas de bourrée first — this is the same weight changes, faster and without the turn."
+          ],
+          "related": ["pas-de-bourree", "loose-legs", "happy-feet", "shuffle"]
+        },
+        {
+          "slug": "lotus",
+          "name": "Lotus",
+          "aliases": ["scissors"],
+          "difficulty": "Intermediate",
+          "summary": "Side-to-side footwork named after Marjory \"Lotus\" Smarth: the leg releases out and is drawn back to centre.",
+          "description": "The Lotus carries the nickname of Marjory Smarth, a pioneer of New York house dance, and is danced in her honour. The knees release into the floor, one leg lifts and opens out to the side, then it is drawn back in to the centre — as if you were sliding something along the floor that you don't want to lift — before the other side goes. Jardy Santiago teaches it as \"a.k.a. scissors\" and points out what makes it hard: the legs come in on the beat and go out on the \"and\", the opposite of most steps. Add hips and let the arms sway with the feet.",
+          "steps": [
+            "Start in a bounce, feet together, knees soft.",
+            "On \"and\", release the knees and let the right leg lift and open out to the side.",
+            "On 1, draw the right foot back in to centre along the floor, rising slightly.",
+            "On \"and\", open the left leg out to the side.",
+            "On 2, draw it back in. Keep alternating side to side.",
+            "Once it flows, double it up on one side before switching."
+          ],
+          "tips": [
+            "Accent the return to centre, not the opening. That is the part people get wrong.",
+            "Lift up through the centre before you open to the other side — that is how the transition works.",
+            "Use the hips. It is a side-to-side groove as much as footwork."
+          ],
+          "related": ["sidewalk", "loose-legs", "musicality"]
+        },
+        {
+          "slug": "chase",
+          "name": "Chase",
+          "aliases": ["Peter Paul"],
+          "difficulty": "Beginner",
+          "summary": "Step out on a diagonal with the back heel pivoting, then slide back in and twist — the precursor to loose legs.",
+          "description": "The chase is one of the original club steps of house — a social move often danced facing a partner. The free foot steps out on a diagonal while the back foot pivots on its heel so the body opens, the weight settles between the feet, and then the foot slides back in and the body twists so the legs finish crossed, ready to go to the other side. Teachers call it the precursor to loose legs, since the same stepping-over motion drives both. BANRI Jackin's syllabus lists it together with the Peter Paul, and common variations add a cross step, or a hop onto the front foot with a tap of the back toe.",
+          "steps": [
+            "Start in a jack, feet together, facing front.",
+            "On 1, step the right foot out on a forward diagonal, pivoting the left heel so the body opens; settle your weight between both feet.",
+            "On 2, slide the right foot back in and twist the body so it ends crossed in front of the left, knees bent.",
+            "On 3, step the left foot out on the other diagonal, pivoting the right heel.",
+            "On 4, slide it back in and twist. Keep alternating.",
+            "Variation: on the \"and\" after the step out, step back slightly and fall into a cross on 2."
+          ],
+          "tips": [
+            "Pivot the back heel on every step out. That is what makes it glide instead of walk.",
+            "Keep the toe of the back foot low as it pivots, so you look like you're floating over it.",
+            "Imagine stepping over a rope on the floor — the same idea as loose legs."
+          ],
+          "related": ["loose-legs", "cross-step", "knock", "snap-kick", "pow-wow"]
+        },
+        {
+          "slug": "pow-wow",
+          "name": "Pow wow",
+          "aliases": ["powwow", "Indian step"],
+          "difficulty": "Intermediate",
+          "summary": "Leg back, kick, hop back onto the other leg, then step over — danced on one side with an up feel.",
+          "description": "The house pow wow is related to the b-boy pow wow, but it is danced on one side and has an up feel rather than a down one. The free leg goes back, kicks through, and you hop back onto the other leg; the foot is put down on the \"and\" and the other leg steps over it on the next count. The upper body stays facing front while only the hips turn, and the arms swing opposite the legs for balance. BANRI Jackin also teaches it as the Indian step. It can travel forward, back or around, and Jardy Santiago chains it into a backwards jog.",
+          "steps": [
+            "Start in a bounce, weight on the left foot.",
+            "On \"and\", take the right leg back.",
+            "On 1, kick it through and hop back onto the right leg as the left lifts.",
+            "On \"and\", put the left foot down.",
+            "On 2, step the right leg over the left, turning only the hips.",
+            "Repeat, and try changing direction or going around in a circle."
+          ],
+          "tips": [
+            "Keep the chest facing front. Letting the whole body turn loses the look.",
+            "Swing the arms against the legs to stay balanced.",
+            "Stay light and up. It isn't a crouched step."
+          ],
+          "related": ["snap-kick", "chase", "around-the-world", "farmer"]
+        },
+        {
+          "slug": "hurdle",
+          "name": "Hurdle",
+          "difficulty": "Intermediate",
+          "danceSlug": "knock-challenge-hurdle",
+          "summary": "Jump open, hop onto one leg with the knee up like a farmer, then jump out to the other side.",
+          "description": "The hurdle blends a criss-cross-style jump with the farmer: you jump the feet open, hop onto one leg as the other knee comes up, and jump out to land the other way — as if clearing a small hurdle each time. JoeyTheJAM describes it as a mix of the two, and BANRI Jackin uses it as the \"challenge\" step that follows the knock in his 30-basics routine. Land softly on the balls of the feet and pop straight back up into the bounce.",
+          "steps": [
+            "Start in a bounce, feet together.",
+            "On 1, jump the feet open.",
+            "On \"and\", hop onto the right leg, bringing the left knee up as in a farmer.",
+            "On 2, jump out to land open again, turning the other way.",
+            "On \"and\", hop onto the left leg with the right knee up, and keep going."
+          ],
+          "tips": [
+            "Learn the knee up and the farmer first — the hurdle is a farmer with a jump in between.",
+            "Land on the balls of the feet and keep the jumps low."
+          ],
+          "related": ["farmer", "knee-up", "knock", "crossroads"]
+        },
+        {
+          "slug": "sponge-bob",
+          "name": "Sponge Bob",
+          "aliases": ["spongebob"],
+          "difficulty": "Intermediate",
+          "summary": "Kick a leg out and back into a figure-four while the standing foot hops out and returns to centre.",
+          "description": "Sponge Bob is a kicking step from the shuffle family. On the \"and\", one leg kicks out and the standing foot slides out a little too; on the count, the leg kicks back in to cross in front, forming a figure four, and the standing foot returns to centre. Then the legs swap. Jardy Santiago's tip is to fix an imaginary centre point on the floor and keep coming back to it. BANRI Jackin teaches it both as a basic step and inside shuffle and criss-cross choreography.",
+          "steps": [
+            "Mark an imaginary centre point on the floor under you.",
+            "On \"and\", kick the right leg out to the side and let the left foot slide slightly out too.",
+            "On 1, kick the right leg back in, bent across in front of the left knee in a figure four, as the left foot returns to centre.",
+            "On \"and\", drop the right foot and kick the left leg out.",
+            "On 2, bring the left leg in to the figure four. Keep alternating."
+          ],
+          "tips": [
+            "Keep returning to the same centre point, otherwise the step drifts across the floor.",
+            "The figure-four shape of the crossing leg is what the step is known for — make it clear."
+          ],
+          "related": ["shuffle", "snap-kick", "crossroads", "roger-rabbit"]
+        },
+        {
+          "slug": "roger-rabbit",
+          "name": "Roger Rabbit",
+          "aliases": ["reject", "house roger rabbit"],
+          "difficulty": "Intermediate",
+          "summary": "A hop back with the free leg swinging, then the feet walking forward and back — the 80s party step, done house style.",
+          "description": "The Roger Rabbit came from hip-hop party dancing, and house dancers use it too — Jardy Santiago teaches a house version and pairs it with the reject. The basic step has four even parts: a hop back on the standing leg as the free leg lifts, placing that leg behind next to the standing leg, a step forward, and a step back. The house version hops forward on one leg while the other swings from inside to about 45° outwards before landing behind. Variations step to the side instead of forward, add a toe-heel twist with a kick, or turn with three hops in a row.",
+          "steps": [
+            "Start in a bounce, weight on the left foot.",
+            "On 1, hop back on the left leg as the right leg lifts.",
+            "On \"and\", put the right foot down behind, next to the left.",
+            "On 2, step forward; on \"and\", step back.",
+            "Repeat starting with a hop on the other leg.",
+            "Keep all four parts the same length: hop, step, step, step."
+          ],
+          "tips": [
+            "Keep the timing even. People rush the steps after the hop.",
+            "Once it is smooth, try the side variation — step out to the side instead of forward."
+          ],
+          "related": ["sponge-bob", "farmer", "shuffle"]
+        },
+        {
+          "slug": "around-the-world",
+          "name": "Around the world",
+          "difficulty": "Advanced",
+          "summary": "Step back, then float two hops while the free leg traces a U, and step back to the same spot.",
+          "description": "Around the world is a hopping step that is especially popular in European house (Jardy Santiago learned it via French dancers). On the \"and\" you step back, then hop from foot to foot while the free leg draws a U shape in the air, cross the foot in front, and step back to the same spot as before — then repeat on the other side. The hops should feel like they are floating: hang in the air as long as you can and put the accent late, on the step back.",
+          "steps": [
+            "Start in a bounce. On \"and\" before 1, step the right foot back.",
+            "Step the left foot in and hop off it on 1, drawing a U with the free leg.",
+            "On \"and\", hop onto the other foot, drawing a U with the other leg.",
+            "On 2, step in, crossing the foot in front.",
+            "On \"and\", step back to the same spot you stepped back to before.",
+            "Repeat to the other side on 3 and 4."
+          ],
+          "tips": [
+            "Make the hops float. The longer you seem to hang, the better it looks.",
+            "Always step back to the same spot — it anchors the step and keeps it from wandering."
+          ],
+          "related": ["pow-wow", "shuffle", "loose-legs"]
         }
       ]
     },
@@ -580,7 +879,7 @@
             "The floor matters: practise on a surface that lets the foot slide.",
             "Keep a bounce underneath so the slide lands on the beat rather than drifting."
           ],
-          "related": ["skate", "cross-over", "chug"]
+          "related": ["skate", "cross-over", "chug", "jb-step"]
         },
         {
           "slug": "cross-over",
@@ -622,6 +921,27 @@
             "Keep each chug small and even."
           ],
           "related": ["train", "slide"]
+        },
+        {
+          "slug": "jb-step",
+          "name": "J.B. step",
+          "aliases": ["James Brown", "JB step", "James Brown shuffle"],
+          "difficulty": "Intermediate",
+          "summary": "Sliding sideways on one foot by pivoting ball, heel, ball, with the other leg dragged along — after James Brown.",
+          "description": "The J.B. step is named after James Brown, and his sideways slides are part of the funk and soul that house dancing inherited. The weight goes over one leg and that foot travels sideways by pivoting on the ball, then the heel, then the ball, while the other leg drags along behind and catches up at the end. The groove is a downward, inward push of the chest into each pivot. BANRI Jackin teaches it in his basic steps series, including a travelling version and a mixed version.",
+          "steps": [
+            "Stand with feet under you, toes turned out slightly.",
+            "On \"and\", shift your weight fully over the right leg and open the chest.",
+            "On 1, pivot on the ball of the right foot so the toe turns in.",
+            "On \"and\", pivot on the heel so the toe turns out; on 2, pivot on the ball again. The right foot travels to the right.",
+            "Let the left leg trail behind, then draw it in at the end of the slide.",
+            "Shift your weight over the left leg and slide back the other way."
+          ],
+          "tips": [
+            "The weight stays on the travelling foot the whole time. The other foot only drags.",
+            "Push the chest down and in on each pivot — that groove is what sells it."
+          ],
+          "related": ["slide", "heel-twist", "toe-twist", "skate"]
         }
       ]
     },
@@ -729,7 +1049,7 @@
             "Never roll straight over the top of the head or neck.",
             "Learn it on a mat before trying it on a hard floor."
           ],
-          "related": ["knee-drop", "seat-spin", "lofting"]
+          "related": ["knee-drop", "seat-spin", "lofting", "kip-up"]
         },
         {
           "slug": "seat-spin",
@@ -750,6 +1070,26 @@
             "Keep the back straight rather than rounding — it keeps you on a single point."
           ],
           "related": ["knee-drop", "back-roll", "helicopter"]
+        },
+        {
+          "slug": "kip-up",
+          "name": "Kip-up",
+          "aliases": ["kick up", "nip up"],
+          "difficulty": "Advanced",
+          "summary": "Springing from your back straight to your feet — a clean way out of lofting and back into footwork.",
+          "description": "The kip-up comes from gymnastics and martial arts by way of breaking, and in house it is one of the cleanest ways to get back up after floorwork: from lying on your back you roll onto your shoulders, then snap the legs forward and push through the hands to land on your feet. Lofting is judged as much on its exits as its entries, and a kip-up gets you from the floor straight back into the groove.",
+          "steps": [
+            "Lie on your back with your knees bent and your hands on the floor beside your ears, fingers pointing to your shoulders.",
+            "Roll back onto your shoulders, bringing the knees towards your chest.",
+            "Kick the legs up and forward explosively, arching the back.",
+            "At the same moment, push hard through the hands.",
+            "Land with your feet under your hips and knees bent, and bounce straight back into a jack."
+          ],
+          "tips": [
+            "Practise on a mat or grass first. Landing short puts you back on your tailbone.",
+            "The power comes from the kick. The hands only finish the job."
+          ],
+          "related": ["back-roll", "knee-drop", "lofting"]
         },
         {
           "slug": "helicopter",

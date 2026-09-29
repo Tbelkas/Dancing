@@ -28,7 +28,7 @@ glossary answers "what *is* this move and how do I do it?".
   warning and leave the term unlinked; links re-resolve every boot.
 - Categories render in the order of their first term; terms in file order.
 
-Live: **House** (2026-09-29, 45 terms / 36 moves). Next styles: reuse the roadmap's style list.
+Live: **House** (2026-09-29, 61 terms / 52 moves; move names follow BANRI Jackin's numbered basics and English tutorial breakdowns). Next styles: reuse the roadmap's style list.
 
 ## Backend
 - `Models/GlossaryTerm.cs`, `Models/UserLearnedGlossaryTerm.cs`; migration `AddGlossary`.
