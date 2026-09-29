@@ -934,6 +934,45 @@ STYLES = {
              "Spinning horizontally on one hand, the elbow planted in the stomach."),
             ("Crickets", 3,
              "Spinning in a series of hops on the hands, the elbow tucked into the hip."),
+            # Round 7 (2026-09-29): Breaking glossary terms without a clip.
+            ("Breaking Indian Step", 1,
+             "The basic toprock: step across, back to centre, out to the side, and "
+             "switch."),
+            ("Salsa Rock", 1,
+             "A toprock from salsa's back step: step back on a diagonal, return, switch "
+             "sides."),
+            ("Toprock Two Step", 1,
+             "Kick forward, step back beside the other foot, and switch - a bouncy "
+             "toprock."),
+            ("Toprock Kick Step", 1,
+             "A toprock kick followed by a step down in front and a switch."),
+            ("Brooklyn Rock", 2,
+             "A toprock from uprock: jerks, crosses and shoulder rocks aimed at an "
+             "opponent."),
+            ("Outlaw Toprock", 2,
+             "Step across, turn on the balls of the feet and open back out facing "
+             "front."),
+            ("CC Footwork", 2,
+             "Switching quickly between a tucked leg and a leg kicked out - a classic "
+             "footwork pattern."),
+            ("Breaking Sweep", 2,
+             "One leg sweeping low in an arc while the body rotates on the hands."),
+            ("Breaking Airchair", 3,
+             "Balanced on one bent arm, elbow in the lower back, body facing up."),
+            ("Elbow Freeze", 2,
+             "The whole body balanced on one hand, the elbow dug into the side of the "
+             "waist."),
+            ("Backspin", 2,
+             "Spinning on the upper back with the legs tucked, started by a push of "
+             "the hands."),
+            ("1990 Spin", 3,
+             "A handstand spin on one hand, the body straight."),
+            ("2000 Spin", 3,
+             "A handstand spin on both hands stacked on top of each other."),
+            ("Munchmill", 3,
+             "A windmill with the knees tucked in, rolling low and fast."),
+            ("Suicide Drop", 3,
+             "A dramatic fall straight onto the upper back, landed safely."),
         ],
     },
 
@@ -963,6 +1002,80 @@ STYLES = {
              "floor."),
             ("Sidewalk", 2,
              "A travelling house step moving laterally, heel and toe alternating."),
+            # Round 7 (2026-09-29): every learnable House glossary term without a clip.
+            # Names that already exist under another style ("Roger Rabbit", "Happy
+            # Feet") carry a "House" prefix, or the seeder would skip them as known.
+            ("House Bounce", 1,
+             "The knees giving and returning on every beat - the pulse every house step "
+             "sits on."),
+            ("Side Jack", 1,
+             "The jack turned sideways: the ribcage and hips rocking left and right on "
+             "the beat."),
+            ("Rolling Jack", 2,
+             "The jack taken round in a circle - forward, side, back, side - one "
+             "quarter per beat."),
+            ("House Stomp", 1,
+             "A flat-footed step driven into the floor on the beat, the jack sinking "
+             "into it."),
+            ("Jack in the Box", 2,
+             "The jack on a jazz-box floor pattern: cross, back, side, together."),
+            ("House Heel Toe", 1,
+             "Heel tapped forward, then toe, before the feet change over - one of the "
+             "first house footwork patterns."),
+            ("House Loose Legs", 2,
+             "The free knee turns in and the lower leg flicks loosely out before the "
+             "weight changes."),
+            ("House Happy Feet", 2,
+             "Quick alternating steps on the balls of the feet, loose at the ankles."),
+            ("House Pas de Bourree", 2,
+             "Three quick weight changes - behind, side, front - borrowed from jazz and "
+             "ballet."),
+            ("House Heel Step", 1,
+             "A heel placed out on the beat while the torso jacks forward over it."),
+            ("House Cross Step", 1,
+             "Step out, step back, cross over in front - then the same to the other "
+             "side."),
+            ("Lotus", 2,
+             "The leg releases out to the side and is drawn back to centre on the beat; "
+             "named for Marjory 'Lotus' Smarth."),
+            ("House Chase", 1,
+             "Step out on a diagonal with the back heel pivoting, then slide in and "
+             "twist - the precursor to loose legs."),
+            ("Pow Wow", 2,
+             "Leg back, kick, hop back onto the other leg, then step over - danced on "
+             "one side with an up feel."),
+            ("House Sponge Bob", 2,
+             "Kick a leg out and back into a figure four while the standing foot "
+             "returns to centre."),
+            ("House Roger Rabbit", 2,
+             "The hip-hop party step danced house style: hop forward, swing the free "
+             "leg out, land it behind."),
+            ("Around the World", 3,
+             "Step back, float two hops while the free leg traces a U, and step back to "
+             "the same spot."),
+            ("House JB Step", 2,
+             "Sliding sideways on one foot by pivoting ball, heel, ball, the other leg "
+             "dragged along."),
+            ("House Pivot Turn", 1,
+             "A half turn on the balls of both feet - step, pivot, and the weight "
+             "settles on the other foot."),
+            ("House Spin", 2,
+             "Wind up, hop onto the ball of one foot and turn, spotting a point in the "
+             "room; land open on two feet."),
+            ("House Knee Drop", 2,
+             "Dropping from standing to the floor by rolling onto the shin and thigh, "
+             "never the kneecap."),
+            ("House Back Roll", 2,
+             "Rolling over one shoulder along the back and returning to the feet "
+             "without stopping the groove."),
+            ("House Seat Spin", 2,
+             "Sitting down and spinning on the seat with the legs tucked, pushed by "
+             "one hand."),
+            ("House Kip Up", 3,
+             "Springing from the back straight to the feet - a clean way out of "
+             "floorwork."),
+            ("House Split", 3,
+             "Dropping into a jazz split from footwork and coming back up."),
         ],
     },
 
@@ -1245,6 +1358,16 @@ STYLES = {
             ("Sturdy", 2,
              "The New York drill-era dance: a hunched, stomping bounce with the arms "
              "swinging, from the early 2020s."),
+            # Round 7 (2026-09-29): Hip-hop glossary terms without a clip.
+            ("Shmoney Dance", 1,
+             "Bobby Shmurda's 2014 dance: a low shoulder bounce with alternating arm "
+             "swings."),
+            ("Hip Hop Rock", 1,
+             "The chest and hips rocking forward and back on the beat - the second core "
+             "groove after the bounce."),
+            ("Hip Roll", 1,
+             "The hips circling forward, side, back and side while the upper body stays "
+             "calm."),
         ],
     },
 

@@ -37,6 +37,7 @@ public class GlossaryTests : IDisposable
         ctx.Users.Add(new User { Id = User, Username = "u", PasswordHash = "x", Name = "U", Nickname = "" });
         ctx.Styles.Add(new Style { Id = HouseStyle, Name = "House" });
         ctx.Styles.Add(new Style { Id = 11, Name = "Hip-hop" });
+        ctx.Styles.Add(new Style { Id = 12, Name = "Breakdance" });
         ctx.Dances.Add(new Dance { Id = 100, Name = "House Jack", Slug = "house-jack" });
         // Same slug in another style, with a lower id: slugs are unique per style only, and a
         // global lookup keyed on slug crashed the boot in production.
@@ -167,11 +168,14 @@ public class GlossaryTests : IDisposable
     }
 
     /// <summary>
-    /// The shipped content itself: parses, seeds in full, and every related slug resolves — a typo
-    /// there would otherwise only show up as a silently missing chip in production.
+    /// The shipped content itself: every file parses, seeds in full, and every related slug
+    /// resolves — a typo there would otherwise only show up as a silently missing chip in production.
     /// </summary>
-    [Fact]
-    public async Task Authored_house_glossary_seeds_cleanly()
+    [Theory]
+    [InlineData(HouseStyle, "jack")]
+    [InlineData(11, "running-man")]
+    [InlineData(12, "six-step")]
+    public async Task Authored_glossaries_seed_cleanly(int styleId, string mustHave)
     {
         var dir = AppContext.BaseDirectory;
         while (dir is not null && !Directory.Exists(Path.Combine(dir, "DancePlatform.API", "Data", "Glossary")))
@@ -183,9 +187,9 @@ public class GlossaryTests : IDisposable
             await GlossarySeeder.SeedAsync(ctx, apiRoot, NullLogger.Instance);
 
         using var check = NewCtx();
-        var terms = await check.GlossaryTerms.Where(t => t.StyleId == HouseStyle).ToListAsync();
+        var terms = await check.GlossaryTerms.Where(t => t.StyleId == styleId).ToListAsync();
         Assert.True(terms.Count > 30, $"expected a full glossary, got {terms.Count}");
-        Assert.Contains(terms, t => t.Slug == "jack" && t.IsLearnable);
+        Assert.Contains(terms, t => t.Slug == mustHave && t.IsLearnable);
         var slugs = terms.Select(t => t.Slug).ToHashSet();
         Assert.All(terms, t => Assert.All(t.Related, r => Assert.Contains(r, slugs)));
         Assert.All(terms.Where(t => t.IsLearnable), t => Assert.NotEmpty(t.Steps));

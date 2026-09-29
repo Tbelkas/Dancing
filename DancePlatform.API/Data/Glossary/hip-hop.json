@@ -1,0 +1,1341 @@
+// Hip-hop glossary. Read by GlossarySeeder on every boot; the file is the source of truth.
+// Slugs are the stable key that users' learned marks hang off - never rename one.
+// "danceSlug" borrows a catalog dance for its videos. Only link a dance whose video really
+// shows the move.
+// Steps are only given where a teacher's breakdown confirmed them; otherwise the clip teaches.
+{
+  "styleName": "Hip-hop",
+  "categories": [
+    {
+      "name": "Foundations",
+      "terms": [
+        {
+          "slug": "hip-hop-dance",
+          "name": "Hip-hop dance",
+          "learnable": false,
+          "summary": "The social and freestyle dance of hip-hop culture, from New York block parties to today's viral steps.",
+          "description": "Hip-hop dance grew up alongside the music in the Bronx and Harlem in the 1970s and 80s, and every decade since has added its own party dances — from the Running Man and the Cabbage Patch through the Harlem Shake and the Dougie to the Griddy. Breaking, popping and locking are sister styles with their own histories; what people usually call hip-hop dance is the groove-based social style, where named steps are shared vocabulary and the point is to freestyle with them. Almost everything sits on a bounce or a rock, and the named steps are called \"grooves\" as often as \"moves\".",
+          "tips": [
+            "Learn every step on top of a bounce or a rock. Without the groove underneath, the steps look like exercises.",
+            "The names are part of the culture. Knowing them is how dancers talk to each other in a cypher or a class."
+          ],
+          "related": ["grooves", "party-dances", "bounce", "freestyle"]
+        },
+        {
+          "slug": "grooves",
+          "name": "Grooves",
+          "learnable": false,
+          "summary": "The continuous body rhythm that every hip-hop step rides on: bounce, rock, and their variations.",
+          "description": "A groove is how your body answers the beat when you are not doing anything in particular. Teachers usually split hip-hop grooves into accents — down, up, bounce and drop — which decide where the weight lands on each beat. A named step like the Steve Martin is a down groove; the Humpty Dance is a drop groove. Knowing which family a step belongs to tells you where to put the accent, and it makes new steps much faster to learn.",
+          "tips": [
+            "Before learning a step, ask where its accent is: down, up, or a drop.",
+            "Practise grooves for a whole song without steps. It builds the stamina and the feel the steps need."
+          ],
+          "related": ["bounce", "rock", "two-step", "head-nod"]
+        },
+        {
+          "slug": "party-dances",
+          "name": "Party dances",
+          "learnable": false,
+          "summary": "Named social steps that spread through clubs, videos and songs — each one a snapshot of its era.",
+          "description": "Much of hip-hop's vocabulary comes from party dances: steps with a name, often from a song, a TV character or a celebrity, that spread through clubs and music videos. The late 80s and early 90s produced the old-school canon (Running Man, Roger Rabbit, Cabbage Patch, Wop, Biz Markie, Bart Simpson); New York added the Harlem Shake and the Chicken Head; the South brought the Stanky Leg, the Dougie and the Walk It Out; and social media carried the Nae Nae, the Milly Rock and the Griddy worldwide. Dancers learn them as vocabulary, and they are the quickest way into the style.",
+          "tips": [
+            "Learn a few from each era. Mixing old-school and new-school steps is a big part of freestyle.",
+            "Find the original video or song if you can. The feel of a step often lives in its source."
+          ],
+          "related": ["running-man", "harlem-shake", "dougie", "griddy"]
+        },
+        {
+          "slug": "freestyle",
+          "name": "Freestyle",
+          "learnable": false,
+          "summary": "Improvising to the music with the vocabulary you know, rather than a set routine.",
+          "description": "Freestyle is where hip-hop dance lives. The steps on this page are vocabulary, and freestyle is using them to say something: choosing what to do on each phrase, changing grooves when the music changes, and adding your own flavour. Most teachers encourage students to freestyle a little every practice, even as beginners, because it is a different skill from learning choreography.",
+          "tips": [
+            "Pick three steps and freestyle only with them for a whole song. Limits make you creative.",
+            "Listen for the changes: a new section or a drop in the track is a cue to switch grooves."
+          ],
+          "related": ["cypher", "musicality", "grooves"]
+        },
+        {
+          "slug": "cypher",
+          "name": "Cypher",
+          "learnable": false,
+          "summary": "The circle dancers form to take turns in the middle.",
+          "description": "A cypher (also spelt cipher) is the circle that forms at parties, jams and events, with dancers taking turns in the middle. It is social, competitive and supportive all at once: you watch, you react, you go in when you feel it. It is where freestyle skills are tested and where the culture passes steps from one dancer to the next.",
+          "tips": [
+            "Watch a few rounds before you go in, and keep your round short at first.",
+            "Hype the others up. Energy in a cypher is shared."
+          ],
+          "related": ["freestyle", "musicality"]
+        },
+        {
+          "slug": "musicality",
+          "name": "Musicality",
+          "learnable": false,
+          "summary": "Dancing what you hear: the beat, the snare, the vocals, the breaks.",
+          "description": "Musicality is the difference between dancing to the music and dancing on top of it. In hip-hop that means knowing where the kick and snare fall, feeling the eight-count phrases, and choosing what to hit — a drum, a vocal line, a bass slide. Grooves keep you on the beat; musicality decides what you do with it.",
+          "tips": [
+            "Count in eights. Most hip-hop tracks are built in phrases of four or eight eight-counts.",
+            "Try dancing only the snare for a whole verse, then only the vocals."
+          ],
+          "related": ["grooves", "freestyle", "bounce"]
+        }
+      ]
+    },
+    {
+      "name": "Grooves",
+      "terms": [
+        {
+          "slug": "bounce",
+          "name": "Bounce",
+          "aliases": ["down bounce", "up bounce"],
+          "difficulty": "Beginner",
+          "danceSlug": "the-bounce",
+          "summary": "Knees bending on the beat with the upper body relaxed — the foundation groove.",
+          "description": "The basic bounce is the first thing most hip-hop classes teach: bend the knees and accent down on every beat while the upper body stays loose. There is also an up bounce, accented on the rise. Everything else — rocks, two-steps, party dances — is layered on top of a bounce, so it is worth getting it relaxed and automatic.",
+          "steps": [
+            "Stand with feet shoulder-width apart, knees soft.",
+            "Bend the knees on each beat, accenting down.",
+            "Let the chest and head ride the bounce rather than holding still.",
+            "Switch to an up bounce: rise on the beat, sink on the \"and\"."
+          ],
+          "tips": [
+            "Keep it relaxed. A stiff bounce spreads tension into every step you put on top of it."
+          ],
+          "related": ["rock", "two-step", "head-nod", "grooves"]
+        },
+        {
+          "slug": "rock",
+          "name": "Rock",
+          "aliases": ["rocking"],
+          "difficulty": "Beginner",
+          "danceSlug": "hip-hop-rock",
+          "summary": "The chest and hips rocking forward and back on the beat — the second core groove after the bounce.",
+          "description": "The rock moves the body forward and back rather than up and down: the chest leans in as the hips go back, then the hips come forward as the chest pulls back, in time with the beat. Many old-school steps — the Bart Simpson, the Biz Markie, the Wop — are built on a bounce and a rock together.",
+          "steps": [
+            "Start in a bounce.",
+            "On the beat, lean the chest forward and push the hips back.",
+            "On the next beat, bring the hips forward and pull the chest back.",
+            "Keep it going and add a step side to side under it."
+          ],
+          "tips": [
+            "The rock comes from the hips and chest together; don't just nod the head."
+          ],
+          "related": ["bounce", "bart-simpson", "biz-markie", "two-step"]
+        },
+        {
+          "slug": "head-nod",
+          "name": "Head nod",
+          "difficulty": "Beginner",
+          "danceSlug": "the-head-nod",
+          "summary": "The head nodding on the beat — the smallest groove there is, and the first sign you are hearing the music.",
+          "description": "The head nod is exactly what everyone does at a hip-hop show: the head drops on the beat. Dancers use it as a rhythm technique — it is the simplest way to lock onto the beat before adding the knees and body.",
+          "steps": [
+            "Stand relaxed and listen for the kick and snare.",
+            "Drop the chin slightly on each beat and let it return.",
+            "Add a small bounce in the knees under it."
+          ],
+          "tips": [
+            "Keep the neck loose; a stiff nod looks mechanical."
+          ],
+          "related": ["bounce", "rock"]
+        },
+        {
+          "slug": "two-step",
+          "name": "Two-step",
+          "difficulty": "Beginner",
+          "danceSlug": "two-step",
+          "summary": "Stepping side to side with a tap — the first step most hip-hop dancers learn.",
+          "description": "The two-step is a simple side-to-side step: step out, bring the other foot in to tap or step, then go the other way, all on a bounce. It is the default step to fall back on in any freestyle, and it can be dressed up endlessly with arms, rocks and turns.",
+          "steps": [
+            "Start in a bounce.",
+            "Step the right foot out to the right.",
+            "Bring the left foot in next to it with a tap.",
+            "Step the left foot out to the left and tap the right in.",
+            "Add arms swinging with the direction."
+          ],
+          "tips": [
+            "Stay on the balls of the feet so the weight can change quickly."
+          ],
+          "related": ["bounce", "rock", "step-touch"]
+        },
+        {
+          "slug": "step-touch",
+          "name": "Step touch",
+          "difficulty": "Beginner",
+          "danceSlug": "step-touches",
+          "summary": "Step to the side and touch the other foot in — the simplest travelling pattern.",
+          "description": "Step touch is the building block beneath the two-step and dozens of routines: one foot steps out, the other touches next to it without taking weight, then back the other way. Hip-hop classes use it to teach weight changes and to layer arm and body grooves on top.",
+          "steps": [
+            "Step the right foot to the side.",
+            "Touch the left foot beside it without weight.",
+            "Step the left foot back out and touch the right beside it.",
+            "Add a bounce, then add arms."
+          ],
+          "related": ["two-step", "bounce"]
+        },
+        {
+          "slug": "skate",
+          "name": "Skate",
+          "aliases": ["roller skate"],
+          "difficulty": "Beginner",
+          "danceSlug": "skate",
+          "summary": "Gliding side to side as if on skates, pushing off each foot on a bounce.",
+          "description": "The skate takes the push-and-glide of roller skating and puts it on a bounce: push off one foot, glide onto the other with the body leaning into the direction, and push back. It is often taught with the bounce and the rock as the third fundamental, and it links easily into steps like the ATL.",
+          "steps": [
+            "Bounce with feet apart.",
+            "Push off the left foot and glide the weight onto the right, leaning right.",
+            "Push off the right and glide back to the left.",
+            "Let the arms swing opposite the legs."
+          ],
+          "tips": [
+            "Push from the standing leg; the glide should look effortless."
+          ],
+          "related": ["bounce", "atl-stomp", "two-step"]
+        },
+        {
+          "slug": "bankhead-bounce",
+          "name": "Bankhead bounce",
+          "aliases": ["BK bounce", "bankhead"],
+          "difficulty": "Beginner",
+          "danceSlug": "bankhead-bounce",
+          "summary": "Atlanta's shoulder bounce — the shoulders pop up and drop into the bounce in any direction.",
+          "description": "The Bankhead bounce (or BK bounce) comes from the Bankhead neighbourhood of Atlanta and was made famous by DJ Kizzy Rock's \"Bankhead Bounce\" in the late 90s. The shoulders pop up and drop down with the knees, and you can take it in any direction. It is simple, but the swag is in how loose and relaxed it looks.",
+          "steps": [
+            "Bend the knees into a bounce.",
+            "On the \"and\", lift both shoulders up.",
+            "On the beat, drop the shoulders and the knees together.",
+            "Keep it going while turning or travelling in any direction."
+          ],
+          "tips": [
+            "Arms stay loose and low — the shoulders do the work."
+          ],
+          "related": ["bounce", "atl-stomp", "walk-it-out"]
+        }
+      ]
+    },
+    {
+      "name": "Isolations and body",
+      "terms": [
+        {
+          "slug": "chest-pop",
+          "name": "Chest pop",
+          "difficulty": "Beginner",
+          "danceSlug": "chest-pop",
+          "summary": "The chest pushing out and snapping back on the beat.",
+          "description": "The chest pop isolates the chest: it pushes forward sharply on the beat and returns, while the shoulders and hips stay still. It is a basic hit in hip-hop choreography and the first step towards body rolls and popping.",
+          "steps": [
+            "Stand with knees soft and shoulders relaxed.",
+            "Push the chest forward on the beat, keeping the shoulders back and down.",
+            "Let it return on the \"and\".",
+            "Add a small bounce, then try popping it on every beat."
+          ],
+          "tips": [
+            "Imagine a string pulling the sternum forward — the shoulders shouldn't roll."
+          ],
+          "related": ["body-roll", "bounce"]
+        },
+        {
+          "slug": "body-roll",
+          "name": "Body roll",
+          "aliases": ["body wave"],
+          "difficulty": "Intermediate",
+          "danceSlug": "the-body-roll",
+          "summary": "A wave rolling down (or up) the body — chest, stomach, hips, knees.",
+          "description": "The body roll, or body wave, sends a ripple through the body: the chest pushes forward, then the stomach, the hips and the knees, one after another. It is a staple of hip-hop choreography and of the party dances that grind and roll, and it is learned slowly, one body part at a time.",
+          "steps": [
+            "Push the chest forward.",
+            "Pull the chest back as the stomach pushes forward.",
+            "Push the hips forward as the stomach pulls in.",
+            "Finish by bending the knees forward, then straighten and start again."
+          ],
+          "tips": [
+            "Go slowly and exaggerate at first. Speed comes after the sequence is clear."
+          ],
+          "related": ["chest-pop", "hip-roll", "arm-wave"]
+        },
+        {
+          "slug": "hip-roll",
+          "name": "Hip roll",
+          "aliases": ["hip circle"],
+          "difficulty": "Beginner",
+          "danceSlug": "hip-roll",
+          "summary": "The hips circling around while the upper body stays calm.",
+          "description": "The hip roll isolates the pelvis in a circle — forward, side, back, side — while the chest stays relatively still. It shows up in grinding party dances like the Tootsie Roll and the Stick and Roll, and in choreography.",
+          "steps": [
+            "Stand with the knees soft.",
+            "Push the hips forward, then to the right, back, and to the left.",
+            "Join the four points into a smooth circle.",
+            "Reverse direction."
+          ],
+          "related": ["body-roll", "tootsie-roll", "stick-and-roll"]
+        },
+        {
+          "slug": "arm-wave",
+          "name": "Arm wave",
+          "aliases": ["waving"],
+          "difficulty": "Intermediate",
+          "danceSlug": "waving",
+          "summary": "A wave travelling through the arms from fingertip to fingertip.",
+          "description": "The arm wave comes from popping and waving: a ripple runs from one hand, through the wrist, elbow, shoulders and across to the other hand. In hip-hop it is used as a flourish and in the Harlem-era party dances.",
+          "steps": [
+            "Hold the arms out to the sides.",
+            "Lift the right wrist, then the elbow, then the shoulder.",
+            "Pass it across the chest to the left shoulder.",
+            "Continue out through the left elbow, wrist and fingers."
+          ],
+          "tips": [
+            "Each joint moves only after the previous one has finished."
+          ],
+          "related": ["body-roll", "snake"]
+        },
+        {
+          "slug": "snake",
+          "name": "Snake",
+          "difficulty": "Intermediate",
+          "danceSlug": "snake",
+          "summary": "Rippling the head, chest, waist and hips in turn as if sliding under a bar.",
+          "description": "The snake tilts one body part after another — head, neck, chest, waist, then pelvis — as if you were sliding underneath a bar, finishing with a snap. It can be done forward or backward, and it builds naturally from the body roll.",
+          "steps": [
+            "Tilt the head forward and down.",
+            "Follow with the chest, then the waist, then the pelvis.",
+            "Finish with a small snap as the hips come through.",
+            "Try it in reverse."
+          ],
+          "related": ["body-roll", "arm-wave"]
+        }
+      ]
+    },
+    {
+      "name": "Old-school party dances",
+      "terms": [
+        {
+          "slug": "running-man",
+          "name": "Running Man",
+          "difficulty": "Beginner",
+          "danceSlug": "running-man",
+          "summary": "Running on the spot: one foot slides back as the other knee lifts and steps forward.",
+          "description": "The Running Man took over in the late 80s and early 90s, danced by MC Hammer, Janet Jackson and Vanilla Ice among others. It looks like running in place: as one knee lifts and steps forward, the standing foot slides back, then they swap. It is a great workout and one of the most recognisable steps in the canon.",
+          "steps": [
+            "Lift the right knee, standing on the left foot.",
+            "Step the right foot down in front as the left foot slides back.",
+            "Lift the left knee, drawing the left foot in, while the right foot slides back.",
+            "Step the left foot down in front. Keep repeating."
+          ],
+          "tips": [
+            "The slide back is what sells it. Keep it smooth, on the ball of the foot."
+          ],
+          "related": ["roger-rabbit", "kid-n-play", "party-machine"]
+        },
+        {
+          "slug": "roger-rabbit",
+          "name": "Roger Rabbit",
+          "difficulty": "Beginner",
+          "danceSlug": "roger-rabbit",
+          "summary": "The Running Man in reverse: hop, flick the foot back, step back.",
+          "description": "Named after the 1988 film Who Framed Roger Rabbit, it runs backwards: skip on one foot while the other lifts and flicks back, then step back onto it and skip on the other side. It travels backwards and looks light and bouncy.",
+          "steps": [
+            "Lift the right foot in front of you.",
+            "Hop on the left foot and swing the right foot back behind you.",
+            "Step back onto the right foot as the left foot lifts.",
+            "Hop on the right and swing the left back. Keep repeating, travelling backwards."
+          ],
+          "tips": [
+            "Keep all the parts even in time — people often rush the step after the hop."
+          ],
+          "related": ["running-man", "reject", "kid-n-play"]
+        },
+        {
+          "slug": "cabbage-patch",
+          "name": "Cabbage Patch",
+          "difficulty": "Beginner",
+          "danceSlug": "cabbage-patch",
+          "summary": "Fists together, circling in front of the chest while the body bounces — from 1987.",
+          "description": "The Cabbage Patch took off after the Gucci Crew II song of 1987, named after the Cabbage Patch Kids dolls. Hands in loose fists close together at chest height stir in circles while the torso rocks with them on a bounce. It became one of the most famous celebration dances of the era.",
+          "steps": [
+            "Start in a bounce with hands in loose fists in front of the chest.",
+            "Circle the fists outward, forward, in and back, as if stirring a big pot.",
+            "Let the shoulders and chest follow the circle.",
+            "Change direction every eight counts."
+          ],
+          "related": ["reebok", "wop", "running-man"]
+        },
+        {
+          "slug": "kid-n-play",
+          "name": "Kid 'n Play kickstep",
+          "aliases": ["kid n play", "kid and play"],
+          "difficulty": "Beginner",
+          "danceSlug": "kid-at-play",
+          "summary": "Two partners kicking out and in so their heels meet — from House Party (1990).",
+          "description": "The duo Kid 'n Play made this partner step famous in the film House Party. Facing each other, both partners step forward, kick the same foot out and in so their heels touch, and step back, then switch feet. It works solo too, and the arms flap out and in with the feet.",
+          "steps": [
+            "Face your partner. Step the left foot forward.",
+            "Kick the right foot out and back in so your heels meet in the middle.",
+            "Step back.",
+            "Repeat with the other foot. The arms go out and in with the kicks."
+          ],
+          "tips": [
+            "Aim for heels meeting heels, not ankles."
+          ],
+          "related": ["kick-step", "running-man"]
+        },
+        {
+          "slug": "wop",
+          "name": "Wop",
+          "difficulty": "Beginner",
+          "danceSlug": "wop",
+          "summary": "A late-80s New York groove — the arms swing and the shoulders bounce with a rock.",
+          "description": "The Wop is a classic New York party groove from the late 80s: the body bounces and rocks while the arms swing across in front, one bent and one following, with lots of shoulder. It is a feel as much as a step.",
+          "steps": [
+            "Start in a bounce and rock.",
+            "Swing both arms across to the left, elbows bent.",
+            "Swing them back across to the right on the next beat.",
+            "Add the shoulders into each swing."
+          ],
+          "related": ["cabbage-patch", "biz-markie", "rock"]
+        },
+        {
+          "slug": "biz-markie",
+          "name": "Biz Markie",
+          "difficulty": "Beginner",
+          "danceSlug": "biz-markie",
+          "summary": "A bouncing, rocking groove named after the rapper Biz Markie.",
+          "description": "Named after the rapper famous for \"Just a Friend\", the Biz Markie is an old-school groove built on the bounce and rock, often taught alongside the Bart Simpson and the Gucci. The legs kick out and the body rocks back into it as the arms swing loosely.",
+          "steps": [
+            "Get the bounce and rock going first - this groove is built on them.",
+            "Watch the linked clip once through at full speed, then copy the legs before the arms.",
+            "Add the arms once the feet are automatic."
+          ],
+          "related": ["bart-simpson", "gucci", "rock"]
+        },
+        {
+          "slug": "bart-simpson",
+          "name": "Bart Simpson",
+          "difficulty": "Beginner",
+          "danceSlug": "bart-simpson",
+          "summary": "Stepping out on a bounce and rock to trace the bottom of a square.",
+          "description": "The Bart Simpson copies the victory dance from the Simpsons arcade game. It combines the bounce and the rock: bounce up, bounce down, step out to the side with the knees and hips pointing that way and the body twisting open and leaning back, then come back and go the other way — the feet trace the bottom of a square.",
+          "steps": [
+            "Bounce up and down in place.",
+            "Step to the right, knees and feet pointing right, twisting open and leaning back into a rock.",
+            "Come back to the bounce.",
+            "Repeat to the left. Let the arms swing loosely."
+          ],
+          "related": ["biz-markie", "rock", "bounce"]
+        },
+        {
+          "slug": "gucci",
+          "name": "Gucci",
+          "difficulty": "Beginner",
+          "danceSlug": "gucci-reebok",
+          "summary": "Jumping side to side while grabbing your clothes and throwing them off — showing off the Gucci.",
+          "description": "The Gucci comes from showing off your designer clothes: you jump side to side with the feet together and, at the same time, grab your jacket or shirt and throw it. Singles and doubles can be mixed freely. It is often paired with the Reebok.",
+          "steps": [
+            "Jump to the side with feet together.",
+            "As you land, grab your collar or shirt and throw it out.",
+            "Jump to the other side and throw again.",
+            "Mix singles and doubles."
+          ],
+          "related": ["reebok", "biz-markie"]
+        },
+        {
+          "slug": "reebok",
+          "name": "Reebok",
+          "difficulty": "Beginner",
+          "danceSlug": "reebok",
+          "summary": "Fists punching side to side with the chest, then a double step — named after the trainers.",
+          "description": "The Reebok is driven by the arms: a loose fist punches across to one side as you look that way and throw the chest into it, then to the other side, followed by a double step. It is old school but still turns up in new-school choreography.",
+          "steps": [
+            "Bounce with the chest driving the groove.",
+            "Punch the right fist across to the right, looking right.",
+            "Punch the left fist to the left.",
+            "Take a double step to the side. Repeat the other way."
+          ],
+          "related": ["gucci", "cabbage-patch"]
+        },
+        {
+          "slug": "steve-martin",
+          "name": "Steve Martin",
+          "difficulty": "Beginner",
+          "danceSlug": "steve-martin",
+          "summary": "A walking down groove named after the comedian: every step accents down.",
+          "description": "Named after Steve Martin, whose films were everywhere in the 80s, it is a walking step where each step lands with the accent down — bend on the step, return up, and turn after four. It is a good way to learn what a down groove feels like.",
+          "steps": [
+            "Walk forward on the left foot, bending into the step.",
+            "Return up and step the right foot, bending again.",
+            "Take four down steps, then turn.",
+            "Keep the accents down throughout."
+          ],
+          "related": ["bounce", "grooves"]
+        },
+        {
+          "slug": "smurf",
+          "name": "Smurf",
+          "difficulty": "Beginner",
+          "danceSlug": "smurf",
+          "summary": "An old-school groove with the arms flapping and the body rocking — named after the cartoon.",
+          "description": "The Smurf is an early-80s party dance named after the cartoon characters, done with a bouncy rock and flapping arms. It came out of the same party scene as the Wop and the Cabbage Patch.",
+          "steps": [
+            "Get the bounce and rock going first - this groove is built on them.",
+            "Watch the linked clip once through at full speed, then copy the legs before the arms.",
+            "Add the arms once the feet are automatic."
+          ],
+          "related": ["wop", "cabbage-patch"]
+        },
+        {
+          "slug": "prep",
+          "name": "The Prep",
+          "aliases": ["prep"],
+          "difficulty": "Beginner",
+          "danceSlug": "the-prep",
+          "summary": "An early-90s preppy step: a jump with one heel kicked forward and a lean back.",
+          "description": "The Prep was a late-80s and early-90s party step named after preppy style. You hop or bounce and kick one heel forward while leaning back, then swap to the other side.",
+          "steps": [
+            "Get the bounce and rock going first - this groove is built on them.",
+            "Watch the linked clip once through at full speed, then copy the legs before the arms.",
+            "Add the arms once the feet are automatic."
+          ],
+          "related": ["heel-toe", "kick-step"]
+        },
+        {
+          "slug": "humpty-dance",
+          "name": "Humpty Dance",
+          "aliases": ["humpty hump"],
+          "difficulty": "Beginner",
+          "danceSlug": "humpty-hump-dance",
+          "summary": "A drop groove from Digital Underground: a criss-cross jump, then scooping hip drops.",
+          "description": "The Humpty Dance comes from Digital Underground's 1990 song. It starts with a criss-cross jump landing with the knees bent, then drops into scooping hip drops while the arms wave side to side — a classic drop groove.",
+          "steps": [
+            "Jump the feet into a criss-cross and land with the knees bent.",
+            "Drop down, scooping the hips forward, four times.",
+            "Wave the arms side to side as you drop.",
+            "Jump out and repeat."
+          ],
+          "tips": [
+            "The drop is a surprise: groove normally, then drop."
+          ],
+          "related": ["criss-cross", "grooves"]
+        },
+        {
+          "slug": "alf",
+          "name": "ALF",
+          "difficulty": "Beginner",
+          "danceSlug": "alf",
+          "summary": "Bounce, then thrust the hips forward as one leg lifts — a party step named after the TV alien.",
+          "description": "Named after the 80s TV alien, the ALF bends the knees into a bounce and then thrusts the hips forward as the legs straighten, lifting one leg and leaning back over the supporting leg. The hips can also push to the side for extra style.",
+          "steps": [
+            "Bounce with the knees bent.",
+            "Straighten the legs and thrust the hips forward.",
+            "Lift one leg as the hips go forward, leaning back on the other.",
+            "Alternate legs."
+          ],
+          "related": ["bounce", "patty-duke"]
+        },
+        {
+          "slug": "patty-duke",
+          "name": "Patty Duke",
+          "difficulty": "Beginner",
+          "danceSlug": "patty-duke",
+          "summary": "An old-school groove named after the actress, part of the late-80s party canon.",
+          "description": "Named after Patty Duke, the Patty Duke is one of the old-school party grooves demonstrated alongside the ALF, the Bobby Brown and the Fila. It is a light, bouncing groove with the feet stepping out and the arms swinging in time.",
+          "steps": [
+            "Get the bounce and rock going first - this groove is built on them.",
+            "Watch the linked clip once through at full speed, then copy the legs before the arms.",
+            "Add the arms once the feet are automatic."
+          ],
+          "related": ["alf", "bounce"]
+        },
+        {
+          "slug": "monastery",
+          "name": "Monastery",
+          "difficulty": "Beginner",
+          "danceSlug": "monastery",
+          "summary": "Shift the weight, lean over the bent leg and snap the other toe in, side to side.",
+          "description": "The Monastery is a grounded groove: lean over to one side so the weight goes onto one bent leg, and bring the other foot in on its toe, knee turned; then step across and do it to the other side. Snapping the knee in adds an accent. It is closely related to the Chicken Head.",
+          "steps": [
+            "Lean to the right and shift your weight onto the right leg, bending it.",
+            "Bring the left foot in on its toe, knee turned in.",
+            "Step the left foot out and shift your weight over to the left.",
+            "Bring the right toe in. Keep switching, and try snapping the knee in."
+          ],
+          "related": ["chicken-head", "bounce"]
+        },
+        {
+          "slug": "chicken-head",
+          "name": "Chicken Head",
+          "aliases": ["chicken", "chickenhead"],
+          "difficulty": "Intermediate",
+          "danceSlug": "the-chicken",
+          "summary": "The hands roll and hit while you lean away and slam the knee down, side to side.",
+          "description": "Made popular in Harlem in the 90s, the Chicken Head (or Chicken) circles the hands and hits, while you lean away from the side the knee lifts on, and slam the foot down like pulling a puppet string. The Monastery is a variation of it.",
+          "steps": [
+            "Circle the hands and hit them to the right.",
+            "Lean left as the right knee lifts.",
+            "Slam the right foot down.",
+            "Do the same on the left side, and try doubling it."
+          ],
+          "related": ["monastery", "harlem-shake"]
+        },
+        {
+          "slug": "party-machine",
+          "name": "Party Machine",
+          "difficulty": "Intermediate",
+          "danceSlug": "party-machine",
+          "summary": "Kick and switch the legs with a jump, side to side — a full-energy footwork step.",
+          "description": "The Party Machine is a high-energy step: kick one leg out, switch legs with a jump, and then add a sideways jump on the kick so the step travels left and right. It is demanding on the legs but simple once the phases are clear.",
+          "steps": [
+            "Kick the right leg forward.",
+            "Jump to switch legs, landing on the right with the left lifting behind.",
+            "Kick again, this time jumping to the side as you kick.",
+            "Switch and repeat to the other side."
+          ],
+          "related": ["running-man", "kick-step"]
+        },
+        {
+          "slug": "robocop",
+          "name": "Robocop",
+          "difficulty": "Beginner",
+          "danceSlug": "robocop",
+          "summary": "Stiff, robotic stepping from the 1987 film — hard stops and sharp turns.",
+          "description": "The Robocop copies the stiff walk of the 1987 film's cyborg: rigid arms, sharp head turns and hard-stopping steps. It sits between party dance and the robot style of popping.",
+          "steps": [
+            "Hold the arms bent and rigid.",
+            "Step forward with a hard stop on the beat.",
+            "Turn the head sharply, then the body.",
+            "Keep every move stopping dead on the beat."
+          ],
+          "related": ["robot", "moonwalk"]
+        },
+        {
+          "slug": "butterfly",
+          "name": "Butterfly",
+          "difficulty": "Intermediate",
+          "danceSlug": "butterfly",
+          "summary": "The knees opening and closing like wings, or a hop-drop-twist legwork step.",
+          "description": "The butterfly spread from dancehall into hip-hop party dance: the knees open and close like wings as the dancer bounces. There is also a butterfly legwork, also called happy feet: hop, drop onto the heel, twist, and cross the other foot behind.",
+          "steps": [
+            "Bend the knees with the feet apart.",
+            "Open the knees outward, then close them together.",
+            "Keep opening and closing on the beat.",
+            "Legwork version: hop to the left with the right leg up, drop onto the right heel, twist it, and cross the left foot behind."
+          ],
+          "related": ["happy-feet", "bounce"]
+        },
+        {
+          "slug": "happy-feet",
+          "name": "Happy feet",
+          "difficulty": "Intermediate",
+          "danceSlug": "happy-feet",
+          "summary": "Quick, loose footwork — the feet patter and twist in and out.",
+          "description": "Happy feet is a quick footwork groove where the feet twist and tap rapidly, loose at the ankles, with a lot of energy and very little effort in the upper body.",
+          "steps": [
+            "Stand on the balls of the feet.",
+            "Twist the heels in and out quickly while taking small steps.",
+            "Keep the knees loose and the chest relaxed."
+          ],
+          "related": ["butterfly", "popcorn"]
+        },
+        {
+          "slug": "popcorn",
+          "name": "Popcorn",
+          "difficulty": "Beginner",
+          "danceSlug": "popcorn",
+          "summary": "A popping bounce: a down groove plus a quick abdominal contraction, like popcorn jumping in a pan.",
+          "description": "The Popcorn layers a quick contraction of the abs and torso over a down groove, so the body seems to pop up like popcorn in the pan. It is a small, quick step that looks good once the pops are sharp.",
+          "steps": [
+            "Groove down on each beat.",
+            "Add a quick contraction of the stomach on each down beat.",
+            "Let the chest and shoulders pop up out of each contraction.",
+            "Speed it up to double time."
+          ],
+          "related": ["happy-feet", "chest-pop"]
+        },
+        {
+          "slug": "reject",
+          "name": "Reject",
+          "difficulty": "Beginner",
+          "danceSlug": "reject",
+          "summary": "Jump forward on one leg with the other kicked back, then lean back and jump across.",
+          "description": "The Reject is a jumping step: small jumps forward on one leg with the other leg kicked up behind, then a lean back and a jump onto the other leg. It is often taught together with the Roger Rabbit and the Harlem Shake.",
+          "steps": [
+            "Jump forward on the left leg, right leg lifted behind.",
+            "Lean back onto the right leg.",
+            "Jump onto the right leg, kicking the left up.",
+            "Keep alternating."
+          ],
+          "related": ["roger-rabbit", "harlem-shake"]
+        },
+        {
+          "slug": "spongebob",
+          "name": "SpongeBob",
+          "aliases": ["sponge bob"],
+          "difficulty": "Intermediate",
+          "danceSlug": "spongebob",
+          "summary": "Jump to one side kicking the other leg out straight, then hop it back behind.",
+          "description": "The SpongeBob is an old-school step also used heavily in shuffling. Jump to the right and kick the left leg out straight, then hop again as the left leg comes back behind the right; then swap sides.",
+          "steps": [
+            "Jump to the right, kicking the left leg out straight.",
+            "Hop again, bringing the left leg behind the right.",
+            "Put the left leg down and kick the right leg out.",
+            "Hop and bring it behind. Keep alternating."
+          ],
+          "related": ["kick-step", "criss-cross"]
+        },
+        {
+          "slug": "criss-cross",
+          "name": "Criss cross",
+          "aliases": ["kriss kross"],
+          "difficulty": "Beginner",
+          "danceSlug": "kriss-kross",
+          "summary": "Jumping the legs crossed and open — named after the 90s duo Kris Kross.",
+          "description": "The criss cross jumps the feet into a cross, then out, then into a cross with the other foot in front. It is linked to the 90s duo Kris Kross, and it is the entry to steps like the Humpty Dance and the hurdle in house.",
+          "steps": [
+            "Jump the feet into a cross, right in front.",
+            "Jump them open.",
+            "Jump into a cross, left in front.",
+            "Jump open. Keep it light."
+          ],
+          "related": ["humpty-dance", "spongebob"]
+        },
+        {
+          "slug": "kick-step",
+          "name": "Kick step",
+          "aliases": ["kick it", "kick step step"],
+          "difficulty": "Beginner",
+          "danceSlug": "kick-it",
+          "summary": "Kick, step, step — a club-party staple in which one foot kicks and the feet change over.",
+          "description": "The kick step (kick, step, step) kicks one foot out, steps back onto it while lifting the other, and steps again. Its cousin the kick ball change adds a quick ball-of-the-foot change after the kick. Both are everywhere in hip-hop choreography.",
+          "steps": [
+            "Kick the right foot forward.",
+            "Step back onto the right foot, lifting the left.",
+            "Step the left foot down.",
+            "Kick with the left and repeat."
+          ],
+          "tips": [
+            "Say it as you do it: kick, step, step. It keeps the pattern straight."
+          ],
+          "related": ["kick-ball-change", "kid-n-play", "party-machine"]
+        },
+        {
+          "slug": "kick-ball-change",
+          "name": "Kick ball change",
+          "difficulty": "Beginner",
+          "danceSlug": "kick-step-kick-ball-change",
+          "summary": "A kick followed by a quick step onto the ball of the foot and a change of weight.",
+          "description": "The kick ball change comes from jazz and is a staple of hip-hop choreography: kick one foot, step onto the ball of that foot, and change the weight back to the other.",
+          "steps": [
+            "Kick the right foot forward.",
+            "Step onto the ball of the right foot beside the left.",
+            "Change weight back onto the left foot.",
+            "Repeat with the other foot."
+          ],
+          "related": ["kick-step"]
+        },
+        {
+          "slug": "heel-toe",
+          "name": "Heel toe",
+          "aliases": ["treetop", "heel toe walk out"],
+          "difficulty": "Intermediate",
+          "danceSlug": "heel-toe-walk-out",
+          "summary": "Jump, landing with the front heel and back toe lined up, then turn and switch — also called the treetop.",
+          "description": "The heel toe (or treetop) is a 90s street groove: jump and land with one foot's heel in front and the other foot's toe behind, lined up, then turn the feet towards the front foot and jump to switch.",
+          "steps": [
+            "Jump and land with the right heel in front and the left toe behind, in line.",
+            "Turn both feet towards the right.",
+            "Jump and switch so the left heel is in front.",
+            "Keep jumping and switching."
+          ],
+          "related": ["prep", "kick-step"]
+        },
+        {
+          "slug": "stick-and-roll",
+          "name": "Stick and roll",
+          "aliases": ["stick it"],
+          "difficulty": "Beginner",
+          "danceSlug": "stick-and-roll",
+          "summary": "Pop the hip out (stick), then roll it through — a hip-isolation party step.",
+          "description": "The Stick and Roll (\"stick it\") pops one hip out hard, then rolls the hips through. The pop comes from tightening the glute on that side.",
+          "steps": [
+            "Lift the right hip and pop it out to the side — the stick.",
+            "Roll the hips through the centre.",
+            "Stick the left hip.",
+            "Roll back. Add the hands tracing the hips."
+          ],
+          "related": ["hip-roll", "tootsie-roll"]
+        },
+        {
+          "slug": "lock-it-down",
+          "name": "Lock it down",
+          "difficulty": "Beginner",
+          "danceSlug": "lock-it-down-variation",
+          "summary": "Step out, bring back, with the elbows pulling in each time the leg comes back.",
+          "description": "Lock It Down is a simple, energetic step: step one leg out and bring it back, pulling both hands in with the elbows folded as it comes back, then the other leg.",
+          "steps": [
+            "Step the right leg out.",
+            "Bring it back, pulling both elbows in.",
+            "Step the left leg out.",
+            "Bring it back and pull in."
+          ],
+          "related": ["two-step", "reebok"]
+        },
+        {
+          "slug": "bus-stop",
+          "name": "Bus stop",
+          "difficulty": "Beginner",
+          "danceSlug": "stop-bus",
+          "summary": "Place one foot ahead and switch the weight to it, then the other, with a hand held up to stop.",
+          "description": "The Bus Stop places one foot forward and switches the body weight onto it, then the other, while the opposite hand is held up as if stopping a bus.",
+          "steps": [
+            "Place the right foot ahead.",
+            "Switch your weight onto it.",
+            "Place the left foot and switch weight.",
+            "Hold up the opposite hand on each step."
+          ],
+          "related": ["two-step", "step-touch"]
+        },
+        {
+          "slug": "shamrock",
+          "name": "Shamrock",
+          "difficulty": "Beginner",
+          "danceSlug": "shamrock",
+          "summary": "Step, pivot the body around, and step in with a bounce up.",
+          "description": "The Shamrock steps forward, pivots the body round on the balls of the feet, then steps in and bounces up, repeating on the other side.",
+          "steps": [
+            "Step forward on the left foot.",
+            "Pivot the body round, lifting the heels.",
+            "Step in, and as the foot lands, bounce up.",
+            "Step forward on the right and repeat."
+          ],
+          "related": ["two-step", "bounce"]
+        },
+        {
+          "slug": "aunt-viv",
+          "name": "Aunt Viv",
+          "difficulty": "Beginner",
+          "danceSlug": "aunt-viv",
+          "summary": "Step together side to side with the arms pulsing down, elbows raised — after the Fresh Prince character.",
+          "description": "Named after Aunt Viv from The Fresh Prince of Bel-Air, it steps together side to side while the arms, raised with the elbows up, pulse down on every count.",
+          "steps": [
+            "Step the right foot out and bring the left together.",
+            "At the same time pull the right arm down, elbows up.",
+            "Step together again, pulsing the arms down.",
+            "Change direction whenever you like."
+          ],
+          "related": ["carlton", "step-touch"]
+        },
+        {
+          "slug": "carlton",
+          "name": "Carlton",
+          "difficulty": "Beginner",
+          "danceSlug": "carlton",
+          "summary": "Step side to side with the arms swinging across the body — from the Fresh Prince.",
+          "description": "The Carlton comes from Alfonso Ribeiro's character in The Fresh Prince of Bel-Air, dancing to Tom Jones. Step together side to side while both arms swing across the body in the same direction, bending as they reach the side.",
+          "steps": [
+            "Step to the right and bring the left foot in.",
+            "Swing both arms across to the right, bending the elbows as they reach the side.",
+            "Step to the left and swing the arms across.",
+            "Keep the swing carrying the body side to side."
+          ],
+          "related": ["aunt-viv", "step-touch"]
+        },
+        {
+          "slug": "wu-tang",
+          "name": "Wu-Tang",
+          "difficulty": "Intermediate",
+          "danceSlug": "wu-tang",
+          "summary": "A ninja-like battle groove with swerving arms and pelvis — named after the Wu-Tang Clan.",
+          "description": "The Wu-Tang dance came from battles, with a martial-arts feel. It is all about the pelvis and the arms: step right, left, right, left, together, then switch with both arms swerving around the body.",
+          "steps": [
+            "Step right, left, right, left, together, in a ninja-like stance.",
+            "Switch, switch, swinging both arms around the body.",
+            "Snap back to the front.",
+            "Repeat."
+          ],
+          "related": ["harlem-shake", "reebok"]
+        }
+      ]
+    },
+    {
+      "name": "Harlem and New York",
+      "terms": [
+        {
+          "slug": "harlem-shake",
+          "name": "Harlem Shake",
+          "difficulty": "Intermediate",
+          "danceSlug": "harlem-shake",
+          "summary": "The shoulders shaking in an alternating rhythm, with a street attitude — from Harlem in the early 80s.",
+          "description": "The original Harlem Shake traces back to Al B. in Harlem in the early 1980s and was spread by crews like the Harlem Shakers and videos by Missy Elliott and G-Dep in the early 2000s. The basic shake bounces the shoulders alternately with the arms loose, and dancers add anything they like on top — with plenty of attitude. It is not the 2013 internet meme of the same name.",
+          "steps": [
+            "Bend the knees slightly with the arms loose.",
+            "Pop one shoulder up as the other drops.",
+            "Switch rapidly, letting the chest move with it.",
+            "Add the arms and your own style."
+          ],
+          "tips": [
+            "The attitude is part of the step — a blank face makes it look like an exercise."
+          ],
+          "related": ["chicken-head", "wu-tang", "reject"]
+        },
+        {
+          "slug": "janet",
+          "name": "Janet Jackson",
+          "aliases": ["Janet"],
+          "difficulty": "Beginner",
+          "danceSlug": "janet",
+          "summary": "Step side to side with the wrists and head flicking up on every half-count.",
+          "description": "Named after Janet Jackson, this step flicks the wrists and head upwards on each count and \"and\", with the arms behind the direction you face, while the feet step side to side, bending the knees on the second step.",
+          "steps": [
+            "Step to the side, staying up.",
+            "Step again, bending the knees.",
+            "At the same time flick the wrists and head up on every count and \"and\".",
+            "Go the other way."
+          ],
+          "related": ["step-touch", "two-step"]
+        }
+      ]
+    },
+    {
+      "name": "Southern and 2000s",
+      "terms": [
+        {
+          "slug": "atl-stomp",
+          "name": "ATL Stomp",
+          "aliases": ["ATL"],
+          "difficulty": "Beginner",
+          "danceSlug": "atl",
+          "summary": "An Atlanta groove combining stomps with the skate-like side step.",
+          "description": "The ATL (or ATL Stomp) comes from the Atlanta party scene. It combines a stomping step with the gliding feel of the skate, travelling side to side on a heavy bounce.",
+          "steps": [
+            "Bounce with the knees bent.",
+            "Stomp to the side with the right foot.",
+            "Glide the left foot in.",
+            "Stomp to the other side."
+          ],
+          "related": ["skate", "bankhead-bounce", "walk-it-out"]
+        },
+        {
+          "slug": "walk-it-out",
+          "name": "Walk It Out",
+          "difficulty": "Beginner",
+          "danceSlug": "walk-it-out",
+          "summary": "Sitting in one hip and walking forward with the knees and feet turning out — from DJ Unk's 2006 hit.",
+          "description": "Walk It Out comes from DJ Unk's 2006 Atlanta hit. You sit into one hip with the knee bent, turn the foot out, and walk forward with the knees turning out and the opposite hip shifting — with a natural bounce.",
+          "steps": [
+            "Sit into the left hip with the knee bent.",
+            "Turn the right foot out and step forward.",
+            "Shift into the right hip and turn the left foot out as it steps.",
+            "Keep walking with a bounce."
+          ],
+          "related": ["bankhead-bounce", "atl-stomp", "stanky-leg"]
+        },
+        {
+          "slug": "crank-that",
+          "name": "Crank That",
+          "aliases": ["Soulja Boy", "superman"],
+          "difficulty": "Beginner",
+          "danceSlug": "crank-that",
+          "summary": "Soulja Boy's 2007 dance: the lean, the Superman jump and the stomps.",
+          "description": "Crank That (Soulja Boy) was one of the first dances to spread through YouTube in 2007. It is a sequence: arm crossing, a lean, the famous \"Superman\" hop, and stomps.",
+          "steps": [
+            "Cross the arms and lean.",
+            "Hop, kicking out, and throw the arm out as the \"Superman\".",
+            "Land and stomp.",
+            "Repeat the sequence."
+          ],
+          "related": ["stanky-leg", "walk-it-out"]
+        },
+        {
+          "slug": "stanky-leg",
+          "name": "Stanky Leg",
+          "difficulty": "Beginner",
+          "danceSlug": "stanky-leg",
+          "summary": "One leg bent and rotated in circles at the knee — from the GS Boyz, 2008.",
+          "description": "The Stanky Leg came from the GS Boyz song of 2008. One leg is bent and rotated in circles at the knee, the upper body leaning over it, then the other leg.",
+          "steps": [
+            "Put your weight on the left leg.",
+            "Bend the right leg and circle the knee in and out.",
+            "Lean the upper body over it.",
+            "Switch legs."
+          ],
+          "related": ["walk-it-out", "dougie"]
+        },
+        {
+          "slug": "dougie",
+          "name": "Dougie",
+          "difficulty": "Beginner",
+          "danceSlug": "dougie",
+          "summary": "Leaning side to side while the hands brush through the hair — popularised by Cali Swag District in 2010.",
+          "description": "The Dougie, popularised by Cali Swag District's \"Teach Me How to Dougie\" (2010), leans side to side with a bounce and shoulder shake while one hand brushes over the hair.",
+          "steps": [
+            "Bounce with the knees soft.",
+            "Lean to one side, shaking the shoulders.",
+            "Brush one hand through the hair.",
+            "Lean to the other side."
+          ],
+          "related": ["cat-daddy", "stanky-leg"]
+        },
+        {
+          "slug": "cat-daddy",
+          "name": "Cat Daddy",
+          "difficulty": "Beginner",
+          "danceSlug": "cat-daddy",
+          "summary": "Punch across and lean, then 'move your arms like your wheelchair's stuck' — from The Rej3ctz.",
+          "description": "The Cat Daddy came from The Rej3ctz' 2011 song and spread with a Chris Brown video. Punch across the body with one arm and lean the other way, then the other arm, then drop.",
+          "steps": [
+            "Punch the right arm across the body, leaning left.",
+            "Punch the left arm across, leaning right.",
+            "Drop twice.",
+            "Repeat the other way."
+          ],
+          "related": ["dougie", "nae-nae"]
+        },
+        {
+          "slug": "jerk",
+          "name": "Jerk",
+          "aliases": ["jerkin"],
+          "difficulty": "Beginner",
+          "summary": "The late-2000s LA jerkin' step: the legs kicking out and in as if running on the spot, with a lean back.",
+          "description": "Jerkin' came out of Los Angeles in 2009 with the New Boyz' \"You're a Jerk\". The basic jerk kicks the legs out and in, alternating with a lean back, often called the reject in LA.",
+          "steps": [
+            "Kick the right leg forward and step back.",
+            "Lean back and swap legs.",
+            "Kick the left leg forward.",
+            "Keep alternating."
+          ],
+          "related": ["reject", "dougie"]
+        },
+        {
+          "slug": "bernie",
+          "name": "Bernie",
+          "difficulty": "Beginner",
+          "danceSlug": "bernie",
+          "summary": "Lifeless, loose arms and a flopping head on a bounce — after Weekend at Bernie's.",
+          "description": "The Bernie came out of Baltimore and Memphis party music, named after the dead character in Weekend at Bernie's. The body goes loose and lifeless — arms flopping, head rolling — but it still bounces on the beat.",
+          "steps": [
+            "Bounce on the beat.",
+            "Let the arms go limp and flowing.",
+            "Let the head roll and flop.",
+            "Keep bouncing — lifeless, but still dancing."
+          ],
+          "related": ["bounce", "hit-the-quan"]
+        },
+        {
+          "slug": "tootsie-roll",
+          "name": "Tootsie Roll",
+          "difficulty": "Beginner",
+          "danceSlug": "tootsie-roll",
+          "summary": "Rolling the hips while stepping side to side — from the 69 Boyz, 1994.",
+          "description": "The Tootsie Roll came from the 69 Boyz song of 1994. The hips roll as the feet step side to side, with the hands rolling at the knees.",
+          "steps": [
+            "Step side to side.",
+            "Roll the hips as you go.",
+            "Roll the hands at knee level.",
+            "Follow the song's call-outs: to the left, to the right, back it up, stop."
+          ],
+          "related": ["hip-roll", "stick-and-roll"]
+        }
+      ]
+    },
+    {
+      "name": "Viral and new school",
+      "terms": [
+        {
+          "slug": "whip",
+          "name": "Whip",
+          "difficulty": "Beginner",
+          "danceSlug": "whip",
+          "summary": "One arm thrown forward and around as if cracking a whip — from Silentó's 2015 hit.",
+          "description": "The Whip was made huge by Silentó's \"Watch Me (Whip/Nae Nae)\" in 2015. Bend the knees and throw one arm out and forward as if cracking a whip.",
+          "steps": [
+            "Bend the knees.",
+            "Throw the right arm forward in a whipping motion, elbow bent.",
+            "Bring it back and repeat."
+          ],
+          "related": ["nae-nae", "hit-the-quan"]
+        },
+        {
+          "slug": "nae-nae",
+          "name": "Nae Nae",
+          "difficulty": "Beginner",
+          "danceSlug": "nae-nae",
+          "summary": "One hand raised and waving while the body rocks side to side — from WeAreToonz, 2013.",
+          "description": "The Nae Nae came from Atlanta group WeAreToonz' 2013 song and spread with \"Watch Me\". One hand goes up, waving side to side, while the other hangs low and the body rocks and sways.",
+          "steps": [
+            "Raise the right hand high, the left arm low.",
+            "Rock the body from side to side.",
+            "Wave the raised hand in time."
+          ],
+          "related": ["whip", "dougie"]
+        },
+        {
+          "slug": "hit-the-quan",
+          "name": "Hit the Quan",
+          "difficulty": "Beginner",
+          "danceSlug": "hit-the-quan",
+          "summary": "A bounce with rolling shoulders and a hand wave — iLoveMemphis, 2015.",
+          "description": "Hit the Quan comes from iLoveMemphis's 2015 song, inspired by the rapper Rich Homie Quan. Bounce, roll the shoulders and wave the hands smoothly in front.",
+          "steps": [
+            "Bounce with the knees soft.",
+            "Roll the shoulders in circles.",
+            "Wave the hands in front of you.",
+            "Keep it smooth and slow."
+          ],
+          "related": ["whip", "nae-nae"]
+        },
+        {
+          "slug": "milly-rock",
+          "name": "Milly Rock",
+          "aliases": ["millie rock"],
+          "difficulty": "Beginner",
+          "danceSlug": "the-milly-rock",
+          "summary": "Rocking side to side with the arms sweeping round — from Brooklyn rapper 2 Milly, 2015.",
+          "description": "The Milly Rock comes from 2 Milly's 2015 song \"Milly Rock\" in Brooklyn. Step side to side, swaying the hips, while the arms sweep round in front as if polishing a big window.",
+          "steps": [
+            "Step to the right, swaying.",
+            "Sweep both arms round in front.",
+            "Step to the left and sweep again.",
+            "Keep the shoulders loose."
+          ],
+          "related": ["shmoney", "dougie"]
+        },
+        {
+          "slug": "shmoney",
+          "name": "Shmoney dance",
+          "aliases": ["shmoney"],
+          "difficulty": "Beginner",
+          "danceSlug": "shmoney-dance",
+          "summary": "Bobby Shmurda's 2014 dance: hunched arm swings and a shoulder bounce.",
+          "description": "The Shmoney dance went viral in 2014 with Bobby Shmurda's debut video. You bounce low with the shoulders, swing one arm and then the other, and add the famous hat throw.",
+          "steps": [
+            "Bounce low, hunched a little.",
+            "Swing the right arm across.",
+            "Swing the left arm.",
+            "Add the shoulder bounce."
+          ],
+          "related": ["milly-rock", "sturdy"]
+        },
+        {
+          "slug": "hit-dem-folks",
+          "name": "Hit Dem Folks",
+          "difficulty": "Beginner",
+          "danceSlug": "hit-dem-folks",
+          "summary": "An Atlanta dance where one arm swings across as the knee lifts.",
+          "description": "Hit Dem Folks came from Atlanta in the 2010s. One arm swings across like a punch while the opposite knee lifts, in a bounce.",
+          "steps": [
+            "Bounce.",
+            "Swing the right arm across as the left knee lifts.",
+            "Swap sides."
+          ],
+          "related": ["woah", "shoot"]
+        },
+        {
+          "slug": "woah",
+          "name": "Woah",
+          "aliases": ["hitting the woah"],
+          "difficulty": "Beginner",
+          "danceSlug": "hitting-the-woah",
+          "summary": "A sharp snapping pose, fists pulled in and the shoulders hit — the late-2010s Florida and Atlanta scene.",
+          "description": "Hitting the Woah is a sharp, snapping pose from the late 2010s: fists pulled in, shoulders hit, and a quick stop on the beat.",
+          "steps": [
+            "Bounce.",
+            "On the beat, pull the fists in to the chest and hit the shoulders.",
+            "Hold for a moment, then release."
+          ],
+          "related": ["hit-dem-folks", "shoot"]
+        },
+        {
+          "slug": "shoot",
+          "name": "Shoot",
+          "aliases": ["hype", "shoot dance"],
+          "difficulty": "Beginner",
+          "danceSlug": "shoot-dance",
+          "summary": "Hop on one foot while the opposite arm swings and punches up — BlocBoy JB's 2018 hit.",
+          "description": "The Shoot comes from BlocBoy JB's \"Shoot\" (2018) and became even more famous as a Fortnite emote. Hop on one foot while the other knee lifts, as the opposite arm swings down and punches up.",
+          "steps": [
+            "Hop on the left foot.",
+            "Lift the right knee and punch the left arm up.",
+            "Swap sides."
+          ],
+          "related": ["hit-dem-folks", "woah"]
+        },
+        {
+          "slug": "floss",
+          "name": "Floss",
+          "difficulty": "Beginner",
+          "danceSlug": "the-floss",
+          "summary": "The hips swinging one way while the arms swing the other, in front and behind.",
+          "description": "The Floss, made famous by the Backpack Kid in 2016 and Fortnite, swings the hips one way while the arms, straight, swing the other way, alternately in front and behind the body.",
+          "steps": [
+            "Swing the arms to the left behind you as the hips go right.",
+            "Swing the arms to the right in front as the hips go left.",
+            "Then behind to the right, and in front to the left.",
+            "Speed it up."
+          ],
+          "related": ["dab"]
+        },
+        {
+          "slug": "dab",
+          "name": "Dab",
+          "difficulty": "Beginner",
+          "danceSlug": "the-dab",
+          "summary": "Dropping the head into the bent elbow with the other arm straight — from Atlanta, 2015.",
+          "description": "The Dab came out of Atlanta's rap scene in 2015. Drop the head into one bent elbow while the other arm extends out straight.",
+          "steps": [
+            "Bend the right arm and bring the face towards the elbow.",
+            "Extend the left arm straight out.",
+            "Hit it on the beat."
+          ],
+          "related": ["floss", "whip"]
+        },
+        {
+          "slug": "griddy",
+          "name": "Griddy",
+          "difficulty": "Beginner",
+          "danceSlug": "griddy",
+          "summary": "Heels tapped alternately while the arms swing and the hands make glasses over the eyes.",
+          "description": "The Griddy was created by Allen \"Griddy\" Davis in Louisiana and made famous by NFL touchdown celebrations. You tap the heels alternately as you move, with the arms swinging, and make glasses over the eyes with your hands.",
+          "steps": [
+            "Tap the right heel forward.",
+            "Tap the left heel forward, alternating quickly.",
+            "Swing the arms with the feet.",
+            "Make glasses over the eyes with the hands."
+          ],
+          "related": ["heel-toe", "shoot"]
+        },
+        {
+          "slug": "sturdy",
+          "name": "Sturdy",
+          "difficulty": "Beginner",
+          "danceSlug": "sturdy",
+          "summary": "The New York drill-era dance: a hunched, stomping bounce with the arms swinging.",
+          "description": "Getting sturdy comes out of New York's drill era in the early 2020s. It is a hunched, stomping bounce with the arms swinging freely.",
+          "steps": [
+            "Hunch forward.",
+            "Stomp the feet in place.",
+            "Swing the arms freely.",
+            "Keep it loose and energetic."
+          ],
+          "related": ["shmoney", "milly-rock"]
+        }
+      ]
+    },
+    {
+      "name": "Walks and glides",
+      "terms": [
+        {
+          "slug": "moonwalk",
+          "name": "Moonwalk",
+          "aliases": ["backslide"],
+          "difficulty": "Intermediate",
+          "danceSlug": "the-moonwalk",
+          "summary": "Gliding backwards while seeming to walk forward — Michael Jackson's signature step.",
+          "description": "The moonwalk (the backslide in popping) became world-famous when Michael Jackson did it in 1983. Alternating feet, the flat foot slides back while the other foot stays on its toe, so you glide backwards while looking like you walk forward.",
+          "steps": [
+            "Right foot flat, left foot on its toe.",
+            "Slide the right foot back, keeping it flat.",
+            "Drop the left heel and lift the right onto its toe.",
+            "Slide the left back. Repeat smoothly."
+          ],
+          "tips": [
+            "Put no weight on the sliding foot."
+          ],
+          "related": ["air-walk", "slide-step", "robot"]
+        },
+        {
+          "slug": "air-walk",
+          "name": "Air walk",
+          "difficulty": "Intermediate",
+          "danceSlug": "air-walk",
+          "summary": "Walking on the spot with a glide — the feet sliding forward and back as if in the air.",
+          "description": "The air walk is a glide: one foot slides forward on its heel as the other slides back on its toe, alternating, so you appear to walk on the spot.",
+          "steps": [
+            "Slide the right foot forward on its heel.",
+            "Slide the left foot back on its toe at the same time.",
+            "Swap.",
+            "Keep it smooth."
+          ],
+          "related": ["moonwalk", "slide-step"]
+        },
+        {
+          "slug": "slide-step",
+          "name": "Side glide",
+          "aliases": ["side glide", "slide step"],
+          "difficulty": "Intermediate",
+          "danceSlug": "slide-step",
+          "summary": "Gliding sideways by alternating heel and toe.",
+          "description": "The side glide slides sideways by alternating the heel and toe of each foot, travelling to the side.",
+          "steps": [
+            "Lift the right heel and slide the left foot to the side on its heel.",
+            "Swap.",
+            "Keep sliding sideways."
+          ],
+          "related": ["moonwalk", "air-walk", "james-brown"]
+        },
+        {
+          "slug": "james-brown",
+          "name": "James Brown",
+          "aliases": ["James Brown shuffle"],
+          "difficulty": "Intermediate",
+          "danceSlug": "james-brown",
+          "summary": "Pivoting one foot ball, heel, ball to slide sideways, with the chest pushing down and in.",
+          "description": "The James Brown step slides sideways on one foot by pivoting on the ball, then the heel, then the ball, while the other leg drags along and the chest pushes down and in on each pivot.",
+          "steps": [
+            "Shift your weight onto the right foot.",
+            "Pivot on the ball, then the heel, then the ball, travelling right.",
+            "Drag the left leg along.",
+            "Switch and go the other way."
+          ],
+          "related": ["slide-step", "camel-walk"]
+        },
+        {
+          "slug": "camel-walk",
+          "name": "Camel walk",
+          "difficulty": "Beginner",
+          "danceSlug": "camel-walk",
+          "summary": "A strutting three-step walk with the chest and knees lifting.",
+          "description": "The camel walk is a jazz-era strut that became hip-hop vocabulary: a walk where each step lifts the knee and chest and drops, often in groups of three.",
+          "steps": [
+            "Step forward on the right, lifting the chest.",
+            "Step left, dropping.",
+            "Step right and pause.",
+            "Repeat on the other side."
+          ],
+          "related": ["james-brown", "c-walk"]
+        },
+        {
+          "slug": "c-walk",
+          "name": "C-walk",
+          "aliases": ["crip walk", "swag walk"],
+          "difficulty": "Advanced",
+          "danceSlug": "swag-walk",
+          "summary": "West Coast footwork: heel and toe twists and hops spelling letters on the floor.",
+          "description": "The C-walk (Crip Walk) comes from Compton in the 1970s and 80s and was spread by rappers like Snoop Dogg and WC. It is quick footwork with heel-toe twists and hops, traditionally spelling out letters.",
+          "steps": [
+            "Hop onto the left foot and tap the right heel out.",
+            "Twist the right toe in.",
+            "Shuffle the feet back together.",
+            "Repeat on the other side."
+          ],
+          "related": ["heel-toe", "james-brown"]
+        },
+        {
+          "slug": "robot",
+          "name": "Robot",
+          "aliases": ["botting"],
+          "difficulty": "Intermediate",
+          "danceSlug": "the-robot",
+          "summary": "Moving like a machine: fixed angles, isolated joints and dead stops.",
+          "description": "The robot (botting) is a popping style that shows up in hip-hop dance too: joints move one at a time, stopping dead at fixed angles, like a machine.",
+          "steps": [
+            "Hold the arms at right angles.",
+            "Move one joint at a time, stopping dead.",
+            "Turn the head sharply.",
+            "Keep everything stiff."
+          ],
+          "related": ["robocop", "moonwalk"]
+        }
+      ]
+    }
+  ]
+}

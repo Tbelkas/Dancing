@@ -1,0 +1,894 @@
+// Breaking glossary. Read by GlossarySeeder on every boot; the file is the source of truth.
+// Slugs are the stable key that users' learned marks hang off - never rename one.
+// "danceSlug" borrows a catalog dance for its videos. Only link a dance whose video really
+// shows the move.
+{
+  "styleName": "Breakdance",
+  "categories": [
+    {
+      "name": "Foundations",
+      "terms": [
+        {
+          "slug": "breaking",
+          "name": "Breaking",
+          "learnable": false,
+          "summary": "The original hip-hop dance, born at 1970s Bronx block parties: toprock, footwork, power moves and freezes.",
+          "description": "Breaking (the media called it breakdancing) started at Bronx block parties in the early 1970s, where DJ Kool Herc looped the instrumental \"breaks\" of funk records and dancers — b-boys and b-girls — went off during them. It borrows from James Brown's footwork, martial arts, gymnastics and Latin dance, and it is organised around four elements: toprock (standing), go-downs and footwork (on the floor), power moves (continuous spinning) and freezes (held poses). It became an Olympic sport at Paris 2024, but at heart it is a battle-and-cypher culture.",
+          "tips": [
+            "Learn all four elements, not just power. Judges and cyphers value foundation, musicality and originality.",
+            "Warm up wrists, shoulders and neck before every session — breaking loads joints most dances never touch."
+          ],
+          "related": ["toprock", "footwork", "power-moves", "freezes"]
+        },
+        {
+          "slug": "footwork",
+          "name": "Footwork",
+          "learnable": false,
+          "summary": "Floor steps done on the hands and feet — also called downrock.",
+          "description": "Footwork (downrock) is the dancing you do on the floor, supported by the hands, with the legs stepping, sweeping and threading around the body. The six-step is the foundation; threes, CCs, sweeps and threads are built from it. Good footwork is fast, clean and musical, and it is what connects toprock to freezes and power moves.",
+          "tips": [
+            "Keep the hips up and the weight over the hands, so the legs have room to move.",
+            "Drill footwork slowly on both sides. Speed comes from clean positions, not from rushing."
+          ],
+          "related": ["six-step", "three-step", "cc", "go-down"]
+        },
+        {
+          "slug": "power-moves",
+          "name": "Power moves",
+          "learnable": false,
+          "summary": "Continuous rotating moves driven by momentum — windmills, flares, headspins.",
+          "description": "Power moves are the acrobatic, continuous rotations of breaking: the windmill, the flare, the headspin, the airflare and many more. They are driven by momentum and strength, and they are the part most people picture when they hear \"breakdance\". In battles they are one element among four, and they must connect musically to the rest of a round.",
+          "tips": [
+            "Build the strength base first: handstands, turtles and freezes make power moves safer.",
+            "Learn on a smooth, clean floor, and use a beanie for anything on the head."
+          ],
+          "related": ["windmill", "flare", "headspin", "turtle"]
+        },
+        {
+          "slug": "freezes",
+          "name": "Freezes",
+          "learnable": false,
+          "summary": "Held poses that stop the motion dead, usually on a hit in the music.",
+          "description": "A freeze stops the dance in a held position — balanced on the hands, head, elbows or shoulders — often to hit a beat or end a round. Freezes range from the beginner baby freeze and chair freeze to the airchair and hollowback. They also build the balance and strength power moves need.",
+          "tips": [
+            "Hold each freeze for a few seconds in practice, then practise getting into it on a beat.",
+            "Stack joints under the weight: wrist under elbow, elbow under the body."
+          ],
+          "related": ["baby-freeze", "chair-freeze", "turtle", "headstand"]
+        },
+        {
+          "slug": "breaks",
+          "name": "Breaks",
+          "learnable": false,
+          "summary": "The drum-heavy instrumental sections of records that breaking is named after.",
+          "description": "The break is the part of a funk or soul record where the other instruments drop out and the drums keep going. DJs like Kool Herc and Grandmaster Flash extended them by switching between two copies of a record, and that is where the dance got its name. Classic break tracks — \"Apache\", \"The Mexican\", \"It's Just Begun\", \"Give It Up or Turnit a Loose\" — are still played at jams.",
+          "tips": [
+            "Learn the classic breaks. Dancing to them is how you learn what the music wants."
+          ],
+          "related": ["breaking", "musicality"]
+        },
+        {
+          "slug": "musicality",
+          "name": "Musicality",
+          "learnable": false,
+          "summary": "Hitting breaks, drum rolls and changes in the track, not just dancing through them.",
+          "description": "In breaking, musicality means dancing the record: toprock that rides the groove, footwork that speeds up with the drums, freezes that land on a hit. It is one of the main judging criteria in battles.",
+          "tips": [
+            "Practise freezing on the last beat of a phrase until it becomes automatic."
+          ],
+          "related": ["breaks", "battle", "freezes"]
+        },
+        {
+          "slug": "battle",
+          "name": "Battle and cypher",
+          "learnable": false,
+          "summary": "Breaking's two stages: the circle where dancers take turns, and head-to-head competition.",
+          "description": "A cypher is the circle where b-boys and b-girls take turns; a battle puts dancers or crews head to head in rounds, judged on foundation, technique, musicality, creativity and character. A \"burn\" is a gesture or move aimed at the opponent. Crews like Rock Steady Crew kept the culture alive and competitive from the 1970s on.",
+          "tips": [
+            "A round usually goes toprock, go-down, footwork, power or tricks, and a freeze to finish."
+          ],
+          "related": ["breaking", "musicality", "toprock"]
+        }
+      ]
+    },
+    {
+      "name": "Toprock",
+      "terms": [
+        {
+          "slug": "toprock",
+          "name": "Toprock",
+          "difficulty": "Beginner",
+          "danceSlug": "toprock",
+          "summary": "The standing dance that opens a round: steps, crosses and kicks on the beat, with attitude.",
+          "description": "Toprock is breaking's standing footwork — the part you dance before you go to the floor. It draws on salsa, Lindy Hop, uprock and martial arts, and it is where a dancer shows style and character. The basic steps below are the vocabulary; in a cypher they are mixed freely with arm movements and changes of direction.",
+          "steps": [
+            "Bounce lightly on the balls of the feet.",
+            "Step the right foot across in front, then back out.",
+            "Step the left foot across, then out.",
+            "Add the arms opening and closing as the feet cross and open."
+          ],
+          "tips": [
+            "Stay light and bouncy, and use the whole space in front of you."
+          ],
+          "related": ["indian-step", "salsa-rock", "brooklyn-rock", "go-down"]
+        },
+        {
+          "slug": "indian-step",
+          "name": "Indian step",
+          "aliases": ["cross step", "basic toprock"],
+          "difficulty": "Beginner",
+          "danceSlug": "breaking-indian-step",
+          "summary": "The basic toprock: step across, back to centre, kick out, switch sides.",
+          "description": "The Indian step is the first toprock most breakers learn: step one foot across in front of the other, bring it back to the centre, kick or step it out to the side, then do the same with the other foot. The arms open and close across the body with it.",
+          "steps": [
+            "Step the right foot across in front of the left.",
+            "Step it back to centre.",
+            "Step or kick it out to the side.",
+            "Do the same with the left foot, opening and closing the arms."
+          ],
+          "related": ["toprock", "salsa-rock", "two-step-toprock"]
+        },
+        {
+          "slug": "salsa-rock",
+          "name": "Salsa rock",
+          "aliases": ["salsa step"],
+          "difficulty": "Beginner",
+          "danceSlug": "salsa-rock",
+          "summary": "A toprock from salsa's back step: step back diagonally, return, switch sides.",
+          "description": "The salsa rock (salsa step) borrows salsa's cross-body back step: step one foot back on a diagonal, shift your weight, and bring it back to centre, then the other foot — with the arms swinging opposite.",
+          "steps": [
+            "Step the right foot back on a diagonal.",
+            "Shift your weight back to the left foot.",
+            "Bring the right foot back to centre.",
+            "Repeat with the left foot."
+          ],
+          "related": ["indian-step", "toprock"]
+        },
+        {
+          "slug": "two-step-toprock",
+          "name": "Two step (toprock)",
+          "difficulty": "Beginner",
+          "danceSlug": "toprock-two-step",
+          "summary": "Kick forward, then step back and switch — a toprock with a hop.",
+          "description": "The toprock two-step kicks one foot forward, steps back onto it and switches to the other side, with a small hop and the arms swinging.",
+          "steps": [
+            "Kick the right foot forward.",
+            "Step it back beside the left.",
+            "Kick the left foot forward.",
+            "Step it back and repeat."
+          ],
+          "related": ["indian-step", "kick-step-toprock"]
+        },
+        {
+          "slug": "kick-step-toprock",
+          "name": "Kick step",
+          "difficulty": "Beginner",
+          "danceSlug": "toprock-kick-step",
+          "summary": "A toprock kick followed by a step down and switch.",
+          "description": "The kick step kicks forward, steps down in front and switches — a simple, bouncy toprock that links easily into the Indian step.",
+          "steps": [
+            "Kick the right foot forward.",
+            "Step down on it.",
+            "Kick with the left.",
+            "Step down and keep going."
+          ],
+          "related": ["two-step-toprock", "indian-step"]
+        },
+        {
+          "slug": "brooklyn-rock",
+          "name": "Brooklyn rock",
+          "aliases": ["brooklyn uprock"],
+          "difficulty": "Intermediate",
+          "danceSlug": "brooklyn-rock",
+          "summary": "A toprock from uprock: jerks, crosses and shoulder rocks towards an opponent.",
+          "description": "The Brooklyn rock comes from uprock, the Brooklyn battle dance: jerky crosses, shoulder rocks and jabs, danced as if confronting an opponent. In breaking it is used as toprock with an aggressive feel.",
+          "steps": [
+            "Bounce and rock the shoulders.",
+            "Step across and jerk the body forward.",
+            "Rock back and cross the other way.",
+            "Add jabs and burns towards the opponent."
+          ],
+          "related": ["toprock", "outlaw"]
+        },
+        {
+          "slug": "outlaw",
+          "name": "Outlaw",
+          "difficulty": "Intermediate",
+          "danceSlug": "outlaw-toprock",
+          "summary": "A cross-step toprock with a spin — step across, turn, and open.",
+          "description": "The outlaw is a toprock with a turn: step across, turn around on the balls of the feet, and open back out facing front. It is often doubled.",
+          "steps": [
+            "Step the right foot across the left.",
+            "Turn around on the balls of both feet.",
+            "Open back out facing front.",
+            "Repeat to the other side."
+          ],
+          "related": ["brooklyn-rock", "indian-step"]
+        }
+      ]
+    },
+    {
+      "name": "Go-downs",
+      "terms": [
+        {
+          "slug": "go-down",
+          "name": "Go-down",
+          "difficulty": "Beginner",
+          "danceSlug": "go-down",
+          "summary": "The transition from toprock to the floor.",
+          "description": "A go-down takes you from standing to footwork. It can be as simple as crouching onto the hands, or as flashy as a spinning drop. A clean, musical go-down is a mark of good foundation.",
+          "steps": [
+            "From toprock, step one foot back.",
+            "Lower yourself, putting one hand down.",
+            "Put the other hand down and kick into footwork."
+          ],
+          "related": ["pin-drop", "kick-out", "coin-drop", "footwork"]
+        },
+        {
+          "slug": "pin-drop",
+          "name": "Pin drop",
+          "aliases": ["colt", "knee drop"],
+          "difficulty": "Intermediate",
+          "danceSlug": "pin-drop",
+          "summary": "Dropping to the floor by folding one leg behind the other — also called the colt or knee drop.",
+          "description": "The pin drop (colt, knee drop) folds one leg behind the standing leg and sinks down onto the shin, landing into footwork.",
+          "steps": [
+            "Stand and cross the right leg behind the left.",
+            "Bend the left knee and sink down.",
+            "Land on the side of the right shin and thigh — never the kneecap.",
+            "Put a hand down and go into footwork."
+          ],
+          "tips": [
+            "Control the drop with the standing leg. The floor should never feel a thud."
+          ],
+          "related": ["go-down", "kick-out"]
+        },
+        {
+          "slug": "kick-out",
+          "name": "Kick out",
+          "difficulty": "Beginner",
+          "danceSlug": "kick-out",
+          "summary": "Crouch with hands down, then kick both legs out and land — the classic go-down into footwork.",
+          "description": "The kick out (shuffle kick out) crouches with both hands on the floor, then kicks the legs out — one or both — landing into a footwork base.",
+          "steps": [
+            "Crouch with both hands on the floor.",
+            "Kick the right leg out to the side.",
+            "Bring it back and kick the left.",
+            "Land into the six-step base."
+          ],
+          "related": ["go-down", "six-step"]
+        },
+        {
+          "slug": "coin-drop",
+          "name": "Coin drop",
+          "aliases": ["coin"],
+          "difficulty": "Intermediate",
+          "danceSlug": "coin",
+          "summary": "Spinning down onto the back, landing on the shoulders like a dropped coin.",
+          "description": "The coin drop spins you down onto your back: kick one leg across and round, lean back and roll onto the shoulders, finishing in a spin or a freeze.",
+          "steps": [
+            "Swing the right leg across the body.",
+            "Turn, lean back and let the momentum take you down.",
+            "Land on the shoulder blades, legs up.",
+            "Roll out into footwork or a back spin."
+          ],
+          "related": ["go-down", "backspin"]
+        }
+      ]
+    },
+    {
+      "name": "Footwork",
+      "terms": [
+        {
+          "slug": "six-step",
+          "name": "Six-step",
+          "aliases": ["6-step"],
+          "difficulty": "Beginner",
+          "danceSlug": "six-step",
+          "summary": "The foundation of footwork: six steps that take the legs in a circle around the hands.",
+          "description": "The six-step is the first footwork move every breaker learns: the legs step in a full circle around the body in six steps while the hands move to make space. It teaches the basic positions all other footwork is built from.",
+          "steps": [
+            "Crouch with both hands down. Step the right leg out.",
+            "Cross the left leg in front of the right.",
+            "Step the right leg back behind.",
+            "Step the left leg back, into a push-up-like position.",
+            "Bring the right leg round to the front.",
+            "Bring the left leg out to return to the start."
+          ],
+          "tips": [
+            "Lift the hands as each leg passes. The legs should never have to go around a hand."
+          ],
+          "related": ["three-step", "cc", "footwork"]
+        },
+        {
+          "slug": "three-step",
+          "name": "Three-step",
+          "difficulty": "Intermediate",
+          "danceSlug": "three-step",
+          "summary": "A shorter footwork cycle — three steps round the body.",
+          "description": "The three-step is a quicker footwork pattern of three steps that turns the body round, with the legs threading under.",
+          "steps": [
+            "From a crouch, step the right leg out in front.",
+            "Step the left leg behind.",
+            "Swing the right leg through and switch.",
+            "Repeat the other way."
+          ],
+          "related": ["six-step", "cc"]
+        },
+        {
+          "slug": "cc",
+          "name": "CC",
+          "aliases": ["CC's"],
+          "difficulty": "Intermediate",
+          "danceSlug": "cc-footwork",
+          "summary": "A classic footwork step: switching quickly between a tucked leg and a leg kicked out.",
+          "description": "The CC (CC's) is one of the classic footwork patterns. You switch between a squat and a leg kicked out on each side in a quick rhythmic swing.",
+          "steps": [
+            "Crouch with hands down, left leg out.",
+            "Switch so the right leg kicks out and the left tucks under.",
+            "Switch back.",
+            "Keep it quick and rhythmic."
+          ],
+          "related": ["six-step", "three-step"]
+        },
+        {
+          "slug": "coffee-grinder",
+          "name": "Coffee grinder",
+          "aliases": ["helicopter"],
+          "difficulty": "Intermediate",
+          "danceSlug": "coffee-grinder",
+          "summary": "One leg sweeping a full circle under the body while the hands hop out of its way.",
+          "description": "The coffee grinder (sometimes called the helicopter) sweeps one straight leg in a full circle low to the floor while you squat on the other, lifting the hands as it passes underneath.",
+          "steps": [
+            "Squat on the left leg, right leg out straight, hands down.",
+            "Sweep the right leg forward in a circle.",
+            "Lift the hands as it passes.",
+            "Hop the left foot over it and complete the circle."
+          ],
+          "related": ["six-step", "sweep"]
+        },
+        {
+          "slug": "sweep",
+          "name": "Sweep",
+          "difficulty": "Intermediate",
+          "danceSlug": "breaking-sweep",
+          "summary": "A leg sweeping round in front while the body turns — a floor move from martial arts.",
+          "description": "The sweep swings one leg low in an arc while the body rotates on the hands, like a martial-arts leg sweep, and returns to footwork.",
+          "steps": [
+            "From a crouch, extend the right leg.",
+            "Swing it round in front of you in an arc.",
+            "Rotate on the hands with it.",
+            "Bring it back into the six-step."
+          ],
+          "related": ["coffee-grinder", "six-step"]
+        },
+        {
+          "slug": "knee-switch",
+          "name": "Knee switch",
+          "aliases": ["knee switches"],
+          "difficulty": "Intermediate",
+          "danceSlug": "knee-switches",
+          "summary": "Dropping from knee to knee in rhythm, legs swapping behind you.",
+          "description": "The knee switch drops onto one knee (on the shin) and switches to the other in rhythm, with the hands helping balance — a quick, low footwork move.",
+          "steps": [
+            "Kneel on the right shin, the left foot flat.",
+            "Switch quickly to the left shin.",
+            "Keep switching in rhythm.",
+            "Use the hands for balance."
+          ],
+          "related": ["footwork", "pin-drop"]
+        },
+        {
+          "slug": "leg-thread",
+          "name": "Leg thread",
+          "aliases": ["thread"],
+          "difficulty": "Advanced",
+          "danceSlug": "leg-thead",
+          "summary": "Threading one leg through the gap between your arm and body.",
+          "description": "A thread passes a leg through a loop made by the body — for instance under the arm and back — without breaking contact with the floor. Threads show control and creativity.",
+          "steps": [
+            "Sit up with one hand on the floor.",
+            "Lift one leg and pass it through the gap between the arm and body.",
+            "Step it out the other side.",
+            "Return the same way."
+          ],
+          "related": ["six-step", "cc"]
+        },
+        {
+          "slug": "monkey-swing",
+          "name": "Monkey swing",
+          "aliases": ["monkey"],
+          "difficulty": "Intermediate",
+          "danceSlug": "the-monkey",
+          "summary": "Swinging the legs from side to side over the hands like a monkey.",
+          "description": "The monkey swings the legs from side to side over the planted hands, landing on the feet each side, a flashy transition in footwork.",
+          "steps": [
+            "Plant both hands on the floor.",
+            "Swing both legs over to the right.",
+            "Swing them back to the left.",
+            "Keep the weight on the hands."
+          ],
+          "related": ["footwork", "sweep"]
+        }
+      ]
+    },
+    {
+      "name": "Freezes",
+      "terms": [
+        {
+          "slug": "baby-freeze",
+          "name": "Baby freeze",
+          "difficulty": "Beginner",
+          "danceSlug": "baby-freeze",
+          "summary": "Balancing on the hands with one knee on the elbow and the head down — the first freeze most breakers learn.",
+          "description": "The baby freeze balances on both hands, side-on to the floor, one knee resting on the elbow and the head touching down for support. It is the gateway freeze.",
+          "steps": [
+            "Lie on your side, hands down, one knee on the matching elbow.",
+            "Bring the other knee up on top.",
+            "Rest the side of the head lightly on the floor.",
+            "Tip the weight onto the hands and lift the feet."
+          ],
+          "related": ["chair-freeze", "turtle", "freezes"]
+        },
+        {
+          "slug": "chair-freeze",
+          "name": "Chair freeze",
+          "difficulty": "Beginner",
+          "danceSlug": "chair-freeze",
+          "summary": "One hand in the lower back, legs crossed and the body turned up like a chair.",
+          "description": "The chair freeze balances on one hand with the elbow in the lower back, legs crossed and the body facing upwards, like sitting in a chair. It leads to the airchair.",
+          "steps": [
+            "Sit with one hand behind you, elbow bent into the lower back.",
+            "Put the other hand down.",
+            "Cross the legs and lift the hips.",
+            "Balance on the elbow-hand."
+          ],
+          "related": ["baby-freeze", "airchair"]
+        },
+        {
+          "slug": "turtle",
+          "name": "Turtle",
+          "difficulty": "Intermediate",
+          "danceSlug": "turtle",
+          "summary": "Balancing on both hands with the elbows in the stomach and the body horizontal.",
+          "description": "The turtle balances on both hands with the elbows dug into the stomach and the whole body horizontal, like a turtle's shell. It is a freeze and also the base of power moves like crickets and turtle spins.",
+          "steps": [
+            "Crouch with both hands flat, elbows in the stomach.",
+            "Lean forward onto the elbows.",
+            "Lift the feet so the body is horizontal.",
+            "Hold, then try walking the hands round."
+          ],
+          "related": ["baby-freeze", "crickets", "jackhammer"]
+        },
+        {
+          "slug": "headstand",
+          "name": "Headstand",
+          "difficulty": "Beginner",
+          "danceSlug": "headstand",
+          "summary": "Balancing on the head and hands in a tripod — the base of headspins and head freezes.",
+          "description": "The breaking headstand is a tripod on the head and both hands, legs up. It is a freeze in itself and the foundation for headspins and head hollowbacks.",
+          "steps": [
+            "Place the top of the head and both hands in a triangle.",
+            "Walk the feet in.",
+            "Lift the knees onto the elbows, then extend the legs.",
+            "Hold."
+          ],
+          "related": ["headspin", "hollowback"]
+        },
+        {
+          "slug": "shoulder-freeze",
+          "name": "Shoulder freeze",
+          "difficulty": "Intermediate",
+          "danceSlug": "shoulder-freeze",
+          "summary": "Balancing on one shoulder and the side of the head, legs in the air.",
+          "description": "The shoulder freeze balances on one shoulder and the side of the head with a hand helping, legs up and often split.",
+          "steps": [
+            "Lie on the side with one shoulder down.",
+            "Put the hand beside the head for support.",
+            "Kick the legs up.",
+            "Balance on the shoulder."
+          ],
+          "related": ["headstand", "airfreeze"]
+        },
+        {
+          "slug": "airfreeze",
+          "name": "Air freeze",
+          "difficulty": "Advanced",
+          "danceSlug": "airfreeze",
+          "summary": "Upside-down on one hand, the head off the floor, the body twisted.",
+          "description": "The air freeze (air baby) balances upside-down on one hand with the elbow in the hip and the head off the floor — an advanced freeze.",
+          "steps": [
+            "Start from a headstand.",
+            "Plant one hand with the elbow tucked into the hip.",
+            "Lift the head off the floor.",
+            "Hold the twisted balance on one hand."
+          ],
+          "related": ["shoulder-freeze", "airchair"]
+        },
+        {
+          "slug": "airchair",
+          "name": "Airchair",
+          "difficulty": "Advanced",
+          "danceSlug": "breaking-airchair",
+          "summary": "The chair freeze with the head up: balanced on one bent arm, body facing up.",
+          "description": "The airchair balances on one bent arm, the elbow in the lower back, with the body facing up and nothing else on the floor. It is a classic intermediate-to-advanced freeze built from the chair freeze and the turtle.",
+          "steps": [
+            "Start from the chair freeze.",
+            "Shift the weight onto the supporting hand.",
+            "Lift the other hand off the floor.",
+            "Hold the body up and turned out."
+          ],
+          "related": ["chair-freeze", "turtle"]
+        },
+        {
+          "slug": "elbow-freeze",
+          "name": "Elbow freeze",
+          "difficulty": "Intermediate",
+          "danceSlug": "elbow-freeze",
+          "summary": "Balancing on one bent elbow tucked into the side, body horizontal.",
+          "description": "The elbow freeze balances the whole body on one hand with the elbow dug into the side of the waist, legs lifted and often bent, the head held off the floor.",
+          "steps": [
+            "Crouch and plant one hand, elbow into the side of the waist.",
+            "Lean onto the elbow.",
+            "Lift the feet.",
+            "Hold the body horizontal."
+          ],
+          "related": ["turtle", "airchair"]
+        },
+        {
+          "slug": "hollowback",
+          "name": "Hollowback",
+          "difficulty": "Advanced",
+          "danceSlug": "hollowback",
+          "summary": "A handstand or headstand with the back arched and the legs dropped over.",
+          "description": "The hollowback is a handstand (or headstand) with the back deeply arched and the legs hanging over behind — a flexible, stylish freeze.",
+          "steps": [
+            "Get into a handstand or headstand.",
+            "Arch the back.",
+            "Let the legs drop over behind you.",
+            "Hold with the chest pushed forward."
+          ],
+          "related": ["headstand", "handstand"]
+        },
+        {
+          "slug": "handstand",
+          "name": "Handstand",
+          "difficulty": "Intermediate",
+          "danceSlug": "handstand",
+          "summary": "Balancing on the hands — the base for power moves and freezes.",
+          "description": "The handstand builds the strength and balance that almost all advanced breaking needs.",
+          "steps": [
+            "Place the hands shoulder-width apart.",
+            "Kick up one leg, then the other.",
+            "Stack hips over shoulders.",
+            "Hold, using the fingers to balance."
+          ],
+          "related": ["hollowback", "airflare"]
+        },
+        {
+          "slug": "frog",
+          "name": "Frog",
+          "aliases": ["frog pose"],
+          "difficulty": "Beginner",
+          "danceSlug": "frog-pose",
+          "summary": "Balancing on the hands with the knees resting on the elbows — a strength base for freezes.",
+          "description": "The frog (crow pose) balances on the hands with the knees resting on the elbows. It is a strength base for the turtle and other freezes.",
+          "steps": [
+            "Crouch with hands flat.",
+            "Put the knees on the elbows.",
+            "Lean forward.",
+            "Lift the feet."
+          ],
+          "related": ["turtle", "baby-freeze"]
+        }
+      ]
+    },
+    {
+      "name": "Power moves",
+      "terms": [
+        {
+          "slug": "windmill",
+          "name": "Windmill",
+          "difficulty": "Advanced",
+          "danceSlug": "windmill",
+          "summary": "Rolling continuously across the upper back and chest with the legs spread in a V.",
+          "description": "The windmill is the classic power move: the body rolls from the upper back across the chest and back again, with the legs spread wide in a V, driven by momentum.",
+          "steps": [
+            "Start from a baby freeze.",
+            "Kick the top leg over and roll onto the upper back.",
+            "Keep the legs spread as you roll over the chest.",
+            "Push with the hands to keep going."
+          ],
+          "tips": [
+            "Keep the legs wide and straight. Bent legs kill the momentum."
+          ],
+          "related": ["baby-freeze", "headspin", "flare"]
+        },
+        {
+          "slug": "backspin",
+          "name": "Backspin",
+          "difficulty": "Intermediate",
+          "danceSlug": "backspin",
+          "summary": "Spinning on the upper back with the legs tucked.",
+          "description": "The backspin spins on the upper back, legs tucked, driven by a push of the hands or a swing of the legs.",
+          "steps": [
+            "Sit and lie back on the upper back.",
+            "Tuck the legs.",
+            "Push with the hands to spin.",
+            "Pull the legs in tight to speed up."
+          ],
+          "related": ["windmill", "coin-drop"]
+        },
+        {
+          "slug": "headspin",
+          "name": "Headspin",
+          "difficulty": "Advanced",
+          "danceSlug": "headspin",
+          "summary": "Spinning upside down on the head.",
+          "description": "The headspin spins on the head in a headstand, driven by the hands and legs. It is learned in a beanie on a smooth floor.",
+          "steps": [
+            "Get into a headstand.",
+            "Push with the hands to start spinning.",
+            "Keep the body straight above the head.",
+            "Push again as you come round."
+          ],
+          "tips": [
+            "Always wear a beanie. Build neck strength first."
+          ],
+          "related": ["headstand", "windmill"]
+        },
+        {
+          "slug": "flare",
+          "name": "Flare",
+          "difficulty": "Advanced",
+          "danceSlug": "flare",
+          "summary": "Swinging the legs round the body in a wide V while balancing on alternating hands.",
+          "description": "The flare comes from gymnastics' Thomas flair: balancing on alternating hands while the straight legs swing in a wide V round the body.",
+          "steps": [
+            "Start with the hands down, legs apart.",
+            "Swing one leg round.",
+            "Shift the weight between hands.",
+            "Keep the legs straight and circling."
+          ],
+          "related": ["airflare", "windmill"]
+        },
+        {
+          "slug": "airflare",
+          "name": "Airflare",
+          "difficulty": "Advanced",
+          "danceSlug": "airflare",
+          "summary": "Rotating in the air on alternate hands with the body at an angle.",
+          "description": "The airflare is an advanced power move: the body rotates in the air at an angle, supported by alternating hands.",
+          "steps": [
+            "Start from a handstand position with a twist.",
+            "Swing the legs round.",
+            "Push off one hand and catch with the other.",
+            "Keep the body rotating."
+          ],
+          "related": ["flare", "windmill"]
+        },
+        {
+          "slug": "swipe",
+          "name": "Swipe",
+          "difficulty": "Advanced",
+          "danceSlug": "swipe",
+          "summary": "A whipping power move twisting the body horizontally from hands to feet.",
+          "description": "The swipe twists the whole body from a back position to the hands, whipping round horizontally and landing on the feet.",
+          "steps": [
+            "Start leaning back on one hand.",
+            "Swing the arms across.",
+            "Kick the legs over.",
+            "Land on the feet."
+          ],
+          "related": ["windmill", "flare"]
+        },
+        {
+          "slug": "halo",
+          "name": "Halo",
+          "difficulty": "Advanced",
+          "danceSlug": "halo",
+          "summary": "Rotating on the head and hands in a circle, the body swinging round like a halo.",
+          "description": "The halo rotates on the head, rolling from the forehead round the side and back, with the hands supporting and the legs swinging round.",
+          "steps": [
+            "Start on the head and hands.",
+            "Roll on the head from the forehead to the side.",
+            "Swing the legs round.",
+            "Use the hands to push."
+          ],
+          "related": ["headspin", "windmill"]
+        },
+        {
+          "slug": "crickets",
+          "name": "Crickets",
+          "difficulty": "Advanced",
+          "danceSlug": "crickets",
+          "summary": "Spinning on the hands in a turtle, with hops.",
+          "description": "Crickets spin the body in a turtle position by hopping from one hand to the other with the elbow tucked.",
+          "steps": [
+            "Get into a turtle.",
+            "Hop from one hand to the other to rotate.",
+            "Keep the body horizontal.",
+            "Keep spinning."
+          ],
+          "related": ["turtle", "jackhammer"]
+        },
+        {
+          "slug": "jackhammer",
+          "name": "Jackhammer",
+          "difficulty": "Advanced",
+          "danceSlug": "jackhammer",
+          "summary": "Hopping on one hand in a turtle-like position while spinning.",
+          "description": "The jackhammer hops on one hand in a turtle-like position while spinning, like a jackhammer.",
+          "steps": [
+            "Get into a turtle.",
+            "Lift one hand.",
+            "Hop on the other hand to spin.",
+            "Keep the body horizontal."
+          ],
+          "related": ["crickets", "turtle"]
+        },
+        {
+          "slug": "hand-glide",
+          "name": "Hand glide",
+          "difficulty": "Intermediate",
+          "danceSlug": "hand-glide",
+          "summary": "Spinning on one hand with the elbow in the hip, the body horizontal.",
+          "description": "The hand glide spins on one hand with the elbow tucked into the hip, pushing with the other hand.",
+          "steps": [
+            "Get into a turtle on one hand.",
+            "Push with the other hand to spin.",
+            "Keep the body horizontal.",
+            "Push again."
+          ],
+          "related": ["turtle", "crickets"]
+        },
+        {
+          "slug": "1990",
+          "name": "1990",
+          "aliases": ["nineteen ninety"],
+          "difficulty": "Advanced",
+          "danceSlug": "1990-spin",
+          "summary": "Spinning on one hand in a straight handstand.",
+          "description": "The 1990 is a handstand spin on one hand: the body stays straight and vertical while it rotates on a single hand. It is named after the year it spread.",
+          "steps": [
+            "Kick up into a handstand with a twist of the hips.",
+            "Take one hand off the floor.",
+            "Rotate on the other hand, body straight.",
+            "Pull the free arm and legs in to spin faster."
+          ],
+          "related": ["2000", "handstand", "headspin"]
+        },
+        {
+          "slug": "2000",
+          "name": "2000",
+          "aliases": ["two thousand"],
+          "difficulty": "Advanced",
+          "danceSlug": "2000-spin",
+          "summary": "Spinning in a handstand on both hands stacked on top of each other.",
+          "description": "The 2000 spins in a handstand with both hands stacked, one on the other, the body straight and turning like a top.",
+          "steps": [
+            "Kick up into a handstand, hands close together.",
+            "Stack one hand on the other.",
+            "Spin, keeping the body straight.",
+            "Tuck the legs to speed up."
+          ],
+          "related": ["1990", "handstand"]
+        },
+        {
+          "slug": "munchmill",
+          "name": "Munchmill",
+          "difficulty": "Advanced",
+          "danceSlug": "munchmill",
+          "summary": "A windmill with the legs bent and tucked in, rolling low and fast.",
+          "description": "The munchmill is a windmill variation where the legs tuck in towards the chest instead of spreading into a V, rolling low and fast across the back.",
+          "steps": [
+            "Start as for a windmill.",
+            "Roll across the back with the knees pulled in.",
+            "Keep the roll going over the chest.",
+            "Open to a normal windmill or freeze out."
+          ],
+          "related": ["windmill", "backspin"]
+        },
+        {
+          "slug": "elbow-airflare",
+          "name": "Elbow airflare",
+          "difficulty": "Advanced",
+          "danceSlug": "elbow-cartwheel",
+          "summary": "An airflare variation rotating on the elbows.",
+          "description": "The elbow airflare (elbow cartwheel) rotates on the elbows, the body swinging in the air.",
+          "steps": [
+            "Start on the elbows.",
+            "Swing the legs round.",
+            "Switch elbows.",
+            "Keep rotating."
+          ],
+          "related": ["airflare", "flare"]
+        }
+      ]
+    },
+    {
+      "name": "Transitions and blow-ups",
+      "terms": [
+        {
+          "slug": "kip-up",
+          "name": "Kip-up",
+          "aliases": ["kick up", "nip up"],
+          "difficulty": "Intermediate",
+          "danceSlug": "kickup",
+          "summary": "Springing from the back straight to the feet.",
+          "description": "The kip-up springs from lying on the back to standing: roll back onto the shoulders, kick the legs up and forward, and push through the hands.",
+          "steps": [
+            "Lie on your back, hands by your ears.",
+            "Roll back onto the shoulders.",
+            "Kick the legs up and forward.",
+            "Push with the hands and land on the feet."
+          ],
+          "related": ["shoulder-roll", "roll-back"]
+        },
+        {
+          "slug": "shoulder-roll",
+          "name": "Shoulder roll",
+          "difficulty": "Beginner",
+          "danceSlug": "shoulder-roll",
+          "summary": "Rolling diagonally over one shoulder and back to the feet.",
+          "description": "The shoulder roll rolls diagonally across the back over one shoulder, a safe way to move through the floor and a transition into footwork.",
+          "steps": [
+            "Kneel down.",
+            "Tuck the head and roll over one shoulder.",
+            "Roll diagonally across the back.",
+            "Come up onto the feet."
+          ],
+          "related": ["kip-up", "roll-back"]
+        },
+        {
+          "slug": "roll-back",
+          "name": "Roll back",
+          "difficulty": "Intermediate",
+          "danceSlug": "roll-back-up",
+          "summary": "Rolling back onto the shoulders and up to a one-hand freeze.",
+          "description": "The roll back rolls back onto the shoulders and up to a freeze, often a one-hand freeze or airchair.",
+          "steps": [
+            "Sit and roll back onto the shoulders.",
+            "Swing the legs over.",
+            "Put one hand down.",
+            "Come up into a freeze."
+          ],
+          "related": ["shoulder-roll", "airchair"]
+        },
+        {
+          "slug": "knee-slide",
+          "name": "Knee slide",
+          "difficulty": "Intermediate",
+          "danceSlug": "the-knee-slide",
+          "summary": "Sliding on the knees across the floor into a pose.",
+          "description": "The knee slide slides across the floor on the knees (with knee pads or on a slick floor) into a pose.",
+          "steps": [
+            "Run a few steps.",
+            "Drop onto the shins.",
+            "Slide, leaning back.",
+            "Finish in a pose."
+          ],
+          "related": ["pin-drop", "knee-switch"]
+        },
+        {
+          "slug": "suicide",
+          "name": "Suicide",
+          "difficulty": "Advanced",
+          "danceSlug": "suicide-drop",
+          "summary": "A dramatic fall straight onto the back, landing safely.",
+          "description": "A suicide is a dramatic fall: the dancer drops straight onto the back as if falling, landing safely on the shoulders and upper back.",
+          "steps": [
+            "Stand straight.",
+            "Fall backwards.",
+            "Tuck the chin.",
+            "Land on the upper back and shoulders."
+          ],
+          "tips": [
+            "Learn it on a mat first."
+          ],
+          "related": ["shoulder-roll", "kip-up"]
+        }
+      ]
+    }
+  ]
+}

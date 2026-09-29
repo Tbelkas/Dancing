@@ -28,7 +28,13 @@ glossary answers "what *is* this move and how do I do it?".
   warning and leave the term unlinked; links re-resolve every boot.
 - Categories render in the order of their first term; terms in file order.
 
-Live: **House** (2026-09-29, 61 terms / 52 moves; move names follow BANRI Jackin's numbered basics and English tutorial breakdowns). Next styles: reuse the roadmap's style list.
+Live (2026-09-29): **House** (66 terms), **Hip-hop** (83), **Breakdance** (56). Next styles: reuse
+the roadmap's style list. Every learnable term should have a clip: when the catalog lacks one, add
+the move to `scripts/style_catalog.py` (prefix the style name if the bare name exists elsewhere -
+the seeder skips known names) and run `seed_style_moves.py` search -> curate `_proto/style_seed.json`
+-> insert -> `verify_intake.py --only-unscored apply` -> `promote_confirmed.py apply` -> promote apply,
+then set `danceSlug`. Silent/wordless tutorials (BANRI Jackin) never verify; approve them by hand
+with a `ReviewNote` after checking the title.
 
 ## Backend
 - `Models/GlossaryTerm.cs`, `Models/UserLearnedGlossaryTerm.cs`; migration `AddGlossary`.
