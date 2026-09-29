@@ -28,7 +28,7 @@ glossary answers "what *is* this move and how do I do it?".
   warning and leave the term unlinked; links re-resolve every boot.
 - Categories render in the order of their first term; terms in file order.
 
-Live (2026-09-29): **House** (66 terms), **Hip-hop** (83), **Breakdance** (56). Next styles: reuse
+Live (2026-09-29): **House** (61 terms), **Hip-hop** (83), **Breakdance** (56). Next styles: reuse
 the roadmap's style list. Every learnable term should have a clip: when the catalog lacks one, add
 the move to `scripts/style_catalog.py` (prefix the style name if the bare name exists elsewhere -
 the seeder skips known names) and run `seed_style_moves.py` search -> curate `_proto/style_seed.json`
