@@ -1,6 +1,6 @@
 # DancePlatform — working rules
 
-ASP.NET Core 8 API + Angular 17 SPA + PostgreSQL, deployed to a Raspberry Pi.
+ASP.NET Core 8 API + Angular 17 SPA + PostgreSQL, deployed to `192.168.0.196` (`ssh hp@192.168.0.196`).
 Architecture, schema, and conventions live in [`.ai-context/`](.ai-context/00-README.md) —
 read `core-context.md` first, then the relevant `module-context/` file.
 
@@ -9,7 +9,7 @@ read `core-context.md` first, then the relevant `module-context/` file.
 ## Keeping the e2e suite honest
 
 `e2e/` holds a Playwright suite that runs against the **deployed** app. It's the only thing
-that catches "the Pi is serving a broken bundle". It's also the first thing to rot if UI
+that catches "production is serving a broken bundle". It's also the first thing to rot if UI
 changes land without it, so:
 
 ### After changing anything in `dance-platform-ui/src`
@@ -77,6 +77,9 @@ permission rule either — `git grep` finds those too.
 
 ## Deploying
 
-`deploy-dance.bat` commits, pushes, and runs the update script on the Pi. Per the
+`deploy-dance.bat` commits, pushes, builds the API and UI on this machine, and streams them to
+`~/deploy-dance` on .196, which swaps them in and rolls the API back if it does not come up.
+The API's config (connection string, JWT key) lives in `dance.service` on .196, not in
+`appsettings.json`. The nightly dead-video sweep and DB backup are cron jobs on .196. Per the
 deploy-test-fix loop: deploy, verify live, fix — don't call a change done until it's been
 seen working on `dance.takelord.com`.

@@ -20,7 +20,7 @@ videos. Results in `_proto/sweep_results.json`, log in `_proto/overnight.log`.
 
 ## Hard constraints — do not violate these
 
-1. **Never deploy.** Do not run `deploy-dance.bat`. The Pi is not to be touched.
+1. **Never deploy.** Do not run `deploy-dance.bat`. Production (.196) is not to be touched.
 2. **Never change the database schema.** No migrations, no `ALTER TABLE`.
 3. **The ONLY way you may write chips to prod is `scripts/apply_chips.py`**, and
    only if a variant genuinely beat the 0.449 baseline. It has the gate, the
