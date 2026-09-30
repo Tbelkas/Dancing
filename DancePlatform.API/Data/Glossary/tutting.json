@@ -1,0 +1,806 @@
+// Tutting glossary. Read by GlossarySeeder on every boot; the file is the source of truth.
+// Slugs are the stable key that users' learned marks hang off - never rename one.
+// "danceSlug" borrows a catalog dance for its videos. Only link a dance whose video really
+// shows the move. Mechanics come from the Tutting roadmap's sources and teachers' own words
+// (JayFunk, Pnut, Rafi, nathaniel2794, EmazingLights, How to Dance Liquid).
+{
+  "styleName": "Tutting",
+  "categories": [
+    {
+      "name": "Foundations",
+      "terms": [
+        {
+          "slug": "tutting",
+          "name": "Tutting",
+          "learnable": false,
+          "summary": "Angular, geometric popping: the arms and hands hit right-angled shapes, one position at a time.",
+          "description": "Tutting was created in 1979 by Mark Benson — King Boogaloo Tut — who took the angular figures of Egyptian bas-reliefs and hit them like a popper; the name comes from King Tutankhamun. It is an element of popping that grew its own community. The whole mechanic is to pop into a position, hold it, and snap to the next, so a dancer who makes perfect boxes but drifts between them is not really tutting. The shapes are measured against a grid of fixed points on your own body, which is what makes the style learnable rather than a matter of copying.",
+          "tips": [
+            "Learn the hit and the right angle before any combo.",
+            "Stretch the wrists and fingers before every session — their range is the ceiling on how clean your angles can be."
+          ],
+          "related": ["the-hit", "right-angles", "king-tut", "the-grid"]
+        },
+        {
+          "slug": "tut-unit",
+          "name": "The tut unit",
+          "learnable": false,
+          "summary": "The measuring stick of tutting: the length of your forearm, from wrist to elbow.",
+          "description": "Teachers who work on the grid measure it in \"tut units\": the distance from wrist to elbow, which is about the same as elbow to shoulder, and about twice the length of the hand. A hand is half a unit, and the fingers divide it further. Thinking in units is what lets you snap shapes to the grid, because every limb segment is a known length.",
+          "tips": [
+            "Check a shape by counting units: two forearms side by side should span exactly two."
+          ],
+          "related": ["the-grid", "four-square", "tut-scale"]
+        },
+        {
+          "slug": "planes",
+          "name": "Planes",
+          "learnable": false,
+          "summary": "The flat pane in front of the body where most tutting lives — and the other planes you can move onto.",
+          "description": "Most tutting sits on one flat pane of glass in front of the chest, facing the audience square on. Keeping a shape on its plane is what makes it read as geometry. Advanced tutters then deliberately move shapes onto other planes — horizontal, sideways, behind the body or on the floor — which is where tutting becomes three-dimensional.",
+          "tips": [
+            "Film yourself from the front. Anything that tilts off the plane shows up as a skewed shape."
+          ],
+          "related": ["3d-space", "back-tuts", "floor-tuts", "pivot-tuts"]
+        },
+        {
+          "slug": "point-to-point",
+          "name": "Point to point",
+          "learnable": false,
+          "summary": "A way of building combos: each arm has three points — fingertips, wrist, elbow — and any point can meet any point.",
+          "description": "One common way to invent tutting combinations is to label three points on each arm — fingertips, wrist and elbow — and move from shape to shape by connecting a point on one arm to a point on the other. Combined with the 90-degree rule, it multiplies the shapes you can find, and tracing from one point to the next is how you travel between them.",
+          "tips": [
+            "Stuck in a shape? Open one elbow to a new 90° angle — it frees a new point to connect to."
+          ],
+          "related": ["right-angles", "tracing", "tutting-combo"]
+        },
+        {
+          "slug": "gloving",
+          "name": "Gloving",
+          "learnable": false,
+          "summary": "The light-show hand-dance scene that grew out of finger tutting — finger rolls, whips, waves and tunnels.",
+          "description": "Finger tutting moved out of popping into gloving, where dancers wear light-up gloves and perform close up to rave music. Gloving added its own vocabulary — finger rolls, waves, whips, tunnels — and many of today's best finger tutters come from that scene. The moves in the Hands category draw on both.",
+          "related": ["finger-tutting", "finger-rolls", "whips", "tunneling"]
+        }
+      ]
+    },
+    {
+      "name": "Basics",
+      "terms": [
+        {
+          "slug": "tutting-basics",
+          "name": "Tutting basics",
+          "difficulty": "Beginner",
+          "danceSlug": "tutting",
+          "summary": "A first full pass through the style: angles, boxes and a short phrase.",
+          "description": "Watch a beginner tutorial from start to finish before drilling anything, so the later concepts have something to attach to. Most beginner lessons follow the same order: stretch, find the 90° angle, make a few basic positions, then join them into a short combo.",
+          "steps": [
+            "Stretch the wrists and fingers.",
+            "Hold the arms in right angles at chest height.",
+            "Move from one basic position to the next, hitting each one.",
+            "String four positions into an eight-count."
+          ],
+          "tips": [
+            "Come back to this whenever a concept stops making sense on its own."
+          ],
+          "related": ["right-angles", "the-hit", "tutting-combo"]
+        },
+        {
+          "slug": "the-hit",
+          "name": "The hit",
+          "difficulty": "Beginner",
+          "danceSlug": "the-hit",
+          "summary": "Pop into a shape, hold it, snap to the next — the grammar of tutting.",
+          "description": "Tutting is a popping element, and the hit is its founding mechanic: a sharp contraction as the arm arrives in a position, a clean hold, and a snap to the next with nothing visible in between. Shapes are the vocabulary; the hit is the grammar.",
+          "steps": [
+            "Hold the arms in a right angle.",
+            "Tense the forearms and hands sharply on the beat as you arrive.",
+            "Hold the shape still.",
+            "Snap to the next position and hit again."
+          ],
+          "tips": [
+            "If you can see the arm travelling between shapes, the hit is missing."
+          ],
+          "related": ["right-angles", "tutting", "hinges"]
+        },
+        {
+          "slug": "right-angles",
+          "name": "Right angles",
+          "aliases": ["90 degree rule", "90s"],
+          "difficulty": "Beginner",
+          "danceSlug": "right-angles",
+          "summary": "The 90° angle — the basic unit of the whole style.",
+          "description": "Every shape in tutting is built from right angles: elbows and wrists square, lines flat to the floor or straight up. The \"90-degree rule\" is that the hand stays straight in line with the forearm and the forearm meets the upper arm at 90°. A bent wrist (the \"duck face\") is the most common mistake.",
+          "steps": [
+            "Raise the upper arm level with the shoulder.",
+            "Bend the elbow to 90°, forearm straight up.",
+            "Keep the hand flat and in line with the forearm.",
+            "Check the angle in a mirror against a door frame."
+          ],
+          "tips": [
+            "Push the palm against a wall for a few minutes a day to extend the wrist's range."
+          ],
+          "related": ["the-hit", "king-tut", "tutting-stretches"]
+        },
+        {
+          "slug": "tutting-stretches",
+          "name": "Hand and wrist stretches",
+          "aliases": ["stretches"],
+          "difficulty": "Beginner",
+          "danceSlug": "tutting-stretches",
+          "summary": "Stretching the wrists and fingers before every session.",
+          "description": "Tutting holds the wrists and fingers at the end of their range for minutes at a time, and that range is the hard limit on how clean your angles can be. Two minutes of stretching before every session is part of the technique, not an extra.",
+          "steps": [
+            "Pull the fingers of one hand back gently with the other hand.",
+            "Press both palms flat against a wall with the fingers pointing down.",
+            "Circle the wrists slowly in both directions.",
+            "Spread and close the fingers several times."
+          ],
+          "tips": [
+            "Never force a stretch to pain. Range comes over weeks."
+          ],
+          "related": ["right-angles", "wrist-rolls"]
+        },
+        {
+          "slug": "wrist-rolls",
+          "name": "Wrist rolls",
+          "difficulty": "Beginner",
+          "danceSlug": "wrist-rolls",
+          "summary": "Rolling the hand through its range while the forearm stays locked.",
+          "description": "A wrist roll turns the hand in a circle around the wrist while the forearm stays still. It is the joint movement that joins one angle to the next, and the easiest way to make a flat shape read as three-dimensional.",
+          "steps": [
+            "Hold the forearm still in front of you.",
+            "Roll the hand down, out, up and in around the wrist.",
+            "Keep the forearm locked.",
+            "Roll the other way, then both hands together."
+          ],
+          "related": ["hinges", "tutting-stretches", "finger-rolls"]
+        },
+        {
+          "slug": "king-tut",
+          "name": "King Tut",
+          "aliases": ["king tuts", "Egyptian"],
+          "difficulty": "Beginner",
+          "danceSlug": "king-tut",
+          "summary": "The origin move: forearms and upper arms flat and square to the audience, Egyptian-style.",
+          "description": "The King Tut is the original tutting figure, taken from the side-on, angular poses of Egyptian wall art. Forearms and upper arms stay flat and everything is square to the audience. Mr. Wiggles teaches it as an exercise in cleaner angles, and it is the best diagnostic of whether your right angles are really right.",
+          "steps": [
+            "Raise one arm to the side with the elbow bent to 90°.",
+            "Bring the other arm across the body at 90°.",
+            "Keep both hands flat and in line with the forearms.",
+            "Switch positions, hitting each one."
+          ],
+          "related": ["right-angles", "box-tuts", "tutting"]
+        },
+        {
+          "slug": "fixed-points",
+          "name": "Fixed points",
+          "aliases": ["fixed point"],
+          "difficulty": "Intermediate",
+          "danceSlug": "fixed-points",
+          "summary": "Choosing a point that does not move while everything rotates around it.",
+          "description": "A fixed point is a knuckle, elbow or fingertip that stays exactly where it is while the rest of the body moves around it. It is the concept that turns a sequence of poses into an illusion, and one of the most often skipped.",
+          "steps": [
+            "Place a fingertip on an imaginary point in the air.",
+            "Move the elbow and body around it.",
+            "Keep the fingertip absolutely still.",
+            "Try it with the elbow or the wrist as the fixed point."
+          ],
+          "tips": [
+            "Practise against a real surface first — a wall or a table — then take the wall away."
+          ],
+          "related": ["isolation-points", "the-magic-box", "hinges"]
+        }
+      ]
+    },
+    {
+      "name": "The grid and boxes",
+      "terms": [
+        {
+          "slug": "four-body-points",
+          "name": "The four body points",
+          "aliases": ["body points"],
+          "difficulty": "Beginner",
+          "danceSlug": "four-body-points",
+          "summary": "Chin, chest, waist, shoulder — the reference points the hands travel between.",
+          "description": "Every serious syllabus organises tutting around fixed points on your own body: chin, chest, waist and shoulder. They never move, so the arms always have somewhere definite to be. Knowing them blind is what makes back tuts possible later.",
+          "steps": [
+            "Touch your chin with the fingertips of each hand in turn.",
+            "Touch your chest, waist and shoulder the same way.",
+            "Do it with your eyes closed.",
+            "Hit each point on the beat."
+          ],
+          "related": ["the-grid", "four-square", "back-tuts"]
+        },
+        {
+          "slug": "four-square",
+          "name": "The four square",
+          "aliases": ["four square"],
+          "difficulty": "Beginner",
+          "danceSlug": "the-four-square",
+          "summary": "Two forearms and two upper arms making four right angles in front of the chest.",
+          "description": "The four square is the first real tutting position: two forearms and two upper arms make four right angles in front of the chest. Every later shape is a variation on it.",
+          "steps": [
+            "Raise both upper arms to shoulder height, in front of you.",
+            "Bend both elbows to 90°.",
+            "Place one forearm above the other so the arms form four right angles.",
+            "Hold it square to the front."
+          ],
+          "related": ["four-body-points", "the-grid", "advanced-four-square", "box-tuts"]
+        },
+        {
+          "slug": "the-grid",
+          "name": "The grid",
+          "aliases": ["holy grid", "levels"],
+          "difficulty": "Intermediate",
+          "danceSlug": "the-grid",
+          "summary": "An imaginary lattice of positions, measured in forearm lengths, that the arms snap to.",
+          "description": "The grid expands the four square up and down into levels, so the arms have a whole lattice of positions rather than one. Teachers describe it as graph paper laid over you, measured in tut units (wrist to elbow), with your joints snapping to its lines. Not every shape has to sit on it, but being able to feel when you are on or off the grid is what keeps tutting clean at speed.",
+          "steps": [
+            "Hold a four square at chest height.",
+            "Move the whole shape up one level, then down one.",
+            "Move a single forearm one unit sideways.",
+            "Name each position as you hit it."
+          ],
+          "tips": [
+            "Practise a scale — a fixed progression across the grid — the way musicians practise scales."
+          ],
+          "related": ["tut-unit", "four-square", "tut-scale", "four-body-points"]
+        },
+        {
+          "slug": "tut-scale",
+          "name": "Tut scale",
+          "aliases": ["scales", "fixed line scale"],
+          "difficulty": "Intermediate",
+          "danceSlug": "tut-scale",
+          "summary": "A fixed progression of shapes across the grid, drilled like a musician's scale.",
+          "description": "A tut scale is a set progression of positions travelling across the grid from one end to the other. It isn't dance on its own; like a piano scale, it trains you to move comfortably through the grid so that the positions are in your body when you freestyle. The practice was spread by liquid and tutting teachers such as Shifted Shapes and Houdoken.",
+          "steps": [
+            "Start in a fixed first position.",
+            "Move one segment at a time to the next grid position.",
+            "Continue through the whole progression.",
+            "Run it back the other way, then speed it up."
+          ],
+          "related": ["the-grid", "tut-unit", "freestyle-tutting"]
+        },
+        {
+          "slug": "box-tuts",
+          "name": "Box tuts",
+          "aliases": ["boxes", "box tut"],
+          "difficulty": "Beginner",
+          "danceSlug": "box-tuts",
+          "summary": "Closing the arms into a box or rectangle, with the hands completing the shape.",
+          "description": "Box tuts close the arms into a real box or rectangle, with the hands finishing the shape. It is the second thing on every syllabus after the King Tut, and the first shape that reads from across a room. Most arm positions are half a box, and you learn to see the imaginary line that would close it.",
+          "steps": [
+            "Make a right angle with one arm.",
+            "Bring the other hand to close the open side.",
+            "Keep all four corners square.",
+            "Move the box to a new position and close it again."
+          ],
+          "related": ["squaring-the-boxes", "the-magic-box", "four-square", "outer-boxes"]
+        },
+        {
+          "slug": "squaring-the-boxes",
+          "name": "Squaring the boxes",
+          "difficulty": "Intermediate",
+          "danceSlug": "squaring-the-boxes",
+          "summary": "Keeping a box truly square while it moves and rotates.",
+          "description": "A box that sags into a parallelogram as soon as it moves is the difference between approximate and clean tutting. Squaring means keeping every corner at 90° while the whole shape travels or turns.",
+          "steps": [
+            "Make a box in front of the chest.",
+            "Move it slowly to one side.",
+            "Check that every corner stays square.",
+            "Rotate it a quarter turn, keeping it square."
+          ],
+          "related": ["box-tuts", "the-magic-box"]
+        },
+        {
+          "slug": "the-magic-box",
+          "name": "The magic box",
+          "difficulty": "Intermediate",
+          "danceSlug": "the-magic-box",
+          "summary": "A box that seems to hang in space while the arms rebuild it with different limbs.",
+          "description": "The magic box combines fixed points and boxes: the box appears to stay fixed in the air while the arms take it apart and rebuild it around a different pair of limbs.",
+          "steps": [
+            "Make a box in front of you.",
+            "Fix two corners in the air.",
+            "Swap which arm makes each side.",
+            "Keep the box itself exactly where it was."
+          ],
+          "related": ["box-tuts", "fixed-points"]
+        },
+        {
+          "slug": "advanced-four-square",
+          "name": "Advanced four square",
+          "difficulty": "Advanced",
+          "danceSlug": "advanced-four-square",
+          "summary": "The four square rotated, inverted and stacked above and behind the body.",
+          "description": "Once the basic four square is automatic, it can be rotated, turned upside down and stacked above or behind the body. Don't start this before the plain version is effortless.",
+          "steps": [
+            "Hit a clean four square.",
+            "Rotate it a quarter turn.",
+            "Invert it.",
+            "Stack it above the head, then behind the body."
+          ],
+          "related": ["four-square", "3d-space"]
+        },
+        {
+          "slug": "triangle-tuts",
+          "name": "Triangle tuts",
+          "aliases": ["triangles"],
+          "difficulty": "Intermediate",
+          "danceSlug": "triangle-tuts",
+          "summary": "Shapes made with triangles instead of boxes.",
+          "description": "Triangle tuts replace some of the right angles with diagonals, so the arms and hands form triangles rather than boxes. They are a common way to add variety once boxes are clean, and they still depend on fixed points and hits.",
+          "steps": [
+            "Make a right angle with one arm.",
+            "Bring the other forearm in on a diagonal to close a triangle.",
+            "Hit and hold the shape.",
+            "Move to a new triangle, keeping one point fixed."
+          ],
+          "related": ["box-tuts", "fixed-points"]
+        }
+      ]
+    },
+    {
+      "name": "Moving between shapes",
+      "terms": [
+        {
+          "slug": "tutting-transitions",
+          "name": "Transitions",
+          "aliases": ["transitions"],
+          "difficulty": "Intermediate",
+          "danceSlug": "tutting-transitions",
+          "summary": "Getting from one shape to the next without a visible scramble.",
+          "description": "Hitting positions is the easy half. A path between them that stays on the grid is the craft, and it is what stops a tutter looking like a slideshow.",
+          "steps": [
+            "Pick two positions.",
+            "Find the shortest path that keeps the arms on the grid.",
+            "Hit the first, travel cleanly, hit the second.",
+            "Chain three or four the same way."
+          ],
+          "related": ["tracing", "hinges", "folds"]
+        },
+        {
+          "slug": "tracing",
+          "name": "Tracing",
+          "difficulty": "Beginner",
+          "danceSlug": "tracing",
+          "summary": "One hand following the line of the other arm or of a held shape.",
+          "description": "Tracing runs one hand along the lines the other arm is making — from fingertip to wrist to elbow — or along a shape held in the air. JayFunk teaches it second, before any combo, because it gives a phrase continuity, and it is the usual way out when you get stuck.",
+          "steps": [
+            "Hold one arm in a right angle.",
+            "Place the other hand's fingertips on its fingertips.",
+            "Slide along the arm to the wrist, then to the elbow.",
+            "Trace back the other way, then practise it slowly in freestyle."
+          ],
+          "related": ["point-to-point", "tutting-transitions", "tunneling"]
+        },
+        {
+          "slug": "isolation-points",
+          "name": "Isolation points",
+          "difficulty": "Intermediate",
+          "danceSlug": "isolation-points",
+          "summary": "A fixed point inside a moving phrase: one joint stays still while the next shape forms around it.",
+          "description": "An isolation point is a joint — a wrist, an elbow, a whole forearm — that stays absolutely still while you move to the next position. JayFunk describes it as the thing that makes combos look cleaner and creates illusions.",
+          "steps": [
+            "Hold a shape.",
+            "Choose the wrist as the isolation point.",
+            "Move to the next shape without moving that wrist.",
+            "Change the isolation point for the next move."
+          ],
+          "related": ["fixed-points", "hinges"]
+        },
+        {
+          "slug": "hinges",
+          "name": "Hinges",
+          "aliases": ["hinging"],
+          "difficulty": "Intermediate",
+          "danceSlug": "hinges",
+          "summary": "Treat a joint as a hinge with one axis, so a limb folds flat instead of swinging.",
+          "description": "JayFunk's image: pretend a bolt goes through your wrist, elbow or knuckles, so the limb can only turn around that one axis. The limb then folds and opens flat, which makes tutting look mechanical. You can add dime stops — tiny hits — as it turns, or push and pull another part of the arm while the hinge stays put.",
+          "steps": [
+            "Imagine a bolt through your elbow.",
+            "Turn the forearm around it, staying on one plane.",
+            "Move the bolt to the wrist and turn the hand.",
+            "Add small hits as it turns: tick, tick, tick."
+          ],
+          "related": ["isolation-points", "wrist-rolls", "folds"]
+        },
+        {
+          "slug": "folds",
+          "name": "Folds and unfolds",
+          "aliases": ["folding", "unfolds"],
+          "difficulty": "Intermediate",
+          "danceSlug": "folds-and-unfolds",
+          "summary": "Collapsing a shape into itself and opening it back out along the same path.",
+          "description": "A fold closes a shape up — forward, back, up — by letting the rotation points (fingertips, wrist, elbow) collapse, and an unfold opens it again the same way. It is the easiest way out of a position you have painted yourself into.",
+          "steps": [
+            "Hold a shape.",
+            "Fold the hand at the wrist, then the forearm at the elbow.",
+            "Open it back out the same way.",
+            "Try folding forward, back and up."
+          ],
+          "related": ["crumbling", "hinges"]
+        },
+        {
+          "slug": "crumbling",
+          "name": "Crumbling",
+          "aliases": ["crumble"],
+          "difficulty": "Intermediate",
+          "danceSlug": "crumbling",
+          "summary": "Letting a shape fall apart joint by joint, as if the hand were melting.",
+          "description": "Crumbling makes leaving a shape into a move of its own: the hand melts down, and in the detailed version the fingers fold one at a time starting with the pinky. Keep the 90° lines while it happens, and practise slowly.",
+          "steps": [
+            "Hold a flat hand at the end of a right angle.",
+            "Curl it down slowly, as if melting.",
+            "Detailed version: fold the fingers one at a time from the pinky.",
+            "Open it back up the same way."
+          ],
+          "related": ["folds", "finger-rolls"]
+        },
+        {
+          "slug": "flip-tuts",
+          "name": "Flip tuts",
+          "aliases": ["flips", "horizontal flip tuts"],
+          "difficulty": "Intermediate",
+          "danceSlug": "flip-tuts",
+          "summary": "Flipping one hand over while its fingertips stay connected to the other.",
+          "description": "In flip tuts the hands stay joined at the fingertips while one flips over, as if hinged there, and the other follows to meet it. They can be done vertically or horizontally, going over and under. When a hand gets stuck, teachers turn it first and then flip it.",
+          "steps": [
+            "Join the fingertips of both hands in front of you.",
+            "Flip one hand down, keeping the fingertips attached.",
+            "Bring the other hand round to meet it.",
+            "Keep alternating; when stuck, turn the hand, then flip."
+          ],
+          "related": ["pivot-tuts", "outer-tuts", "hinges"]
+        },
+        {
+          "slug": "pivot-tuts",
+          "name": "Pivot tuts",
+          "aliases": ["pivoting tuts"],
+          "difficulty": "Intermediate",
+          "danceSlug": "pivot-tuts",
+          "summary": "The same connected shapes turned horizontal, upside down or sideways.",
+          "description": "Pivot tuts keep the hands connected and pivot the whole shape — horizontal, upside down or sideways — so the same positions read completely differently.",
+          "steps": [
+            "Make a connected hand shape in front of you.",
+            "Pivot it until the hands are horizontal.",
+            "Pivot it upside down.",
+            "Repeat the same shapes sideways."
+          ],
+          "related": ["flip-tuts", "planes", "outer-boxes"]
+        },
+        {
+          "slug": "outer-tuts",
+          "name": "Outer tuts",
+          "aliases": ["outer tuts"],
+          "difficulty": "Intermediate",
+          "danceSlug": "outer-tuts",
+          "summary": "Arm tuts on twelve positions around the body, away from the chest.",
+          "description": "Outer tuts take the arms away from the chest to a set of positions around the body — overhead, at the sides, at the hips — with a flip or turn possible at every position. nathaniel2794 teaches them as twelve basic positions, practised on both arms.",
+          "steps": [
+            "Learn the positions around the body on one arm.",
+            "Move from each position only to its neighbours.",
+            "Add a flip or turn at each position.",
+            "Do it with both arms at once."
+          ],
+          "related": ["outer-boxes", "flip-tuts", "the-grid"]
+        },
+        {
+          "slug": "outer-boxes",
+          "name": "Outer boxes",
+          "difficulty": "Intermediate",
+          "danceSlug": "outer-boxes",
+          "summary": "Boxes pushed out away from the body, and carried overhead.",
+          "description": "Outer boxes grow out of pivot tuts: instead of staying close, the box comes out away from the body, can be carried up and over the head, and pulled back down into close boxes.",
+          "steps": [
+            "Start in pivot tuts.",
+            "Push the box out away from the body.",
+            "Carry it up over your head.",
+            "Pull it down and back into close boxes."
+          ],
+          "related": ["pivot-tuts", "box-tuts", "outer-tuts"]
+        }
+      ]
+    },
+    {
+      "name": "Off the flat plane",
+      "terms": [
+        {
+          "slug": "3d-space",
+          "name": "3D tutting",
+          "aliases": ["3D space"],
+          "difficulty": "Advanced",
+          "danceSlug": "3d-space",
+          "summary": "Shapes with depth away from the body, turned like a Rubik's cube.",
+          "description": "3D tutting builds shapes with depth: the shape has a back and two sides as well as a front, and you can turn it. It takes the style off the flat pane in front of the chest.",
+          "steps": [
+            "Make a box in front of you.",
+            "Push one side of it forward.",
+            "Turn the whole shape so a side faces the front.",
+            "Keep all the angles square."
+          ],
+          "related": ["planes", "advanced-four-square", "back-tuts"]
+        },
+        {
+          "slug": "back-tuts",
+          "name": "Back tuts",
+          "difficulty": "Advanced",
+          "danceSlug": "back-tuts",
+          "summary": "Shapes made behind the body, working only off the body points.",
+          "description": "Back tuts are made behind the torso, where you can't see your hands, so you work entirely from the body points. This is where memorising the grid pays off.",
+          "steps": [
+            "Touch a body point behind you — the shoulder blade or waist.",
+            "Make a right angle behind the back.",
+            "Hit it on the beat.",
+            "Move between two back positions."
+          ],
+          "related": ["four-body-points", "3d-space"]
+        },
+        {
+          "slug": "floor-tuts",
+          "name": "Floor tuts",
+          "difficulty": "Advanced",
+          "danceSlug": "floor-tuts",
+          "summary": "Tutting on the ground, using the floor as a fixed plane.",
+          "description": "Floor tuts take the grid to the ground and use the floor as one of the fixed planes — a side of the style that arm-only tutters never build.",
+          "steps": [
+            "Sit or kneel.",
+            "Place a forearm flat on the floor as a fixed line.",
+            "Build shapes against it.",
+            "Move between floor and standing shapes."
+          ],
+          "related": ["planes", "3d-space"]
+        }
+      ]
+    },
+    {
+      "name": "Hands",
+      "terms": [
+        {
+          "slug": "finger-tutting",
+          "name": "Finger tutting",
+          "difficulty": "Beginner",
+          "danceSlug": "finger-tutting",
+          "summary": "Tutting shrunk onto the fingers: right angles, fixed points and tracing at hand scale.",
+          "description": "Finger tutting does with the fingers what arm tutting does with the arms — right angles, fixed points, tracing — only smaller and faster. It has an agreed progression, Pnut's: finger tuts, then digits, then monstas.",
+          "steps": [
+            "Make an L with the thumb and index of each hand.",
+            "Join the two Ls.",
+            "Slide one up and drop it into a box.",
+            "Close the box and turn it."
+          ],
+          "related": ["finger-tuts", "digits", "monstas", "gloving"]
+        },
+        {
+          "slug": "finger-tuts",
+          "name": "Finger tuts",
+          "difficulty": "Beginner",
+          "danceSlug": "finger-tuts",
+          "summary": "The first tier: plain right-angle shapes made with the fingers, held clearly.",
+          "description": "Finger tuts are the beginner tier: right-angle shapes made with the fingers of both hands, held still enough to read. Pnut's starter combo makes two Ls, joins them, slides one up into a double L, drops into a box, closes it, turns it, and ends in a heart. Speed is worth nothing until the shapes are legible.",
+          "steps": [
+            "Make an L with each hand and put them together.",
+            "Slide one up into a double L.",
+            "Drop it into a small box and close the box.",
+            "Turn it, slide out, and finish in a heart."
+          ],
+          "related": ["finger-tutting", "digits"]
+        },
+        {
+          "slug": "digits",
+          "name": "Digits",
+          "difficulty": "Intermediate",
+          "danceSlug": "digits",
+          "summary": "The middle tier: fingers interlocked into one shape and rotated as a unit — built on finger rolls.",
+          "description": "Digits interlock the fingers of both hands into one shape and rotate it as a unit, so finger tutting starts to look like a mechanism. Pnut describes digits as finger rolls and finger tutting together, and trains them with loose, rolling fingers.",
+          "steps": [
+            "Loosen the fingers with finger rolls.",
+            "Interlock both hands into one shape.",
+            "Roll the knuckles to rotate the shape.",
+            "Speed it up gradually."
+          ],
+          "related": ["finger-rolls", "monstas", "finger-stacking"]
+        },
+        {
+          "slug": "monstas",
+          "name": "Monstas",
+          "aliases": ["monsters"],
+          "difficulty": "Advanced",
+          "danceSlug": "monstas",
+          "summary": "The advanced tier: compound digits folding shapes through each other.",
+          "description": "Monstas (\"monsters\") are Pnut's advanced tier: compound digits that fold several shapes through each other. He named them for Medusa's snake hair. They are at the limit of what most hands can do, and it is where people injure themselves.",
+          "steps": [
+            "Put the ring finger down.",
+            "Hook the middle finger around the pinky to make a circle.",
+            "Rest the index on top, thumb poking out, on both hands.",
+            "Touch the knuckles in an X and trace the thumbs round into a figure eight."
+          ],
+          "tips": [
+            "Pnut's own warning: his hands are unusual. Build up slowly."
+          ],
+          "related": ["digits", "finger-stacking"]
+        },
+        {
+          "slug": "finger-stacking",
+          "name": "Finger stacking",
+          "difficulty": "Intermediate",
+          "danceSlug": "finger-stacking",
+          "summary": "Stacking the fingers of both hands into a column and peeling them apart in order.",
+          "description": "Finger stacking layers the fingers of both hands one on top of another — index on middle, then the other hand, then the ring fingers — and peels them apart in order. It is really a finger-independence drill, and the harder digits depend on it.",
+          "steps": [
+            "Put the right index on top of the right middle finger.",
+            "Do the same on the left hand.",
+            "Stack the right middle on the ring finger, then the left.",
+            "Reverse the order to unstack, then speed up."
+          ],
+          "related": ["digits", "monstas"]
+        },
+        {
+          "slug": "tunneling",
+          "name": "Tunneling",
+          "aliases": ["tunnels"],
+          "difficulty": "Intermediate",
+          "danceSlug": "tunneling",
+          "summary": "Passing one hand through a gap in the other without either shape breaking.",
+          "description": "Tunneling passes one hand through the gap made by the other, so the two hands look like one object. JayFunk's version starts with the hands linked like a yin-yang, opens pinky, ring, middle, index, then reconnects the fingers the other way.",
+          "steps": [
+            "Link the hands, one over the other, like a yin-yang.",
+            "Open them: pinky, ring, middle, then index.",
+            "Go round and reconnect the fingers.",
+            "Close, then do it in the other direction."
+          ],
+          "related": ["tracing", "wave-tutting", "gloving"]
+        },
+        {
+          "slug": "finger-rolls",
+          "name": "Finger rolls",
+          "aliases": ["finger roll", "knuckle roll"],
+          "difficulty": "Beginner",
+          "danceSlug": "finger-rolls",
+          "summary": "Opening and closing the fingers one at a time, like a rolling wave.",
+          "description": "The finger roll is one of the most basic moves in gloving, and many harder moves — including digits — are built on it. From loose fists, the fingers open one at a time across both hands until they are flat, then close one at a time. It can face up or down.",
+          "steps": [
+            "Warm up with \"floppy hands\": open one fist flat, then the other, then close them.",
+            "Make two loose fists side by side.",
+            "Open the fingers one at a time, starting with an index finger, until both hands are flat.",
+            "Close them one at a time. Speed it up until it is continuous."
+          ],
+          "related": ["digits", "finger-waves", "wave-tutting"]
+        },
+        {
+          "slug": "finger-waves",
+          "name": "Finger waves",
+          "aliases": ["finger wave"],
+          "difficulty": "Beginner",
+          "danceSlug": "finger-waves",
+          "summary": "A ripple travelling through the fingers of both hands.",
+          "description": "Finger waves send a wave through the fingers, one after another, so the hands ripple. They are a gloving basic built on the same one-at-a-time finger control as the finger roll.",
+          "steps": [
+            "Hold the hands flat, side by side.",
+            "Lift and lower each finger in turn, starting at one end.",
+            "Pass the wave across to the other hand.",
+            "Send it back the other way."
+          ],
+          "related": ["finger-rolls", "wave-tutting"]
+        },
+        {
+          "slug": "wave-tutting",
+          "name": "Wave tutting",
+          "aliases": ["wave tuts"],
+          "difficulty": "Intermediate",
+          "danceSlug": "wave-tutting",
+          "summary": "One hand traces along the other while it rolls, from index to pinky and back.",
+          "description": "Wave tutting combines tracing and finger rolls: one hand traces along the other from index to pinky while the rolling hand stays in place, creating a wave. Only the tracing hand moves.",
+          "steps": [
+            "Hold one hand still as the rolling hand.",
+            "Put the other hand's fingertip on its index finger.",
+            "Trace along the fingers to the pinky as they roll.",
+            "Trace back from pinky to index, then change the angle."
+          ],
+          "related": ["tracing", "finger-rolls", "tunneling"]
+        },
+        {
+          "slug": "whips",
+          "name": "Whips",
+          "aliases": ["whip", "double whip"],
+          "difficulty": "Intermediate",
+          "danceSlug": "gloving-whips",
+          "summary": "The hand pushes out opening in a finger roll, turns, and closes back — a gloving move.",
+          "description": "A whip pushes the hand forward while it opens in a finger roll, turns the wrist over, and closes the fingers around the thumb as it pulls back. There are forward whips, backward whips (palm down, starting from the pinky) and continuous whips that alternate hands. JayFunk teaches double whipping in his Tutorial Tuesdays.",
+          "steps": [
+            "Start with the hand closed and the thumb out.",
+            "Push the hand forward, opening the fingers in a roll.",
+            "Turn the wrist over.",
+            "Close the fingers around the thumb as you pull back. Alternate hands."
+          ],
+          "related": ["finger-rolls", "gloving", "tunneling"]
+        },
+        {
+          "slug": "finger-tutting-combo",
+          "name": "Finger tutting combo",
+          "difficulty": "Intermediate",
+          "danceSlug": "finger-tutting-combo",
+          "summary": "Digits, tunnels and traces together at full speed.",
+          "description": "Putting the hand vocabulary together into a full phrase. Film it and watch it back at quarter speed — that is roughly how an audience sees it close up.",
+          "steps": [
+            "Start with finger tuts.",
+            "Roll into a digit.",
+            "Tunnel through.",
+            "Trace out and end on a clear shape."
+          ],
+          "related": ["finger-tuts", "digits", "tunneling"]
+        }
+      ]
+    },
+    {
+      "name": "Making it dance",
+      "terms": [
+        {
+          "slug": "tutting-patterns",
+          "name": "Tutting patterns",
+          "aliases": ["patterns"],
+          "difficulty": "Intermediate",
+          "danceSlug": "tutting-patterns",
+          "summary": "A stock of ready-made shapes and short sequences to draw on.",
+          "description": "Collect ready-made shapes and short sequences so that freestyling is a choice between things you know rather than inventing geometry in real time.",
+          "steps": [
+            "Learn five short patterns.",
+            "Practise each on both sides.",
+            "Chain two patterns together.",
+            "Swap the order and repeat."
+          ],
+          "related": ["tutting-combo", "freestyle-tutting"]
+        },
+        {
+          "slug": "tutting-combo",
+          "name": "Tutting combo",
+          "aliases": ["combo"],
+          "difficulty": "Intermediate",
+          "danceSlug": "tutting-combo",
+          "summary": "Angles, boxes and transitions strung into one phrase.",
+          "description": "A full combo puts angles, boxes and transitions into a single phrase — the first thing that looks like dancing rather than drilling. Make the last count of each eight special.",
+          "steps": [
+            "Learn an eight-count of positions.",
+            "Clean each transition.",
+            "Add a flip or unique shape on count eight.",
+            "Link two eight-counts."
+          ],
+          "related": ["tutting-patterns", "tutting-musicality", "point-to-point"]
+        },
+        {
+          "slug": "tutting-musicality",
+          "name": "Musicality",
+          "difficulty": "Intermediate",
+          "danceSlug": "tutting-musicality",
+          "summary": "Putting the hits where the record does.",
+          "description": "A clean phrase landing off the beat looks worse than a rough one landing on it. This is where the popping foundation pays off: hits on the drums, flow on the melody, a stop on the break.",
+          "steps": [
+            "Count the track in eights.",
+            "Hit a shape on every beat.",
+            "Double up where the drums double.",
+            "Hold a shape through a break."
+          ],
+          "related": ["the-hit", "tutting-combo", "freestyle-tutting"]
+        },
+        {
+          "slug": "freestyle-tutting",
+          "name": "Freestyle",
+          "aliases": ["freestyle"],
+          "difficulty": "Intermediate",
+          "danceSlug": "freestyle-tutting",
+          "summary": "Tutting to an unfamiliar record with no combo in mind.",
+          "description": "Tutting is a battle style, and nothing counts until it lands on a record you haven't heard before. Freestyle ninety seconds with no routine, and notice how much of your tutting was recalled rather than chosen.",
+          "steps": [
+            "Put on a track you don't know.",
+            "Tut for ninety seconds without a planned combo.",
+            "Use tracing to escape when stuck.",
+            "Watch it back and note what you repeated."
+          ],
+          "related": ["tutting-patterns", "tracing", "tut-scale"]
+        }
+      ]
+    }
+  ]
+}

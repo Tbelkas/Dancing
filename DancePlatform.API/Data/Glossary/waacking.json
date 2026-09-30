@@ -1,0 +1,696 @@
+// Waacking glossary. Read by GlossarySeeder on every boot; the file is the source of truth.
+// Slugs are the stable key that users' learned marks hang off - never rename one.
+// "danceSlug" borrows a catalog dance for its videos. Only link a dance whose video really
+// shows the move. Mechanics follow teachers' own breakdowns (Bagsy, Versa-Style, The Get Down
+// Dance Studios, *SCAPE Singapore) and Waack Nation's Waacking Dictionary.
+// The whack is a strike, not a circle - circles are rolls/bolos. Punking vs waacking origin is
+// disputed; keep the copy neutral.
+{
+  "styleName": "Waacking",
+  "categories": [
+    {
+      "name": "Foundations",
+      "terms": [
+        {
+          "slug": "waacking",
+          "name": "Waacking",
+          "learnable": false,
+          "summary": "The disco-era arm-and-posing dance born in the 1970s Los Angeles underground gay clubs.",
+          "description": "Waacking was created in the early 1970s in Los Angeles' underground disco clubs by Black, Latino and Asian gay dancers, who called themselves punkers. It reached the world through Soul Train, where dancers such as Tyrone Proctor, Jeffrey Daniels and Shabba Doo performed it. It nearly disappeared in the 1980s and was brought back from the 90s on by dancers including Brian Green, Archie Burnett, Princess Lockerooo and Kumari Suraj. The dance is built on fast, powerful arm work, posing inspired by old Hollywood, and character — and it is danced to disco and funk.",
+          "tips": [
+            "Learn the history alongside the arms. Teachers consistently say waacking is not just arms.",
+            "The spelling changed over time: \"whacking\" first, later \"waacking\" with a double a."
+          ],
+          "related": ["three-elements", "punking", "whack", "soul-train"]
+        },
+        {
+          "slug": "three-elements",
+          "name": "Whack, punk and pose",
+          "learnable": false,
+          "summary": "The three parts of the dance: the strike, the character and the held shape.",
+          "description": "Teachers commonly split waacking into three elements. The whack is the arm work — strikes, lines and rolls thrown with force. Punking is the character and emotion behind the movement. The pose is the held shape that shows grace, power or attitude, inspired by old Hollywood. A good round moves between all three rather than living in the arms alone.",
+          "tips": [
+            "If your dance is all arms, add a pose on every phrase ending and see what changes."
+          ],
+          "related": ["whack", "punking", "pose"]
+        },
+        {
+          "slug": "show-the-music",
+          "name": "Show the music",
+          "learnable": false,
+          "summary": "The founding idea: the arms exist to show what the record is doing.",
+          "description": "Bagsy traces this to the drag performers who inspired the punkers: they sold a song through body, face and hands without singing a note. In waacking the hands show the beats, the rhythm, the melody and the texture of the record — you can strike, stop, grab, throw away, place, point, punch or slice, always with intention. \"Dance to express, never to impress.\"",
+          "tips": [
+            "Before drilling a move, ask what in the music it is showing."
+          ],
+          "related": ["conductors-form", "loops-and-accents", "gestures"]
+        },
+        {
+          "slug": "soul-train",
+          "name": "Soul Train",
+          "learnable": false,
+          "summary": "The TV show that carried waacking out of the clubs, and its famous dance line.",
+          "description": "Soul Train, the 1970s TV music show, put waacking dancers in front of the whole country. Its Soul Train line — two rows of dancers with a gap down the middle for pairs to dance through — is still recreated at waacking events, and Bagsy teaches travelling \"down the Soul Train line\" as its own skill.",
+          "related": ["soul-train-walk", "waacking"]
+        },
+        {
+          "slug": "fempunk",
+          "name": "Fempunk",
+          "learnable": false,
+          "summary": "Feminine punking — the expression many of today's waackers use.",
+          "description": "The original punkers were gay men, and \"punking\" was their word. As the dance spread, most waackers became women expressing their own liberation, and that expression has been called fempunk (feminine punking). Waack Nation's dictionary records the term; some dancers call themselves fempunkers.",
+          "related": ["punking", "waacking"]
+        },
+        {
+          "slug": "shway-style",
+          "name": "Shway style",
+          "learnable": false,
+          "summary": "Shabba Doo's own way of expressing waacking, now taught by certified teachers.",
+          "description": "Shabba Doo was a locker who danced with the original punkers and is described as the first straight man to dance waacking. He brought a locking look and energy into punking, and his personal way of doing it is called the Shway style; several dancers are certified Shway-style teachers. Bagsy notes that Errol Flynn was one of his style influences.",
+          "related": ["waacking", "punking"]
+        },
+        {
+          "slug": "waacking-vs-vogue",
+          "name": "Waacking and vogue",
+          "learnable": false,
+          "summary": "Sister styles that are often confused: waacking is about the movies, vogue about the pictures.",
+          "description": "Vogue grew up in New York's ballroom scene, is danced to house-like music and is performed at balls; waacking comes from Los Angeles disco clubs, is danced to disco and funk and is performed in battles. Both use posing and arm work, and the difference often shows in the wrists and the whole body language. Waack Nation sums it up: \"Vogue is about the pictures, Waacking is about the movies.\" Tyrone Proctor would stop a waacking battle if someone vogued in it.",
+          "related": ["pose", "waacking"]
+        },
+        {
+          "slug": "freestyle",
+          "name": "Freestyle and battles",
+          "learnable": false,
+          "summary": "Waacking is a battle style: reacting to a record in real time, not recalling a combo.",
+          "description": "The goal of all the drilling is to react to the music as it plays. Waacking is competed in battles and practised in cyphers, where the dancer who shows the music best wins.",
+          "tips": [
+            "Put on ninety seconds of disco with no plan. Notice how much of your timing comes from counting rather than listening."
+          ],
+          "related": ["show-the-music", "loops-and-accents"]
+        }
+      ]
+    },
+    {
+      "name": "Form and hands",
+      "terms": [
+        {
+          "slug": "conductors-form",
+          "name": "Conductor's form",
+          "difficulty": "Beginner",
+          "danceSlug": "show-the-music",
+          "summary": "Upright, head straight, shoulders down — a still frame for the arms to read against.",
+          "description": "Bagsy's name for the waacking stance: like an orchestra conductor, you stay in one spot, upright, looking out, so the audience can see your face and a clean frame for every arm shape. The head stays straight, the shoulders relaxed and down, the posture upright, a little like ballroom or Latin dancers.",
+          "steps": [
+            "Stand tall with the feet under you, one foot slightly forward if you like.",
+            "Lengthen the neck and keep the head straight.",
+            "Relax the shoulders down and bring the chest slightly forward.",
+            "Keep this frame still while the arms work, and check it in a mirror."
+          ],
+          "tips": [
+            "If the shoulders creep up when the arms get fast, slow down until they stay down."
+          ],
+          "related": ["hand-positions", "whack", "show-the-music"]
+        },
+        {
+          "slug": "hand-positions",
+          "name": "Hand positions",
+          "difficulty": "Beginner",
+          "danceSlug": "waacking-hand-positions",
+          "summary": "Blades, a loose fist, a blossomed flower, one or two fingers — pick one and keep it relaxed.",
+          "description": "There is no single correct hand in waacking. Common choices are open blades, a loose closed fist, fingers spread like a blossoming flower, or one or two fingers pointing. What matters is that the hand stays relaxed however fast the arm moves, and that it stays consistent and symmetrical.",
+          "steps": [
+            "Try each option: blade, loose fist, blossomed flower, one finger, two fingers.",
+            "Pick the one that feels most like you.",
+            "Do a few whacks and rolls keeping that hand shape relaxed.",
+            "Keep both hands matching when both arms work."
+          ],
+          "tips": [
+            "A tight, rigid hand makes the whole arm look stiff."
+          ],
+          "related": ["conductors-form", "whack"]
+        },
+        {
+          "slug": "warm-up",
+          "name": "Wrist and shoulder warm-up",
+          "difficulty": "Beginner",
+          "danceSlug": "waacking-warm-up",
+          "summary": "Arm circles and shoulder work before every session — the arms carry the whole load.",
+          "description": "Waacking puts most of its load on the shoulders, elbows and wrists, and teachers warn that sore arms are the first thing beginners meet. Every drills class starts with a few minutes of arm circles in both directions and shoulder work before any whacking.",
+          "steps": [
+            "Circle the arms slowly forwards, then backwards.",
+            "Make small circles behind you, then in front.",
+            "Roll the shoulders and stretch the arms across the chest and behind the head.",
+            "Only then start the arm drills, slow at first."
+          ],
+          "related": ["arm-drills"]
+        }
+      ]
+    },
+    {
+      "name": "Strikes and lines",
+      "terms": [
+        {
+          "slug": "whack",
+          "name": "The whack",
+          "difficulty": "Beginner",
+          "danceSlug": "the-whack",
+          "summary": "A strike: the arm drives out from the centre of the chest with force, the chest behind it.",
+          "description": "The move the style is named for — and it is a strike, not a circle. The dictionary meaning of whack is \"to strike with force\", and the old name came from the onomatopoeia of cartoons like Batman. Versa-Style teaches it from the centre of the chest: the arm whacks out to the side with power as the chest activates towards it, then the other arm. Circles are rolls, not whacks.",
+          "steps": [
+            "Bring one hand in to the centre of the chest.",
+            "Strike it straight out to the side with force, like slapping something in the air.",
+            "Let the chest push towards the striking arm.",
+            "Bring it back and strike with the other arm. Alternate for an eight-count, then try both together."
+          ],
+          "tips": [
+            "Keep the power on the way back in too, not only on the way out."
+          ],
+          "related": ["lines", "pull-and-extend", "arm-roll"]
+        },
+        {
+          "slug": "pull-and-extend",
+          "name": "Pull and extend",
+          "difficulty": "Beginner",
+          "danceSlug": "extensions-and-grooves",
+          "summary": "Pulling the arm into the shoulder and pushing it out again, with the chest and hips grooving.",
+          "description": "Bagsy calls this a really basic whacking motion that brings out the funk: pull the arm in to the shoulder, extend it out, bring it back and down. It works with one arm, both arms, forward or upward, and it is what he uses to travel down the Soul Train line. The groove in the chest and hips underneath keeps it from looking stiff.",
+          "steps": [
+            "Pull one arm in towards the shoulder.",
+            "Extend it out.",
+            "Pull it back in and bring it down.",
+            "Repeat with the other arm, then both, then extend upwards instead of forwards."
+          ],
+          "related": ["whack", "soul-train-walk", "lines"]
+        },
+        {
+          "slug": "lines",
+          "name": "Lines",
+          "difficulty": "Beginner",
+          "danceSlug": "waacking-lines",
+          "summary": "The arm travelling point to point — up, out, down — fully extended and struck.",
+          "description": "Lines take the arm from one point to the next — up, out to the side parallel to the floor, down on a diagonal — with each point struck rather than placed. The Get Down Dance Studios' tip: imagine a wall just behind you, so the arm stops at the line instead of swinging back. *SCAPE's version builds it through the shoulder and elbow first, with the back and core engaged.",
+          "steps": [
+            "Extend one arm straight up.",
+            "Strike it out to the side, parallel to the floor.",
+            "Strike it down to a low diagonal.",
+            "Go back out, then do the other side, then both arms together."
+          ],
+          "tips": [
+            "When the arm goes up, pull it back beside the ear so the line is up, not forward.",
+            "Keep the shoulders down and the neck long."
+          ],
+          "related": ["whack", "twirl", "three-point-waack-attack"]
+        },
+        {
+          "slug": "twirl",
+          "name": "Twirl",
+          "difficulty": "Beginner",
+          "danceSlug": "waacking-lines",
+          "summary": "Like a line, but the hand touches the sky and goes back to touch your back.",
+          "description": "*SCAPE Singapore teaches twirls straight after lines: the arm starts the same way, but instead of opening out it reaches up to touch the sky, then goes back to touch your back, the elbow close to the face rather than out to the side.",
+          "steps": [
+            "Start as for a line, the hand at the shoulder.",
+            "Reach the arm straight up.",
+            "Bring the hand back to touch your back, elbow close to your face.",
+            "Return and repeat, then try the other arm."
+          ],
+          "related": ["lines", "overhead"]
+        },
+        {
+          "slug": "three-point-waack-attack",
+          "name": "Three-point waack attack",
+          "difficulty": "Intermediate",
+          "danceSlug": "three-point-waack-attack",
+          "summary": "Three hits aimed at three separate points, so a phrase has somewhere to land.",
+          "description": "Bagsy's \"samurai weapon style\" drill: the arm strikes three separate points in turn, one arm, then the other, then both, then split. He then plays with timing — double time on one hand, half time on the other.",
+          "steps": [
+            "Pick three points in front of you.",
+            "Strike one arm to each in turn over an eight-count.",
+            "Do the other arm, then both together, then separate them.",
+            "Try one arm in double time against the other in half time."
+          ],
+          "tips": [
+            "Keep the lines strong; don't let the arms drop low between points."
+          ],
+          "related": ["lines", "whack", "sword-and-nunchuck"]
+        },
+        {
+          "slug": "sword-and-nunchuck",
+          "name": "Sword and nunchuck",
+          "aliases": ["nunchuck style"],
+          "difficulty": "Intermediate",
+          "danceSlug": "martial-arts-influence",
+          "summary": "One arm slices out like a sword while the other goes over the head to the back of the shoulder.",
+          "description": "The originators drew on 1970s kung fu films, and Bagsy teaches their weapon inspirations directly. In the sword-and-nunchuck, one arm cuts straight across like a sword while the other swings over the head to touch the back of the shoulder, like Bruce Lee's nunchucks, in one motion. The overarm \"catch\" and the lasso are its companions.",
+          "steps": [
+            "Slice one arm straight out across the body like a sword.",
+            "At the same moment swing the other arm over the head to the back of the shoulder.",
+            "Switch sides.",
+            "Then try slicing up, down or stabbing across instead."
+          ],
+          "tips": [
+            "Frame the face: the over-the-head arm goes above the head, not off to the side."
+          ],
+          "related": ["inside-roll", "lasso", "three-point-waack-attack"]
+        },
+        {
+          "slug": "lasso",
+          "name": "Lasso",
+          "difficulty": "Intermediate",
+          "danceSlug": "martial-arts-influence",
+          "summary": "Rolling the wrists like a lasso or whip, then whacking out.",
+          "description": "Bagsy's third martial-arts combo takes its image from Indiana Jones' whip or Wonder Woman's lasso: instead of a big bolo, you roll the wrists inwards and close, then roll out and whack out — straight up, on a diagonal or to the side.",
+          "steps": [
+            "Roll the wrists inward and close the arms.",
+            "Roll them outward.",
+            "Whack out on the last roll.",
+            "Try it to the diagonal and straight up."
+          ],
+          "related": ["sword-and-nunchuck", "arm-roll"]
+        }
+      ]
+    },
+    {
+      "name": "Rolls and bolos",
+      "terms": [
+        {
+          "slug": "overhead",
+          "name": "Overhead",
+          "aliases": ["bolo", "overhead bolo"],
+          "difficulty": "Beginner",
+          "danceSlug": "overheads",
+          "summary": "Hands from the chest, over the head to between the shoulder blades, and snapping back like a rubber band.",
+          "description": "Also called bolos. From \"home\" — hands close to the chest, upper arm parallel to the floor — the hands travel up over the head to between the shoulder blades and bounce straight back to the front, as if a rubber band or ball were behind you. The elbows lift with the arms and stay fixed in one spot.",
+          "steps": [
+            "Start at home: hands near the chest, upper arms parallel to the floor.",
+            "Extend up and go over the head to touch between the shoulder blades.",
+            "Snap back over the head to the front.",
+            "Return to home. Single arm first, then both."
+          ],
+          "tips": [
+            "The hands go over the head, not past your ears.",
+            "Don't let the elbow come forward to cover your face."
+          ],
+          "related": ["arm-roll", "outside-roll", "twirl"]
+        },
+        {
+          "slug": "arm-roll",
+          "name": "Arm roll",
+          "aliases": ["single arm roll", "roll"],
+          "difficulty": "Beginner",
+          "danceSlug": "arm-rolls",
+          "summary": "Roll in, extend up, hit the back of the shoulder, extend, roll out and down.",
+          "description": "The single arm roll is the first drill many teachers give. The Get Down Dance Studios breaks it down: roll the arm in towards you (like calling someone over), extend straight up, hit back towards the shoulder blade, extend up again, roll out as if throwing something away, and extend as you come down. Dance with Abhi teaches the same path and uses the back of the shoulder as a springboard to rebound forward.",
+          "steps": [
+            "Bring the hand to the shoulder, upper arm parallel to the floor.",
+            "Roll it in towards you, then extend straight up.",
+            "Hit back to the shoulder blade and use it to rebound forward.",
+            "Extend up, roll outward as if flicking something away, and extend down."
+          ],
+          "tips": [
+            "Keep everything compact and close to the body; the circle gets smaller as you get faster, never sloppier."
+          ],
+          "related": ["overhead", "outside-roll", "inside-roll", "arm-drills"]
+        },
+        {
+          "slug": "outside-roll",
+          "name": "Outside roll",
+          "aliases": ["outside bolo"],
+          "difficulty": "Intermediate",
+          "danceSlug": "outside-rolls",
+          "summary": "The bolo rolled outward so the audience sees the whole circle.",
+          "description": "Bagsy's outside bolo: touch the front of the shoulder, rotate round, touch the back, go over the head, touch the other shoulder and come down — an outward circle so, facing the audience, they see the whole motion. Singles, then doubles, then breaking it up one after the other.",
+          "steps": [
+            "Take one arm out and touch the front of the shoulder.",
+            "Rotate round and touch the back of the shoulder.",
+            "Go over the head and touch the other shoulder.",
+            "Come down. Do singles on each side, then both arms together."
+          ],
+          "tips": [
+            "Take a strong, upright position first; the lines have to be up for the arm to clear the head."
+          ],
+          "related": ["inside-roll", "cannon", "overhead"]
+        },
+        {
+          "slug": "inside-roll",
+          "name": "Inside roll",
+          "aliases": ["inside bolo", "nunchuck bolo"],
+          "difficulty": "Intermediate",
+          "danceSlug": "inside-rolls",
+          "summary": "The bolo taken on the inside line — front, back, over, down — pulling rather than showing.",
+          "description": "The same bolo rolled back towards you: front, back, over, down. It pulls rather than shows the shape, and Bagsy describes it as the kung fu, nunchuck dynamic. The elbow stays up and fixed — never dropped low.",
+          "steps": [
+            "Take the hand high to the inside of the shoulder, elbow up.",
+            "Keep the elbow fixed and roll back over the head.",
+            "Throw forward.",
+            "Bring it down. Then both arms, then one after the other."
+          ],
+          "tips": [
+            "Big, clear circles that clearly go over the head. Small lazy circles don't read."
+          ],
+          "related": ["outside-roll", "sword-and-nunchuck", "cannon"]
+        },
+        {
+          "slug": "cannon",
+          "name": "Cannon",
+          "aliases": ["cascade"],
+          "difficulty": "Intermediate",
+          "danceSlug": "outside-rolls",
+          "summary": "The same roll done one arm after the other, so it ripples.",
+          "description": "Bagsy's name (also cascade) for doing a bolo with one arm and then the other in quick succession instead of together, so the rolls ripple — \"ta-da-ta-da-ta\". It works with outside and inside rolls, singles and doubles.",
+          "steps": [
+            "Start an outside roll with the right arm.",
+            "Start the same roll with the left arm half a beat later.",
+            "Keep them chasing each other round.",
+            "Try it on inside rolls too."
+          ],
+          "related": ["outside-roll", "inside-roll", "alternating-rolls"]
+        },
+        {
+          "slug": "alternating-rolls",
+          "name": "Alternating rolls",
+          "aliases": ["alternate roll", "double roll"],
+          "difficulty": "Intermediate",
+          "danceSlug": "the-butterfly",
+          "summary": "One arm goes back while the other comes down, meeting in the middle.",
+          "description": "In the alternating pattern one arm rolls back while the other comes down, then both come back to the middle and swap. Bagsy teaches it with doubles and singles as part of his bolo combinations.",
+          "steps": [
+            "Start with both hands at the shoulders, lines strong.",
+            "Send one arm back over the head as the other comes down.",
+            "Return both to the middle.",
+            "Swap sides and repeat."
+          ],
+          "related": ["cannon", "butterfly", "arm-roll"]
+        },
+        {
+          "slug": "butterfly",
+          "name": "Butterfly",
+          "difficulty": "Intermediate",
+          "danceSlug": "the-butterfly",
+          "summary": "Both arms mirroring each other open and closed across the body.",
+          "description": "Bagsy's butterfly takes the bolo symmetrically: both arms go back and bring it down together — back and down, back and down — a pattern that reads from across a battle floor.",
+          "steps": [
+            "Bring both arms to the shoulders.",
+            "Rotate them forward, big and over the head, to touch the back.",
+            "Reverse and bring them down.",
+            "Keep both hands matching the whole way."
+          ],
+          "tips": [
+            "Keep the other hand active when you work one arm — on the hip, out in a shape — never dead."
+          ],
+          "related": ["alternating-rolls", "overhead"]
+        },
+        {
+          "slug": "propeller",
+          "name": "Propeller",
+          "difficulty": "Advanced",
+          "danceSlug": "propeller",
+          "summary": "Big straight-arm circles carried by the arm's own momentum.",
+          "description": "A big circle in front with a straight arm — \"don't bend your arm, make sure the circle's nice and big\" — first one arm, then the other, then reversing direction. Bagsy pairs it with the helicopter in his sequence.",
+          "steps": [
+            "Swing one straight arm in a big circle in front of you.",
+            "Do the same with the other arm.",
+            "Reverse the direction.",
+            "Chain the two arms together."
+          ],
+          "related": ["helicopter", "arm-roll"]
+        },
+        {
+          "slug": "helicopter",
+          "name": "Helicopter",
+          "difficulty": "Advanced",
+          "danceSlug": "propeller",
+          "summary": "One elbow tucked into the hip rotating a small circle while the other arm circles front, back, over.",
+          "description": "In Bagsy's helicopter one arm keeps the elbow close to the hip and rotates, while the other arm goes front, back and over in a big circle; then the directions reverse and the arms swap. Timing: one and two, three and four.",
+          "steps": [
+            "Tuck the right elbow into the hip and rotate the forearm.",
+            "With the left arm go front, back, over in a circle.",
+            "Reverse both directions.",
+            "Swap arms."
+          ],
+          "tips": [
+            "Don't let the tucked elbow flap out."
+          ],
+          "related": ["propeller", "butterfly"]
+        },
+        {
+          "slug": "mobius",
+          "name": "Mobius",
+          "aliases": ["chain loop", "infinity loop"],
+          "difficulty": "Advanced",
+          "danceSlug": "loops-and-musical-accents",
+          "summary": "The arms locked at the fingers and looped round the head, front and behind — Shabba Doo's chain loop.",
+          "description": "Bagsy credits the Mobius to Shabba Doo and also calls it the chain or infinity loop. Whack out, lock the first fingers tightly together, and take the locked arms over the head to the back and round to the front, like combing your hair to one side and then the other. A high frontal wave can be added before looping.",
+          "steps": [
+            "Whack out and catch the first fingers together, locked tight.",
+            "Take the locked hands to one side and behind the head.",
+            "Come round the other side and finish at the front.",
+            "Speed it up, then find your own way in and out."
+          ],
+          "tips": [
+            "Keep the lock tight; loose fingers break the illusion."
+          ],
+          "related": ["overhead", "loops-and-accents"]
+        }
+      ]
+    },
+    {
+      "name": "Drills",
+      "terms": [
+        {
+          "slug": "arm-drills",
+          "name": "Arm drills",
+          "difficulty": "Beginner",
+          "danceSlug": "waacking-arm-drills",
+          "summary": "Repeatable arm patterns drilled to build control, stamina and muscle memory.",
+          "description": "Every teacher insists on drills before routines. Verlissa's five basics are the touch-back roll, back and forth, around the world, the semi-circle and the full circle — names vary from teacher to teacher, as she points out. The 20-minute drills videos double as an arm workout.",
+          "steps": [
+            "Warm up first.",
+            "Pick one drill and do it for a whole song.",
+            "Do your weaker side three or four times as often as your stronger side.",
+            "Speed up only when the positions are clean."
+          ],
+          "tips": [
+            "Posture first: the chin stays up and the chest works with every hit."
+          ],
+          "related": ["warm-up", "arm-roll", "around-the-world", "power-and-speed"]
+        },
+        {
+          "slug": "around-the-world",
+          "name": "Around the world",
+          "difficulty": "Beginner",
+          "danceSlug": "waacking-arm-drills",
+          "summary": "An arm drill swinging the fully stretched arm around the ear, front and back.",
+          "description": "Verlissa's third basic drill: the arm travels around the ear, front and back, fully stretched out rather than bent. A small version stays close; a bigger version swings further.",
+          "steps": [
+            "Raise one arm fully stretched beside the ear.",
+            "Swing it forward around the ear.",
+            "Swing it back.",
+            "Make it bigger once it is smooth, then switch arms."
+          ],
+          "related": ["arm-drills", "arm-roll"]
+        },
+        {
+          "slug": "power-and-speed",
+          "name": "Power and speed",
+          "difficulty": "Advanced",
+          "danceSlug": "power-and-speed",
+          "summary": "Tightening the paths you already own until they snap.",
+          "description": "Bagsy's power-and-speed lesson combines bolos, nunchuck styles and the sword into continuous, energetic combinations. The rule: the circle gets smaller, not sloppier, and the arms still frame the face.",
+          "steps": [
+            "Pick a combination you can already do cleanly.",
+            "Speed it up in steps.",
+            "Keep the arms over the head and framing the face.",
+            "Drop back to slow drills as soon as the shape breaks."
+          ],
+          "related": ["arm-drills", "sword-and-nunchuck"]
+        }
+      ]
+    },
+    {
+      "name": "Posing and character",
+      "terms": [
+        {
+          "slug": "punking",
+          "name": "Punking",
+          "difficulty": "Beginner",
+          "danceSlug": "punking",
+          "summary": "The character behind the movement — behaviour, emotion and intention, inspired by old Hollywood.",
+          "description": "\"Punk\" was old slang for a gay man, and the original waackers called themselves punkers to take the stigma out of it. Punking was inspired by old Hollywood films and cartoons, with their theatrical body language; OG Viktor Manoel called it \"behaviour movements\". It means putting emotion and intention into the movement — and dancing with pride in who you are. (Whether punking or waacking came first is genuinely disputed.)",
+          "steps": [
+            "Pick a character — a film star, a supermodel, someone you know.",
+            "Give them a want or a mood.",
+            "Do a simple phrase of whacks and poses as that person.",
+            "Let the face and the walk change, not only the arms."
+          ],
+          "related": ["fempunk", "pose", "three-elements"]
+        },
+        {
+          "slug": "pose",
+          "name": "Pose",
+          "difficulty": "Beginner",
+          "danceSlug": "waacking-poses",
+          "summary": "A held shape that expresses emotion — the whole body and the face together.",
+          "description": "Posing came before the arms; Tyrone Proctor put the order as posing first, then waacking, then voguing. A pose expresses emotion — grace, femininity or masculinity, power — and can be still like a photo or moving like a film. Versa-Style's drill: pose right, left and front for an eight-count each, in character, and don't forget the face.",
+          "steps": [
+            "Pick a character.",
+            "Hit a pose to your right on one and hold for eight.",
+            "Pose to the left, then to the front.",
+            "Freestyle poses, keeping face and body telling the same story."
+          ],
+          "tips": [
+            "Hit on the one and hold it strong for the next seven counts. Most dancers break a beat early."
+          ],
+          "related": ["screen-icon-poses", "punking", "gestures"]
+        },
+        {
+          "slug": "screen-icon-poses",
+          "name": "Screen-icon poses",
+          "aliases": ["Marilyn Monroe poses", "Hollywood poses"],
+          "difficulty": "Beginner",
+          "danceSlug": "waacking-poses",
+          "summary": "Poses from old Hollywood: the dress, the armpit stretch, the pin-up.",
+          "description": "*SCAPE Singapore teaches Marilyn Monroe-inspired poses, since old Hollywood is a core inspiration for waacking. The dress: one hand in front, one leg out straight, the hip up on the other side, the other hand resting on the neck, chin up. The armpit: holding one elbow overhead in a stretch, neck long. The pin-up: on the tiptoes, leaning forward, hands on the waist.",
+          "steps": [
+            "The dress: hand in front, leg out straight, hip up, other hand at the neck, chin up.",
+            "The armpit: hold the elbow overhead, neck long, sit into the hip.",
+            "The pin-up: tiptoes, lean forward, hands on the waist.",
+            "Strike each from neutral on one and hold for eight counts with the face to match."
+          ],
+          "related": ["pose", "punking"]
+        },
+        {
+          "slug": "gestures",
+          "name": "Gestures",
+          "difficulty": "Beginner",
+          "danceSlug": "waacking-gestures",
+          "summary": "Small hand gestures — hair brushes, face frames, flicks — that carry character between shapes.",
+          "description": "Between big shapes, waackers use small gestures: brushing the hair, framing the face, flicking something away. They are the first thing that makes a freestyle look inhabited rather than assembled, and they are how the hands catch small sounds in the music.",
+          "steps": [
+            "Brush one hand past the hair as if fixing it.",
+            "Frame the face with one or both hands for a beat.",
+            "Flick the wrist away as if dismissing someone.",
+            "Use them to catch the small sounds in a record."
+          ],
+          "related": ["flick", "pose", "show-the-music"]
+        },
+        {
+          "slug": "flick",
+          "name": "Flick",
+          "difficulty": "Beginner",
+          "danceSlug": "waacking-gestures",
+          "summary": "Rotating the wrist to show the palm, fingers relaxed back — \"I don't want it\".",
+          "description": "*SCAPE's flick uses the wrist: rotate it to show the palm while the fingers relax towards the back, as if shooing someone or a mosquito away. Do it with intention, in every direction — diagonals, down, front — then use it to play rhythms.",
+          "steps": [
+            "Lift the hand and rotate the wrist to show the palm.",
+            "Let the fingers relax back as you flick away.",
+            "Try all directions, alternating hands.",
+            "Say a rhythm out loud (\"shoo, shoo, ka-ka-ka\") and flick it."
+          ],
+          "related": ["gestures", "show-the-music"]
+        }
+      ]
+    },
+    {
+      "name": "Feet and travel",
+      "terms": [
+        {
+          "slug": "feet-and-arm-placement",
+          "name": "Feet under the arms",
+          "difficulty": "Beginner",
+          "danceSlug": "feet-and-arm-placement",
+          "summary": "Feet and arms landing together, travelling forward, back and side to side.",
+          "description": "Waacking is not danced standing still. The lower body keeps moving while the arms talk — Bagsy suggests starting with a basic two-step under the bolos, and the *SCAPE choreography walks forward and back while the arms work.",
+          "steps": [
+            "Put on a disco track and find a simple two-step.",
+            "Add single whacks on the steps.",
+            "Travel forward and back while whacking.",
+            "Add rolls once the feet are automatic."
+          ],
+          "related": ["soul-train-walk", "walk"]
+        },
+        {
+          "slug": "soul-train-walk",
+          "name": "Down the Soul Train line",
+          "difficulty": "Beginner",
+          "danceSlug": "extensions-and-grooves",
+          "summary": "Walking in character while pulling and extending the arms.",
+          "description": "Bagsy's way to travel: just walk, cool and relaxed, and apply the pull-and-extend to it with a single arm, letting the chest and hips groove — so you enjoy travelling through the space while still waacking.",
+          "steps": [
+            "Walk forward, relaxed.",
+            "Pull one arm in and extend it on each step.",
+            "Let the chest and hips groove.",
+            "Change the hand shape — open, fist, blade — as you go."
+          ],
+          "related": ["pull-and-extend", "walk", "soul-train"]
+        },
+        {
+          "slug": "walk",
+          "name": "Waacking walk",
+          "aliases": ["strut", "podium walk"],
+          "difficulty": "Beginner",
+          "danceSlug": "waacking-walk",
+          "summary": "Crossing the floor in character — the runway walk half the performance lives in.",
+          "description": "Walks and struts carry a waacker across the floor in character. They are half the performance in a battle and almost never practised.",
+          "steps": [
+            "Stand in conductor's form.",
+            "Walk forward with purpose, as if down a runway.",
+            "Keep the chest up and the face in character.",
+            "Stop on a beat and hit a pose."
+          ],
+          "related": ["soul-train-walk", "pose"]
+        },
+        {
+          "slug": "turn",
+          "name": "Turn on one foot",
+          "difficulty": "Intermediate",
+          "danceSlug": "inverted-turn",
+          "summary": "Rotation on a fixed axis with the other leg extended, so an arm shape can hold through it.",
+          "description": "Turns in waacking rotate on one foot with the other leg extended, so the arm shape holds all the way round. Spot the turn properly before adding the arms.",
+          "steps": [
+            "Stand on one foot, the other leg extended.",
+            "Spot a point in front of you.",
+            "Turn, whipping the head round to find the spot again.",
+            "Add an arm shape once the turn is steady."
+          ],
+          "related": ["whip-out-of-turn"]
+        },
+        {
+          "slug": "whip-out-of-turn",
+          "name": "Whip out of a turn",
+          "difficulty": "Intermediate",
+          "danceSlug": "flicks-with-rotation",
+          "summary": "Land the rotation, then throw the arm on the exit.",
+          "description": "Turning and whacking at once reads as a stumble; turning and then whacking reads as a hit. Land the rotation first and throw the arm on the way out.",
+          "steps": [
+            "Do a turn.",
+            "Land it with the weight settled.",
+            "Whack out on the exit.",
+            "Try a flick or a pose instead of the whack."
+          ],
+          "related": ["turn", "whack"]
+        }
+      ]
+    },
+    {
+      "name": "Musicality",
+      "terms": [
+        {
+          "slug": "loops-and-accents",
+          "name": "Loops and musical accents",
+          "difficulty": "Intermediate",
+          "danceSlug": "loops-and-musical-accents",
+          "summary": "Catching the repeating figures in a disco record and hitting its accents.",
+          "description": "Disco records are built on repeating loops. Instead of laying an eight-count over the song, catch those figures with looping arm work and hit the accents on top. Bagsy's lesson on this uses the Mobius loop as its vehicle.",
+          "steps": [
+            "Listen for a repeating figure in the track.",
+            "Loop an arm pattern in time with it.",
+            "Hit a whack or a pose on the accents.",
+            "Change the loop when the record changes."
+          ],
+          "related": ["mobius", "show-the-music", "freestyle"]
+        }
+      ]
+    }
+  ]
+}

@@ -38,6 +38,9 @@ public class GlossaryTests : IDisposable
         ctx.Styles.Add(new Style { Id = HouseStyle, Name = "House" });
         ctx.Styles.Add(new Style { Id = 11, Name = "Hip-hop" });
         ctx.Styles.Add(new Style { Id = 12, Name = "Breakdance" });
+        ctx.Styles.Add(new Style { Id = 8, Name = "Waacking" });
+        ctx.Styles.Add(new Style { Id = 16, Name = "Vogue" });
+        ctx.Styles.Add(new Style { Id = 22, Name = "Tutting" });
         ctx.Dances.Add(new Dance { Id = 100, Name = "House Jack", Slug = "house-jack" });
         // Same slug in another style, with a lower id: slugs are unique per style only, and a
         // global lookup keyed on slug crashed the boot in production.
@@ -175,6 +178,9 @@ public class GlossaryTests : IDisposable
     [InlineData(HouseStyle, "jack")]
     [InlineData(11, "running-man")]
     [InlineData(12, "six-step")]
+    [InlineData(8, "conductors-form")]
+    [InlineData(16, "hand-performance")]
+    [InlineData(22, "tutting-basics")]
     public async Task Authored_glossaries_seed_cleanly(int styleId, string mustHave)
     {
         var dir = AppContext.BaseDirectory;

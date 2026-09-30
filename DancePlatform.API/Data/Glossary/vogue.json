@@ -1,0 +1,758 @@
+// Vogue glossary. Read by GlossarySeeder on every boot; the file is the source of truth.
+// Slugs are the stable key that users' learned marks hang off - never rename one.
+// "danceSlug" borrows a catalog dance for its videos. Only link a dance whose video really
+// shows the move. Culture terms (houses, balls, realness) are concepts, not moves: vogue is
+// competitive dance from Harlem's ballroom scene and the glossary teaches it that way.
+{
+  "styleName": "Vogue",
+  "categories": [
+    {
+      "name": "Ballroom culture",
+      "terms": [
+        {
+          "slug": "vogue",
+          "name": "Vogue",
+          "learnable": false,
+          "danceSlug": "what-vogue-is",
+          "summary": "The dance of Harlem's ballroom scene: posing, hands, walks, spins and dips, danced competitively at balls.",
+          "description": "Vogue grew out of the ballroom scene that Black and Latino LGBTQ+ people built in Harlem from the 1970s on. The name comes from the fashion magazine, because the first moves were magazine poses struck on the runway. From runway posing came Pop, Dip and Spin, then \"performance\", and by the late 80s the dance had split into Old Way and New Way; Vogue Fem followed in the 90s. It is competitive: voguers walk named categories at balls and are judged by a panel. It is also a community and a lifestyle, and teachers ask newcomers to learn the culture along with the moves.",
+          "tips": [
+            "Learn the herstory and the categories before the tricks — judges and elders notice.",
+            "Paris Is Burning (1990) is one outsider snapshot of the scene, not the whole story."
+          ],
+          "related": ["ballroom-herstory", "houses", "balls", "old-way", "new-way", "vogue-fem"]
+        },
+        {
+          "slug": "ballroom-herstory",
+          "name": "Ballroom herstory",
+          "learnable": false,
+          "danceSlug": "ballroom-herstory",
+          "summary": "How the scene began: Black and Latina trans women leaving the white-run drag pageants to build their own balls.",
+          "description": "Harlem already had drag balls, but they were run by and for white, cis-presenting men, and Black and Latina queens rarely won. In the early 1970s Crystal LaBeija refused to keep competing on those terms and co-founded the House of LaBeija, and the house-and-ball system grew from there. The balls gave people who had been pushed out of their families and the job market a place to be seen, to compete and to be celebrated.",
+          "tips": [
+            "Look up the elders the teachers name: Crystal LaBeija, Paris Dupree, Willi Ninja, Pepper LaBeija, Dorian Corey."
+          ],
+          "related": ["vogue", "houses", "realness"]
+        },
+        {
+          "slug": "houses",
+          "name": "Houses",
+          "learnable": false,
+          "danceSlug": "houses-and-balls",
+          "summary": "Chosen families led by a mother and/or father, who walk balls under the house name.",
+          "description": "A house is a chosen family. Many members had been put out by queer-phobic biological families, and the house gave them shelter, guidance and a name to compete under. It is led by a mother and/or father, who decide who joins and who teach members about ballroom and about life. Houses are named after fashion labels or ideas — Willi Ninja said the House of Ninja \"hit hard and hit fast\". Members take the house name as their surname.",
+          "related": ["balls", "ballroom-herstory", "legendary"]
+        },
+        {
+          "slug": "balls",
+          "name": "Balls and kikis",
+          "aliases": ["ball", "kiki", "kiki scene"],
+          "learnable": false,
+          "summary": "The competitions: categories called one at a time, a commentator on the mic, judges giving tens or chopping.",
+          "description": "At a ball the commentator calls categories one at a time and competitors walk in front of a panel of three or five judges. Judges give tens across the board to pass someone into the battles, and \"chop\" anyone who misses a requirement or falls. The final winner takes the grand prize. Kiki balls are the youth scene: lower stakes, often a first step for new voguers.",
+          "tips": [
+            "Know your category's requirements before you walk. A chop is usually a missed requirement, not bad dancing."
+          ],
+          "related": ["categories", "houses", "legendary"]
+        },
+        {
+          "slug": "categories",
+          "name": "Categories",
+          "learnable": false,
+          "danceSlug": "ballroom-categories",
+          "summary": "What you walk in: runway, face, realness, performance, vogue and more, each with its own rules.",
+          "description": "Every ball is organised into categories, and each has rules the judges score against. There are runway categories, realness categories, face, hand performance and sex siren, and the vogue categories: Old Way, New Way and Vogue Fem. Categories are also split by who walks them — butch queen, femme queen, female figure and so on. Teachers explain that newer names such as female figure performance were created to include more people without erasing the femme queens the categories were built around.",
+          "related": ["runway", "face", "realness", "hand-performance-category"]
+        },
+        {
+          "slug": "realness",
+          "name": "Realness",
+          "learnable": false,
+          "danceSlug": "realness",
+          "summary": "Being able to pass in the outside world — the biggest category family, and a survival skill.",
+          "description": "To be real meant you could pass in the straight world without being \"clocked\". Realness categories — schoolboy, executive, femme queen realness and more — reward exactly that. As teachers put it, it was about survival: someone real enough could hold down a nine-to-five and bring food home to the house. Twist categories pair realness with a vogue second half, and the surprise of that switch is the gag.",
+          "related": ["categories", "ballroom-herstory"]
+        },
+        {
+          "slug": "face",
+          "name": "Face",
+          "learnable": false,
+          "summary": "The photo-shoot category: judged on eyes, teeth, skin, neck and light.",
+          "description": "If runway is a fashion show, face is a magazine cover. Face is judged on the eyes (how you look at the judges), the teeth, the skin, the neck (held majestically), and the light (knowing your angles). Framing your face with the hands to show off its lines is part of it, and you should show variety: soft, seductive, smiling. Drag face adds the painting itself as an artwork.",
+          "related": ["runway", "framing", "categories"]
+        },
+        {
+          "slug": "hand-performance-category",
+          "name": "Hand performance (category)",
+          "learnable": false,
+          "summary": "A seated or stationary category judged only on the hands, separate from hands as a Vogue Fem element.",
+          "description": "As a category, hand performance is done seated or standing still and judged on the hands alone. In Vogue Fem, hands are an element you keep going while you move and do everything else.",
+          "related": ["hand-performance", "categories"]
+        },
+        {
+          "slug": "legendary",
+          "name": "Legendary, icon, statement",
+          "aliases": ["legend", "icon"],
+          "learnable": false,
+          "summary": "Ballroom's titles of respect, earned over years of winning and contributing.",
+          "description": "Ballroom has a hierarchy of respect. A \"statement\" or \"star\" is making a name, \"legendary\" is someone whose record and influence are established, and \"icon\" is the top — the voguers everyone learns from. Teachers introduce themselves with these titles, and learning who holds them is part of learning the culture.",
+          "related": ["houses", "balls"]
+        }
+      ]
+    },
+    {
+      "name": "Common vocabulary",
+      "terms": [
+        {
+          "slug": "hand-performance",
+          "name": "Hand performance",
+          "aliases": ["hands", "hands performance"],
+          "difficulty": "Beginner",
+          "danceSlug": "hand-performance",
+          "summary": "Telling a story with the wrists, arms, shoulders and fingers — the element all three ways share.",
+          "description": "Hand performance is storytelling with the hands, and it is where musicality shows most clearly: the hands can catch the detail of the beat that the walks can't. Gravity Balmain breaks it into five techniques: taps, lines, waves, circles and figure eights. It sits under everything in Vogue Fem and appears in Old Way and New Way too.",
+          "steps": [
+            "Start seated or standing, chest up, and find the beat.",
+            "Tap on the accents of the music.",
+            "Hit a line on a crash or loud sound.",
+            "Wave or circle to travel between positions.",
+            "Add figure eights around the head and face, then mix them all to tell a story."
+          ],
+          "tips": [
+            "Play the beat, not just the count. If the beat goes doom-da-da-doom, the hands should too.",
+            "Don't overdo figure eights — they are one tool, not the whole performance."
+          ],
+          "related": ["taps", "hand-lines", "waves", "circles", "figure-eights"]
+        },
+        {
+          "slug": "taps",
+          "name": "Taps",
+          "difficulty": "Beginner",
+          "danceSlug": "hand-performance",
+          "summary": "Tapping your body or the space around you to hit the beat.",
+          "description": "Taps are the simplest hand technique and the most direct tool for musicality: you tap your body, your face or the air in time with the music. They can be single, doubled or rolled across the body.",
+          "steps": [
+            "Listen for a pattern in the beat.",
+            "Tap your shoulder, hip, face or the air on each hit.",
+            "Copy the rhythm exactly — doubles for doubles, rolls for rolls.",
+            "Finish on a line."
+          ],
+          "related": ["hand-performance", "hand-lines", "musicality"]
+        },
+        {
+          "slug": "hand-lines",
+          "name": "Lines (hands)",
+          "difficulty": "Beginner",
+          "danceSlug": "hand-performance",
+          "summary": "Straight lines of the arm that reset the performance on a crash.",
+          "description": "In Vogue Fem hands, lines are straight arm positions, with the wrist bent or straight. They act as an end point or inflection point: after flowing movement, a line on a crash or loud sound gives the audience something clear to read.",
+          "steps": [
+            "Flow through waves or circles.",
+            "On a crash in the music, snap the arm into a straight line.",
+            "Hold it for a moment.",
+            "Flow out again."
+          ],
+          "related": ["hand-performance", "new-way-lines", "arm-lines"]
+        },
+        {
+          "slug": "waves",
+          "name": "Waves",
+          "difficulty": "Beginner",
+          "danceSlug": "hand-performance",
+          "summary": "Waving the hands and fingers to move from one position to the next.",
+          "description": "In vogue, waves aren't the strong isolated arm waves of popping: they are the hands and fingers waving softly. They are transitions, taking the hands from one place in space to the next.",
+          "steps": [
+            "Start with the hands out.",
+            "Wave the fingers and wrists as you bring the hands in.",
+            "Wave back out to a new position.",
+            "Combine with taps and lines."
+          ],
+          "related": ["hand-performance", "circles"]
+        },
+        {
+          "slug": "circles",
+          "name": "Circles",
+          "difficulty": "Beginner",
+          "danceSlug": "hand-performance",
+          "summary": "Circles made with the fingers, wrists, elbows or the whole arm.",
+          "description": "Circles can be drawn by the fingers, wrists, elbows or whole arms, and combining sizes gives hand performance its texture.",
+          "steps": [
+            "Circle the wrists in front of the face.",
+            "Grow it into an elbow circle.",
+            "Try a whole-arm circle.",
+            "Mix sizes and directions."
+          ],
+          "related": ["hand-performance", "figure-eights", "waves"]
+        },
+        {
+          "slug": "figure-eights",
+          "name": "Figure eights",
+          "aliases": ["figure 8s"],
+          "difficulty": "Intermediate",
+          "danceSlug": "hand-performance",
+          "summary": "The hands tracing an eight around the head and face.",
+          "description": "Figure eights trace an eight with the hands, usually around the head and face, often with the wrists rolling. They are a signature of vogue hands, but teachers warn against eight-counts of nothing else.",
+          "steps": [
+            "Start with one hand beside the face.",
+            "Trace a loop over the head and down the other side.",
+            "Cross back through the middle to complete the eight.",
+            "Roll the wrists as you go; add the second hand."
+          ],
+          "tips": [
+            "Use them as one tool among five — two eight-counts of figure eights is not a performance."
+          ],
+          "related": ["circles", "hand-performance", "framing"]
+        },
+        {
+          "slug": "framing",
+          "name": "Framing",
+          "difficulty": "Beginner",
+          "danceSlug": "vogue-poses",
+          "summary": "The hands boxing the face to present it, like a portrait.",
+          "description": "Framing uses the hands to border the face — under the chin, beside the cheek — so the judges see its lines. Willi Ninja described vogue as \"a square framing of the face with rigid hands\", and it's central to face and to posing.",
+          "steps": [
+            "Bring the hands up to a point in front of you.",
+            "Draw them in under your face.",
+            "Separate them to frame the picture.",
+            "Sell it with the face."
+          ],
+          "related": ["poses", "face", "figure-eights"]
+        },
+        {
+          "slug": "poses",
+          "name": "Poses",
+          "difficulty": "Beginner",
+          "danceSlug": "vogue-poses",
+          "summary": "Striking a shape — lines, angles, levels — and selling it with the face.",
+          "description": "Posing is where vogue started: shapes and angles taken from fashion magazines and Egyptian hieroglyphs, hit and held. Diva Miyake-Mugler teaches it as bringing a fantasy to life — a supermodel or a cat — with levels, lines and the face all working.",
+          "steps": [
+            "Leg behind, one arm to the sky, hand on the hip.",
+            "Bring it forward: leg in front, both arms up.",
+            "Drop your level, one arm in front and one behind.",
+            "Stretch out to the side, then bring it in and frame the face."
+          ],
+          "tips": [
+            "The face is part of the pose. A perfect shape with a blank face isn't selling anything."
+          ],
+          "related": ["framing", "pose-to-the-beat", "arm-lines"]
+        },
+        {
+          "slug": "arm-lines",
+          "name": "Arm lines",
+          "difficulty": "Beginner",
+          "danceSlug": "vogue-arm-lines",
+          "summary": "Clean, straight arm lines from shoulder to fingertip.",
+          "description": "Straight, connected arm lines — shoulder, elbow, wrist and fingers in one line — are shared by all three ways, and are the base for New Way lines and boxes.",
+          "steps": [
+            "Stand with the chest up and shoulders down.",
+            "Extend one arm so shoulder and fingertips are in one line.",
+            "Take it front, side, up, down.",
+            "Keep the hand firm, fingers together."
+          ],
+          "related": ["hand-lines", "new-way-lines", "poses"]
+        },
+        {
+          "slug": "musicality",
+          "name": "Musicality and the ha",
+          "learnable": false,
+          "danceSlug": "vogue-musicality",
+          "summary": "Hitting the beat — especially the \"ha\" of old-school vogue tracks on 2, 4, 6 and 8.",
+          "description": "Vogue is danced to the music: hands play the beat and poses land on the hits. In old-school house used for Old Way, the pops land on 2, 4, 6 and 8 rather than on the one — dancers trained in European music have to retrain their ear. Ballroom tracks have the \"ha\" crash, and hitting it is essential.",
+          "tips": [
+            "Pop on the evens for Old Way.",
+            "Listen for the ha and give it a line or a dip."
+          ],
+          "related": ["pose-to-the-beat", "taps", "hand-lines"]
+        }
+      ]
+    },
+    {
+      "name": "Old Way",
+      "terms": [
+        {
+          "slug": "old-way",
+          "name": "Old Way",
+          "learnable": false,
+          "danceSlug": "old-way-vogue",
+          "summary": "The original way: clean poses popped on the beat, lines, symmetry and precision.",
+          "description": "Old Way is the oldest vogue category still walked. It evolved from runway via presentation, performance and Pop, Dip and Spin in the 70s and 80s, and when the more athletic dancers split off as New Way, those who stuck with posing and presentation became Old Way. It is inspired by martial arts, hieroglyphics and magazine poses; Old Way was partly a way to settle arguments on the dance floor instead of outside.",
+          "tips": [
+            "Study the elders: Paris Dupree, Willi Ninja, Cesar Valentino, Archie Burnett, Jamal Milan."
+          ],
+          "related": ["pop-dip-and-spin", "pose-to-the-beat", "switches", "new-way"]
+        },
+        {
+          "slug": "pop-dip-and-spin",
+          "name": "Pop, Dip and Spin",
+          "difficulty": "Beginner",
+          "danceSlug": "pop-dip-and-spin",
+          "summary": "The first vogue category: popping poses, spinning and dropping into a dip.",
+          "description": "Pop, Dip and Spin was the first dance category, and the root of Old Way. You pop a pose and hold it, spin, and dip to the floor, all to the music. A popular teaching note: pop and hold the pose — don't drift from pose to pose.",
+          "steps": [
+            "Pop into a pose on the beat and hold it.",
+            "Pop into the next pose.",
+            "Spin.",
+            "Dip to the floor on a hit, then come up into a pose."
+          ],
+          "tips": [
+            "Hold each pose. The pop only reads if there's a stop after it."
+          ],
+          "related": ["pose-to-the-beat", "spin-and-dip", "old-way"]
+        },
+        {
+          "slug": "pose-to-the-beat",
+          "name": "Pose to the beat",
+          "difficulty": "Beginner",
+          "danceSlug": "pose-to-the-beat",
+          "summary": "Hitting a new pose on every accent.",
+          "description": "The core Old Way drill: hit a clean pose on each accent — the 2, 4, 6 and 8 in old-school house — and hold it.",
+          "steps": [
+            "Put on an old-school vogue track.",
+            "Find the 2, 4, 6 and 8.",
+            "Pop a new pose on each.",
+            "Keep the lines clean and hold between hits."
+          ],
+          "related": ["pop-dip-and-spin", "poses", "musicality"]
+        },
+        {
+          "slug": "switches",
+          "name": "Switches",
+          "difficulty": "Intermediate",
+          "danceSlug": "old-way-switches",
+          "summary": "Moving a held Old Way frame cleanly from one side or level to another.",
+          "description": "Switches take a pose or arm frame and switch it — front to side, one side to the other — as a precise, hit transition, keeping the lines and symmetry. Koppi Mizrahi's Old Way bootcamp drills the front switch and side switch.",
+          "steps": [
+            "Hold a symmetrical arm frame in front of you.",
+            "On the beat, switch it cleanly to the side.",
+            "Hold.",
+            "Switch it back, or to the other side."
+          ],
+          "related": ["slides", "pose-to-the-beat"]
+        },
+        {
+          "slug": "slides",
+          "name": "Slides",
+          "difficulty": "Intermediate",
+          "danceSlug": "old-way-slides",
+          "summary": "Sliding an arm frame through space — along the front or upwards — without breaking its shape.",
+          "description": "Slides move a held shape smoothly through space. Koppi Mizrahi's bootcamp drills the front slide and the up slide, and the contrast between slides and popped hits is part of Old Way's texture.",
+          "steps": [
+            "Hold an arm frame.",
+            "Slide it across in front of you, keeping its shape.",
+            "Hit a pose at the end.",
+            "Try an up slide, sliding the frame over the head."
+          ],
+          "related": ["switches", "pose-to-the-beat"]
+        },
+        {
+          "slug": "old-way-spin-and-dip",
+          "name": "Old Way spin and dip",
+          "difficulty": "Intermediate",
+          "danceSlug": "old-way-spin-and-dip",
+          "summary": "The classic spin into a dip, done the Old Way: in one line, often to the side.",
+          "description": "Old Way has its own dip: done to the side, with the body in one line rather than the Vogue Fem dip with the knee on the floor. Tatiana Hurricane mentions it, and Abi Abismal teaches the classic Old Way spin and dip.",
+          "steps": [
+            "Spin.",
+            "Drop to the side, keeping the body in a straight line.",
+            "Hold the dip on the hit.",
+            "Come up into a pose."
+          ],
+          "related": ["pop-dip-and-spin", "spin-and-dip"]
+        }
+      ]
+    },
+    {
+      "name": "New Way",
+      "terms": [
+        {
+          "slug": "new-way",
+          "name": "New Way",
+          "learnable": false,
+          "danceSlug": "new-way-vogue",
+          "summary": "The late-80s evolution: sharp lines, boxes, contortion and flexibility.",
+          "description": "New Way developed in the late 80s and early 90s, when dancers who could do stretches and flexible lines split from those who couldn't. Jamal Milan remembers going over to Old Way because he couldn't match the stretches. It is about elegance, contortion, sharp lines and precision, inspired by hieroglyphs, breaking, tutting and gymnastics. Its elements are arms control (lines and boxes), the duckwalk, the dip, stretches and floor performance.",
+          "tips": [
+            "Research Andrew Mizrahi, Jose Xtravaganza, Starr Lanvin and Benny Ninja."
+          ],
+          "related": ["arms-control", "new-way-lines", "boxes", "old-way"]
+        },
+        {
+          "slug": "arms-control",
+          "name": "Arms control",
+          "aliases": ["arm control"],
+          "difficulty": "Intermediate",
+          "danceSlug": "arms-control",
+          "summary": "New Way's arm work: lines, boxes, circles, waves and slides, danced with posture and attitude.",
+          "description": "Arms control is the core of New Way. OTA Dance's base course breaks it into five parts: lines, boxes, circles, waves and slides. Posture matters most: chest up, shoulders down, head up, with elegance and attitude.",
+          "steps": [
+            "Set the posture: clasp your hands behind you, pull them back, let the chest come out.",
+            "Drill lines in each direction.",
+            "Drill 90-degree boxes.",
+            "Add circles, waves and slides.",
+            "Combine them continuously to music."
+          ],
+          "tips": [
+            "Practise in a mirror. Lines that drift above or below the shoulder read as sloppy."
+          ],
+          "related": ["new-way-lines", "boxes", "new-way"]
+        },
+        {
+          "slug": "new-way-lines",
+          "name": "New Way lines",
+          "difficulty": "Intermediate",
+          "danceSlug": "new-way-lines",
+          "summary": "Arm lines in six directions — front, sides, up, down, back — cut sharply.",
+          "description": "New Way lines start from the shoulder and extend in a straight line to the fingertips, parallel to the floor or in line with the body. The directions are front, both sides, up, down and back. Stacy B. Poderosa describes cutting into them as if slicing something, and you can do one arm at a time, both together, or cut a line and change.",
+          "steps": [
+            "Set your posture, chest out.",
+            "Start at the shoulders and extend the right arm front.",
+            "Then side, up, down and back.",
+            "Drill right, left, both; play with dynamics."
+          ],
+          "related": ["arms-control", "boxes", "arm-lines"]
+        },
+        {
+          "slug": "boxes",
+          "name": "Boxes",
+          "difficulty": "Intermediate",
+          "danceSlug": "new-way-boxes",
+          "summary": "Bent-arm positions at exact 90-degree angles, inspired by hieroglyphs.",
+          "description": "Boxes bend the arm into right angles — 90 degrees at the elbow and wrist — in the front, side, up, back and down positions. The inspiration is Egyptian hieroglyphs. Lines and boxes combine into most New Way arm work.",
+          "steps": [
+            "Raise the upper arm to shoulder height.",
+            "Bend the elbow to exactly 90 degrees.",
+            "Flex the wrist to 90 degrees.",
+            "Move the box through front, side, up and back positions."
+          ],
+          "tips": [
+            "Check the angles in a mirror — 90 means 90."
+          ],
+          "related": ["new-way-lines", "arms-control"]
+        },
+        {
+          "slug": "clicks",
+          "name": "Clicks",
+          "difficulty": "Advanced",
+          "summary": "Hyper-flexible joint positions where the arm seems to click through an impossible angle.",
+          "description": "Clicks are a New Way element where the flexibility of the shoulders, elbows and wrists lets the arms pass through angles that look impossible, as if the joint clicks into place. They depend on stretch training, and are something to build carefully rather than force.",
+          "steps": [
+            "Warm up the shoulders and wrists thoroughly.",
+            "Build flexibility with New Way stretches first.",
+            "Work into the position slowly with a trained teacher.",
+            "Never force a joint past pain."
+          ],
+          "related": ["new-way-stretches", "arms-control"]
+        },
+        {
+          "slug": "new-way-stretches",
+          "name": "New Way stretches",
+          "difficulty": "Intermediate",
+          "danceSlug": "new-way-stretches",
+          "summary": "The flexibility work behind New Way: fingers, shoulders, back and legs.",
+          "description": "Abi Abismal calls stretch the fourth element of New Way: flexibility from the fingertips through the head to the toes, which is what makes contortions possible. She drills finger stretches against a wall, shoulder openings with a sock or a stick, and counter-positions after each stretch.",
+          "steps": [
+            "Warm up first.",
+            "Press the fingers back against a wall, then counter-stretch.",
+            "Hold a sock or stick with a wide grip and pass it slowly over and behind you.",
+            "Narrow the grip gradually over weeks."
+          ],
+          "tips": [
+            "It should be uncomfortable, not painful. Breathe, and don't rush it."
+          ],
+          "related": ["clicks", "new-way"]
+        }
+      ]
+    },
+    {
+      "name": "Vogue Fem",
+      "terms": [
+        {
+          "slug": "vogue-fem",
+          "name": "Vogue Fem",
+          "aliases": ["vogue femme"],
+          "learnable": false,
+          "danceSlug": "vogue-fem",
+          "summary": "The 90s way: soft or dramatic, built on five elements — hands, catwalk, duckwalk, spins and dips, floor.",
+          "description": "Vogue Fem came from voguers vogueing like their favourite femme queen, and it is scored on five elements: hand performance, catwalk, duckwalk, spins and dips, and floor performance. If you don't have your elements, stunts won't carry you.",
+          "tips": [
+            "Elements first, tricks later — judges chop stunt after stunt with no story."
+          ],
+          "related": ["catwalk", "duckwalk", "spin-and-dip", "floor-performance", "hand-performance"]
+        },
+        {
+          "slug": "catwalk",
+          "name": "Catwalk",
+          "aliases": ["cat walk"],
+          "difficulty": "Beginner",
+          "danceSlug": "catwalk",
+          "summary": "A low, exaggerated feminine walk with the hips swinging — Vogue Fem's way of travelling.",
+          "description": "The catwalk is the main mobility element: it's how you get around the stage, your opponents and the judges. Gravity Balmain breaks it into level, hips, arms and walk. The level is low — put a hand on your shoulder and drop until your head meets it. The hips swing to the upper left and right. Walk in a straight line, on the toes, one foot in front of the other, and use arms in opposition.",
+          "steps": [
+            "Sit low, with the back arched and the chest forward.",
+            "Swing the hips to the upper corners, as if throwing a tennis ball from hip to hip.",
+            "Step one foot in front of the other on the toes, in a line.",
+            "Add arms: right hand forward as the left foot steps, and vice versa."
+          ],
+          "tips": [
+            "The hips are the catwalk; the arms are decoration.",
+            "Don't come up too high — the low level is what makes room for the hips."
+          ],
+          "related": ["duckwalk", "catwalk-variations", "runway"]
+        },
+        {
+          "slug": "catwalk-variations",
+          "name": "Catwalk variations",
+          "difficulty": "Intermediate",
+          "danceSlug": "catwalk-variations",
+          "summary": "Changing the rhythm, arms and direction of the catwalk to match the music.",
+          "description": "Once the basic catwalk is solid, you vary it: speed it up or slow it down to match the track, change the arms, turn and travel differently. It's how a catwalk becomes yours.",
+          "steps": [
+            "Catwalk on each beat.",
+            "Slow it to every other beat.",
+            "Double it on a fast section.",
+            "Change the arms, keeping them in opposition."
+          ],
+          "related": ["catwalk", "musicality"]
+        },
+        {
+          "slug": "duckwalk",
+          "name": "Duckwalk",
+          "aliases": ["duck walk"],
+          "difficulty": "Intermediate",
+          "danceSlug": "duckwalk",
+          "summary": "Squatting on the heels and kicking the feet forward on the beat.",
+          "description": "The duckwalk is always done in a squat, sitting on the heels with the chest upright. Gravity Balmain's image: imagine a small rock in front of each foot and kick it forward with a small, low kick, landing on the beat. Arms follow opposition, as in the catwalk.",
+          "steps": [
+            "Warm up the knees and hips.",
+            "Squat on your heels, chest straight up, hands on your knees.",
+            "Kick one foot forward with a small motion, landing it on the beat.",
+            "Alternate feet, then add arms in opposition."
+          ],
+          "tips": [
+            "Keep the kicks small — big kicks miss the beat.",
+            "Don't lean forward or back; it strains the knees."
+          ],
+          "related": ["catwalk", "switch-duckwalk", "floor-performance"]
+        },
+        {
+          "slug": "switch-duckwalk",
+          "name": "Switch duckwalk",
+          "difficulty": "Advanced",
+          "danceSlug": "duckwalk",
+          "summary": "A duckwalk that jumps both feet at once, switching which is in front.",
+          "description": "In the switch duckwalk you jump with both feet at the same time and switch their positions, rather than kicking one foot at a time. For some voguers it is their main duckwalk. There is also a walking duckwalk, which steps rather than kicks.",
+          "steps": [
+            "Get into the duckwalk squat.",
+            "Jump both feet, switching which one is in front.",
+            "Let the chest move you forward slightly to make room.",
+            "Keep landing on the beat."
+          ],
+          "related": ["duckwalk"]
+        },
+        {
+          "slug": "spin-and-dip",
+          "name": "Spin and dip",
+          "aliases": ["spins and dips"],
+          "difficulty": "Intermediate",
+          "danceSlug": "spin-and-dip",
+          "summary": "A spin that drops straight into a dip on a hit in the music.",
+          "description": "Spins and dips are one element in Vogue Fem: a spin carries you straight into a dip, landing on a crash or the ha of the music.",
+          "steps": [
+            "Prepare and spin.",
+            "Come out of the spin into the dip.",
+            "Land the dip on the hit.",
+            "Recover gracefully."
+          ],
+          "related": ["dip", "dramatic-dip", "pop-dip-and-spin"]
+        },
+        {
+          "slug": "dip",
+          "name": "Dip",
+          "difficulty": "Intermediate",
+          "danceSlug": "vogue-dip",
+          "summary": "Dropping back onto the floor with one leg folded under, the chest up and the head between the hands.",
+          "description": "Tatiana Hurricane teaches the basic dip with one leg folded under you, the knee always on the floor, and the other leg extended. The hands slide on the floor while the chest stays up, and the head stays between the hands. Variations sit on the folded foot or on the toes. The common mistakes: lifting the knee, dropping the chest, putting the head on the floor or on a shoulder.",
+          "steps": [
+            "Fold one leg under, knee on the floor.",
+            "Stretch the front of the thigh and lean back.",
+            "Slide back on the hands, keeping the chest up.",
+            "Lower the head between the hands, and come up using the abs."
+          ],
+          "tips": [
+            "Stretch first. Keep the knee down and the shoulders back."
+          ],
+          "related": ["spin-and-dip", "dramatic-dip", "dip-variations"]
+        },
+        {
+          "slug": "dramatic-dip",
+          "name": "Dramatic dip",
+          "aliases": ["death drop", "shablam"],
+          "difficulty": "Advanced",
+          "danceSlug": "dramatic-dip",
+          "summary": "The sudden fall back to the floor, one leg bent under — not a \"death drop\".",
+          "description": "The dramatic dip is the fast, dramatic fall into a dip, landing with one leg bent under and the other extended. Outside the scene it's called a \"death drop\", but ballroom rejects that name. Legendary Naima Mugler teaches the melt dip as a slow, controlled version.",
+          "steps": [
+            "Warm up and stretch.",
+            "Put enough weight back on the supporting leg.",
+            "Arch back and drop, extending the other leg.",
+            "Land in the dip with expression, and come out cleanly."
+          ],
+          "tips": [
+            "Only drop fast once the slow version is safe."
+          ],
+          "related": ["dip", "dip-variations", "dramatics"]
+        },
+        {
+          "slug": "dip-variations",
+          "name": "Dip variations",
+          "difficulty": "Advanced",
+          "danceSlug": "dip-with-a-kick",
+          "summary": "Entering and finishing the dip in different ways, including with a kick.",
+          "description": "Once the basic dip is solid, dips are varied: the leg positions, a kick on the way down or while in the dip, and different entries and exits.",
+          "steps": [
+            "Master the basic dip.",
+            "Add a kick of the extended leg as you land.",
+            "Try entering from a spin or a catwalk.",
+            "Vary the exit."
+          ],
+          "related": ["dip", "dramatic-dip", "fan-kick"]
+        },
+        {
+          "slug": "floor-performance",
+          "name": "Floor performance",
+          "difficulty": "Intermediate",
+          "danceSlug": "floor-performance",
+          "summary": "Everything on the floor: fan kicks, leg circles, knee moves, rolls and mobility.",
+          "description": "Floor performance is the least rigid element — there is no single base, and it reflects the performer. Gravity Balmain groups common themes: fan kicks, leg circles, knee moves and mobility moves like rolls.",
+          "steps": [
+            "Get to the floor from a dip or duckwalk.",
+            "Use a fan kick to transition.",
+            "Add leg circles or knee moves.",
+            "Travel with rolls, then return to your feet."
+          ],
+          "related": ["fan-kick", "leg-circles", "knee-moves"]
+        },
+        {
+          "slug": "fan-kick",
+          "name": "Fan kick",
+          "difficulty": "Intermediate",
+          "danceSlug": "fan-kick",
+          "summary": "Both legs swinging in a wide arc on the floor — a transition in and out of dips.",
+          "description": "The fan kick swings both legs, feet pointed, in a wide arc. It takes up space, draws the judges' eyes, and is a transition into or out of a dip.",
+          "steps": [
+            "Sit or lie back on the floor.",
+            "Point the feet.",
+            "Swing both legs in a wide arc over.",
+            "Land in a new position."
+          ],
+          "related": ["floor-performance", "leg-circles", "dip-variations"]
+        },
+        {
+          "slug": "leg-circles",
+          "name": "Leg circles",
+          "difficulty": "Intermediate",
+          "danceSlug": "leg-circles",
+          "summary": "The lower leg drawing a circle from the knee.",
+          "description": "A leg circle hinges at the knee so the lower leg traces a circle, or the illusion of one. It can be done with one or both legs, in or out, at different speeds, or during a fan kick.",
+          "steps": [
+            "Lie or sit on the floor, one knee raised.",
+            "Hinge at the knee and circle the lower leg.",
+            "Try the other direction.",
+            "Try both legs, in sequence."
+          ],
+          "related": ["floor-performance", "fan-kick"]
+        },
+        {
+          "slug": "knee-moves",
+          "name": "Knee moves",
+          "difficulty": "Intermediate",
+          "danceSlug": "knee-moves",
+          "summary": "Using the knees as an anchor on the floor — kneeling performance, knee walks and spins.",
+          "description": "Knee moves use the knee as a point of stability: kneeling and doing catwalk arms or hand performance, or more advanced knee walks and spins.",
+          "steps": [
+            "Kneel on one knee.",
+            "Do hand performance or catwalk arms.",
+            "Shift to the other knee.",
+            "Try walking on the knees."
+          ],
+          "related": ["floor-performance"]
+        },
+        {
+          "slug": "dramatics",
+          "name": "Dramatics",
+          "difficulty": "Advanced",
+          "danceSlug": "vogue-fem-dramatics",
+          "summary": "The high-impact side of Vogue Fem: sharp, bold hits, stunts and dramatic dips.",
+          "description": "Vogue Fem is often described as soft or dramatic. Dramatics is the high-energy side: sharp hits, big stunts and dramatic dips.",
+          "steps": [
+            "Hit your hands sharply on the beat.",
+            "Build to a spin.",
+            "Land a dramatic dip on the ha.",
+            "Recover and keep performing."
+          ],
+          "related": ["soft", "dramatic-dip", "vogue-fem"]
+        },
+        {
+          "slug": "soft",
+          "name": "Soft",
+          "difficulty": "Intermediate",
+          "summary": "The fluid, sensual side of Vogue Fem: flowing hands and smooth transitions.",
+          "description": "Soft Vogue Fem is the counterpart to dramatics: flowing hands, smooth transitions and sensuality instead of stunts.",
+          "steps": [
+            "Let the hands flow with waves and circles.",
+            "Keep transitions smooth.",
+            "Use slow, controlled dips.",
+            "Tell the story with the face."
+          ],
+          "related": ["dramatics", "hand-performance"]
+        }
+      ]
+    },
+    {
+      "name": "Runway",
+      "terms": [
+        {
+          "slug": "runway",
+          "name": "Runway",
+          "difficulty": "Beginner",
+          "danceSlug": "runway",
+          "summary": "The fashion-show category: walk, spins and poses.",
+          "description": "Runway is as old as ballroom: realness categories were walked runway-style, and runway became its own category. It's judged on walk, spins and poses. \"Walk For Me\" by Trackmasters is the iconic runway track.",
+          "steps": [
+            "Walk in a straight line with intent.",
+            "Spin at the end.",
+            "Hit a pose.",
+            "Walk back."
+          ],
+          "tips": [
+            "Don't over-pose; runway is mainly the walk."
+          ],
+          "related": ["european-runway", "all-american-runway", "catwalk"]
+        },
+        {
+          "slug": "european-runway",
+          "name": "European runway",
+          "difficulty": "Intermediate",
+          "danceSlug": "european-runway",
+          "summary": "The runway with crossed steps and swaying hips.",
+          "description": "European runway crosses the legs a lot and sways the hips, and is mostly walked by female figures.",
+          "steps": [
+            "Cross each step in front of the other.",
+            "Sway the hips.",
+            "Keep the shoulders quiet.",
+            "Spin and pose at the end."
+          ],
+          "related": ["runway", "all-american-runway"]
+        },
+        {
+          "slug": "all-american-runway",
+          "name": "All-American runway",
+          "learnable": false,
+          "summary": "The butch-side runway: less crossing, less hip.",
+          "description": "All-American runway, mostly walked by male figures, crosses the legs less and sways the hips less than European runway.",
+          "related": ["runway", "european-runway"]
+        }
+      ]
+    }
+  ]
+}
