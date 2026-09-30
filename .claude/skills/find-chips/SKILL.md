@@ -16,7 +16,7 @@ The chips = the `VideoSegments` table; distinct from "In this video" chapters (r
 - `find_chip_candidates.py` reads the prod connection string from `DancePlatform.API/appsettings.Development.json`
   (no hardcoded password). State: `_proto/chip_skip.tsv` (deliberately-skipped) + `_proto/chip_seen.tsv`.
 - To process: take the queued VideoDbId/YtId rows and run the per-video procedure below. **Must run
-  locally** — the prod DB is on the LAN (`192.168.0.197`), unreachable from cloud agents.
+  locally** — the prod DB is on the LAN (`192.168.0.196`), unreachable from cloud agents.
 - A second Scheduled Task **`DanceChipAuto`** (09:15, `chip_auto.bat`) drains the queue automatically:
   if the CHIP-QUEUE block has pending rows it runs headless `claude -p "/find-chips ..."` (max 5
   videos/run), logging to `_proto/chip_auto.log`. Manual runs are still fine anytime.
@@ -27,7 +27,7 @@ The chips = the `VideoSegments` table; distinct from "In this video" chapters (r
   scripts/chip_generic.py documents the fallback tiers.
 
 ## Prod DB / API
-- Postgres on `192.168.0.197`, db `dancing`, user `dance_user`; password lives in
+- Postgres on `192.168.0.196`, db `dancing`, user `dance_user`; password lives in
   `appsettings.Development.json` (rotates — read it, don't hardcode). PascalCase, double-quote identifiers.
   Site reads the DB live — **no deploy needed**.
 - API base `https://dance-api.takelord.com/api` (the `/api` path on the main site returns the SPA).

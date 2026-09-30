@@ -30,9 +30,9 @@ def _prod_password():
     _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     _cfg = os.path.join(_root, "DancePlatform.API", "appsettings.Development.json")
     for _v in _json.load(open(_cfg, encoding="utf-8-sig")).get("ConnectionStrings", {}).values():
-        if "192.168.0.197" in _v:
+        if "192.168.0.196" in _v:
             return dict(_p.split("=", 1) for _p in _v.split(";") if "=" in _p).get("Password", "")
-    raise SystemExit(f"No prod (192.168.0.197) connection string in {_cfg}")
+    raise SystemExit(f"No prod (192.168.0.196) connection string in {_cfg}")
 
 
 def slugify(s):
@@ -40,7 +40,7 @@ def slugify(s):
 
 def run(sql):
     env=dict(os.environ); env["PGPASSWORD"]=_prod_password()
-    p=subprocess.run(["psql","-h","192.168.0.197","-U","dance_user","-d","dancing",
+    p=subprocess.run(["psql","-h","192.168.0.196","-U","dance_user","-d","dancing",
                       "-v","ON_ERROR_STOP=1","-At","-F","\t"],input=sql,
                      capture_output=True,text=True,encoding="utf-8",env=env)
     if p.returncode: sys.stderr.write(p.stderr); raise SystemExit(1)

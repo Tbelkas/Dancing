@@ -35,7 +35,7 @@ OUT = os.path.join(ROOT, "_proto", "chip_all_inventory.tsv")
 def prod_conn():
     d = json.load(open(APPSETTINGS, encoding="utf-8-sig"))
     for v in d.get("ConnectionStrings", {}).values():
-        if "192.168.0.197" in v:
+        if "192.168.0.196" in v:
             return dict(p.split("=", 1) for p in v.split(";") if "=" in p)
     raise SystemExit("No prod connection string found")
 

@@ -62,7 +62,7 @@ if sys.stdout is not None:
 
 # Defaults for a run from the PC, where the Pi is a LAN address. On the Pi itself the
 # connection string comes from the environment (see _connection below) and points at localhost.
-PG_HOST = "192.168.0.197"
+PG_HOST = "192.168.0.196"
 PG_USER = "dance_user"
 PG_DB = "dancing"
 

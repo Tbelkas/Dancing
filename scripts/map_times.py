@@ -5,7 +5,7 @@ match each dance to a chapter (or desc-timestamp) by normalized name and set the
 dance's Video row StartTime/EndTime. Keeps dances (no deletion). Dry-run unless 'apply'.
 """
 import json, os, re, subprocess, sys, unicodedata
-PGHOST="192.168.0.197"; PGUSER="dance_user"; PGDB="dancing"
+PGHOST="192.168.0.196"; PGUSER="dance_user"; PGDB="dancing"
 vid=sys.argv[1]; APPLY=len(sys.argv)>2 and sys.argv[2]=="apply"
 
 def _prod_password():
@@ -17,9 +17,9 @@ def _prod_password():
     _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     _cfg = os.path.join(_root, "DancePlatform.API", "appsettings.Development.json")
     for _v in _json.load(open(_cfg, encoding="utf-8-sig")).get("ConnectionStrings", {}).values():
-        if "192.168.0.197" in _v:
+        if "192.168.0.196" in _v:
             return dict(_p.split("=", 1) for _p in _v.split(";") if "=" in _p).get("Password", "")
-    raise SystemExit(f"No prod (192.168.0.197) connection string in {_cfg}")
+    raise SystemExit(f"No prod (192.168.0.196) connection string in {_cfg}")
 
 
 def psql(sql,ret=True):

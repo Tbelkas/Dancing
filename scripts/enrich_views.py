@@ -22,7 +22,7 @@ PW = db_password()
 
 def psql(sql):
     env = dict(os.environ); env["PGPASSWORD"] = PW
-    p = subprocess.run(["psql", "-h", "192.168.0.197", "-U", "dance_user", "-d", "dancing",
+    p = subprocess.run(["psql", "-h", "192.168.0.196", "-U", "dance_user", "-d", "dancing",
                         "-v", "ON_ERROR_STOP=1", "-At", "-F", "\t"],
                        input=sql, capture_output=True, text=True, encoding="utf-8", env=env)
     if p.returncode: sys.stderr.write(p.stderr); raise SystemExit(1)

@@ -42,7 +42,7 @@ if sys.stdout is not None:
     except (AttributeError, ValueError):
         pass
 
-PGHOST = "192.168.0.197"; PGUSER = "dance_user"; PGDB = "dancing"
+PGHOST = "192.168.0.196"; PGUSER = "dance_user"; PGDB = "dancing"
 STRETCHING, BALLET = 23, 4
 
 

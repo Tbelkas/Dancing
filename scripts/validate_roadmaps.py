@@ -51,9 +51,9 @@ RMDIR = os.path.join(ROOT, "DancePlatform.API", "Data", "Roadmaps")
 def prod_conn():
     cfg = json.load(open(APPSETTINGS, encoding="utf-8-sig"))
     for v in cfg.get("ConnectionStrings", {}).values():
-        if "192.168.0.197" in v:
+        if "192.168.0.196" in v:
             return dict(p.split("=", 1) for p in v.split(";") if "=" in p)
-    raise SystemExit(f"No prod (192.168.0.197) connection string in {APPSETTINGS}")
+    raise SystemExit(f"No prod (192.168.0.196) connection string in {APPSETTINGS}")
 
 
 def psql(sql):

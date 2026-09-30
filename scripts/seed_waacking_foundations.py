@@ -35,7 +35,7 @@ if sys.stdout is not None:
     except (AttributeError, ValueError):
         pass
 
-PGHOST = "192.168.0.197"; PGUSER = "dance_user"; PGDB = "dancing"
+PGHOST = "192.168.0.196"; PGUSER = "dance_user"; PGDB = "dancing"
 
 
 def _prod_password():
@@ -46,9 +46,9 @@ def _prod_password():
     _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     _cfg = os.path.join(_root, "DancePlatform.API", "appsettings.Development.json")
     for _v in json.load(open(_cfg, encoding="utf-8-sig")).get("ConnectionStrings", {}).values():
-        if "192.168.0.197" in _v:
+        if "192.168.0.196" in _v:
             return dict(_p.split("=", 1) for _p in _v.split(";") if "=" in _p).get("Password", "")
-    raise SystemExit(f"No prod (192.168.0.197) connection string in {_cfg}")
+    raise SystemExit(f"No prod (192.168.0.196) connection string in {_cfg}")
 
 
 PGPW = _prod_password()
