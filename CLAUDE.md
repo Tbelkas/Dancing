@@ -6,6 +6,28 @@ read `core-context.md` first, then the relevant `module-context/` file.
 
 ---
 
+## Task board: file the task before you start
+When Justas gives you a task in this session (work that will change code, not a question), put it
+on the board at tasks.takelord.com **first**, then start implementing:
+
+```
+py -3.12 C:/Users/valot/Documents/Git/Python/tasks/card.py start <project> "<title>" --body "<details>"
+```
+
+Project `dance`. It prints the card key (e.g. `TORN-12`). The card goes straight to In progress under
+this session, so no board worker picks it up. Add `--type bug|chore` and `--priority high|urgent`
+when they fit. When the work is finished, close it with a short report, or mark what is missing:
+
+```
+py -3.12 C:/Users/valot/Documents/Git/Python/tasks/card.py done TORN-12 "What changed, commits, deployed or not"
+py -3.12 C:/Users/valot/Documents/Git/Python/tasks/card.py blocked TORN-12 "What is missing"
+```
+
+- One card per task. Follow-ups on the same task in the same session keep its key.
+- **Skip this when you are a board worker** (your prompt starts with "Working unattended" and names
+  a card): that card already exists, and filing another would duplicate it.
+- If the board does not answer, say so once and carry on with the task.
+
 ## Keeping the e2e suite honest
 
 `e2e/` holds a Playwright suite that runs against the **deployed** app. It's the only thing
